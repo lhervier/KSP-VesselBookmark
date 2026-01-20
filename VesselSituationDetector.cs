@@ -3,87 +3,87 @@ using UnityEngine;
 namespace com.github.lhervier.ksp {
     
     /// <summary>
-    /// Détecte et décrit la situation d'un vaisseau
+    /// Detects and describes vessel situation
     /// </summary>
     public static class VesselSituationDetector {
         
         /// <summary>
-        /// Obtient une description textuelle de la situation d'un vaisseau
+        /// Gets a textual description of vessel situation
         /// </summary>
         public static string GetSituation(Vessel vessel) {
             if (vessel == null) {
-                return "Vaisseau introuvable";
+                return "Vessel not found";
             }
             
-            // Vérifier si le vaisseau est détruit
+            // Check if vessel is destroyed
             if (vessel.state == Vessel.State.DEAD) {
-                return "Détruit";
+                return "Destroyed";
             }
             
-            // Vérifier si le vaisseau n'est pas chargé
+            // Check if vessel is not loaded
             if (!vessel.loaded) {
                 return GetSituationForUnloadedVessel(vessel);
             }
             
             CelestialBody mainBody = vessel.mainBody;
-            string bodyName = mainBody != null ? mainBody.displayName : "Inconnu";
+            string bodyName = mainBody != null ? mainBody.displayName : "Unknown";
             
             switch (vessel.situation) {
                 case Vessel.Situations.LANDED:
-                    return $"Posé sur {bodyName}";
+                    return $"Landed on {bodyName}";
                     
                 case Vessel.Situations.SPLASHED:
-                    return $"Dans l'océan de {bodyName}";
+                    return $"Splashed down in {bodyName}'s ocean";
                     
                 case Vessel.Situations.PRELAUNCH:
-                    return $"Sur le pas de tir ({bodyName})";
+                    return $"On launchpad ({bodyName})";
                     
                 case Vessel.Situations.SUB_ORBITAL:
                     return $"Suborbital ({bodyName})";
                     
                 case Vessel.Situations.ORBITING:
-                    return $"En orbite autour de {bodyName}";
+                    return $"Orbiting {bodyName}";
                     
                 case Vessel.Situations.ESCAPING:
-                    return $"Trajectoire de libération ({bodyName})";
+                    return $"Escape trajectory ({bodyName})";
                     
                 default:
-                    return $"En vol ({bodyName})";
+                    return $"In flight ({bodyName})";
             }
         }
         
         /// <summary>
-        /// Obtient la situation pour un vaisseau non chargé
+        /// Gets situation for an unloaded vessel
         /// </summary>
         private static string GetSituationForUnloadedVessel(Vessel vessel) {
             if (vessel.protoVessel == null) {
-                return "Vaisseau introuvable";
+                return "Vessel not found";
             }
             
             CelestialBody mainBody = vessel.mainBody;
-            string bodyName = mainBody != null ? mainBody.displayName : "Inconnu";
+            string bodyName = mainBody != null ? mainBody.displayName : "Unknown";
             
             switch (vessel.situation) {
                 case Vessel.Situations.LANDED:
-                    return $"Posé sur {bodyName}";
+                    return $"Landed on {bodyName}";
                     
                 case Vessel.Situations.SPLASHED:
-                    return $"Dans l'océan de {bodyName}";
+                    return $"Splashed down in {bodyName}'s ocean";
                     
                 case Vessel.Situations.PRELAUNCH:
-                    return $"Sur le pas de tir ({bodyName})";
+                    return $"On launchpad ({bodyName})";
                     
                 case Vessel.Situations.SUB_ORBITAL:
                     return $"Suborbital ({bodyName})";
                     
                 case Vessel.Situations.ORBITING:
-                    return $"En orbite autour de {bodyName}";
+                    return $"Orbiting {bodyName}";
                     
                 case Vessel.Situations.ESCAPING:
-                    return $"Trajectoire de libération ({bodyName})";
+                    return $"Escape trajectory ({bodyName})";
                     
                 default:
-                    return $"En vol ({bodyName})";
+                    return $"In flight ({bodyName})";
             }
         }
     }

@@ -5,8 +5,8 @@ using UnityEngine;
 namespace com.github.lhervier.ksp {
     
     /// <summary>
-    /// Ajoute des actions au menu contextuel des modules de commande
-    /// Utilise une approche simple avec un module personnalisé qui s'ajoute dynamiquement
+    /// Adds actions to command module context menu
+    /// Uses a simple approach with a custom module that is added dynamically
     /// </summary>
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class VesselBookmarkContextMenu : MonoBehaviour {
@@ -14,7 +14,7 @@ namespace com.github.lhervier.ksp {
         private HashSet<Part> _processedParts = new HashSet<Part>();
         
         private void Start() {
-            // Vérifier périodiquement les nouvelles parties
+            // Periodically check for new parts
             InvokeRepeating("ProcessParts", 1f, 2f);
         }
         
@@ -23,7 +23,7 @@ namespace com.github.lhervier.ksp {
         }
         
         /// <summary>
-        /// Traite les parties pour ajouter le module de bookmark si nécessaire
+        /// Processes parts to add bookmark module if needed
         /// </summary>
         private void ProcessParts() {
             if (FlightGlobals.ActiveVessel == null) return;
@@ -31,11 +31,11 @@ namespace com.github.lhervier.ksp {
             foreach (Part part in FlightGlobals.ActiveVessel.parts) {
                 if (part == null || _processedParts.Contains(part)) continue;
                 
-                // Vérifier si c'est un module de commande
+                // Check if it's a command module
                 ModuleCommand commandModule = part.FindModuleImplementing<ModuleCommand>();
                 if (commandModule == null) continue;
                 
-                // Vérifier si le module bookmark n'existe pas déjà
+                // Check if bookmark module doesn't already exist
                 VesselBookmarkPartModule bookmarkModule = part.GetComponent<VesselBookmarkPartModule>();
                 if (bookmarkModule == null) {
                     bookmarkModule = part.gameObject.AddComponent<VesselBookmarkPartModule>();
@@ -47,7 +47,7 @@ namespace com.github.lhervier.ksp {
     }
     
     /// <summary>
-    /// Module personnalisé qui ajoute l'action de bookmark aux modules de commande
+    /// Custom module that adds bookmark action to command modules
     /// </summary>
     public class VesselBookmarkPartModule : PartModule {
         
@@ -59,11 +59,11 @@ namespace com.github.lhervier.ksp {
             
             if (hasBookmark) {
                 if (VesselBookmarkManager.Instance.RemoveBookmark(part.flightID)) {
-                    ScreenMessages.PostScreenMessage("Bookmark supprimé", 2f, ScreenMessageStyle.UPPER_CENTER);
+                    ScreenMessages.PostScreenMessage("Bookmark removed", 2f, ScreenMessageStyle.UPPER_CENTER);
                 }
             } else {
                 if (VesselBookmarkManager.Instance.AddBookmark(part)) {
-                    ScreenMessages.PostScreenMessage("Bookmark ajouté", 2f, ScreenMessageStyle.UPPER_CENTER);
+                    ScreenMessages.PostScreenMessage("Bookmark added", 2f, ScreenMessageStyle.UPPER_CENTER);
                 }
             }
             

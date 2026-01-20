@@ -3,40 +3,40 @@ using UnityEngine;
 namespace com.github.lhervier.ksp {
     
     /// <summary>
-    /// Gère la navigation vers les vaisseaux
+    /// Manages navigation to vessels
     /// </summary>
     public static class VesselNavigator {
         
         /// <summary>
-        /// Navigue vers un vaisseau (change le vaisseau actif)
-        /// Gère les vaisseaux chargés et non chargés, ainsi que la vue carte
-        /// Fonctionne depuis le Tracking Station, MapView et en vol
+        /// Navigate to a vessel (changes active vessel)
+        /// Handles loaded and unloaded vessels, as well as map view
+        /// Works from Tracking Station, MapView and in flight
         /// </summary>
         public static bool NavigateToVessel(Vessel vessel) {
             if (vessel == null) {
-                Debug.LogError("[VesselBookmarkMod] Tentative de navigation vers un vaisseau null");
+                Debug.LogError("[VesselBookmarkMod] Attempted to navigate to null vessel");
                 return false;
             }
             
-            // Vérifier si on est déjà sur ce vaisseau (seulement si on est en vol)
+            // Check if already on this vessel (only if in flight)
             if (HighLogic.LoadedScene == GameScenes.FLIGHT && FlightGlobals.ActiveVessel == vessel) {
-                Debug.Log($"[VesselBookmarkMod] Déjà sur le vaisseau {vessel.vesselName}");
+                Debug.Log($"[VesselBookmarkMod] Already on vessel {vessel.vesselName}");
                 return true;
             }
             
-            // Changer le vaisseau actif
-            // FlightGlobals.SetActiveVessel() gère automatiquement :
-            // - Le chargement de la scène de vol depuis le Tracking Station
-            // - Le rechargement de la scène si le vaisseau n'est pas chargé
-            // - Le centrage de la vue en mode carte
-            // - La mise à jour de la caméra
-            // Comme le fait le menu "changer" de KSP
+            // Change active vessel
+            // FlightGlobals.SetActiveVessel() automatically handles:
+            // - Loading flight scene from Tracking Station
+            // - Reloading scene if vessel is not loaded
+            // - Centering view in map mode
+            // - Updating camera
+            // Like KSP's "switch" menu does
             try {
                 FlightGlobals.SetActiveVessel(vessel);
-                Debug.Log($"[VesselBookmarkMod] Navigation vers {vessel.vesselName} (scène: {HighLogic.LoadedScene}, chargé: {vessel.loaded})");
+                Debug.Log($"[VesselBookmarkMod] Navigating to {vessel.vesselName} (scene: {HighLogic.LoadedScene}, loaded: {vessel.loaded})");
                 return true;
             } catch (System.Exception e) {
-                Debug.LogError($"[VesselBookmarkMod] Erreur lors de la navigation vers {vessel.vesselName}: {e.Message}");
+                Debug.LogError($"[VesselBookmarkMod] Error navigating to {vessel.vesselName}: {e.Message}");
                 return false;
             }
         }

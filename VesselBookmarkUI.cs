@@ -5,7 +5,7 @@ using UnityEngine;
 namespace com.github.lhervier.ksp {
     
     /// <summary>
-    /// Interface utilisateur pour gérer les bookmarks
+    /// User interface for managing bookmarks
     /// </summary>
     [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
     public class VesselBookmarkUI : MonoBehaviour {
@@ -28,7 +28,7 @@ namespace com.github.lhervier.ksp {
         }
         
         /// <summary>
-        /// Appelé quand la toolbar est prête
+        /// Called when toolbar is ready
         /// </summary>
         private void OnLauncherReady() {
             if (_toolbarButton == null) {
@@ -44,27 +44,27 @@ namespace com.github.lhervier.ksp {
                         GameDatabase.Instance.GetTexture("VesselBookmarkMod/icon", false) ?? Texture2D.whiteTexture
                     );
                 } catch (System.Exception e) {
-                    Debug.LogError($"[VesselBookmarkMod] Erreur lors de la création du bouton Toolbar: {e.Message}");
+                    Debug.LogError($"[VesselBookmarkMod] Error creating Toolbar button: {e.Message}");
                 }
             }
         }
         
         /// <summary>
-        /// Appelé quand la toolbar n'est plus prête
+        /// Called when toolbar is no longer ready
         /// </summary>
         private void OnLauncherUnready() {
             if (_toolbarButton != null) {
                 try {
                     ApplicationLauncher.Instance.RemoveModApplication(_toolbarButton);
                 } catch (System.Exception e) {
-                    Debug.LogError($"[VesselBookmarkMod] Erreur lors de la suppression du bouton Toolbar: {e.Message}");
+                    Debug.LogError($"[VesselBookmarkMod] Error removing Toolbar button: {e.Message}");
                 }
                 _toolbarButton = null;
             }
         }
         
         /// <summary>
-        /// Gestionnaire du clic sur le bouton toolbar (activation)
+        /// Toolbar button click handler (activation)
         /// </summary>
         private void OnToggleOn() {
             _visible = true;
@@ -72,7 +72,7 @@ namespace com.github.lhervier.ksp {
         }
         
         /// <summary>
-        /// Gestionnaire du clic sur le bouton toolbar (désactivation)
+        /// Toolbar button click handler (deactivation)
         /// </summary>
         private void OnToggleOff() {
             _visible = false;
@@ -81,7 +81,7 @@ namespace com.github.lhervier.ksp {
         private void OnGUI() {
             if (!_visible) return;
             
-            // Style de la fenêtre
+            // Window style
             GUI.skin = HighLogic.Skin;
             
             _windowRect = GUILayout.Window(
@@ -93,18 +93,18 @@ namespace com.github.lhervier.ksp {
                 GUILayout.MinHeight(400)
             );
             
-            // Empêcher la fenêtre de sortir de l'écran
+            // Prevent window from going off screen
             _windowRect.x = Mathf.Clamp(_windowRect.x, 0, Screen.width - _windowRect.width);
             _windowRect.y = Mathf.Clamp(_windowRect.y, 0, Screen.height - _windowRect.height);
         }
         
         /// <summary>
-        /// Dessine le contenu de la fenêtre
+        /// Draws window content
         /// </summary>
         private void DrawWindow(int windowID) {
             GUILayout.BeginVertical();
             
-            // En-tête
+            // Header
             GUILayout.BeginHorizontal();
             GUILayout.Label($"Bookmarks: {VesselBookmarkManager.Instance.Bookmarks.Count}", GUILayout.ExpandWidth(true));
             if (GUILayout.Button("Refresh", GUILayout.Width(80))) {
@@ -121,11 +121,11 @@ namespace com.github.lhervier.ksp {
             
             GUILayout.Space(10);
             
-            // Liste des bookmarks
+            // Bookmarks list
             _scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
             
             if (VesselBookmarkManager.Instance.Bookmarks.Count == 0) {
-                GUILayout.Label("Aucun bookmark. Cliquez droit sur un module de commande pour en ajouter un.");
+                GUILayout.Label("No bookmarks. Right-click on a command module to add one.");
             } else {
                 foreach (VesselBookmark bookmark in VesselBookmarkManager.Instance.Bookmarks) {
                     DrawBookmarkItem(bookmark);
@@ -136,22 +136,22 @@ namespace com.github.lhervier.ksp {
             
             GUILayout.EndVertical();
             
-            // Permettre de déplacer la fenêtre
+            // Allow window dragging
             GUI.DragWindow();
         }
         
         /// <summary>
-        /// Dessine un item de bookmark
+        /// Draws a bookmark item
         /// </summary>
         private void DrawBookmarkItem(VesselBookmark bookmark) {
             GUILayout.BeginVertical("box");
             
-            // Nom du module de commande et situation
+            // Command module name and situation
             Vessel vessel = VesselBookmarkManager.Instance.GetVesselForBookmark(bookmark);
             string commandModuleName = !string.IsNullOrEmpty(bookmark.CommandModuleName) 
                 ? bookmark.CommandModuleName 
-                : "Module introuvable";
-            string situation = vessel != null ? VesselSituationDetector.GetSituation(vessel) : "Vaisseau introuvable";
+                : "Module not found";
+            string situation = vessel != null ? VesselSituationDetector.GetSituation(vessel) : "Vessel not found";
             
             GUILayout.BeginHorizontal();
             GUILayout.Label($"<b>{commandModuleName}</b>", GUILayout.Width(200));
@@ -160,7 +160,7 @@ namespace com.github.lhervier.ksp {
             
             GUILayout.Space(5);
             
-            // Commentaire éditable
+            // Editable comment
             GUILayout.BeginHorizontal();
             GUILayout.Label("Comment:", GUILayout.Width(80));
             
@@ -177,21 +177,21 @@ namespace com.github.lhervier.ksp {
             
             GUILayout.Space(5);
             
-            // Boutons d'action
+            // Action buttons
             GUILayout.BeginHorizontal();
             
             if (vessel != null) {
                 if (GUILayout.Button("Go to", GUILayout.Width(100))) {
                     if (VesselNavigator.NavigateToVessel(vessel)) {
-                        _visible = false; // Fermer la fenêtre après navigation
+                        _visible = false; // Close window after navigation
                         if (_toolbarButton != null) {
                             _toolbarButton.SetFalse();
                         }
                     }
-                    // Si la navigation échoue, l'erreur est déjà loggée dans NavigateToVessel
+                    // If navigation fails, error is already logged in NavigateToVessel
                 }
             } else {
-                GUILayout.Label("Vaisseau non disponible", GUILayout.Width(150));
+                GUILayout.Label("Vessel unavailable", GUILayout.Width(150));
             }
             
             if (GUILayout.Button("Remove", GUILayout.Width(100))) {

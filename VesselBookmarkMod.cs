@@ -38,8 +38,8 @@ namespace com.github.lhervier.ksp {
         public void Start() {
             LogInfo("Plugin started");
             
-            // Initialiser le gestionnaire de bookmarks
-            // Le singleton sera créé automatiquement au premier accès
+            // Initialize the bookmark manager
+            // The singleton will be created automatically on first access
             var manager = VesselBookmarkManager.Instance;
             LogInfo("VesselBookmarkManager initialized");
         }

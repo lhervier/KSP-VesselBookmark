@@ -4,27 +4,27 @@ using UnityEngine;
 namespace com.github.lhervier.ksp {
     
     /// <summary>
-    /// Représente un bookmark vers un module de commande d'un vaisseau
+    /// Represents a bookmark to a command module of a vessel
     /// </summary>
     public class VesselBookmark {
         
         /// <summary>
-        /// Identifiant unique du module de commande (utilise Part.flightID)
+        /// Unique identifier of the command module (uses Part.flightID)
         /// </summary>
         public uint CommandModuleFlightID { get; set; }
         
         /// <summary>
-        /// Commentaire modifiable par l'utilisateur
+        /// User-editable comment
         /// </summary>
         public string Comment { get; set; }
         
         /// <summary>
-        /// Nom du module de commande (mis à jour dynamiquement)
+        /// Command module name (updated dynamically)
         /// </summary>
         public string CommandModuleName { get; set; }
         
         /// <summary>
-        /// Date de création du bookmark
+        /// Bookmark creation date
         /// </summary>
         public double CreationTime { get; set; }
         
@@ -42,13 +42,13 @@ namespace com.github.lhervier.ksp {
         }
         
         /// <summary>
-        /// Sauvegarde le bookmark dans un ConfigNode
+        /// Saves the bookmark to a ConfigNode
         /// </summary>
         public void Save(ConfigNode node) {
             node.AddValue("commandModuleFlightID", CommandModuleFlightID);
             node.AddValue("comment", Comment);
             node.AddValue("commandModuleName", CommandModuleName);
-            // Compatibilité avec les anciennes sauvegardes
+            // Compatibility with old save files
             if (!string.IsNullOrEmpty(CommandModuleName)) {
                 node.AddValue("vesselName", CommandModuleName);
             }
@@ -56,7 +56,7 @@ namespace com.github.lhervier.ksp {
         }
         
         /// <summary>
-        /// Charge le bookmark depuis un ConfigNode
+        /// Loads the bookmark from a ConfigNode
         /// </summary>
         public void Load(ConfigNode node) {
             if (node.HasValue("commandModuleFlightID")) {
@@ -66,10 +66,10 @@ namespace com.github.lhervier.ksp {
             
             Comment = node.GetValue("comment") ?? "";
             
-            // Charger le nom du module de commande (nouveau format)
+            // Load command module name (new format)
             CommandModuleName = node.GetValue("commandModuleName") ?? "";
             
-            // Compatibilité avec les anciennes sauvegardes qui utilisaient "vesselName"
+            // Compatibility with old save files that used "vesselName"
             if (string.IsNullOrEmpty(CommandModuleName) && node.HasValue("vesselName")) {
                 CommandModuleName = node.GetValue("vesselName") ?? "";
             }

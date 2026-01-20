@@ -6,7 +6,7 @@ using UnityEngine;
 namespace com.github.lhervier.ksp {
     
     /// <summary>
-    /// Gestionnaire central des bookmarks
+    /// Central bookmark manager
     /// </summary>
     public class VesselBookmarkManager {
         
@@ -24,18 +24,18 @@ namespace com.github.lhervier.ksp {
         private const string SAVE_NODE_NAME = "VESSEL_BOOKMARKS";
         
         private VesselBookmarkManager() {
-            // S'abonner aux événements de sauvegarde/chargement
+            // Subscribe to save/load events
             GameEvents.onGameStateLoad.Add(OnGameStateLoad);
             GameEvents.onGameStateSave.Add(OnGameStateSave);
         }
         
         /// <summary>
-        /// Liste de tous les bookmarks
+        /// List of all bookmarks
         /// </summary>
         public IReadOnlyList<VesselBookmark> Bookmarks => _bookmarks.AsReadOnly();
         
         /// <summary>
-        /// Charger les bookmarks depuis la sauvegarde
+        /// Load bookmarks from save file
         /// </summary>
         private void OnGameStateLoad(ConfigNode node) {
             _bookmarks.Clear();
@@ -50,22 +50,22 @@ namespace com.github.lhervier.ksp {
                         bookmark.Load(bookmarkNode);
                         _bookmarks.Add(bookmark);
                     } catch (Exception e) {
-                        Debug.LogError($"[VesselBookmarkMod] Erreur lors du chargement d'un bookmark: {e.Message}");
+                        Debug.LogError($"[VesselBookmarkMod] Error loading bookmark: {e.Message}");
                     }
                 }
             }
             
-            // Mettre à jour les noms des modules de commande
+            // Update command module names
             UpdateCommandModuleNames();
             
-            Debug.Log($"[VesselBookmarkMod] {_bookmarks.Count} bookmark(s) chargé(s)");
+            Debug.Log($"[VesselBookmarkMod] {_bookmarks.Count} bookmark(s) loaded");
         }
         
         /// <summary>
-        /// Sauvegarder les bookmarks dans la sauvegarde
+        /// Save bookmarks to save file
         /// </summary>
         private void OnGameStateSave(ConfigNode node) {
-            // Supprimer l'ancien nœud s'il existe
+            // Remove old node if it exists
             if (node.HasNode(SAVE_NODE_NAME)) {
                 node.RemoveNode(SAVE_NODE_NAME);
             }
@@ -77,51 +77,51 @@ namespace com.github.lhervier.ksp {
                 bookmark.Save(bookmarkNode);
             }
             
-            Debug.Log($"[VesselBookmarkMod] {_bookmarks.Count} bookmark(s) sauvegardé(s)");
+            Debug.Log($"[VesselBookmarkMod] {_bookmarks.Count} bookmark(s) saved");
         }
         
         /// <summary>
-        /// Ajouter un bookmark pour un module de commande
+        /// Add a bookmark for a command module
         /// </summary>
         public bool AddBookmark(Part commandModulePart) {
             if (commandModulePart == null) {
-                Debug.LogError("[VesselBookmarkMod] Tentative d'ajout d'un bookmark avec une partie null");
+                Debug.LogError("[VesselBookmarkMod] Attempted to add bookmark with null part");
                 return false;
             }
             
             uint flightID = commandModulePart.flightID;
             
-            // Vérifier si le bookmark existe déjà
+            // Check if bookmark already exists
             if (_bookmarks.Any(b => b.CommandModuleFlightID == flightID)) {
-                Debug.LogWarning($"[VesselBookmarkMod] Un bookmark existe déjà pour le flightID {flightID}");
+                Debug.LogWarning($"[VesselBookmarkMod] Bookmark already exists for flightID {flightID}");
                 return false;
             }
             
             VesselBookmark bookmark = new VesselBookmark(flightID);
             
-            // Mettre à jour le nom du module de commande
+            // Update command module name
             bookmark.CommandModuleName = GetCommandModuleName(commandModulePart);
             
             _bookmarks.Add(bookmark);
-            Debug.Log($"[VesselBookmarkMod] Bookmark ajouté pour le flightID {flightID}");
+            Debug.Log($"[VesselBookmarkMod] Bookmark added for flightID {flightID}");
             return true;
         }
         
         /// <summary>
-        /// Supprimer un bookmark
+        /// Remove a bookmark
         /// </summary>
         public bool RemoveBookmark(uint commandModuleFlightID) {
             VesselBookmark bookmark = _bookmarks.FirstOrDefault(b => b.CommandModuleFlightID == commandModuleFlightID);
             if (bookmark != null) {
                 _bookmarks.Remove(bookmark);
-                Debug.Log($"[VesselBookmarkMod] Bookmark supprimé pour le flightID {commandModuleFlightID}");
+                Debug.Log($"[VesselBookmarkMod] Bookmark removed for flightID {commandModuleFlightID}");
                 return true;
             }
             return false;
         }
         
         /// <summary>
-        /// Vérifier si un bookmark existe pour un module de commande
+        /// Check if a bookmark exists for a command module
         /// </summary>
         public bool HasBookmark(Part commandModulePart) {
             if (commandModulePart == null) return false;
@@ -129,53 +129,53 @@ namespace com.github.lhervier.ksp {
         }
         
         /// <summary>
-        /// Obtenir le vaisseau actuel pour un bookmark (gère les vaisseaux amarrés)
+        /// Get the current vessel for a bookmark (handles docked vessels)
         /// </summary>
         public Vessel GetVesselForBookmark(VesselBookmark bookmark) {
             if (bookmark == null) return null;
             
             try {
-                // Chercher dans tous les vaisseaux chargés
+                // Search in all loaded vessels
                 foreach (Vessel vessel in FlightGlobals.Vessels) {
                     if (vessel == null || vessel.parts == null) continue;
                     
                     try {
-                        // Chercher le module de commande avec le flightID correspondant
+                        // Search for command module with matching flightID
                         foreach (Part part in vessel.parts) {
                             if (part == null) continue;
                             
                             try {
                                 if (part.flightID == bookmark.CommandModuleFlightID) {
-                                    // Trouvé ! Retourner le vaisseau racine (gère les amarrés)
+                                    // Found! Return root vessel (handles docked vessels)
                                     return FindRootVessel(part);
                                 }
                             } catch (System.Exception e) {
-                                Debug.LogWarning($"[VesselBookmarkMod] Erreur lors de la vérification de la partie {part.name}: {e.Message}");
+                                Debug.LogWarning($"[VesselBookmarkMod] Error checking part {part.name}: {e.Message}");
                                 continue;
                             }
                         }
                     } catch (System.Exception e) {
-                        Debug.LogWarning($"[VesselBookmarkMod] Erreur lors de la vérification du vaisseau {vessel.vesselName}: {e.Message}");
+                        Debug.LogWarning($"[VesselBookmarkMod] Error checking vessel {vessel.vesselName}: {e.Message}");
                         continue;
                     }
                 }
             } catch (System.Exception e) {
-                Debug.LogError($"[VesselBookmarkMod] Erreur lors de la recherche du vaisseau pour le bookmark: {e.Message}");
+                Debug.LogError($"[VesselBookmarkMod] Error searching for vessel for bookmark: {e.Message}");
             }
             
             return null;
         }
         
         /// <summary>
-        /// Trouver le vaisseau racine à partir d'une partie (gère les vaisseaux amarrés)
+        /// Find root vessel from a part (handles docked vessels)
         /// </summary>
         public Vessel FindRootVessel(Part part) {
             if (part == null) return null;
             
             try {
-                // Si la partie a un vaisseau, utiliser rootPart pour trouver le vaisseau racine
+                // If part has a vessel, use rootPart to find root vessel
                 if (part.vessel != null) {
-                    // Le rootPart du vaisseau pointe vers la partie racine du vaisseau composite
+                    // The vessel's rootPart points to the root part of the composite vessel
                     Part rootPart = part.vessel.rootPart;
                     if (rootPart != null && rootPart.vessel != null) {
                         return rootPart.vessel;
@@ -183,79 +183,79 @@ namespace com.github.lhervier.ksp {
                     return part.vessel;
                 }
             } catch (System.Exception e) {
-                Debug.LogWarning($"[VesselBookmarkMod] Erreur lors de la recherche du vaisseau racine: {e.Message}");
+                Debug.LogWarning($"[VesselBookmarkMod] Error finding root vessel: {e.Message}");
             }
             
             return null;
         }
         
         /// <summary>
-        /// Obtenir le module de commande pour un bookmark
+        /// Get command module for a bookmark
         /// </summary>
         public Part GetCommandModuleForBookmark(VesselBookmark bookmark) {
             if (bookmark == null) return null;
             
             try {
-                // Chercher dans tous les vaisseaux chargés
+                // Search in all loaded vessels
                 foreach (Vessel vessel in FlightGlobals.Vessels) {
                     if (vessel == null || vessel.parts == null) continue;
                     
                     try {
-                        // Chercher le module de commande avec le flightID correspondant
+                        // Search for command module with matching flightID
                         foreach (Part part in vessel.parts) {
                             if (part == null) continue;
                             
                             try {
                                 if (part.flightID == bookmark.CommandModuleFlightID) {
-                                    // Vérifier que c'est bien un module de commande
+                                    // Verify it's actually a command module
                                     ModuleCommand commandModule = part.FindModuleImplementing<ModuleCommand>();
                                     if (commandModule != null) {
                                         return part;
                                     }
                                 }
                             } catch (System.Exception e) {
-                                Debug.LogWarning($"[VesselBookmarkMod] Erreur lors de la vérification de la partie {part.name}: {e.Message}");
+                                Debug.LogWarning($"[VesselBookmarkMod] Error checking part {part.name}: {e.Message}");
                                 continue;
                             }
                         }
                     } catch (System.Exception e) {
-                        Debug.LogWarning($"[VesselBookmarkMod] Erreur lors de la vérification du vaisseau: {e.Message}");
+                        Debug.LogWarning($"[VesselBookmarkMod] Error checking vessel: {e.Message}");
                         continue;
                     }
                 }
             } catch (System.Exception e) {
-                Debug.LogError($"[VesselBookmarkMod] Erreur lors de la recherche du module de commande pour le bookmark: {e.Message}");
+                Debug.LogError($"[VesselBookmarkMod] Error searching for command module for bookmark: {e.Message}");
             }
             
             return null;
         }
         
         /// <summary>
-        /// Obtenir le nom d'un module de commande
+        /// Get command module name
         /// </summary>
         private string GetCommandModuleName(Part commandModulePart) {
-            if (commandModulePart == null) return "Module introuvable";
+            if (commandModulePart == null) return "Module not found";
             
             try {
-                // Utiliser le nom de la partie (partInfo.title)
+                // Use part name (partInfo.title)
                 if (commandModulePart.partInfo != null && !string.IsNullOrEmpty(commandModulePart.partInfo.title)) {
                     return commandModulePart.partInfo.title;
                 }
                 
-                // Sinon utiliser le nom de la partie
+                // Otherwise use part name
                 if (!string.IsNullOrEmpty(commandModulePart.partName)) {
                     return commandModulePart.partName;
                 }
                 
-                return "Module de commande";
+                return "Command Module";
             } catch (System.Exception e) {
-                Debug.LogWarning($"[VesselBookmarkMod] Erreur lors de la récupération du nom du module de commande: {e.Message}");
-                return "Module de commande";
+                Debug.LogWarning($"[VesselBookmarkMod] Error retrieving command module name: {e.Message}");
+                return "Command Module";
             }
         }
         
         /// <summary>
-        /// Mettre à jour les noms des modules de commande pour tous les bookmarks
+        /// Update command module names for all bookmarks
         /// </summary>
         public void UpdateCommandModuleNames() {
             try {
@@ -267,33 +267,33 @@ namespace com.github.lhervier.ksp {
                         if (commandModulePart != null) {
                             bookmark.CommandModuleName = GetCommandModuleName(commandModulePart);
                         } else {
-                            // Le module de commande n'est pas chargé ou n'existe plus
+                            // Command module is not loaded or no longer exists
                             if (string.IsNullOrEmpty(bookmark.CommandModuleName)) {
-                                bookmark.CommandModuleName = "Module introuvable";
+                                bookmark.CommandModuleName = "Module not found";
                             }
                         }
                     } catch (System.Exception e) {
-                        Debug.LogWarning($"[VesselBookmarkMod] Erreur lors de la mise à jour du nom pour un bookmark: {e.Message}");
+                        Debug.LogWarning($"[VesselBookmarkMod] Error updating name for bookmark: {e.Message}");
                         if (string.IsNullOrEmpty(bookmark.CommandModuleName)) {
-                            bookmark.CommandModuleName = "Erreur";
+                            bookmark.CommandModuleName = "Error";
                         }
                     }
                 }
             } catch (System.Exception e) {
-                Debug.LogError($"[VesselBookmarkMod] Erreur lors de la mise à jour des noms de modules de commande: {e.Message}");
+                Debug.LogError($"[VesselBookmarkMod] Error updating command module names: {e.Message}");
             }
         }
         
         /// <summary>
-        /// Mettre à jour les noms des vaisseaux pour tous les bookmarks (déprécié, utilise UpdateCommandModuleNames)
+        /// Update vessel names for all bookmarks (deprecated, use UpdateCommandModuleNames)
         /// </summary>
-        [System.Obsolete("Utilisez UpdateCommandModuleNames() à la place")]
+        [System.Obsolete("Use UpdateCommandModuleNames() instead")]
         public void UpdateVesselNames() {
             UpdateCommandModuleNames();
         }
         
         /// <summary>
-        /// Nettoyer les bookmarks vers des vaisseaux qui n'existent plus
+        /// Clean up bookmarks for vessels that no longer exist
         /// </summary>
         public void CleanupInvalidBookmarks() {
             List<VesselBookmark> toRemove = new List<VesselBookmark>();
@@ -308,8 +308,8 @@ namespace com.github.lhervier.ksp {
                     try {
                         Vessel vessel = GetVesselForBookmark(bookmark);
                         if (vessel == null) {
-                            // Vérifier si le vaisseau existe dans les vaisseaux non chargés
-                            // (dans le Tracking Station par exemple)
+                            // Check if vessel exists in unloaded vessels
+                            // (in Tracking Station for example)
                             bool found = false;
                             try {
                                 foreach (Vessel v in FlightGlobals.VesselsUnloaded) {
@@ -323,14 +323,14 @@ namespace com.github.lhervier.ksp {
                                             }
                                         }
                                     } catch (System.Exception e) {
-                                        Debug.LogWarning($"[VesselBookmarkMod] Erreur lors de la vérification des parties du vaisseau non chargé: {e.Message}");
+                                        Debug.LogWarning($"[VesselBookmarkMod] Error checking unloaded vessel parts: {e.Message}");
                                         continue;
                                     }
                                     
                                     if (found) break;
                                 }
                             } catch (System.Exception e) {
-                                Debug.LogWarning($"[VesselBookmarkMod] Erreur lors de la vérification des vaisseaux non chargés: {e.Message}");
+                                Debug.LogWarning($"[VesselBookmarkMod] Error checking unloaded vessels: {e.Message}");
                             }
                             
                             if (!found) {
@@ -338,17 +338,17 @@ namespace com.github.lhervier.ksp {
                             }
                         }
                     } catch (System.Exception e) {
-                        Debug.LogWarning($"[VesselBookmarkMod] Erreur lors de la vérification d'un bookmark: {e.Message}");
-                        // Ne pas supprimer en cas d'erreur, on réessayera plus tard
+                        Debug.LogWarning($"[VesselBookmarkMod] Error checking bookmark: {e.Message}");
+                        // Don't remove on error, will retry later
                     }
                 }
                 
                 foreach (VesselBookmark bookmark in toRemove) {
                     _bookmarks.Remove(bookmark);
-                    Debug.Log($"[VesselBookmarkMod] Bookmark nettoyé (vaisseau introuvable): {bookmark?.CommandModuleFlightID ?? 0}");
+                    Debug.Log($"[VesselBookmarkMod] Bookmark cleaned up (vessel not found): {bookmark?.CommandModuleFlightID ?? 0}");
                 }
             } catch (System.Exception e) {
-                Debug.LogError($"[VesselBookmarkMod] Erreur lors du nettoyage des bookmarks: {e.Message}");
+                Debug.LogError($"[VesselBookmarkMod] Error cleaning up bookmarks: {e.Message}");
             }
         }
     }
