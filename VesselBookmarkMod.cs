@@ -42,26 +42,10 @@ namespace com.github.lhervier.ksp {
             // Le singleton sera créé automatiquement au premier accès
             var manager = VesselBookmarkManager.Instance;
             LogInfo("VesselBookmarkManager initialized");
-            
-            // Nettoyer les bookmarks invalides périodiquement
-            InvokeRepeating("CleanupBookmarks", 30f, 60f);
         }
 
         public void OnDestroy() {
-            CancelInvoke("CleanupBookmarks");
             LogInfo("Plugin stopped");
-        }
-        
-        /// <summary>
-        /// Nettoie les bookmarks invalides périodiquement
-        /// </summary>
-        private void CleanupBookmarks() {
-            try {
-                VesselBookmarkManager.Instance.CleanupInvalidBookmarks();
-                VesselBookmarkManager.Instance.UpdateCommandModuleNames();
-            } catch (Exception e) {
-                LogError($"Erreur lors du nettoyage des bookmarks: {e.Message}");
-            }
         }
     }
 }
