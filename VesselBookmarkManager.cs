@@ -147,8 +147,8 @@ namespace com.github.lhervier.ksp {
                             
                             try {
                                 if (part.flightID == bookmark.CommandModuleFlightID) {
-                                    // Found! Return root vessel (handles docked vessels)
-                                    return FindRootVessel(part);
+                                    // Found! Return the vessel (part.vessel already points to the composite vessel if docked)
+                                    return part.vessel;
                                 }
                             } catch (System.Exception e) {
                                 Debug.LogWarning($"[VesselBookmarkMod] Error checking part {part.name}: {e.Message}");
@@ -172,7 +172,7 @@ namespace com.github.lhervier.ksp {
                             
                             try {
                                 if (protoPart.flightID == bookmark.CommandModuleFlightID) {
-                                    // Found! Return the vessel (unloaded vessels are not docked, so no need to find root)
+                                    // Found! Return the vessel
                                     return vessel;
                                 }
                             } catch (System.Exception e) {
@@ -187,29 +187,6 @@ namespace com.github.lhervier.ksp {
                 }
             } catch (System.Exception e) {
                 Debug.LogError($"[VesselBookmarkMod] Error searching for vessel for bookmark: {e.Message}");
-            }
-            
-            return null;
-        }
-        
-        /// <summary>
-        /// Find root vessel from a part (handles docked vessels)
-        /// </summary>
-        public Vessel FindRootVessel(Part part) {
-            if (part == null) return null;
-            
-            try {
-                // If part has a vessel, use rootPart to find root vessel
-                if (part.vessel != null) {
-                    // The vessel's rootPart points to the root part of the composite vessel
-                    Part rootPart = part.vessel.rootPart;
-                    if (rootPart != null && rootPart.vessel != null) {
-                        return rootPart.vessel;
-                    }
-                    return part.vessel;
-                }
-            } catch (System.Exception e) {
-                Debug.LogWarning($"[VesselBookmarkMod] Error finding root vessel: {e.Message}");
             }
             
             return null;
