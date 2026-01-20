@@ -42,11 +42,26 @@
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>$(KSPDIR)\KSP_x64_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(KSPDIR)\KSP_x64_Data\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(KSPDIR)\KSP_x64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>$(KSPDIR)\KSP_x64_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="VesselBookmarkMod.cs" />
+    <Compile Include="VesselBookmarkData.cs" />
+    <Compile Include="VesselBookmarkManager.cs" />
+    <Compile Include="VesselSituationDetector.cs" />
+    <Compile Include="VesselNavigator.cs" />
+    <Compile Include="VesselBookmarkContextMenu.cs" />
+    <Compile Include="VesselBookmarkUI.cs" />
   </ItemGroup>
   
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
