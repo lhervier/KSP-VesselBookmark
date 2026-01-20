@@ -58,6 +58,7 @@
     <Compile Include="VesselBookmarkMod.cs" />
     <Compile Include="VesselBookmarkData.cs" />
     <Compile Include="VesselBookmarkManager.cs" />
+    <Compile Include="VesselBookmarkScenario.cs" />
     <Compile Include="VesselSituationDetector.cs" />
     <Compile Include="VesselNavigator.cs" />
     <Compile Include="VesselBookmarkContextMenu.cs" />

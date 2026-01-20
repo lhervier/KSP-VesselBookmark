@@ -21,12 +21,10 @@ namespace com.github.lhervier.ksp {
         }
         
         private List<VesselBookmark> _bookmarks = new List<VesselBookmark>();
-        private const string SAVE_NODE_NAME = "VESSEL_BOOKMARKS";
+        public const string SAVE_NODE_NAME = "VESSEL_BOOKMARKS";
         
         private VesselBookmarkManager() {
-            // Subscribe to save/load events
-            GameEvents.onGameStateLoad.Add(OnGameStateLoad);
-            GameEvents.onGameStateSave.Add(OnGameStateSave);
+            // Save/load is now handled by VesselBookmarkScenario (ScenarioModule)
         }
         
         /// <summary>
@@ -35,49 +33,19 @@ namespace com.github.lhervier.ksp {
         public IReadOnlyList<VesselBookmark> Bookmarks => _bookmarks.AsReadOnly();
         
         /// <summary>
-        /// Load bookmarks from save file
+        /// Clear all bookmarks (used by ScenarioModule when loading)
         /// </summary>
-        private void OnGameStateLoad(ConfigNode node) {
+        public void ClearBookmarks() {
             _bookmarks.Clear();
-            
-            if (node.HasNode(SAVE_NODE_NAME)) {
-                ConfigNode bookmarksNode = node.GetNode(SAVE_NODE_NAME);
-                ConfigNode[] bookmarkNodes = bookmarksNode.GetNodes("BOOKMARK");
-                
-                foreach (ConfigNode bookmarkNode in bookmarkNodes) {
-                    VesselBookmark bookmark = new VesselBookmark();
-                    try {
-                        bookmark.Load(bookmarkNode);
-                        _bookmarks.Add(bookmark);
-                    } catch (Exception e) {
-                        Debug.LogError($"[VesselBookmarkMod] Error loading bookmark: {e.Message}");
-                    }
-                }
-            }
-            
-            // Update command module names
-            UpdateCommandModuleNames();
-            
-            Debug.Log($"[VesselBookmarkMod] {_bookmarks.Count} bookmark(s) loaded");
         }
         
         /// <summary>
-        /// Save bookmarks to save file
+        /// Add a bookmark directly without validation (used by ScenarioModule when loading)
         /// </summary>
-        private void OnGameStateSave(ConfigNode node) {
-            // Remove old node if it exists
-            if (node.HasNode(SAVE_NODE_NAME)) {
-                node.RemoveNode(SAVE_NODE_NAME);
+        public void AddBookmarkDirectly(VesselBookmark bookmark) {
+            if (bookmark != null) {
+                _bookmarks.Add(bookmark);
             }
-            
-            ConfigNode bookmarksNode = node.AddNode(SAVE_NODE_NAME);
-            
-            foreach (VesselBookmark bookmark in _bookmarks) {
-                ConfigNode bookmarkNode = bookmarksNode.AddNode("BOOKMARK");
-                bookmark.Save(bookmarkNode);
-            }
-            
-            Debug.Log($"[VesselBookmarkMod] {_bookmarks.Count} bookmark(s) saved");
         }
         
         /// <summary>
