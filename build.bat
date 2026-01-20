@@ -38,6 +38,13 @@ if errorlevel 1 (
     exit /b 1
 )
 
+echo Copying ModuleManager config file
+copy /y "VesselBookmarkMod.cfg" "Release\VesselBookmarkMod"
+if errorlevel 1 (
+    echo ERROR: Failed to copy the config file
+    exit /b 1
+)
+
 echo Zipping Mod
 powershell -Command "Compress-Archive -Path 'Release\VesselBookmarkMod\*' -DestinationPath 'Release\VesselBookmarkMod.zip' -Force"
 if errorlevel 1 (

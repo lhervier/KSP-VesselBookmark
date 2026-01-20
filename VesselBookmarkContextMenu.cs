@@ -1,53 +1,10 @@
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace com.github.lhervier.ksp {
     
     /// <summary>
-    /// Adds actions to command module context menu
-    /// Uses a simple approach with a custom module that is added dynamically
-    /// </summary>
-    [KSPAddon(KSPAddon.Startup.Flight, false)]
-    public class VesselBookmarkContextMenu : MonoBehaviour {
-        
-        private HashSet<Part> _processedParts = new HashSet<Part>();
-        
-        private void Start() {
-            // Periodically check for new parts
-            InvokeRepeating("ProcessParts", 1f, 2f);
-        }
-        
-        private void OnDestroy() {
-            CancelInvoke("ProcessParts");
-        }
-        
-        /// <summary>
-        /// Processes parts to add bookmark module if needed
-        /// </summary>
-        private void ProcessParts() {
-            if (FlightGlobals.ActiveVessel == null) return;
-            
-            foreach (Part part in FlightGlobals.ActiveVessel.parts) {
-                if (part == null || _processedParts.Contains(part)) continue;
-                
-                // Check if it's a command module
-                ModuleCommand commandModule = part.FindModuleImplementing<ModuleCommand>();
-                if (commandModule == null) continue;
-                
-                // Check if bookmark module doesn't already exist
-                VesselBookmarkPartModule bookmarkModule = part.GetComponent<VesselBookmarkPartModule>();
-                if (bookmarkModule == null) {
-                    bookmarkModule = part.gameObject.AddComponent<VesselBookmarkPartModule>();
-                }
-                
-                _processedParts.Add(part);
-            }
-        }
-    }
-    
-    /// <summary>
     /// Custom module that adds bookmark action to command modules
+    /// Injected into command parts via ModuleManager configuration
     /// </summary>
     public class VesselBookmarkPartModule : PartModule {
         
