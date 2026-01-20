@@ -130,6 +130,7 @@ namespace com.github.lhervier.ksp {
         
         /// <summary>
         /// Get the current vessel for a bookmark (handles docked vessels)
+        /// Searches in both loaded and unloaded vessels
         /// </summary>
         public Vessel GetVesselForBookmark(VesselBookmark bookmark) {
             if (bookmark == null) return null;
@@ -156,6 +157,31 @@ namespace com.github.lhervier.ksp {
                         }
                     } catch (System.Exception e) {
                         Debug.LogWarning($"[VesselBookmarkMod] Error checking vessel {vessel.vesselName}: {e.Message}");
+                        continue;
+                    }
+                }
+                
+                // If not found in loaded vessels, search in unloaded vessels
+                foreach (Vessel vessel in FlightGlobals.VesselsUnloaded) {
+                    if (vessel == null || vessel.protoVessel == null) continue;
+                    
+                    try {
+                        // Search for command module with matching flightID in protoPartSnapshots
+                        foreach (ProtoPartSnapshot protoPart in vessel.protoVessel.protoPartSnapshots) {
+                            if (protoPart == null) continue;
+                            
+                            try {
+                                if (protoPart.flightID == bookmark.CommandModuleFlightID) {
+                                    // Found! Return the vessel (unloaded vessels are not docked, so no need to find root)
+                                    return vessel;
+                                }
+                            } catch (System.Exception e) {
+                                Debug.LogWarning($"[VesselBookmarkMod] Error checking protoPart {protoPart.partName}: {e.Message}");
+                                continue;
+                            }
+                        }
+                    } catch (System.Exception e) {
+                        Debug.LogWarning($"[VesselBookmarkMod] Error checking unloaded vessel {vessel.vesselName}: {e.Message}");
                         continue;
                     }
                 }
