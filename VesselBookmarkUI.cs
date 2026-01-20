@@ -40,7 +40,7 @@ namespace com.github.lhervier.ksp {
                         null,
                         null,
                         null,
-                        ApplicationLauncher.AppScenes.FLIGHT,
+                        ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW,
                         GameDatabase.Instance.GetTexture("VesselBookmarkMod/icon", false) ?? Texture2D.whiteTexture
                     );
                 } catch (System.Exception e) {
