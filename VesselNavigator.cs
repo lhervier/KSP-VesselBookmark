@@ -14,13 +14,13 @@ namespace com.github.lhervier.ksp {
         /// </summary>
         public static bool NavigateToVessel(Vessel vessel) {
             if (vessel == null) {
-                Debug.LogError("[VesselBookmarkMod] Attempted to navigate to null vessel");
+                ModLogger.LogError("Attempted to navigate to null vessel");
                 return false;
             }
             
             // Check if already on this vessel (only if in flight)
             if (HighLogic.LoadedScene == GameScenes.FLIGHT && FlightGlobals.ActiveVessel == vessel) {
-                Debug.Log($"[VesselBookmarkMod] Already on vessel {vessel.vesselName}");
+                ModLogger.LogDebug($"Already on vessel {vessel.vesselName}");
                 return true;
             }
             
@@ -33,10 +33,10 @@ namespace com.github.lhervier.ksp {
             // Like KSP's "switch" menu does
             try {
                 FlightGlobals.SetActiveVessel(vessel);
-                Debug.Log($"[VesselBookmarkMod] Navigating to {vessel.vesselName} (scene: {HighLogic.LoadedScene}, loaded: {vessel.loaded})");
+                ModLogger.LogDebug($"Navigating to {vessel.vesselName} (scene: {HighLogic.LoadedScene}, loaded: {vessel.loaded})");
                 return true;
             } catch (System.Exception e) {
-                Debug.LogError($"[VesselBookmarkMod] Error navigating to {vessel.vesselName}: {e.Message}");
+                ModLogger.LogError($"Error navigating to {vessel.vesselName}: {e.Message}");
                 return false;
             }
         }

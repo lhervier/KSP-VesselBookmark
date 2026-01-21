@@ -44,7 +44,7 @@ namespace com.github.lhervier.ksp {
                         GameDatabase.Instance.GetTexture("VesselBookmarkMod/icon", false) ?? Texture2D.whiteTexture
                     );
                 } catch (System.Exception e) {
-                    Debug.LogError($"[VesselBookmarkMod] Error creating Toolbar button: {e.Message}");
+                    ModLogger.LogError($"Error creating Toolbar button: {e.Message}");
                 }
             }
         }
@@ -57,7 +57,7 @@ namespace com.github.lhervier.ksp {
                 try {
                     ApplicationLauncher.Instance.RemoveModApplication(_toolbarButton);
                 } catch (System.Exception e) {
-                    Debug.LogError($"[VesselBookmarkMod] Error removing Toolbar button: {e.Message}");
+                    ModLogger.LogError($"Error removing Toolbar button: {e.Message}");
                 }
                 _toolbarButton = null;
             }
