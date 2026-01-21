@@ -27,8 +27,9 @@ namespace com.github.lhervier.ksp {
 
             // Subscribe to save/load events
             GameEvents.onGameStateCreated.Add(OnGameStateCreated);
-            GameEvents.onGameStateLoad.Add(OnGameStateLoad);
+            GameEvents.onGameStatePostLoad.Add(OnGameStatePostLoad);
             GameEvents.onGameStateSave.Add(OnGameStateSave);
+
             ModLogger.LogInfo("Events subscribed");
         }
 
@@ -37,9 +38,19 @@ namespace com.github.lhervier.ksp {
 
             // Unsubscribe from save/load events
             GameEvents.onGameStateCreated.Remove(OnGameStateCreated);
-            GameEvents.onGameStateLoad.Remove(OnGameStateLoad);
+            GameEvents.onGameStatePostLoad.Remove(OnGameStatePostLoad);
             GameEvents.onGameStateSave.Remove(OnGameStateSave);
+
             ModLogger.LogInfo("Events unsubscribed");
+        }
+
+        /// <summary>
+        /// Called when the game has finished loading a save file.
+        /// </summary>
+        /// <param name="configNode"></param>
+        private void OnGameStatePostLoad(ConfigNode configNode) {
+            ModLogger.LogDebug("On Game state post load");
+            this._manager.LoadBookmarks(configNode.GetNode("GAME"));
         }
 
         /// <summary>
@@ -51,15 +62,6 @@ namespace com.github.lhervier.ksp {
         private void OnGameStateCreated(Game game) {
             ModLogger.LogDebug("On Game state created");
             this._manager.LoadBookmarks(game.config);
-        }
-
-        /// <summary>
-        /// Called when the game loads a save file.
-        /// </summary>
-        /// <param name="node"></param>
-        private void OnGameStateLoad(ConfigNode node) {
-            ModLogger.LogDebug("On Game state load");
-            this._manager.LoadBookmarks(node);
         }
 
         /// <summary>
