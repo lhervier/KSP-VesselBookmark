@@ -22,23 +22,36 @@ namespace com.github.lhervier.ksp {
         /// Command module name (updated dynamically)
         /// </summary>
         public string CommandModuleName { get; set; }
+
+        /// <summary>
+        /// Vessel type
+        /// </summary>
+        public VesselType VesselType { get; set; }
         
         /// <summary>
         /// Bookmark creation date
         /// </summary>
         public double CreationTime { get; set; }
         
+        /// <summary>
+        /// Custom order for sorting bookmarks (lower values appear first)
+        /// </summary>
+        public int Order { get; set; }
+        
         public VesselBookmark() {
             Comment = "";
             CommandModuleName = "";
-            CreationTime = Planetarium.GetUniversalTime();
+            VesselType = VesselType.Unknown;
+            Order = 0;
         }
         
         public VesselBookmark(uint flightID, string comment = "") {
             CommandModuleFlightID = flightID;
             Comment = comment ?? "";
             CommandModuleName = "";
+            VesselType = VesselType.Unknown;
             CreationTime = Planetarium.GetUniversalTime();
+            Order = 0;
         }
         
         /// <summary>
@@ -49,6 +62,8 @@ namespace com.github.lhervier.ksp {
             node.AddValue("comment", Comment);
             node.AddValue("commandModuleName", CommandModuleName);
             node.AddValue("creationTime", CreationTime);
+            node.AddValue("vesselType", (int) VesselType);
+            node.AddValue("order", Order);
         }
         
         /// <summary>
@@ -64,12 +79,27 @@ namespace com.github.lhervier.ksp {
             
             Comment = node.GetValue("comment") ?? "";
             
-            // Load command module name (new format)
             CommandModuleName = node.GetValue("commandModuleName") ?? "";
             
+            if (node.HasValue("vesselType")) {
+                int.TryParse(node.GetValue("vesselType"), out int vesselType);
+                VesselType = (VesselType) vesselType;
+            } else {
+                throw new Exception("vesselType not found in the bookmark node");
+            }
+
             if (node.HasValue("creationTime")) {
                 double.TryParse(node.GetValue("creationTime"), out double time);
                 CreationTime = time;
+            } else {
+                throw new Exception("creationTime not found in the bookmark node");
+            }
+            
+            if (node.HasValue("order")) {
+                int.TryParse(node.GetValue("order"), out int order);
+                Order = order;
+            } else {
+                throw new Exception("order not found in the bookmark node");
             }
         }
     }

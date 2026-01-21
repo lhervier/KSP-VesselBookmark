@@ -33,6 +33,18 @@ namespace com.github.lhervier.ksp {
         /// </summary>
         private List<VesselBookmark> _bookmarks = new List<VesselBookmark>();
         public IReadOnlyList<VesselBookmark> Bookmarks => _bookmarks.AsReadOnly();
+
+        /// <summary>
+        /// List of available celestial bodies
+        /// </summary>
+        private List<CelestialBody> _availableBodies = new List<CelestialBody>();
+        public IReadOnlyList<CelestialBody> AvailableBodies => _availableBodies.AsReadOnly();
+        
+        /// <summary>
+        /// List of available vessel types
+        /// </summary>
+        private List<VesselType> _availableVesselTypes = new List<VesselType>();
+        public IReadOnlyList<VesselType> AvailableVesselTypes => _availableVesselTypes.AsReadOnly();
         
         /// <summary>
         /// Load bookmarks from config node
@@ -58,6 +70,8 @@ namespace com.github.lhervier.ksp {
                         ModLogger.LogError($"Error loading bookmark: {e.Message}");
                     }
                 }
+
+                RefreshBookmarks();
             } finally {
                 ModLogger.LogDebug($"{_bookmarks.Count} bookmark(s) loaded");
             }
@@ -106,10 +120,20 @@ namespace com.github.lhervier.ksp {
             
             VesselBookmark bookmark = new VesselBookmark(flightID);
             
-            // Update command module name
+            // Update command module name and vessel type
             bookmark.CommandModuleName = GetCommandModuleName(commandModulePart);
+            bookmark.VesselType = GetCommandModuleVesselType(commandModulePart);
+
+            // Assign order (max + 1, or 0 if list is empty)
+            if (_bookmarks.Count > 0) {
+                bookmark.Order = _bookmarks.Max(b => b.Order) + 1;
+            } else {
+                bookmark.Order = 0;
+            }
             
             _bookmarks.Add(bookmark);
+            UpdateAvailableCelestialBodies();
+            UpdateAvailableVesselTypes();
             ModLogger.LogDebug($"Bookmark added for flightID {flightID}");
             return true;
         }
@@ -123,6 +147,8 @@ namespace com.github.lhervier.ksp {
                 return false;
             } 
             _bookmarks.Remove(bookmark);
+            UpdateAvailableCelestialBodies();
+            UpdateAvailableVesselTypes();
             ModLogger.LogDebug($"Bookmark removed for flightID {commandModuleFlightID}");
             return true;
         }
@@ -248,6 +274,88 @@ namespace com.github.lhervier.ksp {
             if( commandModulePart.vesselNaming == null ) return "Part is not a CommandModule";
             return commandModulePart.vesselNaming.vesselName;
         }
+
+        /// <summary>
+        /// Get command module vessel type
+        /// </summary>
+        private VesselType GetCommandModuleVesselType(Part commandModulePart) {
+            if (commandModulePart == null) return VesselType.Unknown;
+            return commandModulePart.vesselNaming.vesselType;
+        }
+        
+        /// <summary>
+        /// Get filtered bookmarks by celestial body and/or vessel type
+        /// </summary>
+        public IEnumerable<VesselBookmark> GetFilteredBookmarks(CelestialBody bodyFilter, VesselType? typeFilter) {
+            IEnumerable<VesselBookmark> filtered = _bookmarks;
+            
+            if (bodyFilter != null) {
+                filtered = filtered.Where(b => {
+                    Vessel vessel = GetVesselForBookmark(b);
+                    return vessel != null && vessel.mainBody == bodyFilter;
+                });
+            }
+            
+            if (typeFilter.HasValue) {
+                filtered = filtered.Where(b => {
+                    Vessel vessel = GetVesselForBookmark(b);
+                    return vessel != null && vessel.vesselType == typeFilter.Value;
+                });
+            }
+            
+            // Sort by Order, then by CreationTime
+            return filtered.OrderBy(b => b.Order).ThenBy(b => b.CreationTime);
+        }
+        
+        /// <summary>
+        /// Move a bookmark up in the order (decrease Order value)
+        /// </summary>
+        public bool MoveBookmarkUp(VesselBookmark bookmark) {
+            if (bookmark == null || !_bookmarks.Contains(bookmark)) {
+                return false;
+            }
+            
+            // Find the bookmark with the highest Order that is less than this one's Order
+            VesselBookmark previous = _bookmarks
+                .Where(b => b.Order < bookmark.Order)
+                .OrderByDescending(b => b.Order)
+                .FirstOrDefault();
+            
+            if (previous != null) {
+                // Swap orders
+                int temp = bookmark.Order;
+                bookmark.Order = previous.Order;
+                previous.Order = temp;
+                return true;
+            }
+            
+            return false; // Already at the top
+        }
+        
+        /// <summary>
+        /// Move a bookmark down in the order (increase Order value)
+        /// </summary>
+        public bool MoveBookmarkDown(VesselBookmark bookmark) {
+            if (bookmark == null || !_bookmarks.Contains(bookmark)) {
+                return false;
+            }
+            
+            // Find the bookmark with the lowest Order that is greater than this one's Order
+            VesselBookmark next = _bookmarks
+                .Where(b => b.Order > bookmark.Order)
+                .OrderBy(b => b.Order)
+                .FirstOrDefault();
+            
+            if (next != null) {
+                // Swap orders
+                int temp = bookmark.Order;
+                bookmark.Order = next.Order;
+                next.Order = temp;
+                return true;
+            }
+            
+            return false; // Already at the bottom
+        }
         
         /// <summary>
         /// Refresh command module names for all bookmarks
@@ -261,10 +369,12 @@ namespace com.github.lhervier.ksp {
                         Part commandModulePart = GetCommandModuleForBookmark(bookmark);
                         if (commandModulePart != null) {
                             bookmark.CommandModuleName = GetCommandModuleName(commandModulePart);
+                            bookmark.VesselType = GetCommandModuleVesselType(commandModulePart);
                         } else {
                             // Command module is not loaded or no longer exists
                             if (string.IsNullOrEmpty(bookmark.CommandModuleName)) {
                                 bookmark.CommandModuleName = "Module not found";
+                                bookmark.VesselType = VesselType.Unknown;
                             }
                         }
                     } catch (System.Exception e) {
@@ -274,9 +384,36 @@ namespace com.github.lhervier.ksp {
                         }
                     }
                 }
+
+                UpdateAvailableCelestialBodies();
+                UpdateAvailableVesselTypes();
             } catch (System.Exception e) {
-                ModLogger.LogError($"Error updating command module names: {e.Message}");
+                ModLogger.LogError($"Error updating command module names and vessel types: {e.Message}");
             }
+        }
+
+        /// <summary>
+        /// Get list of available celestial bodies from all bookmarks
+        /// </summary>
+        public void UpdateAvailableCelestialBodies() {
+            HashSet<CelestialBody> bodies = new HashSet<CelestialBody>();
+            
+            foreach (VesselBookmark bookmark in _bookmarks) {
+                Vessel vessel = GetVesselForBookmark(bookmark);
+                if (vessel != null && vessel.mainBody != null) {
+                    bodies.Add(vessel.mainBody);
+                }
+            }
+            
+            _availableBodies = bodies.OrderBy(b => b.displayName).ToList();
+        }
+
+        public void UpdateAvailableVesselTypes() {
+            HashSet<VesselType> types = new HashSet<VesselType>();
+            foreach (VesselBookmark bookmark in _bookmarks) {
+                types.Add(bookmark.VesselType);
+            }
+            _availableVesselTypes = types.OrderBy(t => t.ToString()).ToList();
         }
     }
 }
