@@ -24,20 +24,37 @@ namespace com.github.lhervier.ksp {
                 return true;
             }
             
-            // Change active vessel
-            // FlightGlobals.SetActiveVessel() automatically handles:
-            // - Loading flight scene from Tracking Station
-            // - Reloading scene if vessel is not loaded
-            // - Centering view in map mode
-            // - Updating camera
-            // Like KSP's "switch" menu does
-            try {
-                FlightGlobals.SetActiveVessel(vessel);
-                ModLogger.LogDebug($"Navigating to {vessel.vesselName} (scene: {HighLogic.LoadedScene}, loaded: {vessel.loaded})");
+            // If we are ont the flight scene
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                try {
+                    FlightGlobals.SetActiveVessel(vessel);
+                    ModLogger.LogDebug($"Navigating to {vessel.vesselName} (scene: {HighLogic.LoadedScene}, loaded: {vessel.loaded})");
+                    return true;
+                } catch (System.Exception e) {
+                    ModLogger.LogError($"Error navigating to {vessel.vesselName}: {e.Message}");
+                    return false;
+                }
+            
+            // Otherwise, we need to save and reload the game
+            } else {
+                // First, save the game, forcing the flight scene
+                Game currentGame;
+                if (HighLogic.CurrentGame == null)
+                {
+                    HighLogic.CurrentGame = new Game().Updated(GameScenes.FLIGHT);
+                    currentGame = HighLogic.CurrentGame;
+                }
+                else 
+                {
+                    currentGame = HighLogic.CurrentGame.Updated(GameScenes.FLIGHT);
+                }
+                GamePersistence.SaveGame(currentGame, "persistent", HighLogic.SaveFolder, SaveMode.OVERWRITE);
+
+                // Then, load the saved game, and focus on the vessel
+                FlightDriver.StartAndFocusVessel("persistent", FlightGlobals.Vessels.IndexOf(vessel));
+
                 return true;
-            } catch (System.Exception e) {
-                ModLogger.LogError($"Error navigating to {vessel.vesselName}: {e.Message}");
-                return false;
             }
         }
         
