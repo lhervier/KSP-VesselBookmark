@@ -39,9 +39,16 @@ if errorlevel 1 (
 )
 
 echo Copying ModuleManager config file
-copy /y "VesselBookmarkMod.cfg" "Release\VesselBookmarkMod"
+copy /y "GameData\VesselBookmarkMod\VesselBookmarkMod.cfg" "Release\VesselBookmarkMod"
 if errorlevel 1 (
     echo ERROR: Failed to copy the config file
+    exit /b 1
+)
+
+echo Copying icon file
+copy /y "GameData\VesselBookmarkMod\icon.png" "Release\VesselBookmarkMod"
+if errorlevel 1 (
+    echo ERROR: Failed to copy the icon file
     exit /b 1
 )
 
