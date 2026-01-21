@@ -25,8 +25,11 @@ namespace com.github.lhervier.ksp {
         
         private VesselBookmarkManager() {
             // Subscribe to save/load events
+            GameEvents.onGameStateCreated.Add(OnGameStateCreated);
             GameEvents.onGameStateLoad.Add(OnGameStateLoad);
+            GameEvents.onGameStatePostLoad.Add(OnGameStatePostLoad);
             GameEvents.onGameStateSave.Add(OnGameStateSave);
+            GameEvents.onGameStateSaved.Add(OnGameStateSaved);
         }
         
         /// <summary>
@@ -34,13 +37,59 @@ namespace com.github.lhervier.ksp {
         /// </summary>
         public IReadOnlyList<VesselBookmark> Bookmarks => _bookmarks.AsReadOnly();
         
-        /// <summary>
-        /// Load bookmarks from save file
-        /// </summary>
-        private void OnGameStateLoad(ConfigNode node) {
-            _bookmarks.Clear();
+        private void LogConfigNode(ConfigNode configNode) {
+            ModLogger.LogDebug($"Logging config node :");
+            if( configNode == null ) {
+                ModLogger.LogDebug($"  => No config node to log");
+                return;
+            }
+
+            ConfigNode[] allNodes = configNode.GetNodes();
+            ModLogger.LogDebug($"  => Nodes present in the config {configNode.name}: {allNodes.Length}");
+            foreach( ConfigNode node in allNodes ) {
+                ModLogger.LogDebug($"    - Node: {node.name}");
+            }
+        }
+
+        private void LogBookmarks(ConfigNode configNode) {
+            ModLogger.LogDebug($"Logging bookmarks present in the config node :");
             
-            if (node.HasNode(SAVE_NODE_NAME)) {
+            if( configNode == null ) {
+                ModLogger.LogDebug($"  => No config node to log bookmarks from");
+                return;
+            }
+
+            ConfigNode[] bookmarksNodes = configNode.GetNodes(SAVE_NODE_NAME);
+            if (bookmarksNodes == null || bookmarksNodes.Length == 0) {
+                ModLogger.LogDebug($"  => Bookmarks configuration node not present in the current game");
+                return;
+            }
+
+            if( bookmarksNodes.Length > 1 ) {
+                ModLogger.LogWarning($"  !! Multiple bookmarks configuration nodes present in the current game. Using first...");
+            }
+
+            ConfigNode bookmarksNode = bookmarksNodes[0];
+            ConfigNode[] bookmarkNodes = bookmarksNode.GetNodes("BOOKMARK");
+
+            if (bookmarkNodes == null || bookmarkNodes.Length == 0) {
+                ModLogger.LogDebug($"  => No bookmarks nodes present in the saved game");
+                return;
+            }
+
+            foreach (ConfigNode bookmarkNode in bookmarkNodes) {
+                ModLogger.LogDebug($"  - Bookmark node: {bookmarkNode.name}");
+            }
+        }
+
+        private void LoadBookmarks(ConfigNode node) {
+            ModLogger.LogDebug($"Loading bookmarks from config node");
+            try {
+                _bookmarks.Clear();
+                
+                if (!node.HasNode(SAVE_NODE_NAME)) {
+                    return;
+                }
                 ConfigNode bookmarksNode = node.GetNode(SAVE_NODE_NAME);
                 ConfigNode[] bookmarkNodes = bookmarksNode.GetNodes("BOOKMARK");
                 
@@ -50,42 +99,90 @@ namespace com.github.lhervier.ksp {
                         bookmark.Load(bookmarkNode);
                         _bookmarks.Add(bookmark);
                     } catch (Exception e) {
-                        Debug.LogError($"[VesselBookmarkMod] Error loading bookmark: {e.Message}");
+                        ModLogger.LogError($"Error loading bookmark: {e.Message}");
                     }
                 }
+            } finally {
+                ModLogger.LogDebug($"{_bookmarks.Count} bookmark(s) loaded");
             }
-            
-            // Update command module names
-            UpdateCommandModuleNames();
-            
-            Debug.Log($"[VesselBookmarkMod] {_bookmarks.Count} bookmark(s) loaded");
         }
-        
+
+        private void SaveBookmarks(ConfigNode node) {
+            ModLogger.LogDebug($"Saving bookmarks to config node");
+
+            try {
+                // Remove old node if it exists
+                if (node.HasNode(SAVE_NODE_NAME)) {
+                    node.RemoveNode(SAVE_NODE_NAME);
+                }
+                
+                ConfigNode bookmarksNode = node.AddNode(SAVE_NODE_NAME);
+                
+                foreach (VesselBookmark bookmark in _bookmarks) {
+                    ConfigNode bookmarkNode = bookmarksNode.AddNode("BOOKMARK");
+                    bookmark.Save(bookmarkNode);
+                }
+            } finally {
+                ModLogger.LogDebug($"{_bookmarks.Count} bookmark(s) saved");
+            }
+        }
+
+        // =====================================================================================
+
+        private void OnGameStateCreated(Game game) {
+            ModLogger.LogDebug("======================> On Game state created");
+            LogConfigNode(game.config);
+            LogBookmarks(game.config);
+
+            LoadBookmarks(game.config);
+        }
+
+        private void OnGameStateLoad(ConfigNode node) {
+            ModLogger.LogDebug("======================> On Game state load");
+            LogConfigNode(node);
+            LogBookmarks(node);
+
+            LoadBookmarks(node);
+        }
+
         /// <summary>
         /// Save bookmarks to save file
         /// </summary>
         private void OnGameStateSave(ConfigNode node) {
-            // Remove old node if it exists
-            if (node.HasNode(SAVE_NODE_NAME)) {
-                node.RemoveNode(SAVE_NODE_NAME);
-            }
-            
-            ConfigNode bookmarksNode = node.AddNode(SAVE_NODE_NAME);
-            
-            foreach (VesselBookmark bookmark in _bookmarks) {
-                ConfigNode bookmarkNode = bookmarksNode.AddNode("BOOKMARK");
-                bookmark.Save(bookmarkNode);
-            }
-            
-            Debug.Log($"[VesselBookmarkMod] {_bookmarks.Count} bookmark(s) saved");
+            ModLogger.LogDebug("======================> On Game state save");
+            LogConfigNode(node);
+            LogBookmarks(node);
+
+            SaveBookmarks(node);
         }
+        
+        private void OnGameStateSaved(Game game) {
+            ModLogger.LogDebug("======================> On Game state saved");
+            LogConfigNode(game.config);
+            LogBookmarks(game.config);
+        }
+
+        /// <summary>
+        /// Load bookmarks from save file
+        /// </summary>
+        private void OnGameStatePostLoad(ConfigNode node) {
+            ModLogger.LogDebug("======================> On Game state post load");
+
+            // In this event, the node is the parent of the "game" node
+            ConfigNode gameNode = node.GetNode("GAME");
+
+            LogConfigNode(gameNode);
+            LogBookmarks(gameNode);
+        }
+        
+        // =====================================================================================
         
         /// <summary>
         /// Add a bookmark for a command module
         /// </summary>
         public bool AddBookmark(Part commandModulePart) {
             if (commandModulePart == null) {
-                Debug.LogError("[VesselBookmarkMod] Attempted to add bookmark with null part");
+                ModLogger.LogError("Attempted to add bookmark with null part");
                 return false;
             }
             
@@ -93,7 +190,7 @@ namespace com.github.lhervier.ksp {
             
             // Check if bookmark already exists
             if (_bookmarks.Any(b => b.CommandModuleFlightID == flightID)) {
-                Debug.LogWarning($"[VesselBookmarkMod] Bookmark already exists for flightID {flightID}");
+                ModLogger.LogWarning($"Bookmark already exists for flightID {flightID}");
                 return false;
             }
             
@@ -103,7 +200,7 @@ namespace com.github.lhervier.ksp {
             bookmark.CommandModuleName = GetCommandModuleName(commandModulePart);
             
             _bookmarks.Add(bookmark);
-            Debug.Log($"[VesselBookmarkMod] Bookmark added for flightID {flightID}");
+            ModLogger.LogDebug($"Bookmark added for flightID {flightID}");
             return true;
         }
         
@@ -114,7 +211,7 @@ namespace com.github.lhervier.ksp {
             VesselBookmark bookmark = _bookmarks.FirstOrDefault(b => b.CommandModuleFlightID == commandModuleFlightID);
             if (bookmark != null) {
                 _bookmarks.Remove(bookmark);
-                Debug.Log($"[VesselBookmarkMod] Bookmark removed for flightID {commandModuleFlightID}");
+                ModLogger.LogDebug($"Bookmark removed for flightID {commandModuleFlightID}");
                 return true;
             }
             return false;
@@ -151,12 +248,12 @@ namespace com.github.lhervier.ksp {
                                     return part.vessel;
                                 }
                             } catch (System.Exception e) {
-                                Debug.LogWarning($"[VesselBookmarkMod] Error checking part {part.name}: {e.Message}");
+                                ModLogger.LogWarning($"Error checking part {part.name}: {e.Message}");
                                 continue;
                             }
                         }
                     } catch (System.Exception e) {
-                        Debug.LogWarning($"[VesselBookmarkMod] Error checking vessel {vessel.vesselName}: {e.Message}");
+                        ModLogger.LogWarning($"Error checking vessel {vessel.vesselName}: {e.Message}");
                         continue;
                     }
                 }
@@ -176,17 +273,17 @@ namespace com.github.lhervier.ksp {
                                     return vessel;
                                 }
                             } catch (System.Exception e) {
-                                Debug.LogWarning($"[VesselBookmarkMod] Error checking protoPart {protoPart.partName}: {e.Message}");
+                                ModLogger.LogWarning($"Error checking protoPart {protoPart.partName}: {e.Message}");
                                 continue;
                             }
                         }
                     } catch (System.Exception e) {
-                        Debug.LogWarning($"[VesselBookmarkMod] Error checking unloaded vessel {vessel.vesselName}: {e.Message}");
+                        ModLogger.LogWarning($"Error checking unloaded vessel {vessel.vesselName}: {e.Message}");
                         continue;
                     }
                 }
             } catch (System.Exception e) {
-                Debug.LogError($"[VesselBookmarkMod] Error searching for vessel for bookmark: {e.Message}");
+                ModLogger.LogError($"Error searching for vessel for bookmark: {e.Message}");
             }
             
             return null;
@@ -217,17 +314,17 @@ namespace com.github.lhervier.ksp {
                                     }
                                 }
                             } catch (System.Exception e) {
-                                Debug.LogWarning($"[VesselBookmarkMod] Error checking part {part.name}: {e.Message}");
+                                ModLogger.LogWarning($"Error checking part {part.name}: {e.Message}");
                                 continue;
                             }
                         }
                     } catch (System.Exception e) {
-                        Debug.LogWarning($"[VesselBookmarkMod] Error checking vessel: {e.Message}");
+                        ModLogger.LogWarning($"Error checking vessel: {e.Message}");
                         continue;
                     }
                 }
             } catch (System.Exception e) {
-                Debug.LogError($"[VesselBookmarkMod] Error searching for command module for bookmark: {e.Message}");
+                ModLogger.LogError($"Error searching for command module for bookmark: {e.Message}");
             }
             
             return null;
@@ -252,7 +349,7 @@ namespace com.github.lhervier.ksp {
                 
                 return "Command Module";
             } catch (System.Exception e) {
-                Debug.LogWarning($"[VesselBookmarkMod] Error retrieving command module name: {e.Message}");
+                ModLogger.LogWarning($"Error retrieving command module name: {e.Message}");
                 return "Command Module";
             }
         }
@@ -276,14 +373,14 @@ namespace com.github.lhervier.ksp {
                             }
                         }
                     } catch (System.Exception e) {
-                        Debug.LogWarning($"[VesselBookmarkMod] Error updating name for bookmark: {e.Message}");
+                        ModLogger.LogWarning($"Error updating name for bookmark: {e.Message}");
                         if (string.IsNullOrEmpty(bookmark.CommandModuleName)) {
                             bookmark.CommandModuleName = "Error";
                         }
                     }
                 }
             } catch (System.Exception e) {
-                Debug.LogError($"[VesselBookmarkMod] Error updating command module names: {e.Message}");
+                ModLogger.LogError($"Error updating command module names: {e.Message}");
             }
         }
         
@@ -326,14 +423,14 @@ namespace com.github.lhervier.ksp {
                                             }
                                         }
                                     } catch (System.Exception e) {
-                                        Debug.LogWarning($"[VesselBookmarkMod] Error checking unloaded vessel parts: {e.Message}");
+                                        ModLogger.LogWarning($"Error checking unloaded vessel parts: {e.Message}");
                                         continue;
                                     }
                                     
                                     if (found) break;
                                 }
                             } catch (System.Exception e) {
-                                Debug.LogWarning($"[VesselBookmarkMod] Error checking unloaded vessels: {e.Message}");
+                                ModLogger.LogWarning($"Error checking unloaded vessels: {e.Message}");
                             }
                             
                             if (!found) {
@@ -341,17 +438,17 @@ namespace com.github.lhervier.ksp {
                             }
                         }
                     } catch (System.Exception e) {
-                        Debug.LogWarning($"[VesselBookmarkMod] Error checking bookmark: {e.Message}");
+                        ModLogger.LogWarning($"Error checking bookmark: {e.Message}");
                         // Don't remove on error, will retry later
                     }
                 }
                 
                 foreach (VesselBookmark bookmark in toRemove) {
                     _bookmarks.Remove(bookmark);
-                    Debug.Log($"[VesselBookmarkMod] Bookmark cleaned up (vessel not found): {bookmark?.CommandModuleFlightID ?? 0}");
+                    ModLogger.LogDebug($"Bookmark cleaned up (vessel not found): {bookmark?.CommandModuleFlightID ?? 0}");
                 }
             } catch (System.Exception e) {
-                Debug.LogError($"[VesselBookmarkMod] Error cleaning up bookmarks: {e.Message}");
+                ModLogger.LogError($"Error cleaning up bookmarks: {e.Message}");
             }
         }
     }
