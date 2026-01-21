@@ -245,23 +245,8 @@ namespace com.github.lhervier.ksp {
         /// </summary>
         private string GetCommandModuleName(Part commandModulePart) {
             if (commandModulePart == null) return "Module not found";
-            
-            try {
-                // Use part name (partInfo.title)
-                if (commandModulePart.partInfo != null && !string.IsNullOrEmpty(commandModulePart.partInfo.title)) {
-                    return commandModulePart.partInfo.title;
-                }
-                
-                // Otherwise use part name
-                if (!string.IsNullOrEmpty(commandModulePart.partName)) {
-                    return commandModulePart.partName;
-                }
-                
-                return "Command Module";
-            } catch (System.Exception e) {
-                ModLogger.LogWarning($"Error retrieving command module name: {e.Message}");
-                return "Command Module";
-            }
+            if( commandModulePart.vesselNaming == null ) return "Part is not a CommandModule";
+            return commandModulePart.vesselNaming.vesselName;
         }
         
         /// <summary>
