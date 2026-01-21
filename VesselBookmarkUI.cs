@@ -68,7 +68,7 @@ namespace com.github.lhervier.ksp {
         /// </summary>
         private void OnToggleOn() {
             _visible = true;
-            VesselBookmarkManager.Instance.UpdateCommandModuleNames();
+            VesselBookmarkManager.Instance.RefreshBookmarks();
         }
         
         /// <summary>
@@ -117,8 +117,7 @@ namespace com.github.lhervier.ksp {
             GUILayout.BeginHorizontal();
             GUILayout.Label($"Bookmarks: {VesselBookmarkManager.Instance.Bookmarks.Count}", GUILayout.ExpandWidth(true));
             if (GUILayout.Button("Refresh", GUILayout.Width(80))) {
-                VesselBookmarkManager.Instance.UpdateCommandModuleNames();
-                VesselBookmarkManager.Instance.CleanupInvalidBookmarks();
+                VesselBookmarkManager.Instance.RefreshBookmarks();
             }
             if (GUILayout.Button("Close", GUILayout.Width(80))) {
                 _visible = false;
