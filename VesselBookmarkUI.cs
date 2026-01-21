@@ -40,7 +40,7 @@ namespace com.github.lhervier.ksp {
                         null,
                         null,
                         null,
-                        ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW,
+                        ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW | ApplicationLauncher.AppScenes.TRACKSTATION,
                         GameDatabase.Instance.GetTexture("VesselBookmarkMod/icon", false) ?? Texture2D.whiteTexture
                     );
                 } catch (System.Exception e) {
@@ -80,15 +80,6 @@ namespace com.github.lhervier.ksp {
         
         private void OnGUI() {
             if (!_visible) return;
-            
-            // Only show window in FLIGHT scene where navigation works
-            if (HighLogic.LoadedScene != GameScenes.FLIGHT) {
-                _visible = false;
-                if (_toolbarButton != null) {
-                    _toolbarButton.SetFalse();
-                }
-                return;
-            }
             
             // Window style
             GUI.skin = HighLogic.Skin;
