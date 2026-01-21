@@ -48,10 +48,6 @@ namespace com.github.lhervier.ksp {
             node.AddValue("commandModuleFlightID", CommandModuleFlightID);
             node.AddValue("comment", Comment);
             node.AddValue("commandModuleName", CommandModuleName);
-            // Compatibility with old save files
-            if (!string.IsNullOrEmpty(CommandModuleName)) {
-                node.AddValue("vesselName", CommandModuleName);
-            }
             node.AddValue("creationTime", CreationTime);
         }
         
@@ -62,6 +58,8 @@ namespace com.github.lhervier.ksp {
             if (node.HasValue("commandModuleFlightID")) {
                 uint.TryParse(node.GetValue("commandModuleFlightID"), out uint flightID);
                 CommandModuleFlightID = flightID;
+            } else {
+                throw new Exception("commandModuleFlightID not found in the bookmark node");
             }
             
             Comment = node.GetValue("comment") ?? "";
@@ -69,16 +67,9 @@ namespace com.github.lhervier.ksp {
             // Load command module name (new format)
             CommandModuleName = node.GetValue("commandModuleName") ?? "";
             
-            // Compatibility with old save files that used "vesselName"
-            if (string.IsNullOrEmpty(CommandModuleName) && node.HasValue("vesselName")) {
-                CommandModuleName = node.GetValue("vesselName") ?? "";
-            }
-            
             if (node.HasValue("creationTime")) {
                 double.TryParse(node.GetValue("creationTime"), out double time);
                 CreationTime = time;
-            } else {
-                CreationTime = Planetarium.GetUniversalTime();
             }
         }
     }
