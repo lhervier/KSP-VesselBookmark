@@ -40,15 +40,15 @@ namespace com.github.lhervier.ksp {
             _editWindowID = UnityEngine.Random.Range(2000, 3000);
             GameEvents.onGUIApplicationLauncherReady.Add(OnLauncherReady);
             
-            _vesselTypeIcons[VesselType.Base] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/icons/vessel_type_base", false);
-            _vesselTypeIcons[VesselType.Debris] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/icons/vessel_type_debris", false);
-            _vesselTypeIcons[VesselType.Lander] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/icons/vessel_type_lander", false);
-            _vesselTypeIcons[VesselType.Plane] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/icons/vessel_type_plane", false);
-            _vesselTypeIcons[VesselType.Probe] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/icons/vessel_type_probe", false);
-            _vesselTypeIcons[VesselType.Relay] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/icons/vessel_type_relay", false);
-            _vesselTypeIcons[VesselType.Rover] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/icons/vessel_type_rover", false);
-            _vesselTypeIcons[VesselType.Ship] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/icons/vessel_type_ship", false);
-            _vesselTypeIcons[VesselType.Station] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/icons/vessel_type_station", false);
+            _vesselTypeIcons[VesselType.Base] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/base", false);
+            _vesselTypeIcons[VesselType.Debris] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/debris", false);
+            _vesselTypeIcons[VesselType.Lander] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/lander", false);
+            _vesselTypeIcons[VesselType.Plane] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/plane", false);
+            _vesselTypeIcons[VesselType.Probe] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/probe", false);
+            _vesselTypeIcons[VesselType.Relay] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/relay", false);
+            _vesselTypeIcons[VesselType.Rover] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/rover", false);
+            _vesselTypeIcons[VesselType.Ship] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/ship", false);
+            _vesselTypeIcons[VesselType.Station] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/station", false);
         }
         
         private void OnDestroy() {

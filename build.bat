@@ -24,9 +24,9 @@ if errorlevel 1 (
     exit /b 1
 )
 
-mkdir Release\VesselBookmarkMod\icons
+mkdir Release\VesselBookmarkMod\vessel_types
 if errorlevel 1 (
-    echo ERROR: Failed to create the icons folder
+    echo ERROR: Failed to create the vessel types folder
     exit /b 1
 )
 
@@ -59,9 +59,9 @@ if errorlevel 1 (
 )
 
 echo Copying vessel types icons files
-copy /y "GameData\VesselBookmarkMod\icons\*" "Release\VesselBookmarkMod\icons"
+copy /y "GameData\VesselBookmarkMod\vessel_types\*" "Release\VesselBookmarkMod\vessel_types"
 if errorlevel 1 (
-    echo ERROR: Failed to copy the icons files
+    echo ERROR: Failed to copy the vessel types files
     exit /b 1
 )
 
