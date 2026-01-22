@@ -49,7 +49,6 @@ namespace com.github.lhervier.ksp {
         /// </summary>
         /// <param name="configNode"></param>
         private void OnGameStatePostLoad(ConfigNode configNode) {
-            ModLogger.LogDebug("On Game state post load");
             this._manager.LoadBookmarks(configNode.GetNode("GAME"));
         }
 
@@ -60,7 +59,6 @@ namespace com.github.lhervier.ksp {
         /// </summary>
         /// <param name="game"></param>
         private void OnGameStateCreated(Game game) {
-            ModLogger.LogDebug("On Game state created");
             this._manager.LoadBookmarks(game.config);
         }
 
@@ -68,7 +66,6 @@ namespace com.github.lhervier.ksp {
         /// Save bookmarks to save file
         /// </summary>
         private void OnGameStateSave(ConfigNode node) {
-            ModLogger.LogDebug("On Game state save");
             this._manager.SaveBookmarks(node);
         }
     }
