@@ -11,29 +11,44 @@ namespace com.github.lhervier.ksp {
     [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
     public class VesselBookmarkUI : MonoBehaviour {
         
-        private Rect _windowRect = new Rect(100, 100, 500, 600);
-        private Rect _editWindowRect = new Rect(200, 200, 400, 200);
-        private bool _visible = false;
-        private bool _editWindowVisible = false;
-        private Vector2 _scrollPosition = Vector2.zero;
         private ApplicationLauncherButton _toolbarButton;
-        private int _windowID;
+        private Rect _mainWindowRect = new Rect(100, 100, 500, 600);
+        private bool _mainWindowsVisible = false;
+        private int _mainWindowID;
+        
+        private Rect _editWindowRect = new Rect(200, 200, 400, 200);
+        private bool _editWindowVisible = false;
         private int _editWindowID;
+        
+        private Vector2 _scrollPosition = Vector2.zero;
         
         // Filters
         private CelestialBody _selectedBody = null;
-        private VesselType? _selectedVesselType = null;
         private int _selectedBodyIndex = 0;
+        private VesselType? _selectedVesselType = null;
         private int _selectedVesselTypeIndex = 0;
         
         // Edit window
         private VesselBookmark _editingBookmark = null;
         private string _editComment = "";
         
+        // Icon cache
+        private Dictionary<VesselType, Texture2D> _vesselTypeIcons = new Dictionary<VesselType, Texture2D>();
+        
         private void Awake() {
-            _windowID = UnityEngine.Random.Range(1000, 2000);
+            _mainWindowID = UnityEngine.Random.Range(1000, 2000);
             _editWindowID = UnityEngine.Random.Range(2000, 3000);
             GameEvents.onGUIApplicationLauncherReady.Add(OnLauncherReady);
+            
+            _vesselTypeIcons[VesselType.Base] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/icons/vessel_type_base", false);
+            _vesselTypeIcons[VesselType.Debris] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/icons/vessel_type_debris", false);
+            _vesselTypeIcons[VesselType.Lander] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/icons/vessel_type_lander", false);
+            _vesselTypeIcons[VesselType.Plane] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/icons/vessel_type_plane", false);
+            _vesselTypeIcons[VesselType.Probe] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/icons/vessel_type_probe", false);
+            _vesselTypeIcons[VesselType.Relay] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/icons/vessel_type_relay", false);
+            _vesselTypeIcons[VesselType.Rover] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/icons/vessel_type_rover", false);
+            _vesselTypeIcons[VesselType.Ship] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/icons/vessel_type_ship", false);
+            _vesselTypeIcons[VesselType.Station] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/icons/vessel_type_station", false);
         }
         
         private void OnDestroy() {
@@ -81,7 +96,8 @@ namespace com.github.lhervier.ksp {
         /// Toolbar button click handler (activation)
         /// </summary>
         private void OnToggleOn() {
-            _visible = true;
+            _mainWindowsVisible = true;
+            _editWindowVisible = false;
             VesselBookmarkManager.Instance.RefreshBookmarks();
         }
         
@@ -89,26 +105,27 @@ namespace com.github.lhervier.ksp {
         /// Toolbar button click handler (deactivation)
         /// </summary>
         private void OnToggleOff() {
-            _visible = false;
+            _mainWindowsVisible = false;
+            _editWindowVisible = false;
         }
         
         private void OnGUI() {
             // Window style
             GUI.skin = HighLogic.Skin;
             
-            if (_visible) {
-                _windowRect = GUILayout.Window(
-                    _windowID,
-                    _windowRect,
-                    DrawWindow,
+            if (_mainWindowsVisible) {
+                _mainWindowRect = GUILayout.Window(
+                    _mainWindowID,
+                    _mainWindowRect,
+                    DrawMainWindow,
                     "Vessel Bookmarks",
                     GUILayout.MinWidth(500),
                     GUILayout.MinHeight(400)
                 );
                 
                 // Prevent window from going off screen
-                _windowRect.x = Mathf.Clamp(_windowRect.x, 0, Screen.width - _windowRect.width);
-                _windowRect.y = Mathf.Clamp(_windowRect.y, 0, Screen.height - _windowRect.height);
+                _mainWindowRect.x = Mathf.Clamp(_mainWindowRect.x, 0, Screen.width - _mainWindowRect.width);
+                _mainWindowRect.y = Mathf.Clamp(_mainWindowRect.y, 0, Screen.height - _mainWindowRect.height);
             }
             
             if (_editWindowVisible) {
@@ -130,18 +147,26 @@ namespace com.github.lhervier.ksp {
         /// <summary>
         /// Draws window content
         /// </summary>
-        private void DrawWindow(int windowID) {
+        private void DrawMainWindow(int windowID) {
             GUILayout.BeginVertical();
             
             // Header
             GUILayout.BeginHorizontal();
-            var filteredCount = VesselBookmarkManager.Instance.GetFilteredBookmarks(_selectedBody, _selectedVesselType).Count();
-            GUILayout.Label($"Bookmarks: {filteredCount}/{VesselBookmarkManager.Instance.Bookmarks.Count}", GUILayout.ExpandWidth(true));
+            var filteredCount = VesselBookmarkManager.Instance.GetFilteredBookmarks(
+                _selectedBody, 
+                _selectedVesselType
+            )
+            .Count();
+            GUILayout.Label(
+                $"Bookmarks: {filteredCount}/{VesselBookmarkManager.Instance.Bookmarks.Count}", 
+                GUILayout.ExpandWidth(true)
+            );
             if (GUILayout.Button("Refresh", GUILayout.Width(80))) {
                 VesselBookmarkManager.Instance.RefreshBookmarks();
             }
             if (GUILayout.Button("Close", GUILayout.Width(80))) {
-                _visible = false;
+                _mainWindowsVisible = false;
+                _editWindowVisible = false;
                 if (_toolbarButton != null) {
                     _toolbarButton.SetFalse();
                 }
@@ -158,7 +183,11 @@ namespace com.github.lhervier.ksp {
             // Bookmarks list
             _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, false, true);
             
-            var filteredBookmarks = VesselBookmarkManager.Instance.GetFilteredBookmarks(_selectedBody, _selectedVesselType).ToList();
+            var filteredBookmarks = VesselBookmarkManager.Instance.GetFilteredBookmarks(
+                _selectedBody, 
+                _selectedVesselType
+            )
+            .ToList();
             
             if (filteredBookmarks.Count == 0) {
                 GUILayout.Label("No bookmarks match the filters. Right-click on a command module to add one.");
@@ -194,11 +223,19 @@ namespace com.github.lhervier.ksp {
                 bodyOptions[i + 1] = VesselBookmarkManager.Instance.AvailableBodies[i].bodyName;
             }
             
-            string currentBodyName = _selectedBody != null ? _selectedBody.bodyName : "All";
+            string currentBodyName;
+            if( _selectedBody != null) {
+                currentBodyName = _selectedBody.bodyName;
+            } else {
+                currentBodyName = "All";
+            }
             if (GUILayout.Button(currentBodyName, GUILayout.Width(120))) {
-                // Simple toggle: cycle through options
                 _selectedBodyIndex = (_selectedBodyIndex + 1) % bodyOptions.Length;
-                _selectedBody = (_selectedBodyIndex == 0) ? null : VesselBookmarkManager.Instance.AvailableBodies[_selectedBodyIndex - 1];
+                if (_selectedBodyIndex == 0) {
+                    _selectedBody = null;
+                } else {
+                    _selectedBody = VesselBookmarkManager.Instance.AvailableBodies[_selectedBodyIndex - 1];
+                }
             }
             
             GUILayout.Space(10);
@@ -213,13 +250,19 @@ namespace com.github.lhervier.ksp {
                 vesselTypeOptions[i + 1] = VesselBookmarkManager.Instance.AvailableVesselTypes[i].ToString();
             }
             
-            string currentVesselTypeName = _selectedVesselType.HasValue 
-                ? GetVesselTypeDisplayName(_selectedVesselType.Value) 
-                : "All";
+            string currentVesselTypeName;
+            if( _selectedVesselType.HasValue) {
+                currentVesselTypeName = GetVesselTypeDisplayName(_selectedVesselType.Value);
+            } else {
+                currentVesselTypeName = "All";
+            }
             if (GUILayout.Button(currentVesselTypeName, GUILayout.Width(100))) {
-                // Cycle through type options
                 _selectedVesselTypeIndex = (_selectedVesselTypeIndex + 1) % vesselTypeOptions.Length;
-                _selectedVesselType = (_selectedVesselTypeIndex == 0) ? (VesselType?)null : VesselBookmarkManager.Instance.AvailableVesselTypes[_selectedVesselTypeIndex - 1];
+                if (_selectedVesselTypeIndex == 0) {
+                    _selectedVesselType = null;
+                } else {
+                    _selectedVesselType = VesselBookmarkManager.Instance.AvailableVesselTypes[_selectedVesselTypeIndex - 1];
+                }
             }
 
             GUILayout.FlexibleSpace();
@@ -243,7 +286,11 @@ namespace com.github.lhervier.ksp {
             GUILayout.BeginVertical();
             
             GUILayout.Label("Comment:");
-            _editComment = GUILayout.TextArea(_editComment, GUILayout.Height(100), GUILayout.ExpandWidth(true));
+            _editComment = GUILayout.TextArea(
+                _editComment, 
+                GUILayout.Height(100), 
+                GUILayout.ExpandWidth(true)
+            );
             
             GUILayout.Space(10);
             
@@ -274,14 +321,21 @@ namespace com.github.lhervier.ksp {
         /// </summary>
         private void DrawBookmarkItem(VesselBookmark bookmark, List<VesselBookmark> filteredList) {
             Vessel vessel = VesselBookmarkManager.Instance.GetVesselForBookmark(bookmark);
-            string commandModuleName = !string.IsNullOrEmpty(bookmark.CommandModuleName) 
-                ? bookmark.CommandModuleName 
-                : "Module not found";
-            string comment = !string.IsNullOrEmpty(bookmark.Comment) 
-                ? bookmark.Comment 
-                : "No comment";
-            VesselType vesselType = bookmark.VesselType;
-            string vesselTypeIcon = GetVesselTypeIcon(vesselType);
+            string commandModuleName;
+            if( !string.IsNullOrEmpty(bookmark.CommandModuleName) ) {
+                commandModuleName = bookmark.CommandModuleName;
+            } else {
+                commandModuleName = "Module not found";
+            }
+
+            string comment;
+            if( !string.IsNullOrEmpty(bookmark.Comment) ) {
+                comment = bookmark.Comment;
+            } else {
+                comment = "No comment";
+            }
+            
+            Texture2D vesselTypeIcon = GetVesselTypeIcon(bookmark.VesselType);
             
             GUILayout.BeginVertical("box", GUILayout.Height(60));
             
@@ -289,7 +343,11 @@ namespace com.github.lhervier.ksp {
             GUILayout.BeginHorizontal();
             
             // Vessel type icon and name
-            GUILayout.Label(vesselTypeIcon, GUILayout.Width(20));
+            if (vesselTypeIcon != null) {
+                GUILayout.Label(vesselTypeIcon, GUILayout.Width(21), GUILayout.Height(20));
+            } else {
+                GUILayout.Label("", GUILayout.Width(21));
+            }
             
             // Command module name (bold)
             GUILayout.Label($"<b>{commandModuleName}</b>", GUILayout.Width(150));
@@ -331,7 +389,8 @@ namespace com.github.lhervier.ksp {
             if (vessel != null) {
                 if (GUILayout.Button("Go to", GUILayout.Width(70))) {
                     if (VesselNavigator.NavigateToVessel(vessel)) {
-                        _visible = false;
+                        _mainWindowsVisible = false;
+                        _editWindowVisible = false;
                         if (_toolbarButton != null) {
                             _toolbarButton.SetFalse();
                         }
@@ -367,44 +426,18 @@ namespace com.github.lhervier.ksp {
                 case VesselType.Ship: return "Ship";
                 case VesselType.Station: return "Station";
                 
-                case VesselType.DeployedGroundPart: return "Science";
-                case VesselType.DeployedScienceController: return "Science";
-                case VesselType.DeployedSciencePart: return "Science";
-                case VesselType.EVA: return "Kerbal";
-                case VesselType.Flag: return "Flag";
-                case VesselType.SpaceObject: return "Object";
-                case VesselType.Unknown: return "Unknown";
-                
-                default: return "Unknown";
+                default: return "Other";
             }
         }
         
         /// <summary>
-        /// Gets icon symbol for vessel type
+        /// Gets icon texture for vessel type
         /// </summary>
-        private string GetVesselTypeIcon(VesselType type) {
-            switch (type) {
-                case VesselType.Base: return "🏠";
-                case VesselType.Debris: return "💥";
-                case VesselType.DroppedPart: return "💥";
-                case VesselType.Lander: return "🌙";
-                case VesselType.Plane: return "🌙";
-                case VesselType.Probe: return "📡";
-                case VesselType.Relay: return "📡";
-                case VesselType.Rover: return "🚗";
-                case VesselType.Ship: return "🚀";
-                case VesselType.Station: return "🛰️";
-                
-                case VesselType.DeployedGroundPart: return "💥";
-                case VesselType.DeployedScienceController: return "💥";
-                case VesselType.DeployedSciencePart: return "💥";
-                case VesselType.EVA: return "👤";
-                case VesselType.Flag: return "🚩";
-                case VesselType.SpaceObject: return "⭐";
-                case VesselType.Unknown: return "🛰️";
-                
-                default: return "❓";
+        private Texture2D GetVesselTypeIcon(VesselType type) {
+            if (_vesselTypeIcons.ContainsKey(type)) {
+                return _vesselTypeIcons[type];
             }
+            return null;
         }
     }
 }

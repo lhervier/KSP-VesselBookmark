@@ -1,0 +1,2 @@
+Trier les corps celeste dans leur ordre depuis le soleil (et pas par ordre alpha)
+On ne peut pas bookmarker un vaisseau s'il n'a pas de module de commande
