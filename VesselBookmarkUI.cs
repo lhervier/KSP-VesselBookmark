@@ -203,6 +203,9 @@ namespace com.github.lhervier.ksp {
             
             GUILayout.Space(10);
             
+             // Vessel Type filter
+            GUILayout.Label("Type:", GUILayout.Width(50));
+            
             // Create dropdown options for vessel type
             string[] vesselTypeOptions = new string[VesselBookmarkManager.Instance.AvailableVesselTypes.Count + 1];
             vesselTypeOptions[0] = "All";
