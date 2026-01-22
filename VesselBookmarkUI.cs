@@ -34,6 +34,8 @@ namespace com.github.lhervier.ksp {
         
         // Icon cache
         private Dictionary<VesselType, Texture2D> _vesselTypeIcons = new Dictionary<VesselType, Texture2D>();
+        private Texture2D _removeButtonIcon;
+        private Texture2D _removeButtonIconHover;
         
         private void Awake() {
             _mainWindowID = UnityEngine.Random.Range(1000, 2000);
@@ -49,6 +51,9 @@ namespace com.github.lhervier.ksp {
             _vesselTypeIcons[VesselType.Rover] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/rover", false);
             _vesselTypeIcons[VesselType.Ship] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/ship", false);
             _vesselTypeIcons[VesselType.Station] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/station", false);
+            
+            _removeButtonIcon = GameDatabase.Instance.GetTexture("VesselBookmarkMod/buttons/remove", false);
+            _removeButtonIconHover = GameDatabase.Instance.GetTexture("VesselBookmarkMod/buttons/remove_hover", false);
         }
         
         private void OnDestroy() {
@@ -400,11 +405,23 @@ namespace com.github.lhervier.ksp {
                 GUILayout.Label("Unavailable", GUILayout.Width(70));
             }
             
-            // Remove button
-            if (GUILayout.Button("Remove", GUILayout.Width(70))) {
-                VesselBookmarkManager.Instance.RemoveBookmark(bookmark.CommandModuleFlightID);
+            Rect iconRect = GUILayoutUtility.GetRect(20, 20, GUILayout.Width(20), GUILayout.Height(20));
+            
+            // Determine which icon to use based on hover state
+            Texture2D iconToUse = _removeButtonIcon;
+            if (iconRect.Contains(Event.current.mousePosition)) {
+                iconToUse = _removeButtonIconHover;
             }
             
+            // Draw icon
+            GUI.DrawTexture(iconRect, iconToUse);
+            
+            // Handle click
+            if (Event.current.type == EventType.MouseDown && iconRect.Contains(Event.current.mousePosition)) {
+                VesselBookmarkManager.Instance.RemoveBookmark(bookmark.CommandModuleFlightID);
+                Event.current.Use();
+            }
+
             GUILayout.EndHorizontal();
             
             GUILayout.EndVertical();
