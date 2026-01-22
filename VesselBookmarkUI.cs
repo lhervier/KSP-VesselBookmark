@@ -40,6 +40,9 @@ namespace com.github.lhervier.ksp {
         private BookmarkButton _goToButton;
         private BookmarkButton _editButton;
         
+        // Hover state
+        private uint _hoveredBookmarkFlightID = 0;
+        
         private void Awake() {
             _mainWindowID = UnityEngine.Random.Range(1000, 2000);
             _editWindowID = UnityEngine.Random.Range(2000, 3000);
@@ -399,7 +402,17 @@ namespace com.github.lhervier.ksp {
             
             Texture2D vesselTypeIcon = GetVesselTypeIcon(bookmark.VesselType);
             
-            GUILayout.BeginVertical("box", GUILayout.Height(60));
+            // Create custom box style with hover background if this is the hovered bookmark
+            GUIStyle boxStyle = new GUIStyle(GUI.skin.box);
+            if (_hoveredBookmarkFlightID == bookmark.CommandModuleFlightID) {
+                // Create hover background texture
+                Texture2D hoverBg = new Texture2D(1, 1);
+                hoverBg.SetPixel(0, 0, new Color(0.3f, 0.3f, 0.3f, 1f));
+                hoverBg.Apply();
+                boxStyle.normal.background = hoverBg;
+            }
+            
+            GUILayout.BeginVertical(boxStyle, GUILayout.Height(60));
             
             // Line 1: Icon, Module name, Type, Comment, Edit button
             GUILayout.BeginHorizontal();
@@ -480,7 +493,15 @@ namespace com.github.lhervier.ksp {
 
             GUILayout.EndHorizontal();
             
+            // Get the rect of the vertical box BEFORE closing it
+            Rect bookmarkRect = GUILayoutUtility.GetLastRect();
+            
             GUILayout.EndVertical();
+
+            // Detect hover and update the hovered bookmark ID
+            if (bookmarkRect.Contains(Event.current.mousePosition)) {
+                _hoveredBookmarkFlightID = bookmark.CommandModuleFlightID;
+            }
         }
         
         /// <summary>
