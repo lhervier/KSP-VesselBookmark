@@ -35,6 +35,10 @@ namespace com.github.lhervier.ksp {
         // Icon cache
         private Dictionary<VesselType, Texture2D> _vesselTypeIcons = new Dictionary<VesselType, Texture2D>();
         private BookmarkButton _removeButton;
+        private BookmarkButton _moveUpButton;
+        private BookmarkButton _moveDownButton;
+        private BookmarkButton _goToButton;
+        private BookmarkButton _editButton;
         
         private void Awake() {
             _mainWindowID = UnityEngine.Random.Range(1000, 2000);
@@ -53,9 +57,40 @@ namespace com.github.lhervier.ksp {
             
             // Initialize remove button
             _removeButton = new BookmarkButton(
-                GameDatabase.Instance.GetTexture("VesselBookmarkMod/buttons/remove", false), 
-                GameDatabase.Instance.GetTexture("VesselBookmarkMod/buttons/remove_hover", false), 
+                "VesselBookmarkMod/buttons/remove",
                 "Remove bookmark", 
+                20, 
+                20
+            );
+            
+            // Initialize move up button
+            _moveUpButton = new BookmarkButton(
+                "VesselBookmarkMod/buttons/up",
+                "Move up", 
+                20, 
+                20
+            );
+            
+            // Initialize move down button
+            _moveDownButton = new BookmarkButton(
+                "VesselBookmarkMod/buttons/down",
+                "Move down", 
+                20, 
+                20
+            );
+            
+            // Initialize go to button
+            _goToButton = new BookmarkButton(
+                "VesselBookmarkMod/buttons/switch",
+                "Go to vessel", 
+                20, 
+                20
+            );
+            
+            // Initialize edit button
+            _editButton = new BookmarkButton(
+                "VesselBookmarkMod/buttons/edit",
+                "Edit comment", 
                 20, 
                 20
             );
@@ -383,11 +418,11 @@ namespace com.github.lhervier.ksp {
             GUILayout.Label(comment, GUILayout.ExpandWidth(true));
             
             // Edit button
-            if (GUILayout.Button("Edit", GUILayout.Width(50))) {
+            _editButton.Draw(() => {
                 _editingBookmark = bookmark;
                 _editComment = bookmark.Comment;
                 _editWindowVisible = true;
-            }
+            });
             
             GUILayout.EndHorizontal();
             
@@ -400,21 +435,29 @@ namespace com.github.lhervier.ksp {
             bool canMoveUp = currentIndex > 0;
             bool canMoveDown = currentIndex < allBookmarks.Count - 1;
             
-            GUI.enabled = canMoveUp;
-            if (GUILayout.Button("↑", GUILayout.Width(25))) {
-                VesselBookmarkManager.Instance.MoveBookmarkUp(bookmark);
+            // Move up button
+            if (canMoveUp) {
+                _moveUpButton.Draw(() => {
+                    VesselBookmarkManager.Instance.MoveBookmarkUp(bookmark);
+                });
+            } else {
+                _moveUpButton.DrawDisabled();
             }
-            GUI.enabled = canMoveDown;
-            if (GUILayout.Button("↓", GUILayout.Width(25))) {
-                VesselBookmarkManager.Instance.MoveBookmarkDown(bookmark);
+            
+            // Move down button
+            if (canMoveDown) {
+                _moveDownButton.Draw(() => {
+                    VesselBookmarkManager.Instance.MoveBookmarkDown(bookmark);
+                });
+            } else {
+                _moveDownButton.DrawDisabled();
             }
-            GUI.enabled = true;
             
             GUILayout.Space(5);
             
             // Go to button
             if (vessel != null) {
-                if (GUILayout.Button("Go to", GUILayout.Width(70))) {
+                _goToButton.Draw(() => {
                     if (VesselNavigator.NavigateToVessel(vessel)) {
                         _mainWindowsVisible = false;
                         _editWindowVisible = false;
@@ -422,9 +465,10 @@ namespace com.github.lhervier.ksp {
                             _toolbarButton.SetFalse();
                         }
                     }
-                }
+                });
             } else {
-                GUILayout.Label("Unavailable", GUILayout.Width(70));
+                // Draw disabled go to button when vessel is unavailable
+                _goToButton.DrawDisabled();
             }
             
             // Remove button

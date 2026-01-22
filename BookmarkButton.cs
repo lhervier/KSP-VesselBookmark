@@ -9,6 +9,8 @@ namespace com.github.lhervier.ksp {
         
         public Texture2D Icon { get; private set; }
         public Texture2D IconHover { get; private set; }
+        public Texture2D IconClicked { get; private set; }
+        public Texture2D IconDisabled { get; private set; }
         public string Tooltip { get; private set; }
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -16,20 +18,29 @@ namespace com.github.lhervier.ksp {
         /// <summary>
         /// Creates a new bookmark button
         /// </summary>
-        /// <param name="icon">Normal icon texture</param>
-        /// <param name="iconHover">Hover icon texture (optional)</param>
+        /// <param name="iconPath">Base path to the icon (e.g., "VesselBookmarkMod/buttons/remove"). 
+        /// The class will automatically load variants: _hover, _clicked, _disabled if they exist.</param>
         /// <param name="tooltip">Tooltip text (optional)</param>
         /// <param name="width">Button width in pixels</param>
         /// <param name="height">Button height in pixels</param>
         public BookmarkButton(
-            Texture2D icon, 
-            Texture2D iconHover = null, 
+            string iconPath,
             string tooltip = "", 
             int width = 20,
             int height = 20
         ) {
-            Icon = icon;
-            IconHover = iconHover;
+            // Load base icon
+            Icon = GameDatabase.Instance.GetTexture(iconPath, false);
+            
+            // Load hover variant if it exists
+            IconHover = GameDatabase.Instance.GetTexture(iconPath + "_hover", false);
+            
+            // Load clicked variant if it exists
+            IconClicked = GameDatabase.Instance.GetTexture(iconPath + "_clicked", false);
+            
+            // Load disabled variant if it exists
+            IconDisabled = GameDatabase.Instance.GetTexture(iconPath + "_disabled", false);
+            
             Tooltip = tooltip;
             Width = width;
             Height = height;
@@ -48,10 +59,14 @@ namespace com.github.lhervier.ksp {
             // Reserve space for button and get its rect
             Rect iconRect = GUILayoutUtility.GetRect(Width, Height, GUILayout.Width(Width), GUILayout.Height(Height));
             
-            // Determine which icon to use based on hover state
-            Texture2D iconToUse = Icon;
             bool isHovering = iconRect.Contains(Event.current.mousePosition);
-            if (isHovering && IconHover != null) {
+            bool isClicking = Event.current.type == EventType.MouseDown && iconRect.Contains(Event.current.mousePosition);
+            
+            // Determine which icon to use based on state (clicked > hover > normal)
+            Texture2D iconToUse = Icon;
+            if (isClicking && IconClicked != null) {
+                iconToUse = IconClicked;
+            } else if (isHovering && IconHover != null) {
                 iconToUse = IconHover;
             }
             
@@ -66,7 +81,7 @@ namespace com.github.lhervier.ksp {
             
             // Handle click
             bool wasClicked = false;
-            if (Event.current.type == EventType.MouseDown && iconRect.Contains(Event.current.mousePosition)) {
+            if (isClicking) {
                 if (OnClick != null) {
                     OnClick();
                 }
@@ -75,6 +90,24 @@ namespace com.github.lhervier.ksp {
             }
             
             return wasClicked;
+        }
+        
+        /// <summary>
+        /// Draws the button in disabled state (no interactions, no tooltip, no hover)
+        /// </summary>
+        public void DrawDisabled() {
+            // Use disabled icon if available, otherwise fall back to normal icon
+            Texture2D iconToUse = IconDisabled != null ? IconDisabled : Icon;
+            
+            if (iconToUse == null) {
+                return;
+            }
+            
+            // Reserve space for button and get its rect
+            Rect iconRect = GUILayoutUtility.GetRect(Width, Height, GUILayout.Width(Width), GUILayout.Height(Height));
+            
+            // Draw icon only (no tooltip, no hover, no click handling)
+            GUI.DrawTexture(iconRect, iconToUse);
         }
     }
 }
