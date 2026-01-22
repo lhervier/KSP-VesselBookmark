@@ -356,16 +356,25 @@ namespace com.github.lhervier.ksp {
         /// </summary>
         private string GetVesselTypeDisplayName(VesselType type) {
             switch (type) {
-                case VesselType.Ship: return "Ship";
-                case VesselType.Station: return "Station";
-                case VesselType.Lander: return "Lander";
-                case VesselType.Probe: return "Probe";
-                case VesselType.Rover: return "Rover";
                 case VesselType.Base: return "Base";
                 case VesselType.Debris: return "Debris";
-                case VesselType.EVA: return "EVA";
+                case VesselType.DroppedPart: return "Debris";
+                case VesselType.Lander: return "Lander";
+                case VesselType.Plane: return "Plane";
+                case VesselType.Probe: return "Probe";
+                case VesselType.Relay: return "Relay";
+                case VesselType.Rover: return "Rover";
+                case VesselType.Ship: return "Ship";
+                case VesselType.Station: return "Station";
+                
+                case VesselType.DeployedGroundPart: return "Science";
+                case VesselType.DeployedScienceController: return "Science";
+                case VesselType.DeployedSciencePart: return "Science";
+                case VesselType.EVA: return "Kerbal";
                 case VesselType.Flag: return "Flag";
                 case VesselType.SpaceObject: return "Object";
+                case VesselType.Unknown: return "Unknown";
+                
                 default: return "Unknown";
             }
         }
@@ -377,20 +386,21 @@ namespace com.github.lhervier.ksp {
             switch (type) {
                 case VesselType.Base: return "🏠";
                 case VesselType.Debris: return "💥";
-                case VesselType.DeployedGroundPart: return "💥";
-                case VesselType.DeployedScienceController: return "💥";
-                case VesselType.DeployedSciencePart: return "💥";
                 case VesselType.DroppedPart: return "💥";
-                case VesselType.EVA: return "👤";
-                case VesselType.Flag: return "🚩";
                 case VesselType.Lander: return "🌙";
                 case VesselType.Plane: return "🌙";
                 case VesselType.Probe: return "📡";
                 case VesselType.Relay: return "📡";
                 case VesselType.Rover: return "🚗";
                 case VesselType.Ship: return "🚀";
-                case VesselType.SpaceObject: return "⭐";
                 case VesselType.Station: return "🛰️";
+                
+                case VesselType.DeployedGroundPart: return "💥";
+                case VesselType.DeployedScienceController: return "💥";
+                case VesselType.DeployedSciencePart: return "💥";
+                case VesselType.EVA: return "👤";
+                case VesselType.Flag: return "🚩";
+                case VesselType.SpaceObject: return "⭐";
                 case VesselType.Unknown: return "🛰️";
                 
                 default: return "❓";
