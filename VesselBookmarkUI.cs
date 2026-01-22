@@ -34,8 +34,7 @@ namespace com.github.lhervier.ksp {
         
         // Icon cache
         private Dictionary<VesselType, Texture2D> _vesselTypeIcons = new Dictionary<VesselType, Texture2D>();
-        private Texture2D _removeButtonIcon;
-        private Texture2D _removeButtonIconHover;
+        private BookmarkButton _removeButton;
         
         private void Awake() {
             _mainWindowID = UnityEngine.Random.Range(1000, 2000);
@@ -52,8 +51,14 @@ namespace com.github.lhervier.ksp {
             _vesselTypeIcons[VesselType.Ship] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/ship", false);
             _vesselTypeIcons[VesselType.Station] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/station", false);
             
-            _removeButtonIcon = GameDatabase.Instance.GetTexture("VesselBookmarkMod/buttons/remove", false);
-            _removeButtonIconHover = GameDatabase.Instance.GetTexture("VesselBookmarkMod/buttons/remove_hover", false);
+            // Initialize remove button
+            _removeButton = new BookmarkButton(
+                GameDatabase.Instance.GetTexture("VesselBookmarkMod/buttons/remove", false), 
+                GameDatabase.Instance.GetTexture("VesselBookmarkMod/buttons/remove_hover", false), 
+                "Remove bookmark", 
+                20, 
+                20
+            );
         }
         
         private void OnDestroy() {
@@ -205,6 +210,23 @@ namespace com.github.lhervier.ksp {
             GUILayout.EndScrollView();
             
             GUILayout.EndVertical();
+            
+            // Display tooltip if any
+            if (!string.IsNullOrEmpty(GUI.tooltip)) {
+                Vector2 mousePos = Event.current.mousePosition;
+                Vector2 tooltipSize = GUI.skin.box.CalcSize(new GUIContent(GUI.tooltip));
+                Rect tooltipRect = new Rect(mousePos.x + 10, mousePos.y + 10, tooltipSize.x + 10, tooltipSize.y + 5);
+                
+                // Ensure tooltip stays on screen
+                if (tooltipRect.xMax > Screen.width) {
+                    tooltipRect.x = mousePos.x - tooltipRect.width - 10;
+                }
+                if (tooltipRect.yMax > Screen.height) {
+                    tooltipRect.y = mousePos.y - tooltipRect.height - 10;
+                }
+                
+                GUI.Box(tooltipRect, GUI.tooltip);
+            }
             
             // Allow window dragging
             GUI.DragWindow();
@@ -405,22 +427,12 @@ namespace com.github.lhervier.ksp {
                 GUILayout.Label("Unavailable", GUILayout.Width(70));
             }
             
-            Rect iconRect = GUILayoutUtility.GetRect(20, 20, GUILayout.Width(20), GUILayout.Height(20));
-            
-            // Determine which icon to use based on hover state
-            Texture2D iconToUse = _removeButtonIcon;
-            if (iconRect.Contains(Event.current.mousePosition)) {
-                iconToUse = _removeButtonIconHover;
-            }
-            
-            // Draw icon
-            GUI.DrawTexture(iconRect, iconToUse);
-            
-            // Handle click
-            if (Event.current.type == EventType.MouseDown && iconRect.Contains(Event.current.mousePosition)) {
-                VesselBookmarkManager.Instance.RemoveBookmark(bookmark.CommandModuleFlightID);
-                Event.current.Use();
-            }
+            // Remove button
+            _removeButton.Draw(
+                () => {
+                    VesselBookmarkManager.Instance.RemoveBookmark(bookmark.CommandModuleFlightID);
+                }
+            );
 
             GUILayout.EndHorizontal();
             
