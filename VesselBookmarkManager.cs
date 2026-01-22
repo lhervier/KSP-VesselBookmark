@@ -405,7 +405,7 @@ namespace com.github.lhervier.ksp {
                 }
             }
             
-            _availableBodies = bodies.OrderBy(b => b.displayName).ToList();
+            _availableBodies = bodies.OrderBy(b => b.bodyName).ToList();
         }
 
         public void UpdateAvailableVesselTypes() {

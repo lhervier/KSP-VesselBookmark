@@ -191,10 +191,10 @@ namespace com.github.lhervier.ksp {
             string[] bodyOptions = new string[VesselBookmarkManager.Instance.AvailableBodies.Count + 1];
             bodyOptions[0] = "All";
             for (int i = 0; i < VesselBookmarkManager.Instance.AvailableBodies.Count; i++) {
-                bodyOptions[i + 1] = VesselBookmarkManager.Instance.AvailableBodies[i].displayName;
+                bodyOptions[i + 1] = VesselBookmarkManager.Instance.AvailableBodies[i].bodyName;
             }
             
-            string currentBodyName = _selectedBody != null ? _selectedBody.displayName : "All";
+            string currentBodyName = _selectedBody != null ? _selectedBody.bodyName : "All";
             if (GUILayout.Button(currentBodyName, GUILayout.Width(120))) {
                 // Simple toggle: cycle through options
                 _selectedBodyIndex = (_selectedBodyIndex + 1) % bodyOptions.Length;
