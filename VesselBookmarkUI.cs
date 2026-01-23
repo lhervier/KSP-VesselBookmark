@@ -36,13 +36,13 @@ namespace com.github.lhervier.ksp {
         private string _editComment = "";
         
         // Icon cache
-        private Dictionary<VesselType, BookmarkButton> _vesselTypeButtons = new Dictionary<VesselType, BookmarkButton>();
-        private BookmarkButton _removeButton;
-        private BookmarkButton _moveUpButton;
-        private BookmarkButton _moveDownButton;
-        private BookmarkButton _goToButton;
-        private BookmarkButton _editButton;
-        private BookmarkButton _emptyButton;
+        private Dictionary<VesselType, VesselBookmarkButton> _vesselTypeButtons = new Dictionary<VesselType, VesselBookmarkButton>();
+        private VesselBookmarkButton _removeButton;
+        private VesselBookmarkButton _moveUpButton;
+        private VesselBookmarkButton _moveDownButton;
+        private VesselBookmarkButton _goToButton;
+        private VesselBookmarkButton _editButton;
+        private VesselBookmarkButton _emptyButton;
         
         // Hover state
         private uint _hoveredBookmarkFlightID = 0;
@@ -53,18 +53,18 @@ namespace com.github.lhervier.ksp {
             GameEvents.onGUIApplicationLauncherReady.Add(OnLauncherReady);
             
             // Initialize vessel type buttons
-            _vesselTypeButtons[VesselType.Base] = new BookmarkButton("VesselBookmarkMod/vessel_types/base", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Debris] = new BookmarkButton("VesselBookmarkMod/vessel_types/debris", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Lander] = new BookmarkButton("VesselBookmarkMod/vessel_types/lander", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Plane] = new BookmarkButton("VesselBookmarkMod/vessel_types/plane", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Probe] = new BookmarkButton("VesselBookmarkMod/vessel_types/probe", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Relay] = new BookmarkButton("VesselBookmarkMod/vessel_types/relay", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Rover] = new BookmarkButton("VesselBookmarkMod/vessel_types/rover", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Ship] = new BookmarkButton("VesselBookmarkMod/vessel_types/ship", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Station] = new BookmarkButton("VesselBookmarkMod/vessel_types/station", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Base] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/base", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Debris] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/debris", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Lander] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/lander", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Plane] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/plane", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Probe] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/probe", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Relay] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/relay", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Rover] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/rover", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Ship] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/ship", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Station] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/station", null, BUTTON_WIDTH, BUTTON_HEIGHT);
             
             // Initialize empty button
-            _emptyButton = new BookmarkButton(
+            _emptyButton = new VesselBookmarkButton(
                 "VesselBookmarkMod/buttons/empty",
                 null, 
                 BUTTON_WIDTH, 
@@ -72,7 +72,7 @@ namespace com.github.lhervier.ksp {
             );
 
             // Initialize remove button
-            _removeButton = new BookmarkButton(
+            _removeButton = new VesselBookmarkButton(
                 "VesselBookmarkMod/buttons/remove",
                 "Remove bookmark", 
                 BUTTON_WIDTH, 
@@ -80,7 +80,7 @@ namespace com.github.lhervier.ksp {
             );
             
             // Initialize move up button
-            _moveUpButton = new BookmarkButton(
+            _moveUpButton = new VesselBookmarkButton(
                 "VesselBookmarkMod/buttons/up",
                 "Move up", 
                 BUTTON_WIDTH, 
@@ -88,7 +88,7 @@ namespace com.github.lhervier.ksp {
             );
             
             // Initialize move down button
-            _moveDownButton = new BookmarkButton(
+            _moveDownButton = new VesselBookmarkButton(
                 "VesselBookmarkMod/buttons/down",
                 "Move down", 
                 BUTTON_WIDTH, 
@@ -96,7 +96,7 @@ namespace com.github.lhervier.ksp {
             );
             
             // Initialize go to button
-            _goToButton = new BookmarkButton(
+            _goToButton = new VesselBookmarkButton(
                 "VesselBookmarkMod/buttons/switch",
                 "Go to vessel", 
                 BUTTON_WIDTH, 
@@ -104,7 +104,7 @@ namespace com.github.lhervier.ksp {
             );
             
             // Initialize edit button
-            _editButton = new BookmarkButton(
+            _editButton = new VesselBookmarkButton(
                 "VesselBookmarkMod/buttons/edit",
                 "Edit comment", 
                 BUTTON_WIDTH, 
@@ -431,7 +431,7 @@ namespace com.github.lhervier.ksp {
             GUILayout.BeginHorizontal();
             
             // Vessel type icon
-            BookmarkButton vesselTypeButton = GetVesselTypeButton(bookmark.VesselType);
+            VesselBookmarkButton vesselTypeButton = GetVesselTypeButton(bookmark.VesselType);
             if (vesselTypeButton != null) {
                 vesselTypeButton.Draw(null);
             } else {
@@ -546,7 +546,7 @@ namespace com.github.lhervier.ksp {
         /// <summary>
         /// Gets icon texture for vessel type
         /// </summary>
-        private BookmarkButton GetVesselTypeButton(VesselType type) {
+        private VesselBookmarkButton GetVesselTypeButton(VesselType type) {
             if (_vesselTypeButtons.ContainsKey(type)) {
                 return _vesselTypeButtons[type];
             }

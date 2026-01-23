@@ -5,7 +5,7 @@ namespace com.github.lhervier.ksp {
     /// <summary>
     /// Represents a clickable button with icon, hover icon, and tooltip
     /// </summary>
-    public class BookmarkButton {
+    public class VesselBookmarkButton {
         
         public Texture2D Icon { get; private set; }
         public Texture2D IconHover { get; private set; }
@@ -23,7 +23,7 @@ namespace com.github.lhervier.ksp {
         /// <param name="tooltip">Tooltip text (optional)</param>
         /// <param name="width">Button width in pixels</param>
         /// <param name="height">Button height in pixels</param>
-        public BookmarkButton(
+        public VesselBookmarkButton(
             string iconPath,
             string tooltip = "", 
             int width = 20,
