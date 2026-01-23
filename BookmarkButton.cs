@@ -52,10 +52,6 @@ namespace com.github.lhervier.ksp {
         /// <param name="onClick">Callback to execute on click</param>
         /// <returns>True if the button was clicked</returns>
         public bool Draw(System.Action OnClick) {
-            if (Icon == null) {
-                return false;
-            }
-            
             // Reserve space for button and get its rect
             Rect iconRect = GUILayoutUtility.GetRect(Width, Height, GUILayout.Width(Width), GUILayout.Height(Height));
             
