@@ -3,3 +3,4 @@
 - Quand on remonte un bookmark, il remonte dans la liste complète sans tenir compte des filtres
 - Afficher la situation a coté du nom du nom du vaisseau et mettre le commentaire en dessous
 - Confirmation à la suppression du bookmark
+- Ecrire en blanc
