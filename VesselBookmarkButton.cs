@@ -11,6 +11,7 @@ namespace com.github.lhervier.ksp {
         public Texture2D IconHover { get; private set; }
         public Texture2D IconClicked { get; private set; }
         public Texture2D IconDisabled { get; private set; }
+        public Texture2D EmptyIcon { get; private set; }
         public string Tooltip { get; private set; }
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -41,6 +42,11 @@ namespace com.github.lhervier.ksp {
             // Load disabled variant if it exists
             IconDisabled = GameDatabase.Instance.GetTexture(iconPath + "_disabled", false);
             
+            // Create an empty and transparent texture
+            EmptyIcon = new Texture2D(1, 1);
+            EmptyIcon.SetPixel(0, 0, Color.clear);
+            EmptyIcon.Apply();
+
             Tooltip = tooltip;
             Width = width;
             Height = height;
@@ -64,8 +70,10 @@ namespace com.github.lhervier.ksp {
                 iconToUse = IconClicked;
             } else if (isHovering && IconHover != null) {
                 iconToUse = IconHover;
+            } else {
+                iconToUse = EmptyIcon;
             }
-            
+
             // Set tooltip if provided
             if (!string.IsNullOrEmpty(Tooltip)) {
                 GUIContent iconContent = new GUIContent("", Tooltip);
