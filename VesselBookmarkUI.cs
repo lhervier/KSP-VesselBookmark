@@ -11,6 +11,9 @@ namespace com.github.lhervier.ksp {
     [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
     public class VesselBookmarkUI : MonoBehaviour {
         
+        private static readonly int BUTTON_HEIGHT = 20;
+        private static readonly int BUTTON_WIDTH = 20;
+
         private ApplicationLauncherButton _toolbarButton;
         private Rect _mainWindowRect = new Rect(100, 100, 500, 600);
         private bool _mainWindowsVisible = false;
@@ -33,7 +36,7 @@ namespace com.github.lhervier.ksp {
         private string _editComment = "";
         
         // Icon cache
-        private Dictionary<VesselType, Texture2D> _vesselTypeIcons = new Dictionary<VesselType, Texture2D>();
+        private Dictionary<VesselType, BookmarkButton> _vesselTypeButtons = new Dictionary<VesselType, BookmarkButton>();
         private BookmarkButton _removeButton;
         private BookmarkButton _moveUpButton;
         private BookmarkButton _moveDownButton;
@@ -49,62 +52,63 @@ namespace com.github.lhervier.ksp {
             _editWindowID = UnityEngine.Random.Range(2000, 3000);
             GameEvents.onGUIApplicationLauncherReady.Add(OnLauncherReady);
             
-            _vesselTypeIcons[VesselType.Base] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/base", false);
-            _vesselTypeIcons[VesselType.Debris] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/debris", false);
-            _vesselTypeIcons[VesselType.Lander] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/lander", false);
-            _vesselTypeIcons[VesselType.Plane] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/plane", false);
-            _vesselTypeIcons[VesselType.Probe] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/probe", false);
-            _vesselTypeIcons[VesselType.Relay] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/relay", false);
-            _vesselTypeIcons[VesselType.Rover] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/rover", false);
-            _vesselTypeIcons[VesselType.Ship] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/ship", false);
-            _vesselTypeIcons[VesselType.Station] = GameDatabase.Instance.GetTexture("VesselBookmarkMod/vessel_types/station", false);
+            // Initialize vessel type buttons
+            _vesselTypeButtons[VesselType.Base] = new BookmarkButton("VesselBookmarkMod/vessel_types/base", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Debris] = new BookmarkButton("VesselBookmarkMod/vessel_types/debris", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Lander] = new BookmarkButton("VesselBookmarkMod/vessel_types/lander", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Plane] = new BookmarkButton("VesselBookmarkMod/vessel_types/plane", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Probe] = new BookmarkButton("VesselBookmarkMod/vessel_types/probe", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Relay] = new BookmarkButton("VesselBookmarkMod/vessel_types/relay", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Rover] = new BookmarkButton("VesselBookmarkMod/vessel_types/rover", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Ship] = new BookmarkButton("VesselBookmarkMod/vessel_types/ship", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Station] = new BookmarkButton("VesselBookmarkMod/vessel_types/station", null, BUTTON_WIDTH, BUTTON_HEIGHT);
             
             // Initialize empty button
             _emptyButton = new BookmarkButton(
                 "VesselBookmarkMod/buttons/empty",
                 null, 
-                20, 
-                20
+                BUTTON_WIDTH, 
+                BUTTON_HEIGHT
             );
 
             // Initialize remove button
             _removeButton = new BookmarkButton(
                 "VesselBookmarkMod/buttons/remove",
                 "Remove bookmark", 
-                20, 
-                20
+                BUTTON_WIDTH, 
+                BUTTON_HEIGHT
             );
             
             // Initialize move up button
             _moveUpButton = new BookmarkButton(
                 "VesselBookmarkMod/buttons/up",
                 "Move up", 
-                20, 
-                20
+                BUTTON_WIDTH, 
+                BUTTON_HEIGHT
             );
             
             // Initialize move down button
             _moveDownButton = new BookmarkButton(
                 "VesselBookmarkMod/buttons/down",
                 "Move down", 
-                20, 
-                20
+                BUTTON_WIDTH, 
+                BUTTON_HEIGHT
             );
             
             // Initialize go to button
             _goToButton = new BookmarkButton(
                 "VesselBookmarkMod/buttons/switch",
                 "Go to vessel", 
-                20, 
-                20
+                BUTTON_WIDTH, 
+                BUTTON_HEIGHT
             );
             
             // Initialize edit button
             _editButton = new BookmarkButton(
                 "VesselBookmarkMod/buttons/edit",
                 "Edit comment", 
-                20, 
-                20
+                BUTTON_WIDTH, 
+                BUTTON_HEIGHT
             );
         }
         
@@ -409,8 +413,6 @@ namespace com.github.lhervier.ksp {
                 comment = "No comment";
             }
             
-            Texture2D vesselTypeIcon = GetVesselTypeIcon(bookmark.VesselType);
-            
             bool isHovered = _hoveredBookmarkFlightID == bookmark.CommandModuleFlightID;
 
             // Create custom box style with hover background if this is the hovered bookmark
@@ -423,45 +425,61 @@ namespace com.github.lhervier.ksp {
                 boxStyle.normal.background = hoverBg;
             }
             
-            GUILayout.BeginVertical(boxStyle, GUILayout.Height(60));
+            GUILayout.BeginVertical(boxStyle, GUILayout.Height(BUTTON_HEIGHT));
             
-            // Line 1: Icon, Module name, Type, Comment, Edit button
+            // Single line: Icon, Module name, Comment, and all action buttons (aligned right)
             GUILayout.BeginHorizontal();
             
-            // Vessel type icon and name
-            if (vesselTypeIcon != null) {
-                GUILayout.Label(vesselTypeIcon, GUILayout.Width(21), GUILayout.Height(20));
+            // Vessel type icon
+            BookmarkButton vesselTypeButton = GetVesselTypeButton(bookmark.VesselType);
+            if (vesselTypeButton != null) {
+                vesselTypeButton.Draw(null);
             } else {
-                GUILayout.Label("", GUILayout.Width(21));
+                _emptyButton.Draw(null);
             }
             
             // Command module name (bold)
             GUILayout.Label($"<b>{commandModuleName}</b>", GUILayout.Width(150));
             
-            // Comment
+            // Comment - takes remaining space
             GUILayout.Label(comment, GUILayout.ExpandWidth(true));
             
-            // Edit button
+            var allBookmarks = VesselBookmarkManager.Instance.Bookmarks.OrderBy(b => b.Order).ThenBy(b => b.CreationTime).ToList();
+            int currentIndex = allBookmarks.IndexOf(bookmark);
+            bool canMoveUp = currentIndex > 0;
+            bool canMoveDown = currentIndex < allBookmarks.Count - 1;
+                
             if( isHovered ) {
+                // Small spacing before buttons
+                GUILayout.Space(5);
+                
+                // Edit button
                 _editButton.Draw(() => {
                     _editingBookmark = bookmark;
                     _editComment = bookmark.Comment;
                     _editWindowVisible = true;
                 });
-            }
-            
-            GUILayout.EndHorizontal();
-            
-            // Line 2: Reorder buttons, Go to, Remove
-            GUILayout.BeginHorizontal();
-            
-            // Reorder buttons - check against full list, not filtered list
-            var allBookmarks = VesselBookmarkManager.Instance.Bookmarks.OrderBy(b => b.Order).ThenBy(b => b.CreationTime).ToList();
-            int currentIndex = allBookmarks.IndexOf(bookmark);
-            bool canMoveUp = currentIndex > 0;
-            bool canMoveDown = currentIndex < allBookmarks.Count - 1;
-            
-            if( isHovered ) {
+                
+                GUILayout.Space(3);
+
+                // Go to button
+                if (vessel != null) {
+                    _goToButton.Draw(() => {
+                        if (VesselNavigator.NavigateToVessel(vessel)) {
+                            _mainWindowsVisible = false;
+                            _editWindowVisible = false;
+                            if (_toolbarButton != null) {
+                                _toolbarButton.SetFalse();
+                            }
+                        }
+                    });
+                } else {
+                    // Draw disabled go to button when vessel is unavailable
+                    _goToButton.DrawDisabled();
+                }
+                
+                GUILayout.Space(3);
+
                 // Move up button
                 if (canMoveUp) {
                     _moveUpButton.Draw(() => {
@@ -480,24 +498,8 @@ namespace com.github.lhervier.ksp {
                     _moveDownButton.DrawDisabled();
                 }
             
-                GUILayout.Space(5);
+                GUILayout.Space(3);
             
-                // Go to button
-                if (vessel != null) {
-                    _goToButton.Draw(() => {
-                        if (VesselNavigator.NavigateToVessel(vessel)) {
-                            _mainWindowsVisible = false;
-                            _editWindowVisible = false;
-                            if (_toolbarButton != null) {
-                                _toolbarButton.SetFalse();
-                            }
-                        }
-                    });
-                } else {
-                    // Draw disabled go to button when vessel is unavailable
-                    _goToButton.DrawDisabled();
-                }
-
                 // Remove button
                 _removeButton.Draw(
                     () => {
@@ -544,9 +546,9 @@ namespace com.github.lhervier.ksp {
         /// <summary>
         /// Gets icon texture for vessel type
         /// </summary>
-        private Texture2D GetVesselTypeIcon(VesselType type) {
-            if (_vesselTypeIcons.ContainsKey(type)) {
-                return _vesselTypeIcons[type];
+        private BookmarkButton GetVesselTypeButton(VesselType type) {
+            if (_vesselTypeButtons.ContainsKey(type)) {
+                return _vesselTypeButtons[type];
             }
             return null;
         }
