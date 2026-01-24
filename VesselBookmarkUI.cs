@@ -45,6 +45,12 @@ namespace com.github.lhervier.ksp {
         
         // Hover state
         private uint _hoveredBookmarkFlightID = 0;
+
+        // UI styles with white text
+        private GUIStyle _labelStyle;
+        private GUIStyle _buttonStyle;
+        private GUIStyle _textAreaStyle;
+        private GUIStyle _tooltipStyle;
         
         private void Awake() {
             _mainWindowID = UnityEngine.Random.Range(1000, 2000);
@@ -101,6 +107,37 @@ namespace com.github.lhervier.ksp {
                 BUTTON_WIDTH, 
                 BUTTON_HEIGHT
             );
+        }
+
+        private void EnsureWhiteTextStyles() {
+            if (_labelStyle != null) {
+                return;
+            }
+
+            _labelStyle = new GUIStyle(GUI.skin.label) { richText = true };
+            _buttonStyle = new GUIStyle(GUI.skin.button);
+            _textAreaStyle = new GUIStyle(GUI.skin.textArea);
+            _tooltipStyle = new GUIStyle(GUI.skin.box);
+
+            ApplyWhiteText(_labelStyle);
+            ApplyWhiteText(_buttonStyle);
+            ApplyWhiteText(_textAreaStyle);
+            ApplyWhiteText(_tooltipStyle);
+        }
+
+        private void ApplyWhiteText(GUIStyle style) {
+            if (style == null) {
+                return;
+            }
+
+            style.normal.textColor = Color.white;
+            style.hover.textColor = Color.white;
+            style.active.textColor = Color.white;
+            style.focused.textColor = Color.white;
+            style.onNormal.textColor = Color.white;
+            style.onHover.textColor = Color.white;
+            style.onActive.textColor = Color.white;
+            style.onFocused.textColor = Color.white;
         }
         
         private void OnDestroy() {
@@ -164,6 +201,7 @@ namespace com.github.lhervier.ksp {
         private void OnGUI() {
             // Window style
             GUI.skin = HighLogic.Skin;
+            EnsureWhiteTextStyles();
             
             if (_mainWindowsVisible) {
                 _mainWindowRect = GUILayout.Window(
@@ -210,13 +248,14 @@ namespace com.github.lhervier.ksp {
             )
             .Count();
             GUILayout.Label(
-                $"Bookmarks: {filteredCount}/{VesselBookmarkManager.Instance.Bookmarks.Count}", 
+                $"Bookmarks: {filteredCount}/{VesselBookmarkManager.Instance.Bookmarks.Count}",
+                _labelStyle,
                 GUILayout.ExpandWidth(true)
             );
-            if (GUILayout.Button("Refresh", GUILayout.Width(80))) {
+            if (GUILayout.Button("Refresh", _buttonStyle, GUILayout.Width(80))) {
                 VesselBookmarkManager.Instance.RefreshBookmarks();
             }
-            if (GUILayout.Button("Close", GUILayout.Width(80))) {
+            if (GUILayout.Button("Close", _buttonStyle, GUILayout.Width(80))) {
                 _mainWindowsVisible = false;
                 _editWindowVisible = false;
                 if (_toolbarButton != null) {
@@ -242,7 +281,7 @@ namespace com.github.lhervier.ksp {
             .ToList();
             
             if (filteredBookmarks.Count == 0) {
-                GUILayout.Label("No bookmarks match the filters. Right-click on a command module to add one.");
+                GUILayout.Label("No bookmarks match the filters. Right-click on a command module to add one.", _labelStyle);
             } else {
                 foreach (VesselBookmark bookmark in filteredBookmarks) {
                     DrawBookmarkItem(bookmark, filteredBookmarks);
@@ -267,7 +306,7 @@ namespace com.github.lhervier.ksp {
                     tooltipRect.y = mousePos.y - tooltipRect.height - 10;
                 }
                 
-                GUI.Box(tooltipRect, GUI.tooltip);
+                GUI.Box(tooltipRect, GUI.tooltip, _tooltipStyle);
             }
             
             // Allow window dragging
@@ -283,7 +322,7 @@ namespace com.github.lhervier.ksp {
             GUILayout.BeginHorizontal();
             
             // Body filter
-            GUILayout.Label("Body:", GUILayout.Width(50));
+            GUILayout.Label("Body:", _labelStyle, GUILayout.Width(50));
             
             // Create dropdown options for body
             string[] bodyOptions = new string[VesselBookmarkManager.Instance.AvailableBodies.Count + 1];
@@ -298,7 +337,7 @@ namespace com.github.lhervier.ksp {
             } else {
                 currentBodyName = "All";
             }
-            if (GUILayout.Button(currentBodyName, GUILayout.Width(120))) {
+            if (GUILayout.Button(currentBodyName, _buttonStyle, GUILayout.Width(120))) {
                 _selectedBodyIndex = (_selectedBodyIndex + 1) % bodyOptions.Length;
                 if (_selectedBodyIndex == 0) {
                     _selectedBody = null;
@@ -310,7 +349,7 @@ namespace com.github.lhervier.ksp {
             GUILayout.Space(10);
             
              // Vessel Type filter
-            GUILayout.Label("Type:", GUILayout.Width(50));
+            GUILayout.Label("Type:", _labelStyle, GUILayout.Width(50));
             
             // Create dropdown options for vessel type
             string[] vesselTypeOptions = new string[VesselBookmarkManager.Instance.AvailableVesselTypes.Count + 1];
@@ -325,7 +364,7 @@ namespace com.github.lhervier.ksp {
             } else {
                 currentVesselTypeName = "All";
             }
-            if (GUILayout.Button(currentVesselTypeName, GUILayout.Width(100))) {
+            if (GUILayout.Button(currentVesselTypeName, _buttonStyle, GUILayout.Width(100))) {
                 _selectedVesselTypeIndex = (_selectedVesselTypeIndex + 1) % vesselTypeOptions.Length;
                 if (_selectedVesselTypeIndex == 0) {
                     _selectedVesselType = null;
@@ -336,7 +375,7 @@ namespace com.github.lhervier.ksp {
 
             GUILayout.FlexibleSpace();
             
-            if (GUILayout.Button("Clear", GUILayout.Width(60))) {
+            if (GUILayout.Button("Clear", _buttonStyle, GUILayout.Width(60))) {
                 _selectedBody = null;
                 _selectedVesselType = null;
                 _selectedBodyIndex = 0;
@@ -354,9 +393,10 @@ namespace com.github.lhervier.ksp {
         private void DrawEditWindow(int windowID) {
             GUILayout.BeginVertical();
             
-            GUILayout.Label("Comment:");
+            GUILayout.Label("Comment:", _labelStyle);
             _editComment = GUILayout.TextArea(
                 _editComment, 
+                _textAreaStyle,
                 GUILayout.Height(100), 
                 GUILayout.ExpandWidth(true)
             );
@@ -364,7 +404,7 @@ namespace com.github.lhervier.ksp {
             GUILayout.Space(10);
             
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Save")) {
+            if (GUILayout.Button("Save", _buttonStyle)) {
                 if (_editingBookmark != null) {
                     _editingBookmark.Comment = _editComment;
                 }
@@ -372,7 +412,7 @@ namespace com.github.lhervier.ksp {
                 _editingBookmark = null;
                 _editComment = "";
             }
-            if (GUILayout.Button("Cancel")) {
+            if (GUILayout.Button("Cancel", _buttonStyle)) {
                 _editWindowVisible = false;
                 _editingBookmark = null;
                 _editComment = "";
@@ -429,10 +469,10 @@ namespace com.github.lhervier.ksp {
             );
             
             // Command module name (bold)
-            GUILayout.Label($"<b>{commandModuleName}</b>", GUILayout.Width(150));
+            GUILayout.Label($"<b>{commandModuleName}</b>", _labelStyle, GUILayout.Width(150));
             
             // Comment - takes remaining space
-            GUILayout.Label(comment, GUILayout.ExpandWidth(true));
+            GUILayout.Label(comment, _labelStyle, GUILayout.ExpandWidth(true));
             
             var allBookmarks = VesselBookmarkManager.Instance.Bookmarks.OrderBy(b => b.Order).ThenBy(b => b.CreationTime).ToList();
             int currentIndex = allBookmarks.IndexOf(bookmark);
