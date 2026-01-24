@@ -42,7 +42,6 @@ namespace com.github.lhervier.ksp {
         private VesselBookmarkButton _moveDownButton;
         private VesselBookmarkButton _goToButton;
         private VesselBookmarkButton _editButton;
-        private VesselBookmarkButton _emptyButton;
         
         // Hover state
         private uint _hoveredBookmarkFlightID = 0;
@@ -63,14 +62,6 @@ namespace com.github.lhervier.ksp {
             _vesselTypeButtons[VesselType.Ship] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/ship", null, BUTTON_WIDTH, BUTTON_HEIGHT);
             _vesselTypeButtons[VesselType.Station] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/station", null, BUTTON_WIDTH, BUTTON_HEIGHT);
             
-            // Initialize empty button
-            _emptyButton = new VesselBookmarkButton(
-                "VesselBookmarkMod/buttons/empty",
-                null, 
-                BUTTON_WIDTH, 
-                BUTTON_HEIGHT
-            );
-
             // Initialize remove button
             _removeButton = new VesselBookmarkButton(
                 "VesselBookmarkMod/buttons/remove",
@@ -432,11 +423,10 @@ namespace com.github.lhervier.ksp {
             
             // Vessel type icon
             VesselBookmarkButton vesselTypeButton = GetVesselTypeButton(bookmark.VesselType);
-            if (vesselTypeButton != null) {
-                vesselTypeButton.Draw(null);
-            } else {
-                _emptyButton.Draw(null);
-            }
+            vesselTypeButton.Draw(
+                () => vesselTypeButton != null,
+                null
+            );
             
             // Command module name (bold)
             GUILayout.Label($"<b>{commandModuleName}</b>", GUILayout.Width(150));
@@ -449,66 +439,62 @@ namespace com.github.lhervier.ksp {
             bool canMoveUp = currentIndex > 0;
             bool canMoveDown = currentIndex < allBookmarks.Count - 1;
                 
-            if( isHovered ) {
-                // Small spacing before buttons
-                GUILayout.Space(5);
-                
-                // Edit button
-                _editButton.Draw(() => {
+            // Small spacing before buttons
+            GUILayout.Space(5);
+            
+            // Edit button
+            _editButton.Draw(
+                () => isHovered,
+                () => {
                     _editingBookmark = bookmark;
                     _editComment = bookmark.Comment;
                     _editWindowVisible = true;
-                });
-                
-                GUILayout.Space(3);
+                }
+            );
+            
+            GUILayout.Space(3);
 
-                // Go to button
-                if (vessel != null) {
-                    _goToButton.Draw(() => {
-                        if (VesselNavigator.NavigateToVessel(vessel)) {
-                            _mainWindowsVisible = false;
-                            _editWindowVisible = false;
-                            if (_toolbarButton != null) {
-                                _toolbarButton.SetFalse();
-                            }
+            // Go to button
+            _goToButton.Draw(
+                () => isHovered,
+                () => {
+                    if (VesselNavigator.NavigateToVessel(vessel)) {
+                        _mainWindowsVisible = false;
+                        _editWindowVisible = false;
+                        if (_toolbarButton != null) {
+                            _toolbarButton.SetFalse();
                         }
-                    });
-                } else {
-                    // Draw disabled go to button when vessel is unavailable
-                    _goToButton.DrawDisabled();
-                }
-                
-                GUILayout.Space(3);
-
-                // Move up button
-                if (canMoveUp) {
-                    _moveUpButton.Draw(() => {
-                        VesselBookmarkManager.Instance.MoveBookmarkUp(bookmark);
-                    });
-                } else {
-                    _moveUpButton.DrawDisabled();
-                }
-            
-                // Move down button
-                if (canMoveDown) {
-                    _moveDownButton.Draw(() => {
-                        VesselBookmarkManager.Instance.MoveBookmarkDown(bookmark);
-                    });
-                } else {
-                    _moveDownButton.DrawDisabled();
-                }
-            
-                GUILayout.Space(3);
-            
-                // Remove button
-                _removeButton.Draw(
-                    () => {
-                        VesselBookmarkManager.Instance.RemoveBookmark(bookmark.CommandModuleFlightID);
                     }
-                );
-            } else {
-                _emptyButton.Draw(null);
-            }
+                }
+            );
+                
+            GUILayout.Space(3);
+
+            // Move up button
+            _moveUpButton.Draw(
+                () => isHovered,
+                () => {
+                    VesselBookmarkManager.Instance.MoveBookmarkUp(bookmark);
+                }
+            );
+        
+            // Move down button
+            _moveDownButton.Draw(
+                () => isHovered,
+                () => {
+                    VesselBookmarkManager.Instance.MoveBookmarkDown(bookmark);
+                }
+            );
+            
+            GUILayout.Space(3);
+            
+            // Remove button
+            _removeButton.Draw(
+                () => isHovered,
+                () => {
+                    VesselBookmarkManager.Instance.RemoveBookmark(bookmark.CommandModuleFlightID);
+                }
+            );
             
             GUILayout.EndHorizontal();
             

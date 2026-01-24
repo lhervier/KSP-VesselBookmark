@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace com.github.lhervier.ksp {
@@ -52,12 +53,24 @@ namespace com.github.lhervier.ksp {
             Height = height;
         }
         
-        /// <summary>
-        /// Draws the button and handles interactions
-        /// </summary>
-        /// <param name="onClick">Callback to execute on click</param>
-        /// <returns>True if the button was clicked</returns>
-        public bool Draw(System.Action OnClick) {
+        public bool Draw(
+            Func<bool> isVisible,
+            System.Action OnClick
+        ) {
+            if( !isVisible() ) {
+                this.DrawHidden();
+                return false;
+            }
+
+            if( OnClick == null ) {
+                this.DrawDisabled();
+                return false;
+            } else {
+                return this.DrawEnabled(OnClick);
+            }
+        }
+
+        private bool DrawEnabled(System.Action OnClick) {
             // Reserve space for button and get its rect
             Rect iconRect = GUILayoutUtility.GetRect(Width, Height, GUILayout.Width(Width), GUILayout.Height(Height));
             
@@ -65,11 +78,13 @@ namespace com.github.lhervier.ksp {
             bool isClicking = Event.current.type == EventType.MouseDown && iconRect.Contains(Event.current.mousePosition);
             
             // Determine which icon to use based on state (clicked > hover > normal)
-            Texture2D iconToUse = Icon;
+            Texture2D iconToUse = null;
             if (isClicking && IconClicked != null) {
                 iconToUse = IconClicked;
             } else if (isHovering && IconHover != null) {
                 iconToUse = IconHover;
+            } else if( Icon != null ) {
+                iconToUse = Icon;
             } else {
                 iconToUse = EmptyIcon;
             }
@@ -112,6 +127,11 @@ namespace com.github.lhervier.ksp {
             
             // Draw icon only (no tooltip, no hover, no click handling)
             GUI.DrawTexture(iconRect, iconToUse);
+        }
+
+        public void DrawHidden() {
+            Rect iconRect = GUILayoutUtility.GetRect(Width, Height, GUILayout.Width(Width), GUILayout.Height(Height));
+            GUI.DrawTexture(iconRect, EmptyIcon);
         }
     }
 }
