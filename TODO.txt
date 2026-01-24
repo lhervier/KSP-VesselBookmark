@@ -6,3 +6,4 @@
 - Afficher la situation a coté du nom du nom du vaisseau et mettre le commentaire en dessous
 - Ecrire en blanc
 - Remplacer le filtre sur le type par une liste d'icônes cliquables
+- Traduire
