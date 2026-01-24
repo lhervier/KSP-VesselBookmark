@@ -492,7 +492,9 @@ namespace com.github.lhervier.ksp {
             _removeButton.Draw(
                 () => isHovered,
                 () => {
-                    VesselBookmarkManager.Instance.RemoveBookmark(bookmark.CommandModuleFlightID);
+                    VesselBookmarkUIDialog.ConfirmRemoval(() => {
+                        VesselBookmarkManager.Instance.RemoveBookmark(bookmark.CommandModuleFlightID);
+                    });
                 }
             );
             

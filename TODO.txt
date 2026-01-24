@@ -4,6 +4,5 @@
     => Ca fait ajouter un "type" de bookmark (vessel ou commandModule)
 - Quand on remonte un bookmark, il remonte dans la liste complète sans tenir compte des filtres
 - Afficher la situation a coté du nom du nom du vaisseau et mettre le commentaire en dessous
-- Confirmation à la suppression du bookmark
 - Ecrire en blanc
 - Remplacer le filtre sur le type par une liste d'icônes cliquables

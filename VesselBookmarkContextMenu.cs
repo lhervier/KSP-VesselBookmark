@@ -12,16 +12,14 @@ namespace com.github.lhervier.ksp {
         public void ToggleBookmarkEvent() {
             if (part == null) return;
             
-            bool hasBookmark = VesselBookmarkManager.Instance.HasBookmark(part);
-            
-            if (hasBookmark) {
-                if (VesselBookmarkManager.Instance.RemoveBookmark(part.flightID)) {
-                    ScreenMessages.PostScreenMessage("Bookmark removed", 2f, ScreenMessageStyle.UPPER_CENTER);
-                }
-            } else {
-                if (VesselBookmarkManager.Instance.AddBookmark(part)) {
-                    ScreenMessages.PostScreenMessage("Bookmark added", 2f, ScreenMessageStyle.UPPER_CENTER);
-                }
+            if (VesselBookmarkManager.Instance.HasBookmark(part)) {
+                VesselBookmarkUIDialog.ConfirmRemoval(() => {
+                    if (VesselBookmarkManager.Instance.RemoveBookmark(part.flightID)) {
+                        ScreenMessages.PostScreenMessage("Bookmark removed", 2f, ScreenMessageStyle.UPPER_CENTER);
+                    }
+                });
+            } else if (VesselBookmarkManager.Instance.AddBookmark(part)) {
+                ScreenMessages.PostScreenMessage("Bookmark added", 2f, ScreenMessageStyle.UPPER_CENTER);
             }
             
             UpdateEventName();
