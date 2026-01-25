@@ -40,6 +40,7 @@ namespace com.github.lhervier.ksp {
             
             BaseEvent bookmarkEvent = Events["ToggleBookmarkEvent"];
             if (bookmarkEvent != null) {
+                ModLogger.LogDebug($"Updating event name for part {part.flightID}");
                 bool hasBookmark = VesselBookmarkManager.Instance.HasBookmark(part);
                 bookmarkEvent.guiName = hasBookmark ? "Remove from Bookmarks" : "Add to Bookmarks";
             }

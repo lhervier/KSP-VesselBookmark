@@ -47,6 +47,8 @@ namespace com.github.lhervier.ksp {
         private List<VesselType> _availableVesselTypes = new List<VesselType>();
         public IReadOnlyList<VesselType> AvailableVesselTypes => _availableVesselTypes.AsReadOnly();
         
+        public readonly EventVoid OnBookmarksUpdated = new EventVoid("VesselBookmarkManager.OnBookmarksUpdated");
+ 
         // =======================================================================================
 
         /// <summary>
@@ -108,9 +110,10 @@ namespace com.github.lhervier.ksp {
         public IEnumerable<VesselBookmark> GetFilteredBookmarks(CelestialBody bodyFilter, VesselType? typeFilter) {
             try {
                 if (bodyFilter == null && typeFilter == null) {
-                    ModLogger.LogError("Attempted to get filtered bookmarks with null body and type");
+                    ModLogger.LogDebug("Getting all bookmarks");
                     return _bookmarks;
                 }
+
                 ModLogger.LogDebug($"Getting filtered bookmarks for body {bodyFilter?.bodyName} and type {typeFilter?.ToString()}");
                 IEnumerable<VesselBookmark> filtered = _bookmarks;
                 
@@ -274,6 +277,7 @@ namespace com.github.lhervier.ksp {
                 UpdateAvailableVesselTypes();
 
                 ModLogger.LogDebug($"Bookmark added for flightID {bookmark.CommandModuleFlightID}");
+                OnBookmarksUpdated.Fire();
                 return true;
             } catch (Exception e) {
                 ModLogger.LogError($"Error adding bookmark: {e.Message}");
@@ -363,6 +367,7 @@ namespace com.github.lhervier.ksp {
                 UpdateAvailableCelestialBodies();
                 UpdateAvailableVesselTypes();
                 ModLogger.LogDebug($"Bookmark removed for flightID {bookmark.CommandModuleFlightID}");
+                OnBookmarksUpdated.Fire();
                 return true;
             } catch (Exception e) {
                 ModLogger.LogError($"Error removing bookmark for bookmark {bookmark.CommandModuleFlightID}: {e.Message}");
@@ -423,6 +428,7 @@ namespace com.github.lhervier.ksp {
                 previous.Order = temp;
                 
                 this._bookmarks = this._bookmarks.OrderBy(b => b.Order).ToList();
+                OnBookmarksUpdated.Fire();
                 return true;
             } catch (Exception e) {
                 ModLogger.LogError($"Error moving bookmark up for bookmark {commandModuleFlightID}: {e.Message}");
@@ -461,9 +467,39 @@ namespace com.github.lhervier.ksp {
                 next.Order = temp;
 
                 this._bookmarks = this._bookmarks.OrderBy(b => b.Order).ToList();
+                OnBookmarksUpdated.Fire();
                 return true;
             } catch (Exception e) {
                 ModLogger.LogError($"Error moving bookmark down for bookmark {commandModuleFlightID}: {e.Message}");
+                return false;
+            }
+        }
+
+        public bool SwapBookmarks(uint commandModuleFlightID1, uint commandModuleFlightID2) {
+            try {
+                ModLogger.LogDebug($"Swapping bookmarks for flightIDs {commandModuleFlightID1} and {commandModuleFlightID2}");
+
+                VesselBookmark bookmark1 = this.GetBookmark(commandModuleFlightID1);
+                if (bookmark1 == null) {
+                    ModLogger.LogWarning($"Bookmark {commandModuleFlightID1}: Not found");
+                    return false;
+                }
+
+                VesselBookmark bookmark2 = this.GetBookmark(commandModuleFlightID2);
+                if (bookmark2 == null) {
+                    ModLogger.LogWarning($"Bookmark {commandModuleFlightID2}: Not found");
+                    return false;
+                }
+
+                int temp = bookmark1.Order;
+                bookmark1.Order = bookmark2.Order;
+                bookmark2.Order = temp;
+
+                this._bookmarks = this._bookmarks.OrderBy(b => b.Order).ToList();
+                OnBookmarksUpdated.Fire();
+                return true;
+            } catch (Exception e) {
+                ModLogger.LogError($"Error swapping bookmarks for flightIDs {commandModuleFlightID1} and {commandModuleFlightID2}: {e.Message}");
                 return false;
             }
         }
@@ -649,7 +685,7 @@ namespace com.github.lhervier.ksp {
             try {
                 ModLogger.LogDebug($"Getting command module protoPartSnapshot for flightID {commandModuleFlightID}");
                 foreach (Vessel vessel in FlightGlobals.VesselsUnloaded) {
-                    if (vessel == null || vessel.protoVessel == null) continue;
+                    if (vessel == null || vessel.protoVessel == null || vessel.protoVessel.protoPartSnapshots == null) continue;
                     foreach (ProtoPartSnapshot protoPart in vessel.protoVessel.protoPartSnapshots) {
                         if (protoPart == null) continue;
                         if (protoPart.flightID == commandModuleFlightID) {
@@ -720,6 +756,7 @@ namespace com.github.lhervier.ksp {
 
                 UpdateAvailableCelestialBodies();
                 UpdateAvailableVesselTypes();
+                OnBookmarksUpdated.Fire();
             } catch (Exception e) {
                 ModLogger.LogError($"Error refreshing bookmarks: {e.Message}");
             }

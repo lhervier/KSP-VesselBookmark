@@ -51,7 +51,10 @@ namespace com.github.lhervier.ksp {
         private GUIStyle _buttonStyle;
         private GUIStyle _textAreaStyle;
         private GUIStyle _tooltipStyle;
-        
+
+        // Bookmarks list to display in the UI (cached for performance)
+        private List<VesselBookmark> _displayedBookmarks = new List<VesselBookmark>();
+
         private void Awake() {
             _mainWindowID = UnityEngine.Random.Range(1000, 2000);
             _editWindowID = UnityEngine.Random.Range(2000, 3000);
@@ -107,6 +110,16 @@ namespace com.github.lhervier.ksp {
                 BUTTON_WIDTH, 
                 BUTTON_HEIGHT
             );
+
+            VesselBookmarkManager.Instance.OnBookmarksUpdated.Add(OnBookmarksUpdated);
+        }
+
+        private void OnBookmarksUpdated() {
+            _displayedBookmarks = VesselBookmarkManager.Instance.GetFilteredBookmarks(
+                _selectedBody, 
+                _selectedVesselType
+            )
+            .ToList();
         }
 
         private void EnsureWhiteTextStyles() {
@@ -143,6 +156,7 @@ namespace com.github.lhervier.ksp {
         private void OnDestroy() {
             GameEvents.onGUIApplicationLauncherReady.Remove(OnLauncherReady);
             OnLauncherUnready();
+            VesselBookmarkManager.Instance.OnBookmarksUpdated.Remove(OnBookmarksUpdated);
         }
         
         /// <summary>
@@ -242,13 +256,9 @@ namespace com.github.lhervier.ksp {
             
             // Header
             GUILayout.BeginHorizontal();
-            var filteredCount = VesselBookmarkManager.Instance.GetFilteredBookmarks(
-                _selectedBody, 
-                _selectedVesselType
-            )
-            .Count();
+            var filteredCount = _displayedBookmarks.Count;
             GUILayout.Label(
-                $"Bookmarks: {filteredCount}/{VesselBookmarkManager.Instance.Bookmarks.Count}",
+                $"Bookmarks: {filteredCount}/{_displayedBookmarks.Count}",
                 _labelStyle,
                 GUILayout.ExpandWidth(true)
             );
@@ -275,17 +285,11 @@ namespace com.github.lhervier.ksp {
             // Bookmarks list
             _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, false, true);
             
-            var filteredBookmarks = VesselBookmarkManager.Instance.GetFilteredBookmarks(
-                _selectedBody, 
-                _selectedVesselType
-            )
-            .ToList();
-            
-            if (filteredBookmarks.Count == 0) {
+            if (_displayedBookmarks.Count == 0) {
                 GUILayout.Label("No bookmarks match the filters. Right-click on a command module to add one.", _labelStyle);
             } else {
-                foreach (VesselBookmark bookmark in filteredBookmarks) {
-                    DrawBookmarkItem(bookmark, filteredBookmarks);
+                foreach (VesselBookmark bookmark in _displayedBookmarks) {
+                    DrawBookmarkItem(bookmark);
                 }
             }
             
@@ -345,6 +349,7 @@ namespace com.github.lhervier.ksp {
                 } else {
                     _selectedBody = VesselBookmarkManager.Instance.AvailableBodies[_selectedBodyIndex - 1];
                 }
+                this.OnBookmarksUpdated();
             }
             
             GUILayout.Space(10);
@@ -372,6 +377,7 @@ namespace com.github.lhervier.ksp {
                 } else {
                     _selectedVesselType = VesselBookmarkManager.Instance.AvailableVesselTypes[_selectedVesselTypeIndex - 1];
                 }
+                this.OnBookmarksUpdated();
             }
 
             GUILayout.FlexibleSpace();
@@ -381,6 +387,7 @@ namespace com.github.lhervier.ksp {
                 _selectedVesselType = null;
                 _selectedBodyIndex = 0;
                 _selectedVesselTypeIndex = 0;
+                this.OnBookmarksUpdated();
             }
             
             GUILayout.EndHorizontal();
@@ -408,6 +415,7 @@ namespace com.github.lhervier.ksp {
             if (GUILayout.Button("Save", _buttonStyle)) {
                 if (_editingBookmark != null) {
                     _editingBookmark.Comment = _editComment;
+                    this.OnBookmarksUpdated();
                 }
                 _editWindowVisible = false;
                 _editingBookmark = null;
@@ -429,8 +437,7 @@ namespace com.github.lhervier.ksp {
         /// <summary>
         /// Draws a bookmark item
         /// </summary>
-        private void DrawBookmarkItem(VesselBookmark bookmark, List<VesselBookmark> filteredList) {
-            Vessel vessel = VesselBookmarkManager.Instance.GetVessel(bookmark);
+        private void DrawBookmarkItem(VesselBookmark bookmark) {
             string commandModuleName;
             if( !string.IsNullOrEmpty(bookmark.CommandModuleName) ) {
                 commandModuleName = bookmark.CommandModuleName;
@@ -474,10 +481,9 @@ namespace com.github.lhervier.ksp {
             
             GUILayout.FlexibleSpace();
             
-            var allBookmarks = VesselBookmarkManager.Instance.Bookmarks.OrderBy(b => b.Order).ThenBy(b => b.CreationTime).ToList();
-            int currentIndex = allBookmarks.IndexOf(bookmark);
+            int currentIndex = _displayedBookmarks.IndexOf(bookmark);
             bool canMoveUp = currentIndex > 0;
-            bool canMoveDown = currentIndex < allBookmarks.Count - 1;
+            bool canMoveDown = currentIndex < _displayedBookmarks.Count - 1;
                 
             // Small spacing before buttons
             GUILayout.Space(5);
@@ -498,6 +504,7 @@ namespace com.github.lhervier.ksp {
             _goToButton.Draw(
                 () => isHovered,
                 () => {
+                    Vessel vessel = VesselBookmarkManager.Instance.GetVessel(bookmark);
                     if (VesselNavigator.NavigateToVessel(vessel)) {
                         _mainWindowsVisible = false;
                         _editWindowVisible = false;
@@ -514,7 +521,13 @@ namespace com.github.lhervier.ksp {
             _moveUpButton.Draw(
                 () => isHovered,
                 () => {
-                    VesselBookmarkManager.Instance.MoveBookmarkUp(bookmark.CommandModuleFlightID);
+                    if( canMoveUp ) {
+                        VesselBookmark previousBookmark = _displayedBookmarks[currentIndex - 1];
+                        VesselBookmarkManager.Instance.SwapBookmarks(
+                            bookmark.CommandModuleFlightID, 
+                            previousBookmark.CommandModuleFlightID
+                        );
+                    }
                 }
             );
         
@@ -522,7 +535,13 @@ namespace com.github.lhervier.ksp {
             _moveDownButton.Draw(
                 () => isHovered,
                 () => {
-                    VesselBookmarkManager.Instance.MoveBookmarkDown(bookmark.CommandModuleFlightID);
+                    if( canMoveDown ) {
+                        VesselBookmark nextBookmark = _displayedBookmarks[currentIndex + 1];
+                        VesselBookmarkManager.Instance.SwapBookmarks(
+                            bookmark.CommandModuleFlightID, 
+                            nextBookmark.CommandModuleFlightID
+                        );
+                    }
                 }
             );
             
