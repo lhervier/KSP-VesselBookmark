@@ -53,7 +53,9 @@ namespace com.github.lhervier.ksp {
         private GUIStyle _tooltipStyle;
 
         // Bookmarks list to display in the UI (cached for performance)
-        private List<VesselBookmark> _displayedBookmarks = new List<VesselBookmark>();
+        private List<VesselBookmark> _availableBookmarks = new List<VesselBookmark>();
+        private List<CelestialBody> _availableBodies = new List<CelestialBody>();
+        private List<VesselType> _availableVesselTypes = new List<VesselType>();
 
         private void Awake() {
             _mainWindowID = UnityEngine.Random.Range(1000, 2000);
@@ -115,11 +117,39 @@ namespace com.github.lhervier.ksp {
         }
 
         private void OnBookmarksUpdated() {
-            _displayedBookmarks = VesselBookmarkManager.Instance.GetFilteredBookmarks(
-                _selectedBody, 
-                _selectedVesselType
-            )
-            .ToList();
+            ModLogger.LogDebug($"OnBookmarksUpdated");
+            
+            _availableBookmarks.Clear();
+            _availableBodies.Clear();
+            _availableVesselTypes.Clear();
+
+            foreach (VesselBookmark bookmark in VesselBookmarkManager.Instance.Bookmarks) {
+                Vessel vessel = VesselBookmarkManager.Instance.GetVessel(bookmark);
+                if( vessel != null && !_availableBodies.Contains(vessel.mainBody) ) {
+                    _availableBodies.Add(vessel.mainBody);
+                }
+
+                if( !_availableVesselTypes.Contains(bookmark.VesselType) ) {
+                    _availableVesselTypes.Add(bookmark.VesselType);
+                }
+
+                if( !_availableBookmarks.Contains(bookmark) ) {
+                    bool addBookmark;
+
+                    if( _selectedBody == null && _selectedVesselType == null ) {
+                        addBookmark = true;
+                    } else if( _selectedBody == null ) {
+                        addBookmark = bookmark.VesselType == _selectedVesselType;
+                    } else if( _selectedVesselType == null ) {
+                        addBookmark = vessel.mainBody == _selectedBody;
+                    } else {
+                        addBookmark = vessel.mainBody == _selectedBody && bookmark.VesselType == _selectedVesselType;
+                    }
+                    if( addBookmark ) {
+                        _availableBookmarks.Add(bookmark);
+                    }
+                }
+            }
         }
 
         private void EnsureWhiteTextStyles() {
@@ -256,9 +286,9 @@ namespace com.github.lhervier.ksp {
             
             // Header
             GUILayout.BeginHorizontal();
-            var filteredCount = _displayedBookmarks.Count;
+            var filteredCount = _availableBookmarks.Count;
             GUILayout.Label(
-                $"Bookmarks: {filteredCount}/{_displayedBookmarks.Count}",
+                $"Bookmarks: {filteredCount}/{_availableBookmarks.Count}",
                 _labelStyle,
                 GUILayout.ExpandWidth(true)
             );
@@ -285,10 +315,10 @@ namespace com.github.lhervier.ksp {
             // Bookmarks list
             _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, false, true);
             
-            if (_displayedBookmarks.Count == 0) {
+            if (_availableBookmarks.Count == 0) {
                 GUILayout.Label("No bookmarks match the filters. Right-click on a command module to add one.", _labelStyle);
             } else {
-                foreach (VesselBookmark bookmark in _displayedBookmarks) {
+                foreach (VesselBookmark bookmark in _availableBookmarks) {
                     DrawBookmarkItem(bookmark);
                 }
             }
@@ -330,10 +360,10 @@ namespace com.github.lhervier.ksp {
             GUILayout.Label("Body:", _labelStyle, GUILayout.Width(50));
             
             // Create dropdown options for body
-            string[] bodyOptions = new string[VesselBookmarkManager.Instance.AvailableBodies.Count + 1];
+            string[] bodyOptions = new string[_availableBodies.Count + 1];
             bodyOptions[0] = "All";
-            for (int i = 0; i < VesselBookmarkManager.Instance.AvailableBodies.Count; i++) {
-                bodyOptions[i + 1] = VesselBookmarkManager.Instance.AvailableBodies[i].bodyName;
+            for (int i = 0; i < _availableBodies.Count; i++) {
+                bodyOptions[i + 1] = _availableBodies[i].bodyName;
             }
             
             string currentBodyName;
@@ -347,7 +377,7 @@ namespace com.github.lhervier.ksp {
                 if (_selectedBodyIndex == 0) {
                     _selectedBody = null;
                 } else {
-                    _selectedBody = VesselBookmarkManager.Instance.AvailableBodies[_selectedBodyIndex - 1];
+                    _selectedBody = _availableBodies[_selectedBodyIndex - 1];
                 }
                 this.OnBookmarksUpdated();
             }
@@ -358,10 +388,10 @@ namespace com.github.lhervier.ksp {
             GUILayout.Label("Type:", _labelStyle, GUILayout.Width(50));
             
             // Create dropdown options for vessel type
-            string[] vesselTypeOptions = new string[VesselBookmarkManager.Instance.AvailableVesselTypes.Count + 1];
+            string[] vesselTypeOptions = new string[_availableVesselTypes.Count + 1];
             vesselTypeOptions[0] = "All";
-            for (int i = 0; i < VesselBookmarkManager.Instance.AvailableVesselTypes.Count; i++) {
-                vesselTypeOptions[i + 1] = VesselBookmarkManager.Instance.AvailableVesselTypes[i].ToString();
+            for (int i = 0; i < _availableVesselTypes.Count; i++) {
+                vesselTypeOptions[i + 1] = _availableVesselTypes[i].ToString();
             }
             
             string currentVesselTypeName;
@@ -375,7 +405,7 @@ namespace com.github.lhervier.ksp {
                 if (_selectedVesselTypeIndex == 0) {
                     _selectedVesselType = null;
                 } else {
-                    _selectedVesselType = VesselBookmarkManager.Instance.AvailableVesselTypes[_selectedVesselTypeIndex - 1];
+                    _selectedVesselType = _availableVesselTypes[_selectedVesselTypeIndex - 1];
                 }
                 this.OnBookmarksUpdated();
             }
@@ -481,9 +511,9 @@ namespace com.github.lhervier.ksp {
             
             GUILayout.FlexibleSpace();
             
-            int currentIndex = _displayedBookmarks.IndexOf(bookmark);
+            int currentIndex = _availableBookmarks.IndexOf(bookmark);
             bool canMoveUp = currentIndex > 0;
-            bool canMoveDown = currentIndex < _displayedBookmarks.Count - 1;
+            bool canMoveDown = currentIndex < _availableBookmarks.Count - 1;
                 
             // Small spacing before buttons
             GUILayout.Space(5);
@@ -522,7 +552,7 @@ namespace com.github.lhervier.ksp {
                 () => isHovered,
                 () => {
                     if( canMoveUp ) {
-                        VesselBookmark previousBookmark = _displayedBookmarks[currentIndex - 1];
+                        VesselBookmark previousBookmark = _availableBookmarks[currentIndex - 1];
                         VesselBookmarkManager.Instance.SwapBookmarks(
                             bookmark.CommandModuleFlightID, 
                             previousBookmark.CommandModuleFlightID
@@ -536,7 +566,7 @@ namespace com.github.lhervier.ksp {
                 () => isHovered,
                 () => {
                     if( canMoveDown ) {
-                        VesselBookmark nextBookmark = _displayedBookmarks[currentIndex + 1];
+                        VesselBookmark nextBookmark = _availableBookmarks[currentIndex + 1];
                         VesselBookmarkManager.Instance.SwapBookmarks(
                             bookmark.CommandModuleFlightID, 
                             nextBookmark.CommandModuleFlightID
