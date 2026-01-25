@@ -34,7 +34,7 @@ namespace com.github.lhervier.ksp {
         // Edit window
         private VesselBookmark _editingBookmark = null;
         private string _editComment = "";
-        
+
         // Icon cache
         private Dictionary<VesselType, VesselBookmarkButton> _vesselTypeButtons = new Dictionary<VesselType, VesselBookmarkButton>();
         private VesselBookmarkButton _removeButton;
@@ -430,7 +430,7 @@ namespace com.github.lhervier.ksp {
         /// Draws a bookmark item
         /// </summary>
         private void DrawBookmarkItem(VesselBookmark bookmark, List<VesselBookmark> filteredList) {
-            Vessel vessel = VesselBookmarkManager.Instance.GetVesselForBookmark(bookmark);
+            Vessel vessel = VesselBookmarkManager.Instance.GetVessel(bookmark);
             string commandModuleName;
             if( !string.IsNullOrEmpty(bookmark.CommandModuleName) ) {
                 commandModuleName = bookmark.CommandModuleName;
@@ -514,7 +514,7 @@ namespace com.github.lhervier.ksp {
             _moveUpButton.Draw(
                 () => isHovered,
                 () => {
-                    VesselBookmarkManager.Instance.MoveBookmarkUp(bookmark);
+                    VesselBookmarkManager.Instance.MoveBookmarkUp(bookmark.CommandModuleFlightID);
                 }
             );
         
@@ -522,7 +522,7 @@ namespace com.github.lhervier.ksp {
             _moveDownButton.Draw(
                 () => isHovered,
                 () => {
-                    VesselBookmarkManager.Instance.MoveBookmarkDown(bookmark);
+                    VesselBookmarkManager.Instance.MoveBookmarkDown(bookmark.CommandModuleFlightID);
                 }
             );
             
