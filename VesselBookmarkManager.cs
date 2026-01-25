@@ -34,6 +34,7 @@ namespace com.github.lhervier.ksp {
         /// </summary>
         private List<VesselBookmark> _bookmarks = new List<VesselBookmark>();
         public IReadOnlyList<VesselBookmark> Bookmarks => _bookmarks.AsReadOnly();
+        private List<uint> _bookmarksFlightIDs = new List<uint>();
 
         public readonly EventVoid OnBookmarksUpdated = new EventVoid("VesselBookmarkManager.OnBookmarksUpdated");
  
@@ -95,14 +96,14 @@ namespace com.github.lhervier.ksp {
         // =======================================================================================
 
         /// <summary>
-        /// Check if a bookmark exists for a command module
+        /// Check if a bookmark exists for a command module.
+        /// Note: This method has no cost and can be called frequently.
         /// </summary>
         /// <param name="commandModuleFlightID"></param>
         /// <returns></returns>
         public bool HasBookmark(uint commandModuleFlightID) {
             try {
-                ModLogger.LogDebug($"Checking if bookmark exists for flightID {commandModuleFlightID}");
-                return _bookmarks.Any(b => b.CommandModuleFlightID == commandModuleFlightID);
+                return _bookmarksFlightIDs.Contains(commandModuleFlightID);
             } catch (Exception e) {
                 ModLogger.LogError($"Error checking if bookmark exists for flightID {commandModuleFlightID}: {e.Message}");
                 return false;
@@ -221,7 +222,8 @@ namespace com.github.lhervier.ksp {
                 }
 
                 _bookmarks.Add(bookmark);
-                
+                _bookmarksFlightIDs.Add(bookmark.CommandModuleFlightID);
+
                 ModLogger.LogDebug($"Bookmark added for flightID {bookmark.CommandModuleFlightID}");
                 OnBookmarksUpdated.Fire();
                 return true;
@@ -310,6 +312,7 @@ namespace com.github.lhervier.ksp {
                 ModLogger.LogDebug($"Removing bookmark for bookmark {bookmark.CommandModuleFlightID}");
 
                 _bookmarks.Remove(bookmark);
+                _bookmarksFlightIDs.Remove(bookmark.CommandModuleFlightID);
                 
                 ModLogger.LogDebug($"Bookmark removed for flightID {bookmark.CommandModuleFlightID}");
                 OnBookmarksUpdated.Fire();
@@ -459,6 +462,7 @@ namespace com.github.lhervier.ksp {
             try {
                 ModLogger.LogDebug($"Loading bookmarks from config node");
                 _bookmarks.Clear();
+                _bookmarksFlightIDs.Clear();
                 
                 if (!node.HasNode(SAVE_NODE_NAME)) {
                     return;

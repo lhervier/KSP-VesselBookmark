@@ -10,15 +10,21 @@ namespace com.github.lhervier.ksp {
         
         [KSPEvent(guiActive = true, guiActiveUnfocused = true, guiName = "Toggle Bookmark", active = true)]
         public void ToggleBookmarkEvent() {
-            if (part == null) return;
-            
+            ModLogger.LogDebug($"ToggleBookmarkEvent");
+            if (part == null) {
+                ModLogger.LogWarning($"- ToggleBookmarkEvent: Part is null");
+                return;
+            }
+
             if (VesselBookmarkManager.Instance.HasBookmark(part)) {
+                ModLogger.LogDebug($"- ToggleBookmarkEvent: Removing bookmark for part {part.flightID}");
                 VesselBookmarkUIDialog.ConfirmRemoval(() => {
                     if (VesselBookmarkManager.Instance.RemoveBookmark(part.flightID)) {
                         ScreenMessages.PostScreenMessage("Bookmark removed", 2f, ScreenMessageStyle.UPPER_CENTER);
                     }
                 });
             } else if (VesselBookmarkManager.Instance.AddBookmark(part)) {
+                ModLogger.LogDebug($"- ToggleBookmarkEvent: Bookmark added for part {part.flightID}");
                 ScreenMessages.PostScreenMessage("Bookmark added", 2f, ScreenMessageStyle.UPPER_CENTER);
             }
             
@@ -36,12 +42,14 @@ namespace com.github.lhervier.ksp {
         }
         
         private void UpdateEventName() {
-            if (part == null || Events == null) return;
+            if (part == null || Events == null) {
+                ModLogger.LogWarning($"- UpdateEventName: Part is null or Events is null");
+                return;
+            }
             
             BaseEvent bookmarkEvent = Events["ToggleBookmarkEvent"];
             if (bookmarkEvent != null) {
-                ModLogger.LogDebug($"Updating event name for part {part.flightID}");
-                bool hasBookmark = VesselBookmarkManager.Instance.HasBookmark(part);
+                bool hasBookmark = VesselBookmarkManager.Instance.HasBookmark(part.flightID);
                 bookmarkEvent.guiName = hasBookmark ? "Remove from Bookmarks" : "Add to Bookmarks";
             }
         }
