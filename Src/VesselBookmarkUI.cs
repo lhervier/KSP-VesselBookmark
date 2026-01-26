@@ -3,6 +3,7 @@ using KSP.UI.Screens;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using com.github.lhervier.ksp.bookmarks;
 
 namespace com.github.lhervier.ksp {
     
@@ -33,7 +34,7 @@ namespace com.github.lhervier.ksp {
         private int _selectedVesselTypeIndex = 0;
         
         // Edit window
-        private VesselBookmark _editingBookmark = null;
+        private Bookmark _editingBookmark = null;
         private string _editComment = "";
 
         // Icon cache
@@ -58,7 +59,7 @@ namespace com.github.lhervier.ksp {
         private Texture2D _activeVesselBorder;
 
         // Bookmarks list to display in the UI (cached for performance)
-        private List<VesselBookmark> _availableBookmarks = new List<VesselBookmark>();
+        private List<Bookmark> _availableBookmarks = new List<Bookmark>();
         private List<CelestialBody> _availableBodies = new List<CelestialBody>();
         private List<VesselType> _availableVesselTypes = new List<VesselType>();
 
@@ -146,8 +147,8 @@ namespace com.github.lhervier.ksp {
             _availableBodies.Clear();
             _availableVesselTypes.Clear();
 
-            foreach (VesselBookmark bookmark in VesselBookmarkManager.Instance.Bookmarks) {
-                Vessel vessel = VesselBookmarkManager.Instance.GetVessel(bookmark.CommandModuleFlightID);
+            foreach (Bookmark bookmark in VesselBookmarkManager.Instance.Bookmarks) {
+                Vessel vessel = bookmark.GetVessel();
                 if( vessel != null && !_availableBodies.Contains(vessel.mainBody) ) {
                     _availableBodies.Add(vessel.mainBody);
                 }
@@ -349,7 +350,7 @@ namespace com.github.lhervier.ksp {
             if (_availableBookmarks.Count == 0) {
                 GUILayout.Label(VesselBookmarkLocalization.GetString("labelNoBookmarks"), _labelStyle);
             } else {
-                foreach (VesselBookmark bookmark in _availableBookmarks) {
+                foreach (Bookmark bookmark in _availableBookmarks) {
                     DrawBookmarkItem(bookmark);
                 }
             }
@@ -498,7 +499,7 @@ namespace com.github.lhervier.ksp {
         /// <summary>
         /// Draws a bookmark item
         /// </summary>
-        private void DrawBookmarkItem(VesselBookmark bookmark) {
+        private void DrawBookmarkItem(Bookmark bookmark) {
             string commandModuleName;
             if( !string.IsNullOrEmpty(bookmark.CommandModuleName) ) {
                 commandModuleName = bookmark.CommandModuleName;
@@ -593,7 +594,7 @@ namespace com.github.lhervier.ksp {
             System.Action moveUpAction = null;
             if( canMoveUp ) {
                 moveUpAction = () => {
-                    VesselBookmark previousBookmark = _availableBookmarks[currentIndex - 1];
+                    Bookmark previousBookmark = _availableBookmarks[currentIndex - 1];
                     VesselBookmarkManager.Instance.SwapBookmarks(
                         bookmark.CommandModuleFlightID, 
                         previousBookmark.CommandModuleFlightID
@@ -609,7 +610,7 @@ namespace com.github.lhervier.ksp {
             System.Action moveDownAction = null;
             if( canMoveDown ) {
                 moveDownAction = () => {
-                    VesselBookmark nextBookmark = _availableBookmarks[currentIndex + 1];
+                    Bookmark nextBookmark = _availableBookmarks[currentIndex + 1];
                     VesselBookmarkManager.Instance.SwapBookmarks(
                         bookmark.CommandModuleFlightID, 
                         nextBookmark.CommandModuleFlightID

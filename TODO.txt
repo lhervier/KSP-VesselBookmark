@@ -1,7 +1,7 @@
-- Trier les corps celeste dans leur ordre depuis le soleil (et pas par ordre alpha)
 - On ne peut pas bookmarker un vaisseau s'il n'a pas de module de commande
     => Ajouter un bouton "Add bookmark to current vessel"
     => Ca fait ajouter un "type" de bookmark (vessel ou commandModule)
+- Trier les corps celeste dans leur ordre depuis le soleil (et pas par ordre alpha)
 - Remplacer le filtre sur le type par une liste d'icônes cliquables
 
 

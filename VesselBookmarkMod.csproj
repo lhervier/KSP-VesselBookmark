@@ -56,10 +56,15 @@
   <ItemGroup>
     <Compile Include="Src/AssemblyInfo.cs" />
     <Compile Include="Src/ModLogger.cs" />
+    
+    <Compile Include="Src/bookmarks/Bookmark.cs" />
+    <Compile Include="Src/bookmarks/BookmarkType.cs" />
+    <Compile Include="Src/bookmarks/VesselBookmark.cs" />
+    <Compile Include="Src/bookmarks/CommandModuleBookmark.cs" />
+    
     <Compile Include="Src/VesselBookmarkButton.cs" />
     <Compile Include="Src/VesselBookmarkUIDialog.cs" />
     <Compile Include="Src/VesselBookmarkMod.cs" />
-    <Compile Include="Src/VesselBookmarkData.cs" />
     <Compile Include="Src/VesselBookmarkLocalization.cs" />
     <Compile Include="Src/VesselBookmarkManager.cs" />
     <Compile Include="Src/VesselSituationDetector.cs" />

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using com.github.lhervier.ksp.bookmarks;
 
 namespace com.github.lhervier.ksp {
     
@@ -32,27 +33,16 @@ namespace com.github.lhervier.ksp {
         /// <summary>
         /// List of all bookmarks
         /// </summary>
-        private List<VesselBookmark> _bookmarks = new List<VesselBookmark>();
-        public IReadOnlyList<VesselBookmark> Bookmarks => _bookmarks.AsReadOnly();
-        private List<uint> _bookmarksFlightIDs = new List<uint>();
+        private List<Bookmark> _bookmarks = new List<Bookmark>();
+        public IReadOnlyList<Bookmark> Bookmarks => _bookmarks.AsReadOnly();
+        private List<object> _bookmarksIDs = new List<object>();
 
         public readonly EventVoid OnBookmarksUpdated = new EventVoid("VesselBookmarkManager.OnBookmarksUpdated");
  
         // =======================================================================================
 
-        /// <summary>
-        /// Get a bookmark from the list
-        /// </summary>
-        /// <param name="commandModuleFlightID"></param>
-        /// <returns></returns>
-        public VesselBookmark GetBookmark(uint commandModuleFlightID) {
-            try {
-                ModLogger.LogDebug($"Getting bookmark for flightID {commandModuleFlightID}");
-                return _bookmarks.First(b => b.CommandModuleFlightID == commandModuleFlightID);
-            } catch (Exception e) {
-                ModLogger.LogError($"Error getting bookmark for flightID {commandModuleFlightID}: {e.Message}");
-                return null;
-            }
+        public Bookmark GetBookmark(object bookmarkID) {
+            return _bookmarks.First(b => object.Equals(b.GetBookmarkID(), bookmarkID));
         }
         
         /// <summary>
@@ -61,11 +51,11 @@ namespace com.github.lhervier.ksp {
         /// </summary>
         /// <param name="commandModuleFlightID"></param>
         /// <returns></returns>
-        public bool HasBookmark(uint commandModuleFlightID) {
+        public bool HasBookmark(object bookmarkID) {
             try {
-                return _bookmarksFlightIDs.Contains(commandModuleFlightID);
+                return _bookmarksIDs.Contains(bookmarkID);
             } catch (Exception e) {
-                ModLogger.LogError($"Error checking if bookmark exists for flightID {commandModuleFlightID}: {e.Message}");
+                ModLogger.LogError($"Error checking if bookmark exists for bookmarkID {bookmarkID}: {e.Message}");
                 return false;
             }
         }
@@ -73,18 +63,22 @@ namespace com.github.lhervier.ksp {
         /// <summary>
         /// Add a bookmark for a command module
         /// </summary>
-        /// <param name="commandModuleFlightID"></param>
-        public bool AddBookmark(uint commandModuleFlightID, bool sendEvent = true) {
+        /// <param name="bookmark">The bookmark to add</param>
+        /// <param name="sendEvent">True if the OnBookmarksUpdated event should be fired, false otherwise</param>
+        /// <returns>True if the bookmark was added, false otherwise</returns>
+        public bool AddBookmark(Bookmark bookmark, bool sendEvent = true) {
             try {
-                ModLogger.LogDebug($"Adding bookmark for flightID {commandModuleFlightID}");
-                
-                // Check if bookmark already exists
-                if (this.HasBookmark(commandModuleFlightID)) {
-                    ModLogger.LogWarning($"Bookmark already exists for flightID {commandModuleFlightID}");
+                if( bookmark == null ) {
+                    ModLogger.LogError("Attempted to add null bookmark");
                     return false;
                 }
+                ModLogger.LogDebug($"Adding bookmark for bookmarkID {bookmark.GetBookmarkID()}");
                 
-                VesselBookmark bookmark = new VesselBookmark(commandModuleFlightID);
+                // Check if bookmark already exists
+                if (this.HasBookmark(bookmark.GetBookmarkID())) {
+                    ModLogger.LogWarning($"Bookmark already exists for bookmarkID {bookmark.GetBookmarkID()}");
+                    return false;
+                }
                 
                 // Assign order (max + 1, or 0 if list is empty)
                 if (_bookmarks.Count > 0) {
@@ -94,13 +88,13 @@ namespace com.github.lhervier.ksp {
                 }
 
                 _bookmarks.Add(bookmark);
-                _bookmarksFlightIDs.Add(bookmark.CommandModuleFlightID);
+                _bookmarksIDs.Add(bookmark.GetBookmarkID());
 
-                this.RefreshBookmark(bookmark, sendEvent);
+                bookmark.Refresh(sendEvent);
 
                 return true;
             } catch (Exception e) {
-                ModLogger.LogError($"Error adding bookmark for flightID {commandModuleFlightID}: {e.Message}");
+                ModLogger.LogError($"Error adding bookmark for bookmarkID {bookmark.GetBookmarkID()}: {e.Message}");
                 return false;
             }
         }
@@ -108,23 +102,24 @@ namespace com.github.lhervier.ksp {
         /// <summary>
         /// Remove a bookmark from the list
         /// </summary>
-        /// <param name="commandModuleFlightID"></param>
-        public bool RemoveBookmark(uint commandModuleFlightID) {
+        /// <param name="bookmarkID">The unique identifier of the bookmark to remove</param>
+        /// <returns>True if the bookmark was removed, false otherwise</returns>
+        public bool RemoveBookmark(object bookmarkID) {
             try {
-                ModLogger.LogDebug($"Removing bookmark for flightID {commandModuleFlightID}");
-                VesselBookmark bookmark = this.GetBookmark(commandModuleFlightID);
+                ModLogger.LogDebug($"Removing bookmark for bookmarkID {bookmarkID}");
+                Bookmark bookmark = this.GetBookmark(bookmarkID);
                 if( bookmark == null ) {
-                    ModLogger.LogWarning($"Bookmark for flightID {commandModuleFlightID}: Not found");
+                    ModLogger.LogWarning($"Bookmark for bookmarkID {bookmarkID}: Not found");
                     return false;
                 }
 
                 _bookmarks.Remove(bookmark);
-                _bookmarksFlightIDs.Remove(bookmark.CommandModuleFlightID);
+                _bookmarksIDs.Remove(bookmark.GetBookmarkID());
                 
                 OnBookmarksUpdated.Fire();
                 return true;
             } catch (Exception e) {
-                ModLogger.LogError($"Error removing bookmark for flightID {commandModuleFlightID}: {e.Message}");
+                ModLogger.LogError($"Error removing bookmark for bookmarkID {bookmarkID}: {e.Message}");
                 return false;
             }
         }
@@ -134,27 +129,27 @@ namespace com.github.lhervier.ksp {
         /// <summary>
         /// Move a bookmark up in the order (decrease Order value)
         /// </summary>
-        /// <param name="bookmark"></param>
+        /// <param name="bookmarkID">The unique identifier of the bookmark to move up</param>
         /// <returns>True if the bookmark was moved up, false otherwise</returns>
-        public bool MoveBookmarkUp(uint commandModuleFlightID) {
+        public bool MoveBookmarkUp(object bookmarkID) {
             try {
-                ModLogger.LogDebug($"Moving bookmark up for bookmark {commandModuleFlightID}");
+                ModLogger.LogDebug($"Moving bookmark up for bookmarkID {bookmarkID}");
 
-                VesselBookmark bookmark = this.GetBookmark(commandModuleFlightID);
+                Bookmark bookmark = this.GetBookmark(bookmarkID);
                 if (bookmark == null) {
-                    ModLogger.LogWarning($"Bookmark {commandModuleFlightID}: Not found");
+                    ModLogger.LogWarning($"Bookmark for bookmarkID {bookmarkID}: Not found");
                     return false;
                 }
 
                 if( bookmark.Order <= 0 ) {
-                    ModLogger.LogError($"Bookmark {commandModuleFlightID} cannot be moved up: Order is {bookmark.Order}");
+                    ModLogger.LogError($"Bookmark for bookmarkID {bookmarkID} cannot be moved up: Order is {bookmark.Order}");
                     return false;
                 }
 
                 // Find the bookmark with previous Order
-                VesselBookmark previous = _bookmarks.Find(b => b.Order == bookmark.Order - 1);
+                Bookmark previous = _bookmarks.Find(b => b.Order == bookmark.Order - 1);
                 if( previous == null ) {
-                    ModLogger.LogWarning($"Bookmark {commandModuleFlightID}: Previous bookmark not found");
+                    ModLogger.LogWarning($"Bookmark for bookmarkID {bookmarkID}: Previous bookmark not found");
                     return false;
                 }
 
@@ -169,7 +164,7 @@ namespace com.github.lhervier.ksp {
                 OnBookmarksUpdated.Fire();
                 return true;
             } catch (Exception e) {
-                ModLogger.LogError($"Error moving bookmark up for bookmark {commandModuleFlightID}: {e.Message}");
+                ModLogger.LogError($"Error moving bookmark up for bookmarkID {bookmarkID}: {e.Message}");
                 return false;
             }
         }
@@ -177,25 +172,27 @@ namespace com.github.lhervier.ksp {
         /// <summary>
         /// Move a bookmark down in the order (increase Order value)
         /// </summary>
-        public bool MoveBookmarkDown(uint commandModuleFlightID) {
+        /// <param name="bookmarkID">The unique identifier of the bookmark to move down</param>
+        /// <returns>True if the bookmark was moved down, false otherwise</returns>
+        public bool MoveBookmarkDown(object bookmarkID) {
             try {
-                ModLogger.LogDebug($"Moving bookmark down for bookmark {commandModuleFlightID}");
+                ModLogger.LogDebug($"Moving bookmark down for bookmarkID {bookmarkID}");
 
-                VesselBookmark bookmark = this.GetBookmark(commandModuleFlightID);
+                Bookmark bookmark = this.GetBookmark(bookmarkID);
                 if (bookmark == null) {
-                    ModLogger.LogWarning($"Bookmark {commandModuleFlightID}: Not found");
+                    ModLogger.LogWarning($"Bookmark for bookmarkID {bookmarkID}: Not found");
                     return false;
                 }
 
                 if( bookmark.Order >= _bookmarks.Max(b => b.Order) ) {
-                    ModLogger.LogWarning($"Bookmark {commandModuleFlightID} cannot be moved down: Order is {bookmark.Order}");
+                    ModLogger.LogWarning($"Bookmark for bookmarkID {bookmarkID} cannot be moved down: Order is {bookmark.Order}");
                     return false;
                 }
                 
                 // Find the bookmark with next Order
-                VesselBookmark next = _bookmarks.Find(b => b.Order == bookmark.Order + 1);
+                Bookmark next = _bookmarks.Find(b => b.Order == bookmark.Order + 1);
                 if( next == null ) {
-                    ModLogger.LogWarning($"Bookmark {commandModuleFlightID}: Next bookmark not found");
+                    ModLogger.LogWarning($"Bookmark for bookmarkID {bookmarkID}: Next bookmark not found");
                     return false;
                 }
                 
@@ -210,7 +207,7 @@ namespace com.github.lhervier.ksp {
                 OnBookmarksUpdated.Fire();
                 return true;
             } catch (Exception e) {
-                ModLogger.LogError($"Error moving bookmark down for bookmark {commandModuleFlightID}: {e.Message}");
+                ModLogger.LogError($"Error moving bookmark down for bookmarkID {bookmarkID}: {e.Message}");
                 return false;
             }
         }
@@ -218,22 +215,22 @@ namespace com.github.lhervier.ksp {
         /// <summary>
         /// Swap the order of two bookmarks
         /// </summary>
-        /// <param name="commandModuleFlightID1"></param>
-        /// <param name="commandModuleFlightID2"></param>
+        /// <param name="bookmarkID1">The unique identifier of the first bookmark to swap</param>
+        /// <param name="bookmarkID2">The unique identifier of the second bookmark to swap</param>
         /// <returns>True if the bookmarks were swapped, false otherwise</returns>
-        public bool SwapBookmarks(uint commandModuleFlightID1, uint commandModuleFlightID2) {
+        public bool SwapBookmarks(object bookmarkID1, object bookmarkID2) {
             try {
-                ModLogger.LogDebug($"Swapping bookmarks for flightIDs {commandModuleFlightID1} and {commandModuleFlightID2}");
+                ModLogger.LogDebug($"Swapping bookmarks for bookmarkID1 {bookmarkID1} and bookmarkID2 {bookmarkID2}");
 
-                VesselBookmark bookmark1 = this.GetBookmark(commandModuleFlightID1);
+                Bookmark bookmark1 = this.GetBookmark(bookmarkID1);
                 if (bookmark1 == null) {
-                    ModLogger.LogWarning($"Bookmark {commandModuleFlightID1}: Not found");
+                    ModLogger.LogWarning($"Bookmark for bookmarkID {bookmarkID1}: Not found");
                     return false;
                 }
 
-                VesselBookmark bookmark2 = this.GetBookmark(commandModuleFlightID2);
+                Bookmark bookmark2 = this.GetBookmark(bookmarkID2);
                 if (bookmark2 == null) {
-                    ModLogger.LogWarning($"Bookmark {commandModuleFlightID2}: Not found");
+                    ModLogger.LogWarning($"Bookmark for bookmarkID {bookmarkID2}: Not found");
                     return false;
                 }
 
@@ -245,7 +242,7 @@ namespace com.github.lhervier.ksp {
                 OnBookmarksUpdated.Fire();
                 return true;
             } catch (Exception e) {
-                ModLogger.LogError($"Error swapping bookmarks for flightIDs {commandModuleFlightID1} and {commandModuleFlightID2}: {e.Message}");
+                ModLogger.LogError($"Error swapping bookmarks for bookmarkID1 {bookmarkID1} and bookmarkID2 {bookmarkID2}: {e.Message}");
                 return false;
             }
         }
@@ -260,7 +257,7 @@ namespace com.github.lhervier.ksp {
             try {
                 ModLogger.LogDebug($"Loading bookmarks from config node");
                 _bookmarks.Clear();
-                _bookmarksFlightIDs.Clear();
+                _bookmarksIDs.Clear();
                 
                 if (!node.HasNode(SAVE_NODE_NAME)) {
                     return;
@@ -278,9 +275,23 @@ namespace com.github.lhervier.ksp {
                 }).ToArray();
 
                 foreach (ConfigNode bookmarkNode in bookmarkNodes) {
-                    VesselBookmark bookmark = new VesselBookmark();
-                    bookmark.Load(bookmarkNode);
-                    this.AddBookmark(bookmark.CommandModuleFlightID, false);
+                    BookmarkType bookmarkType = BookmarkType.Unknown;
+                    if (bookmarkNode.HasValue("bookmarkType")) {
+                        int.TryParse(bookmarkNode.GetValue("bookmarkType"), out int bookmarkTypeInt);
+                        bookmarkType = (BookmarkType) bookmarkTypeInt;
+                    }
+
+                    Bookmark bookmark = null;
+                    if( bookmarkType == BookmarkType.CommandModule ) {
+                        bookmark = new CommandModuleBookmark(bookmarkNode);
+                    } else if( bookmarkType == BookmarkType.Vessel ) {
+                        bookmark = new VesselBookmark(bookmarkNode);
+                    } else {
+                        ModLogger.LogError($"Bookmark type {bookmarkType} not supported");
+                        continue;
+                    }
+                    
+                    this.AddBookmark(bookmark, false);
                 }
 
                 OnBookmarksUpdated.Fire();
@@ -303,7 +314,7 @@ namespace com.github.lhervier.ksp {
                 }
                 
                 ConfigNode bookmarksNode = node.AddNode(SAVE_NODE_NAME);
-                foreach (VesselBookmark bookmark in _bookmarks) {
+                foreach (Bookmark bookmark in _bookmarks) {
                     ConfigNode bookmarkNode = bookmarksNode.AddNode(BOOKMARK_NODE_NAME);
                     bookmark.Save(bookmarkNode);
                 }
@@ -314,164 +325,6 @@ namespace com.github.lhervier.ksp {
         }
 
         // =======================================================================================
-
-        /// <summary>
-        /// Get the current vessel for a bookmark (handles docked vessels)
-        /// Searches in both loaded and unloaded vessels
-        /// </summary>
-        /// <param name="commandModuleFlightID"></param>
-        /// <returns>The vessel, or null if not found</returns>
-        public Vessel GetVessel(uint commandModuleFlightID) {
-            try {
-                ModLogger.LogDebug($"Getting vessel for flightID {commandModuleFlightID}");
-
-                foreach (Vessel vessel in FlightGlobals.Vessels) {
-                    if (vessel == null || vessel.parts == null) continue;
-                    foreach (Part part in vessel.parts) {
-                        if (part == null) continue;
-                        if (part.flightID == commandModuleFlightID) {
-                            return vessel;
-                        }
-                    }
-                }
-                foreach (Vessel vessel in FlightGlobals.VesselsUnloaded) {
-                    if (vessel == null || vessel.protoVessel == null) continue;
-                    foreach (ProtoPartSnapshot protoPart in vessel.protoVessel.protoPartSnapshots) {
-                        if (protoPart == null) continue;
-                        if (protoPart.flightID == commandModuleFlightID) {
-                            return vessel;
-                        }
-                    }
-                }
-                return null;
-            } catch (Exception e) {
-                ModLogger.LogError($"Error getting vessel for flightID {commandModuleFlightID}: {e.Message}");
-                return null;
-            }
-        }
-        
-        /// <summary>
-        /// Get command module part for a command module
-        /// </summary>
-        /// <param name="commandModuleFlightID"></param>
-        /// <returns>The command module part, or null if not found</returns>
-        private Part GetPart(uint commandModuleFlightID) {
-            try {
-                ModLogger.LogDebug($"Getting command module part for flightID {commandModuleFlightID}");
-                foreach (Vessel vessel in FlightGlobals.Vessels) {
-                    if (vessel == null || vessel.parts == null) continue;
-                    foreach (Part part in vessel.parts) {
-                        if (part == null) continue;
-                        if (part.flightID == commandModuleFlightID) {
-                            ModuleCommand commandModule = part.FindModuleImplementing<ModuleCommand>();
-                            if (commandModule != null) {
-                                return part;
-                            } else {
-                                ModLogger.LogWarning($"Bookmark {commandModuleFlightID}: Target part is not a command module");
-                                return null;
-                            }
-                        }
-                    }
-                }
-                return null;
-            } catch (Exception e) {
-                ModLogger.LogError($"Error getting command module part for flightID {commandModuleFlightID}: {e.Message}");
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Get command module protoPartSnapshot for a command module
-        /// </summary>
-        /// <param name="commandModuleFlightID"></param>
-        /// <returns>The command module protoPartSnapshot, or null if not found</returns>
-        private ProtoPartSnapshot GetProtoPartSnapshot(uint commandModuleFlightID) {
-            try {
-                ModLogger.LogDebug($"Getting command module protoPartSnapshot for flightID {commandModuleFlightID}");
-                if( FlightGlobals.VesselsUnloaded == null || FlightGlobals.VesselsUnloaded.Count == 0 ) {
-                    ModLogger.LogWarning($"Bookmark {commandModuleFlightID}: No unloaded vessels found. May happen when first loading a save game. Another event should be emitted soon...");
-                    return null;
-                }
-                foreach (Vessel vessel in FlightGlobals.VesselsUnloaded) {
-                    if (vessel == null ) continue;
-                    if (vessel.protoVessel == null ) continue;
-                    if (vessel.protoVessel.protoPartSnapshots == null) continue;
-                    
-                    foreach (ProtoPartSnapshot protoPart in vessel.protoVessel.protoPartSnapshots) {
-                        if (protoPart == null) continue;
-                        
-                        if (protoPart.flightID == commandModuleFlightID) {
-                            if (protoPart.FindModule("ModuleCommand") != null) {
-                                return protoPart;
-                            } else {
-                                return null;
-                            }
-                        }
-                    }
-                }
-                return null;
-            } catch (Exception e) {
-                ModLogger.LogError($"Error getting command module protoPartSnapshot for flightID {commandModuleFlightID}: {e.Message}");
-                return null;
-            }
-        }
-
-        // =======================================================================================
-
-        /// <summary>
-        /// Get command module for a bookmark
-        /// </summary>
-        /// <param name="bookmark">The bookmark to refresh</param>
-        /// <param name="sendEvent">True if the OnBookmarksUpdated event should be fired, false otherwise</param>
-        /// <returns>True if the bookmark was refreshed, false otherwise</returns>
-        private bool RefreshBookmark(VesselBookmark bookmark, bool sendEvent) {
-            try {
-                if (bookmark == null) {
-                    ModLogger.LogError("Attempted to refresh bookmark with null bookmark");
-                    return false;
-                }
-                ModLogger.LogDebug($"Refreshing bookmark for bookmark {bookmark.CommandModuleFlightID}");
-                
-                Vessel vessel = GetVessel(bookmark.CommandModuleFlightID);
-                if( vessel == null ) {
-                    ModLogger.LogWarning($"Bookmark {bookmark.CommandModuleFlightID}: Vessel not found");
-                    return false;
-                }
-                
-                VesselNaming naming;
-                Part commandModulePart = GetPart(bookmark.CommandModuleFlightID);
-                if (commandModulePart != null) {
-                    naming = commandModulePart.vesselNaming;
-                } else {
-                    ProtoPartSnapshot commandModuleProtoPartSnapshot = GetProtoPartSnapshot(bookmark.CommandModuleFlightID);
-                    if (commandModuleProtoPartSnapshot != null) {
-                        naming = commandModuleProtoPartSnapshot.vesselNaming;
-                    } else {
-                        ModLogger.LogWarning($"Bookmark {bookmark.CommandModuleFlightID}: Command module part or protoPartSnapshot not found");
-                        naming = null;
-                    }
-                }
-                if( naming == null ) {
-                    ModLogger.LogWarning($"Bookmark {bookmark.CommandModuleFlightID}: Vessel naming not found");
-                    return false;
-                } 
-                
-                bookmark.CommandModuleName = naming.vesselName;
-                bookmark.VesselType = naming.vesselType;
-                bookmark.VesselSituation = VesselSituationDetector.GetSituation(vessel);
-                bookmark.VesselName = vessel.vesselName;
-                bookmark.VesselPersistentID = vessel.persistentId.ToString();
-                
-                if( sendEvent ) {
-                    OnBookmarksUpdated.Fire();
-                }
-
-                return true;
-            } catch (Exception e) {
-                ModLogger.LogError($"Error refreshing bookmark for bookmark {bookmark.CommandModuleFlightID}: {e.Message}");
-                return false;
-            }
-        }
         
         /// <summary>
         /// Refresh command module names for all bookmarks
@@ -480,9 +333,9 @@ namespace com.github.lhervier.ksp {
             try {
                 ModLogger.LogDebug($"Refreshing bookmarks");
 
-                foreach (VesselBookmark bookmark in _bookmarks) {
-                    if( !this.RefreshBookmark(bookmark, false) ) {
-                        ModLogger.LogWarning($"Bookmark {bookmark.CommandModuleFlightID}: Not found");
+                foreach (Bookmark bookmark in _bookmarks) {
+                    if( !bookmark.Refresh(false) ) {
+                        ModLogger.LogWarning($"Bookmark {bookmark.GetBookmarkID()}: Not found");
                     }
                 }
 
