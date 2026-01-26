@@ -2,7 +2,6 @@
 - On ne peut pas bookmarker un vaisseau s'il n'a pas de module de commande
     => Ajouter un bouton "Add bookmark to current vessel"
     => Ca fait ajouter un "type" de bookmark (vessel ou commandModule)
-- Quand on remonte un bookmark, il remonte dans la liste complète sans tenir compte des filtres
 - Remplacer le filtre sur le type par une liste d'icônes cliquables
 - Traduire
 - Redimentionner les icones en 32x32 pour éviter les alertes au démarrage
