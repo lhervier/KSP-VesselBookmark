@@ -580,9 +580,19 @@ namespace com.github.lhervier.ksp {
             _removeButton.Draw(
                 () => isHovered,
                 () => {
-                    VesselBookmarkUIDialog.ConfirmRemoval(() => {
-                        VesselBookmarkManager.Instance.RemoveBookmark(bookmark.CommandModuleFlightID);
-                    });
+                    // Close main window temporarily to ensure confirmation dialog appears on top
+                    bool wasMainWindowVisible = _mainWindowsVisible;
+                    _mainWindowsVisible = false;
+                    
+                    VesselBookmarkUIDialog.ConfirmRemoval(
+                        () => {
+                            VesselBookmarkManager.Instance.RemoveBookmark(bookmark.CommandModuleFlightID);
+                            _mainWindowsVisible = wasMainWindowVisible;
+                        },
+                        () => {
+                            _mainWindowsVisible = wasMainWindowVisible;
+                        }
+                    );
                 }
             );
             
