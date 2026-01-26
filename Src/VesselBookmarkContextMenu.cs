@@ -16,14 +16,14 @@ namespace com.github.lhervier.ksp {
                 return;
             }
 
-            if (VesselBookmarkManager.Instance.HasBookmark(part)) {
+            if (VesselBookmarkManager.Instance.HasBookmark(part.flightID)) {
                 ModLogger.LogDebug($"- ToggleBookmarkEvent: Removing bookmark for part {part.flightID}");
                 VesselBookmarkUIDialog.ConfirmRemoval(() => {
                     if (VesselBookmarkManager.Instance.RemoveBookmark(part.flightID)) {
                         ScreenMessages.PostScreenMessage("Bookmark removed", 2f, ScreenMessageStyle.UPPER_CENTER);
                     }
                 });
-            } else if (VesselBookmarkManager.Instance.AddBookmark(part)) {
+            } else if (VesselBookmarkManager.Instance.AddBookmark(part.flightID)) {
                 ModLogger.LogDebug($"- ToggleBookmarkEvent: Bookmark added for part {part.flightID}");
                 ScreenMessages.PostScreenMessage("Bookmark added", 2f, ScreenMessageStyle.UPPER_CENTER);
             }
