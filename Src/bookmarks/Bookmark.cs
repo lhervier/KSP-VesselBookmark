@@ -204,5 +204,21 @@ namespace com.github.lhervier.ksp.bookmarks {
                 return false;
             }
         }
+
+        /// <summary>
+        /// Draw the title of the bookmark
+        /// </summary>
+        public abstract string GetBookmarkDisplayName();
+
+        /// <summary>
+        /// Draw the type of the bookmark
+        /// </summary>
+        public abstract VesselType GetBookmarkDisplayType();
+        
+        /// <summary>
+        /// Should draw the part of the bookmark
+        /// </summary>
+        /// <returns>True if the part of the bookmark should be drawn, false otherwise</returns>
+        public abstract bool ShouldDrawPartOf();
     }
 }

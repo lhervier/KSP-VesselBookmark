@@ -67,5 +67,29 @@ namespace com.github.lhervier.ksp.bookmarks {
         protected override bool RefreshSpecific() {
             return true;
         }
+
+        /// <summary>
+        /// Get the display name of the vessel bookmark
+        /// </summary>
+        /// <returns>The display name of the vessel bookmark</returns>
+        public override string GetBookmarkDisplayName() {
+            return VesselName;
+        }
+
+        /// <summary>
+        /// Get the display type of the vessel bookmark
+        /// </summary>
+        /// <returns>The display type of the vessel bookmark</returns>
+        public override VesselType GetBookmarkDisplayType() {
+            return VesselType;
+        }
+
+        /// <summary>
+        /// Should draw the part of the vessel bookmark
+        /// </summary>
+        /// <returns>True if the part of the vessel bookmark should be drawn, false otherwise</returns>
+        public override bool ShouldDrawPartOf() {
+            return false;
+        }
     }
 }

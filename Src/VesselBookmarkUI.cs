@@ -46,7 +46,7 @@ namespace com.github.lhervier.ksp {
         private VesselBookmarkButton _editButton;
         
         // Hover state
-        private uint _hoveredBookmarkFlightID = 0;
+        private string _hoveredBookmarkID = "";
 
         // UI styles with white text
         private GUIStyle _labelStyle;
@@ -500,21 +500,21 @@ namespace com.github.lhervier.ksp {
         /// Draws a bookmark item
         /// </summary>
         private void DrawBookmarkItem(Bookmark bookmark) {
-            string commandModuleName;
-            if( !string.IsNullOrEmpty(bookmark.CommandModuleName) ) {
-                commandModuleName = bookmark.CommandModuleName;
+            string bookmarkName;
+            if( !string.IsNullOrEmpty(bookmark.GetBookmarkDisplayName())) {
+                bookmarkName = bookmark.GetBookmarkDisplayName();
             } else {
-                commandModuleName = VesselBookmarkLocalization.GetString("labelModuleNotFound", "Module not found");
+                bookmarkName = VesselBookmarkLocalization.GetString("labelModuleNotFound");
             }
 
             string comment = bookmark.Comment;
             
-            bool isHovered = _hoveredBookmarkFlightID == bookmark.CommandModuleFlightID;
+            bool isHovered = _hoveredBookmarkID == bookmark.GetBookmarkID();
             
             // Check if this bookmark corresponds to the active vessel
             bool isActiveVessel = false;
             if (FlightGlobals.ActiveVessel != null) {
-                isActiveVessel = string.Equals(bookmark.VesselPersistentID, FlightGlobals.ActiveVessel.persistentId.ToString());
+                isActiveVessel = bookmark.VesselPersistentID == FlightGlobals.ActiveVessel.persistentId;
             }
 
             // Create custom box style with appropriate background
@@ -539,14 +539,14 @@ namespace com.github.lhervier.ksp {
             GUILayout.BeginHorizontal();
             
             // Vessel type icon
-            VesselBookmarkButton vesselTypeButton = GetVesselTypeButton(bookmark.VesselType);
+            VesselBookmarkButton vesselTypeButton = GetVesselTypeButton(bookmark.GetBookmarkDisplayType());
             vesselTypeButton.Draw(
                 () => vesselTypeButton != null,
                 null
             );
             
-            // Command module name (always in normal color, no red)
-            GUILayout.Label($"<b>{commandModuleName}</b>", _labelStyle, GUILayout.Width(150));
+            // Bookmark name
+            GUILayout.Label($"<b>{bookmarkName}</b>", _labelStyle, GUILayout.Width(150));
             GUILayout.FlexibleSpace();
             
             int currentIndex = _availableBookmarks.IndexOf(bookmark);
@@ -572,9 +572,9 @@ namespace com.github.lhervier.ksp {
             System.Action goToAction = null;
             if (!isActiveVessel) {
                 goToAction = () => {
-                    Vessel vessel = VesselBookmarkManager.Instance.GetVessel(bookmark.CommandModuleFlightID);
+                    Vessel vessel = bookmark.GetVessel();
                     if( vessel == null ) {
-                        ModLogger.LogWarning($"Bookmark {bookmark.CommandModuleFlightID}: Vessel not found");
+                        ModLogger.LogWarning($"Bookmark {bookmark.GetBookmarkID()}: Vessel not found");
                         return;
                     }
                     if (VesselNavigator.NavigateToVessel(vessel)) {
@@ -596,8 +596,8 @@ namespace com.github.lhervier.ksp {
                 moveUpAction = () => {
                     Bookmark previousBookmark = _availableBookmarks[currentIndex - 1];
                     VesselBookmarkManager.Instance.SwapBookmarks(
-                        bookmark.CommandModuleFlightID, 
-                        previousBookmark.CommandModuleFlightID
+                        bookmark.GetBookmarkID(), 
+                        previousBookmark.GetBookmarkID()
                     );
                 };
             }
@@ -612,8 +612,8 @@ namespace com.github.lhervier.ksp {
                 moveDownAction = () => {
                     Bookmark nextBookmark = _availableBookmarks[currentIndex + 1];
                     VesselBookmarkManager.Instance.SwapBookmarks(
-                        bookmark.CommandModuleFlightID, 
-                        nextBookmark.CommandModuleFlightID
+                        bookmark.GetBookmarkID(), 
+                        nextBookmark.GetBookmarkID()
                     );
                 };
             }
@@ -634,7 +634,7 @@ namespace com.github.lhervier.ksp {
                     
                     VesselBookmarkUIDialog.ConfirmRemoval(
                         () => {
-                            VesselBookmarkManager.Instance.RemoveBookmark(bookmark.CommandModuleFlightID);
+                            VesselBookmarkManager.Instance.RemoveBookmark(bookmark.GetBookmarkID());
                             _mainWindowsVisible = wasMainWindowVisible;
                         },
                         () => {
@@ -658,8 +658,8 @@ namespace com.github.lhervier.ksp {
                 GUILayout.Label(VesselBookmarkLocalization.GetString("labelUnknownSituation"), _labelStyle, GUILayout.Width(150));
             }
 
-            // Vessel name if different from command module name
-            if( !string.IsNullOrEmpty(bookmark.VesselName) && bookmark.VesselName != commandModuleName ) {
+            // Bookmark is prt of 
+            if( bookmark.ShouldDrawPartOf() ) {
                 GUILayout.Label(VesselBookmarkLocalization.GetString("labelPartOf", bookmark.VesselName), _labelStyle);
             }
             
@@ -702,7 +702,7 @@ namespace com.github.lhervier.ksp {
 
             // Detect hover and update the hovered bookmark ID
             if (bookmarkRect.Contains(Event.current.mousePosition)) {
-                _hoveredBookmarkFlightID = bookmark.CommandModuleFlightID;
+                _hoveredBookmarkID = bookmark.GetBookmarkID();
             }
         }
         

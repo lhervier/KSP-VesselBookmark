@@ -200,5 +200,29 @@ namespace com.github.lhervier.ksp.bookmarks {
                 return false;
             }
         }
+
+        /// <summary>
+        /// Get the display name of the command module bookmark
+        /// </summary>
+        /// <returns>The display name of the command module bookmark</returns>
+        public override string GetBookmarkDisplayName() {
+            return CommandModuleName;
+        }
+
+        /// <summary>
+        /// Get the display type of the command module bookmark
+        /// </summary>
+        /// <returns>The display type of the command module bookmark</returns>
+        public override VesselType GetBookmarkDisplayType() {
+            return CommandModuleType;
+        }
+
+        /// <summary>
+        /// Should draw the part of the command module bookmark
+        /// </summary>
+        /// <returns>True if the part of the command module bookmark should be drawn, false otherwise</returns>
+        public override bool ShouldDrawPartOf() {
+            return VesselName != CommandModuleName;
+        }
     }
 }
