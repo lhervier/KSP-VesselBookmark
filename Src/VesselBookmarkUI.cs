@@ -566,10 +566,10 @@ namespace com.github.lhervier.ksp {
             
             GUILayout.Space(3);
 
-            // Go to button
-            _goToButton.Draw(
-                () => isHovered,
-                () => {
+            // Go to button (disabled if this is the active vessel)
+            System.Action goToAction = null;
+            if (!isActiveVessel) {
+                goToAction = () => {
                     Vessel vessel = VesselBookmarkManager.Instance.GetVessel(bookmark.CommandModuleFlightID);
                     if( vessel == null ) {
                         ModLogger.LogWarning($"Bookmark {bookmark.CommandModuleFlightID}: Vessel not found");
@@ -582,37 +582,42 @@ namespace com.github.lhervier.ksp {
                             _toolbarButton.SetFalse();
                         }
                     }
-                }
-            );
+                };
+            }
+            _goToButton.Draw(() => isHovered, goToAction);
                 
             GUILayout.Space(3);
 
             // Move up button
+            System.Action moveUpAction = null;
+            if( canMoveUp ) {
+                moveUpAction = () => {
+                    VesselBookmark previousBookmark = _availableBookmarks[currentIndex - 1];
+                    VesselBookmarkManager.Instance.SwapBookmarks(
+                        bookmark.CommandModuleFlightID, 
+                        previousBookmark.CommandModuleFlightID
+                    );
+                };
+            }
             _moveUpButton.Draw(
                 () => isHovered,
-                () => {
-                    if( canMoveUp ) {
-                        VesselBookmark previousBookmark = _availableBookmarks[currentIndex - 1];
-                        VesselBookmarkManager.Instance.SwapBookmarks(
-                            bookmark.CommandModuleFlightID, 
-                            previousBookmark.CommandModuleFlightID
-                        );
-                    }
-                }
+                moveUpAction
             );
         
             // Move down button
+            System.Action moveDownAction = null;
+            if( canMoveDown ) {
+                moveDownAction = () => {
+                    VesselBookmark nextBookmark = _availableBookmarks[currentIndex + 1];
+                    VesselBookmarkManager.Instance.SwapBookmarks(
+                        bookmark.CommandModuleFlightID, 
+                        nextBookmark.CommandModuleFlightID
+                    );
+                };
+            }
             _moveDownButton.Draw(
                 () => isHovered,
-                () => {
-                    if( canMoveDown ) {
-                        VesselBookmark nextBookmark = _availableBookmarks[currentIndex + 1];
-                        VesselBookmarkManager.Instance.SwapBookmarks(
-                            bookmark.CommandModuleFlightID, 
-                            nextBookmark.CommandModuleFlightID
-                        );
-                    }
-                }
+                moveDownAction
             );
             
             GUILayout.Space(3);
