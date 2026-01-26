@@ -534,7 +534,11 @@ namespace com.github.lhervier.ksp {
             _goToButton.Draw(
                 () => isHovered,
                 () => {
-                    Vessel vessel = VesselBookmarkManager.Instance.GetVessel(bookmark);
+                    Vessel vessel = VesselBookmarkManager.Instance.GetVessel(bookmark.CommandModuleFlightID);
+                    if( vessel == null ) {
+                        ModLogger.LogWarning($"Bookmark {bookmark.CommandModuleFlightID}: Vessel not found");
+                        return;
+                    }
                     if (VesselNavigator.NavigateToVessel(vessel)) {
                         _mainWindowsVisible = false;
                         _editWindowVisible = false;
