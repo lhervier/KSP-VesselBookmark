@@ -54,17 +54,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="ModLogger.cs" />
-    <Compile Include="VesselBookmarkButton.cs" />
-    <Compile Include="VesselBookmarkUIDialog.cs" />
-    <Compile Include="VesselBookmarkMod.cs" />
-    <Compile Include="VesselBookmarkData.cs" />
-    <Compile Include="VesselBookmarkManager.cs" />
-    <Compile Include="VesselSituationDetector.cs" />
-    <Compile Include="VesselNavigator.cs" />
-    <Compile Include="VesselBookmarkContextMenu.cs" />
-    <Compile Include="VesselBookmarkUI.cs" />
+    <Compile Include="Src/AssemblyInfo.cs" />
+    <Compile Include="Src/ModLogger.cs" />
+    <Compile Include="Src/VesselBookmarkButton.cs" />
+    <Compile Include="Src/VesselBookmarkUIDialog.cs" />
+    <Compile Include="Src/VesselBookmarkMod.cs" />
+    <Compile Include="Src/VesselBookmarkData.cs" />
+    <Compile Include="Src/VesselBookmarkManager.cs" />
+    <Compile Include="Src/VesselSituationDetector.cs" />
+    <Compile Include="Src/VesselNavigator.cs" />
+    <Compile Include="Src/VesselBookmarkContextMenu.cs" />
+    <Compile Include="Src/VesselBookmarkUI.cs" />
   </ItemGroup>
   
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
