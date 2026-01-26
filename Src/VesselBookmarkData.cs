@@ -38,6 +38,8 @@ namespace com.github.lhervier.ksp {
         /// </summary>
         public string VesselName { get; set; }
 
+        public string VesselPersistentID { get; set; }
+
         /// <summary>
         /// Bookmark creation date
         /// </summary>
@@ -52,6 +54,9 @@ namespace com.github.lhervier.ksp {
             Comment = "";
             CommandModuleName = "";
             VesselType = VesselType.Unknown;
+            VesselSituation = "";
+            VesselName = "";
+            VesselPersistentID = "";
             Order = 0;
         }
         
@@ -61,6 +66,8 @@ namespace com.github.lhervier.ksp {
             CommandModuleName = "";
             VesselType = VesselType.Unknown;
             VesselSituation = "";
+            VesselName = "";
+            VesselPersistentID = "";
             CreationTime = Planetarium.GetUniversalTime();
             Order = 0;
         }
@@ -76,6 +83,7 @@ namespace com.github.lhervier.ksp {
             node.AddValue("vesselType", (int) VesselType);
             node.AddValue("vesselSituation", VesselSituation);
             node.AddValue("vesselName", VesselName);
+            node.AddValue("vesselPersistentID", VesselPersistentID);
             node.AddValue("order", Order);
         }
         
@@ -103,6 +111,7 @@ namespace com.github.lhervier.ksp {
 
             VesselSituation = node.GetValue("vesselSituation") ?? "";
             VesselName = node.GetValue("vesselName") ?? "";
+            VesselPersistentID = node.GetValue("vesselPersistentID") ?? "";
 
             if (node.HasValue("creationTime")) {
                 double.TryParse(node.GetValue("creationTime"), out double time);

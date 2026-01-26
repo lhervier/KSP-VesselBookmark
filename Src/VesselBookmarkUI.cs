@@ -501,9 +501,24 @@ namespace com.github.lhervier.ksp {
                 null
             );
             
-            // Command module name (bold)
-            GUILayout.Label($"<b>{commandModuleName}</b>", _labelStyle, GUILayout.Width(150));
-            
+            bool currentVessel;
+            if( FlightGlobals.ActiveVessel == null ) {
+                currentVessel = false;
+            } else {
+                if( string.Equals(bookmark.VesselPersistentID, FlightGlobals.ActiveVessel.persistentId.ToString()) ) {
+                    currentVessel = true;
+                } else {
+                    currentVessel = false;
+                }
+            }
+
+            if( !currentVessel ) {
+                // Command module is not part of the current vessel
+                GUILayout.Label($"<b>{commandModuleName}</b>", _labelStyle, GUILayout.Width(150));
+            } else {
+                // Command module is part of the current vessel: Display its name in red
+                GUILayout.Label($"<color=red><b>{commandModuleName}</b></color>", _labelStyle, GUILayout.Width(150));
+            }
             GUILayout.FlexibleSpace();
             
             int currentIndex = _availableBookmarks.IndexOf(bookmark);

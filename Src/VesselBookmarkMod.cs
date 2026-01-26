@@ -29,6 +29,7 @@ namespace com.github.lhervier.ksp {
             GameEvents.onGameStateCreated.Add(OnGameStateCreated);
             GameEvents.onGameStatePostLoad.Add(OnGameStatePostLoad);
             GameEvents.onGameStateSave.Add(OnGameStateSave);
+            GameEvents.onVesselWasModified.Add(OnVesselWasModified);
 
             ModLogger.LogInfo("Events subscribed");
         }
@@ -40,6 +41,9 @@ namespace com.github.lhervier.ksp {
             GameEvents.onGameStateCreated.Remove(OnGameStateCreated);
             GameEvents.onGameStatePostLoad.Remove(OnGameStatePostLoad);
             GameEvents.onGameStateSave.Remove(OnGameStateSave);
+            GameEvents.onVesselWasModified.Remove(OnVesselWasModified);
+
+            _manager = null;
 
             ModLogger.LogInfo("Events unsubscribed");
         }
@@ -67,6 +71,14 @@ namespace com.github.lhervier.ksp {
         /// </summary>
         private void OnGameStateSave(ConfigNode node) {
             this._manager.SaveBookmarks(node);
+        }
+
+        /// <summary>
+        /// Called when a vessel is modified
+        /// </summary>
+        /// <param name="vessel">The vessel that was modified</param>
+        private void OnVesselWasModified(Vessel vessel) {
+            this._manager.RefreshBookmarks();
         }
     }
 }
