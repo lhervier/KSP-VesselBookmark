@@ -60,6 +60,7 @@
     <Compile Include="Src/VesselBookmarkUIDialog.cs" />
     <Compile Include="Src/VesselBookmarkMod.cs" />
     <Compile Include="Src/VesselBookmarkData.cs" />
+    <Compile Include="Src/VesselBookmarkLocalization.cs" />
     <Compile Include="Src/VesselBookmarkManager.cs" />
     <Compile Include="Src/VesselSituationDetector.cs" />
     <Compile Include="Src/VesselNavigator.cs" />

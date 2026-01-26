@@ -11,18 +11,34 @@ namespace com.github.lhervier.ksp {
         
         private const string ConfirmDialogTag = "VesselBookmarkConfirmRemove";
         
-        public static void ConfirmRemoval(Action onConfirm, Action onCancel = null, string title = "Supprimer le bookmark", string message = "Voulez-vous supprimer ce bookmark ?") {
+        public static void ConfirmRemoval(Action onConfirm, Action onCancel = null, string title = null, string message = null) {
             if (onConfirm == null) return;
             
+            // Use localized strings if not provided
+            if (string.IsNullOrEmpty(title)) {
+                title = VesselBookmarkLocalization.GetString("dialogRemoveTitle");
+            }
+            if (string.IsNullOrEmpty(message)) {
+                message = VesselBookmarkLocalization.GetString("dialogRemoveMessage");
+            }
+            
             DialogGUIBase[] options = new DialogGUIBase[] {
-                new DialogGUIButton("Supprimer", () => {
-                    onConfirm();
-                }, true),
-                new DialogGUIButton("Annuler", () => {
-                    if (onCancel != null) {
-                        onCancel();
-                    }
-                }, true)
+                new DialogGUIButton(
+                    VesselBookmarkLocalization.GetString("dialogButtonRemove"), 
+                    () => {
+                        onConfirm();
+                    }, 
+                    true
+                ),
+                new DialogGUIButton(
+                    VesselBookmarkLocalization.GetString("dialogButtonCancel"), 
+                    () => {
+                        if (onCancel != null) {
+                            onCancel();
+                        }
+                    }, 
+                    true
+                )
             };
             
             MultiOptionDialog dialog = new MultiOptionDialog(

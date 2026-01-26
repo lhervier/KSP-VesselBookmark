@@ -36,6 +36,12 @@ if errorlevel 1 (
     exit /b 1
 )
 
+mkdir Release\VesselBookmarkMod\Localization
+if errorlevel 1 (
+    echo ERROR: Failed to create the localization folder
+    exit /b 1
+)
+
 echo Building Mod DLL
 dotnet build
 if errorlevel 1 (
@@ -75,6 +81,13 @@ echo Copying buttons icons files
 copy /y "GameData\VesselBookmarkMod\buttons\*" "Release\VesselBookmarkMod\buttons"
 if errorlevel 1 (
     echo ERROR: Failed to copy the buttons files
+    exit /b 1
+)
+
+echo Copying localization files
+copy /y "GameData\VesselBookmarkMod\Localization\*" "Release\VesselBookmarkMod\Localization"
+if errorlevel 1 (
+    echo ERROR: Failed to copy the localization files
     exit /b 1
 )
 

@@ -20,12 +20,20 @@ namespace com.github.lhervier.ksp {
                 ModLogger.LogDebug($"- ToggleBookmarkEvent: Removing bookmark for part {part.flightID}");
                 VesselBookmarkUIDialog.ConfirmRemoval(() => {
                     if (VesselBookmarkManager.Instance.RemoveBookmark(part.flightID)) {
-                        ScreenMessages.PostScreenMessage("Bookmark removed", 2f, ScreenMessageStyle.UPPER_CENTER);
+                        ScreenMessages.PostScreenMessage(
+                            VesselBookmarkLocalization.GetString("messageBookmarkRemoved"), 
+                            2f, 
+                            ScreenMessageStyle.UPPER_CENTER
+                        );
                     }
                 });
             } else if (VesselBookmarkManager.Instance.AddBookmark(part.flightID)) {
                 ModLogger.LogDebug($"- ToggleBookmarkEvent: Bookmark added for part {part.flightID}");
-                ScreenMessages.PostScreenMessage("Bookmark added", 2f, ScreenMessageStyle.UPPER_CENTER);
+                ScreenMessages.PostScreenMessage(
+                    VesselBookmarkLocalization.GetString("messageBookmarkAdded"), 
+                    2f, 
+                    ScreenMessageStyle.UPPER_CENTER
+                );
             }
             
             UpdateEventName();
@@ -50,7 +58,9 @@ namespace com.github.lhervier.ksp {
             BaseEvent bookmarkEvent = Events["ToggleBookmarkEvent"];
             if (bookmarkEvent != null) {
                 bool hasBookmark = VesselBookmarkManager.Instance.HasBookmark(part.flightID);
-                bookmarkEvent.guiName = hasBookmark ? "Remove from Bookmarks" : "Add to Bookmarks";
+                bookmarkEvent.guiName = hasBookmark 
+                    ? VesselBookmarkLocalization.GetString("contextMenuRemoveFromBookmarks")
+                    : VesselBookmarkLocalization.GetString("contextMenuAddToBookmarks");
             }
         }
     }

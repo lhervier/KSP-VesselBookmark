@@ -3,7 +3,6 @@
     => Ajouter un bouton "Add bookmark to current vessel"
     => Ca fait ajouter un "type" de bookmark (vessel ou commandModule)
 - Remplacer le filtre sur le type par une liste d'icônes cliquables
-- Traduire
 
 
 - Fenêtre de saisie du commentaire: Ajouter des ascenseurs pour le cas où saisie est longue.

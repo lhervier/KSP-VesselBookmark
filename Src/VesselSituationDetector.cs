@@ -14,46 +14,46 @@ namespace com.github.lhervier.ksp {
             try {
                 if (vessel == null) {
                     ModLogger.LogError($"Getting situation: Vessel is null");
-                    return "Unknown";
+                    return VesselBookmarkLocalization.GetString("situationUnknown");
                 }
                 ModLogger.LogDebug($"Getting situation for vessel {vessel.vesselName}");
                 
                 // Check if vessel is destroyed
                 if (vessel.state == Vessel.State.DEAD) {
                     ModLogger.LogDebug($"- Vessel is destroyed");
-                    return "Destroyed";
+                    return VesselBookmarkLocalization.GetString("situationDestroyed");
                 }
                 
                 CelestialBody mainBody = vessel.mainBody;
-                string bodyName = mainBody != null ? mainBody.bodyName : "Unknown";
+                string bodyName = mainBody != null ? mainBody.bodyName : VesselBookmarkLocalization.GetString("situationUnknown");
                 
                 ModLogger.LogDebug($"- Main body: {bodyName}");
                 ModLogger.LogDebug($"- Situation: {vessel.situation}");
                 switch (vessel.situation) {
                     case Vessel.Situations.LANDED:
-                        return $"Landed on {bodyName}";
+                        return VesselBookmarkLocalization.GetString("situationLanded", bodyName);
                         
                     case Vessel.Situations.SPLASHED:
-                        return $"Splashed down in {bodyName}'s ocean";
+                        return VesselBookmarkLocalization.GetString("situationSplashed", bodyName);
                         
                     case Vessel.Situations.PRELAUNCH:
-                        return $"On launchpad ({bodyName})";
+                        return VesselBookmarkLocalization.GetString("situationPrelaunch", bodyName);
                         
                     case Vessel.Situations.SUB_ORBITAL:
-                        return $"Suborbital ({bodyName})";
+                        return VesselBookmarkLocalization.GetString("situationSuborbital", bodyName);
                         
                     case Vessel.Situations.ORBITING:
-                        return $"Orbiting {bodyName}";
+                        return VesselBookmarkLocalization.GetString("situationOrbiting", bodyName);
                         
                     case Vessel.Situations.ESCAPING:
-                        return $"Escape trajectory ({bodyName})";
+                        return VesselBookmarkLocalization.GetString("situationEscaping", bodyName);
                         
                     default:
-                        return $"In flight ({bodyName})";
+                        return VesselBookmarkLocalization.GetString("situationInFlight", bodyName);
                 }
             } catch (System.Exception e) {
                 ModLogger.LogError($"Error getting situation for vessel {vessel.vesselName}: {e.Message}");
-                return "Unknown";
+                return VesselBookmarkLocalization.GetString("situationUnknown");
             }
         }
     }
