@@ -51,6 +51,10 @@ namespace com.github.lhervier.ksp {
         private GUIStyle _buttonStyle;
         private GUIStyle _textAreaStyle;
         private GUIStyle _tooltipStyle;
+        
+        // Textures for active vessel highlighting
+        private Texture2D _activeVesselBackground;
+        private Texture2D _activeVesselBorder;
 
         // Bookmarks list to display in the UI (cached for performance)
         private List<VesselBookmark> _availableBookmarks = new List<VesselBookmark>();
@@ -114,6 +118,24 @@ namespace com.github.lhervier.ksp {
             );
 
             VesselBookmarkManager.Instance.OnBookmarksUpdated.Add(OnBookmarksUpdated);
+            
+            // Initialize textures for active vessel highlighting
+            InitializeActiveVesselTextures();
+        }
+        
+        /// <summary>
+        /// Initializes textures for highlighting active vessel bookmarks
+        /// </summary>
+        private void InitializeActiveVesselTextures() {
+            // Background texture (slightly tinted blue-green)
+            _activeVesselBackground = new Texture2D(1, 1);
+            _activeVesselBackground.SetPixel(0, 0, new Color(0.15f, 0.25f, 0.3f, 0.6f)); // Bleu-vert foncé avec transparence
+            _activeVesselBackground.Apply();
+            
+            // Border texture (bright blue-green)
+            _activeVesselBorder = new Texture2D(1, 1);
+            _activeVesselBorder.SetPixel(0, 0, new Color(0.2f, 0.6f, 0.8f, 1f)); // Bleu-vert clair
+            _activeVesselBorder.Apply();
         }
 
         private void OnBookmarksUpdated() {
@@ -187,6 +209,14 @@ namespace com.github.lhervier.ksp {
             GameEvents.onGUIApplicationLauncherReady.Remove(OnLauncherReady);
             OnLauncherUnready();
             VesselBookmarkManager.Instance.OnBookmarksUpdated.Remove(OnBookmarksUpdated);
+            
+            // Clean up textures
+            if (_activeVesselBackground != null) {
+                UnityEngine.Object.Destroy(_activeVesselBackground);
+            }
+            if (_activeVesselBorder != null) {
+                UnityEngine.Object.Destroy(_activeVesselBorder);
+            }
         }
         
         /// <summary>
@@ -478,11 +508,23 @@ namespace com.github.lhervier.ksp {
             string comment = bookmark.Comment;
             
             bool isHovered = _hoveredBookmarkFlightID == bookmark.CommandModuleFlightID;
+            
+            // Check if this bookmark corresponds to the active vessel
+            bool isActiveVessel = false;
+            if (FlightGlobals.ActiveVessel != null) {
+                isActiveVessel = string.Equals(bookmark.VesselPersistentID, FlightGlobals.ActiveVessel.persistentId.ToString());
+            }
 
-            // Create custom box style with hover background if this is the hovered bookmark
+            // Create custom box style with appropriate background
             GUIStyle boxStyle = new GUIStyle(GUI.skin.box);
-            if (isHovered) {
-                // Create hover background texture
+            
+            if (isActiveVessel) {
+                // Active vessel: use colored background
+                boxStyle.normal.background = _activeVesselBackground;
+                // Add border by setting border values
+                boxStyle.border = new RectOffset(2, 2, 2, 2);
+            } else if (isHovered) {
+                // Hovered bookmark: use hover background
                 Texture2D hoverBg = new Texture2D(1, 1);
                 hoverBg.SetPixel(0, 0, new Color(0.3f, 0.3f, 0.3f, 1f));
                 hoverBg.Apply();
@@ -501,24 +543,8 @@ namespace com.github.lhervier.ksp {
                 null
             );
             
-            bool currentVessel;
-            if( FlightGlobals.ActiveVessel == null ) {
-                currentVessel = false;
-            } else {
-                if( string.Equals(bookmark.VesselPersistentID, FlightGlobals.ActiveVessel.persistentId.ToString()) ) {
-                    currentVessel = true;
-                } else {
-                    currentVessel = false;
-                }
-            }
-
-            if( !currentVessel ) {
-                // Command module is not part of the current vessel
-                GUILayout.Label($"<b>{commandModuleName}</b>", _labelStyle, GUILayout.Width(150));
-            } else {
-                // Command module is part of the current vessel: Display its name in red
-                GUILayout.Label($"<color=red><b>{commandModuleName}</b></color>", _labelStyle, GUILayout.Width(150));
-            }
+            // Command module name (always in normal color, no red)
+            GUILayout.Label($"<b>{commandModuleName}</b>", _labelStyle, GUILayout.Width(150));
             GUILayout.FlexibleSpace();
             
             int currentIndex = _availableBookmarks.IndexOf(bookmark);
@@ -651,6 +677,21 @@ namespace com.github.lhervier.ksp {
             );
             
             GUILayout.EndVertical();
+            
+            // Draw border for active vessel bookmark
+            if (isActiveVessel && Event.current.type == EventType.Repaint) {
+                // Draw border using lines
+                int borderWidth = 2;
+                
+                // Top border
+                GUI.DrawTexture(new Rect(bookmarkRect.x, bookmarkRect.y, bookmarkRect.width, borderWidth), _activeVesselBorder);
+                // Bottom border
+                GUI.DrawTexture(new Rect(bookmarkRect.x, bookmarkRect.yMax - borderWidth, bookmarkRect.width, borderWidth), _activeVesselBorder);
+                // Left border
+                GUI.DrawTexture(new Rect(bookmarkRect.x, bookmarkRect.y, borderWidth, bookmarkRect.height), _activeVesselBorder);
+                // Right border
+                GUI.DrawTexture(new Rect(bookmarkRect.xMax - borderWidth, bookmarkRect.y, borderWidth, bookmarkRect.height), _activeVesselBorder);
+            }
 
             // Detect hover and update the hovered bookmark ID
             if (bookmarkRect.Contains(Event.current.mousePosition)) {
