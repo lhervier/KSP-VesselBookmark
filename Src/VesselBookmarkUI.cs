@@ -509,12 +509,6 @@ namespace com.github.lhervier.ksp {
             // Command module name (bold)
             GUILayout.Label($"<b>{commandModuleName}</b>", _labelStyle, GUILayout.Width(150));
             
-            // Vessel situation
-            if (!string.IsNullOrEmpty(bookmark.VesselSituation)) {
-                GUILayout.Space(10);
-                GUILayout.Label(bookmark.VesselSituation, _labelStyle);
-            }
-            
             GUILayout.FlexibleSpace();
             
             int currentIndex = _availableBookmarks.IndexOf(bookmark);
@@ -600,19 +594,39 @@ namespace com.github.lhervier.ksp {
             GUILayout.EndHorizontal();
             Rect line1Rect = GUILayoutUtility.GetLastRect();
 
-            // Line 2: Comment
+            // Line 2: Situation and vessel name (if different from command module name)
+            GUILayout.BeginHorizontal();
+            GUILayout.Space(BUTTON_WIDTH + 4);
+            
+            // Vessel situation
+            if (!string.IsNullOrEmpty(bookmark.VesselSituation)) {
+                GUILayout.Label(bookmark.VesselSituation, _labelStyle);
+            }
+
+            // Vessel name if different from command module name
+            if( !string.IsNullOrEmpty(bookmark.VesselName) && bookmark.VesselName != commandModuleName ) {
+                if (!string.IsNullOrEmpty(bookmark.VesselSituation)) {
+                    GUILayout.Space(10);
+                }
+                GUILayout.Label($"Part of {bookmark.VesselName}", _labelStyle);
+            }
+            
+            GUILayout.EndHorizontal();
+            Rect line2Rect = GUILayoutUtility.GetLastRect();
+
+            // Line 3: Comment
             GUILayout.BeginHorizontal();
             GUILayout.Space(BUTTON_WIDTH + 4);
             GUILayout.Label(comment, _labelStyle, GUILayout.ExpandWidth(true));
             GUILayout.EndHorizontal();
-            Rect line2Rect = GUILayoutUtility.GetLastRect();
+            Rect line3Rect = GUILayoutUtility.GetLastRect();
             
             // Get the rect of the bookmark area BEFORE closing it
             Rect bookmarkRect = Rect.MinMaxRect(
-                Mathf.Min(line1Rect.xMin, line2Rect.xMin),
-                Mathf.Min(line1Rect.yMin, line2Rect.yMin),
-                Mathf.Max(line1Rect.xMax, line2Rect.xMax),
-                Mathf.Max(line1Rect.yMax, line2Rect.yMax)
+                Mathf.Min(Mathf.Min(line1Rect.xMin, line2Rect.xMin), line3Rect.xMin),
+                Mathf.Min(Mathf.Min(line1Rect.yMin, line2Rect.yMin), line3Rect.yMin),
+                Mathf.Max(Mathf.Max(line1Rect.xMax, line2Rect.xMax), line3Rect.xMax),
+                Mathf.Max(Mathf.Max(line1Rect.yMax, line2Rect.yMax), line3Rect.yMax)
             );
             
             GUILayout.EndVertical();

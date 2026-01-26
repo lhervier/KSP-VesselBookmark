@@ -34,6 +34,11 @@ namespace com.github.lhervier.ksp {
         public string VesselSituation { get; set; }
 
         /// <summary>
+        /// Name of the vessel that the command module belongs to
+        /// </summary>
+        public string VesselName { get; set; }
+
+        /// <summary>
         /// Bookmark creation date
         /// </summary>
         public double CreationTime { get; set; }
@@ -70,6 +75,7 @@ namespace com.github.lhervier.ksp {
             node.AddValue("creationTime", CreationTime);
             node.AddValue("vesselType", (int) VesselType);
             node.AddValue("vesselSituation", VesselSituation);
+            node.AddValue("vesselName", VesselName);
             node.AddValue("order", Order);
         }
         
@@ -96,6 +102,7 @@ namespace com.github.lhervier.ksp {
             }
 
             VesselSituation = node.GetValue("vesselSituation") ?? "";
+            VesselName = node.GetValue("vesselName") ?? "";
 
             if (node.HasValue("creationTime")) {
                 double.TryParse(node.GetValue("creationTime"), out double time);

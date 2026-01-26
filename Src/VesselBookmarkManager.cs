@@ -459,6 +459,7 @@ namespace com.github.lhervier.ksp {
                 bookmark.CommandModuleName = naming.vesselName;
                 bookmark.VesselType = naming.vesselType;
                 bookmark.VesselSituation = VesselSituationDetector.GetSituation(vessel);
+                bookmark.VesselName = vessel.vesselName;
                 
                 if( sendEvent ) {
                     OnBookmarksUpdated.Fire();
