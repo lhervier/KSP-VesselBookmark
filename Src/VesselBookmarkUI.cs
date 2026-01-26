@@ -475,12 +475,7 @@ namespace com.github.lhervier.ksp {
                 commandModuleName = "Module not found";
             }
 
-            string comment;
-            if( !string.IsNullOrEmpty(bookmark.Comment) ) {
-                comment = bookmark.Comment;
-            } else {
-                comment = "No comment";
-            }
+            string comment = bookmark.Comment;
             
             bool isHovered = _hoveredBookmarkFlightID == bookmark.CommandModuleFlightID;
 
@@ -600,14 +595,13 @@ namespace com.github.lhervier.ksp {
             
             // Vessel situation
             if (!string.IsNullOrEmpty(bookmark.VesselSituation)) {
-                GUILayout.Label(bookmark.VesselSituation, _labelStyle);
+                GUILayout.Label(bookmark.VesselSituation, _labelStyle, GUILayout.Width(150));
+            } else {
+                GUILayout.Label("Unknown situation", _labelStyle, GUILayout.Width(150));
             }
 
             // Vessel name if different from command module name
             if( !string.IsNullOrEmpty(bookmark.VesselName) && bookmark.VesselName != commandModuleName ) {
-                if (!string.IsNullOrEmpty(bookmark.VesselSituation)) {
-                    GUILayout.Space(10);
-                }
                 GUILayout.Label($"Part of {bookmark.VesselName}", _labelStyle);
             }
             
@@ -615,10 +609,12 @@ namespace com.github.lhervier.ksp {
             Rect line2Rect = GUILayoutUtility.GetLastRect();
 
             // Line 3: Comment
+            if( !string.IsNullOrEmpty(comment) ) {
             GUILayout.BeginHorizontal();
-            GUILayout.Space(BUTTON_WIDTH + 4);
-            GUILayout.Label(comment, _labelStyle, GUILayout.ExpandWidth(true));
-            GUILayout.EndHorizontal();
+                GUILayout.Space(BUTTON_WIDTH + 4);
+                GUILayout.Label(comment, _labelStyle, GUILayout.ExpandWidth(true));
+                GUILayout.EndHorizontal();
+            }
             Rect line3Rect = GUILayoutUtility.GetLastRect();
             
             // Get the rect of the bookmark area BEFORE closing it
