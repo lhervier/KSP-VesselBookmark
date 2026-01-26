@@ -324,6 +324,33 @@ namespace com.github.lhervier.ksp {
                 _labelStyle,
                 GUILayout.ExpandWidth(true)
             );
+            
+            // Add bookmark button (for current active vessel)
+            if (FlightGlobals.ActiveVessel != null) {
+                if (GUILayout.Button(VesselBookmarkLocalization.GetString("buttonAdd"), _buttonStyle, GUILayout.Width(80))) {
+                
+                    uint vesselPersistentID = FlightGlobals.ActiveVessel.persistentId;
+                    string bookmarkID = VesselBookmark.ComputeBookmarkID(vesselPersistentID);
+                    
+                    if (VesselBookmarkManager.Instance.HasBookmark(bookmarkID)) {
+                        ScreenMessages.PostScreenMessage(
+                            VesselBookmarkLocalization.GetString("messageBookmarkAlreadyExists"),
+                            2f,
+                            ScreenMessageStyle.UPPER_CENTER
+                        );
+                    } else {
+                        VesselBookmark bookmark = new VesselBookmark(vesselPersistentID);
+                        if (VesselBookmarkManager.Instance.AddBookmark(bookmark)) {
+                            ScreenMessages.PostScreenMessage(
+                                VesselBookmarkLocalization.GetString("messageBookmarkAdded"),
+                                2f,
+                                ScreenMessageStyle.UPPER_CENTER
+                            );
+                        }
+                    }
+                }
+            }
+            
             if (GUILayout.Button(VesselBookmarkLocalization.GetString("buttonRefresh"), _buttonStyle, GUILayout.Width(80))) {
                 VesselBookmarkManager.Instance.RefreshBookmarks();
             }
