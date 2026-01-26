@@ -153,8 +153,8 @@ namespace com.github.lhervier.ksp {
                     _availableBodies.Add(vessel.mainBody);
                 }
 
-                if( !_availableVesselTypes.Contains(bookmark.VesselType) ) {
-                    _availableVesselTypes.Add(bookmark.VesselType);
+                if( !_availableVesselTypes.Contains(bookmark.GetBookmarkDisplayType()) ) {
+                    _availableVesselTypes.Add(bookmark.GetBookmarkDisplayType());
                 }
 
                 if( !_availableBookmarks.Contains(bookmark) ) {
