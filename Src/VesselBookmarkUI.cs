@@ -124,7 +124,7 @@ namespace com.github.lhervier.ksp {
             _availableVesselTypes.Clear();
 
             foreach (VesselBookmark bookmark in VesselBookmarkManager.Instance.Bookmarks) {
-                Vessel vessel = VesselBookmarkManager.Instance.GetVessel(bookmark);
+                Vessel vessel = VesselBookmarkManager.Instance.GetVessel(bookmark.CommandModuleFlightID);
                 if( vessel != null && !_availableBodies.Contains(vessel.mainBody) ) {
                     _availableBodies.Add(vessel.mainBody);
                 }
@@ -508,6 +508,12 @@ namespace com.github.lhervier.ksp {
             
             // Command module name (bold)
             GUILayout.Label($"<b>{commandModuleName}</b>", _labelStyle, GUILayout.Width(150));
+            
+            // Vessel situation
+            if (!string.IsNullOrEmpty(bookmark.VesselSituation)) {
+                GUILayout.Space(10);
+                GUILayout.Label(bookmark.VesselSituation, _labelStyle);
+            }
             
             GUILayout.FlexibleSpace();
             

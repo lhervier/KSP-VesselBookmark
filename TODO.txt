@@ -3,9 +3,9 @@
     => Ajouter un bouton "Add bookmark to current vessel"
     => Ca fait ajouter un "type" de bookmark (vessel ou commandModule)
 - Quand on remonte un bookmark, il remonte dans la liste complète sans tenir compte des filtres
-- Afficher la situation a coté du nom du nom du vaisseau et mettre le commentaire en dessous
 - Remplacer le filtre sur le type par une liste d'icônes cliquables
 - Traduire
 - Fenêtre de saisie du commentaire: Ajouter des ascenseurs pour le cas où saisie est longue.
 - Redimentionner les icones en 32x32 pour éviter les alertes au démarrage
 - Faire ressortir les bookmarks qui correspondent au vaisseau courant
+- Fermer temporairement la fenêtre qd on affiche le diague de confirmation de suppression
