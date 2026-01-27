@@ -483,7 +483,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             );
             
             // Bookmark name
-            GUILayout.Label($"<b>{bookmarkName}</b>", _labelStyle, GUILayout.Width(150));
+            GUILayout.Label($"<b>{bookmarkName} ({bookmark.GetBookmarkType()})</b>", _labelStyle, GUILayout.Width(150));
             GUILayout.FlexibleSpace();
             
             bool canMoveUp = currentIndex > 0;
