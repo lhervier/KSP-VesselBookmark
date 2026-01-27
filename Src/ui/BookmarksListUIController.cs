@@ -107,7 +107,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                         _availableBodies.Add(vesselBodyName);
                     }
                 }
-                this._availableBodies.Sort();
+                // Sort bodies by distance to Kerbol with moons interleaved
+                this._availableBodies = CelestialBodySorter.SortBodyNames(this._availableBodies);
                 this._availableBodies.Insert(0, ModLocalization.GetString("labelAll"));
                 this.SelectBody(selectedBody, false);
             } catch (Exception e) {
