@@ -2,6 +2,7 @@
     => Ajouter un bouton "Add bookmark to current vessel"
     => Ca fait ajouter un "type" de bookmark (vessel ou commandModule)
 - Trier les corps celeste dans leur ordre depuis le soleil (et pas par ordre alpha)
+- Traduire les types de vaisseaux
 - Remplacer le filtre sur le type par une liste d'icônes cliquables
 
 - Fenêtre de saisie du commentaire: Ajouter des ascenseurs pour le cas où saisie est longue.

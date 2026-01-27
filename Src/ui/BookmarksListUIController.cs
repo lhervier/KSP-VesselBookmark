@@ -6,6 +6,7 @@ using UnityEngine;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.bookmarksmod.util;
 using System;
+using KSP.UI.Screens.DebugToolbar.Screens.Cheats;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
@@ -48,97 +49,200 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             UpdateBookmarks();
         }
 
+        // ======================================================================
+
         /// <summary>
-        /// Update the bookmarks list
+        /// Get the selected body
         /// </summary>
-        public void UpdateBookmarks() {
+        /// <returns>The selected body</returns>
+        public string GetSelectedBody() {
+            if( _selectedBodyIndex >= 0 && _selectedBodyIndex < _availableBodies.Count ) {
+                return _availableBodies[_selectedBodyIndex];
+            } else {
+                return ModLocalization.GetString("labelAll");
+            }
+        }
+
+        /// <summary>
+        /// Select a body
+        /// </summary>
+        /// <param name="bodyName">The name of the body to select</param>
+        /// <param name="updateBookmarks">Whether to update the bookmarks list</param>
+        public void SelectBody(string bodyName, bool updateBookmarks = true) {
+            if( this._availableBodies.Contains(bodyName) ) {
+                this._selectedBodyIndex = this._availableBodies.IndexOf(bodyName);
+            } else {
+                this._selectedBodyIndex = 0;
+            }
+            if( updateBookmarks ) {
+                UpdateBookmarks();
+            }
+        }
+
+        /// <summary>
+        /// Select the next body
+        /// </summary>
+        public void SelectNextBody() {
+            _selectedBodyIndex = (_selectedBodyIndex + 1) % _availableBodies.Count;
+            UpdateBookmarks();
+        }
+
+        /// <summary>
+        /// Update the available bodies
+        /// </summary>
+        private void UpdateAvailableBodies() {
             try {
-                ModLogger.LogDebug($"Updating bookmarks");
-                _availableBookmarks.Clear();
-                
-                _availableBodies.Clear();
-                _availableBodies.Add(ModLocalization.GetString("labelAll"));
-
-                _availableVesselTypes.Clear();
-                _availableVesselTypes.Add(ModLocalization.GetString("labelAll"));
-
+                ModLogger.LogDebug($"Updating available bodies");
+                string selectedBody = GetSelectedBody();
+                this._availableBodies.Clear();
                 foreach (Bookmark bookmark in BookmarkManager.Instance.Bookmarks) {
-                    // Update the list of available bodies
                     Vessel vessel = bookmark.GetVessel();
-                    if( vessel != null && !_availableBodies.Contains(vessel.mainBody.bodyName) ) {
-                        _availableBodies.Add(vessel.mainBody.bodyName);
+                    if( vessel == null ) {
+                        continue;
+                    }
+                    string vesselBodyName = vessel.mainBody.bodyName;
+                    if( !_availableBodies.Contains(vesselBodyName) ) {
+                        _availableBodies.Add(vesselBodyName);
+                    }
+                }
+                this._availableBodies.Sort();
+                this._availableBodies.Insert(0, ModLocalization.GetString("labelAll"));
+                this.SelectBody(selectedBody, false);
+            } catch (Exception e) {
+                ModLogger.LogError($"Error updating available bodies: {e.Message}");
+            }
+        }
+
+        // ======================================================================
+
+        /// <summary>
+        /// Get the selected vessel type
+        /// </summary>
+        /// <returns>The selected vessel type</returns>
+        public string GetSelectedVesselType() {
+            if( _selectedVesselTypeIndex >= 0 && _selectedVesselTypeIndex < _availableVesselTypes.Count ) {
+                return _availableVesselTypes[_selectedVesselTypeIndex];
+            } else {
+                return ModLocalization.GetString("labelAll");
+            }
+        }
+
+        /// <summary>
+        /// Select a vessel type
+        /// </summary>
+        /// <param name="vesselTypeName">The name of the vessel type to select</param>
+        /// <param name="updateBookmarks">Whether to update the bookmarks list</param>
+        public void SelectVesselType(string vesselTypeName, bool updateBookmarks = true) {
+            if( this._availableVesselTypes.Contains(vesselTypeName) ) {
+                this._selectedVesselTypeIndex = this._availableVesselTypes.IndexOf(vesselTypeName);
+            } else {
+                this._selectedVesselTypeIndex = 0;
+            }
+            if( updateBookmarks ) {
+                UpdateBookmarks();
+            }
+        }
+
+        /// <summary>
+        /// Select the next vessel type
+        /// </summary>
+        public void SelectNextVesselType() {
+            _selectedVesselTypeIndex = (_selectedVesselTypeIndex + 1) % _availableVesselTypes.Count;
+            UpdateBookmarks();
+        }
+
+        private void UpdateAvailableVesselTypes() {
+            try {
+                ModLogger.LogDebug($"Updating available vessel types");
+                string selectedVesselType = GetSelectedVesselType();
+                this._availableVesselTypes.Clear();
+                foreach (Bookmark bookmark in BookmarkManager.Instance.Bookmarks) {
+                    VesselType vesselType = bookmark.GetBookmarkDisplayType();
+                    string vesselTypeName = vesselType.ToString();
+                    if( !_availableVesselTypes.Contains(vesselTypeName) ) {
+                        _availableVesselTypes.Add(vesselTypeName);
+                    }
+                }
+                this._availableVesselTypes.Sort();
+                this._availableVesselTypes.Insert(0, ModLocalization.GetString("labelAll"));
+                this.SelectVesselType(selectedVesselType, false);
+            } catch (Exception e) {
+                ModLogger.LogError($"Error updating available vessel types: {e.Message}");
+            }
+        }
+
+        // ======================================================================
+
+        /// <summary>
+        /// Update the available bookmarks
+        /// </summary>
+        private void UpdateAvailableBookmarks() {
+            try {
+                ModLogger.LogDebug($"Updating available bookmarks");
+                this._availableBookmarks.Clear();
+                
+                string selectedBody = GetSelectedBody();
+                string selectedVesselType = GetSelectedVesselType();
+                string all = ModLocalization.GetString("labelAll");
+                
+                foreach (Bookmark bookmark in BookmarkManager.Instance.Bookmarks) {
+                    Vessel vessel = bookmark.GetVessel();
+                    if( vessel == null ) {
+                        continue;
                     }
 
-                    // Update the list of available vessel types
-                    if( !_availableVesselTypes.Contains(bookmark.GetBookmarkDisplayType().ToString()) ) {
-                        _availableVesselTypes.Add(bookmark.GetBookmarkDisplayType().ToString());
-                    }
-
-                    // Add the bookmark to the list if it matches the selected body and vessel type
-                    if( _availableBookmarks.Contains(bookmark) ) {
-                        return;
-                    }
                     bool addBookmark;
-                    if( _selectedBodyIndex == 0 && _selectedVesselTypeIndex == 0 ) {
+                    if( string.Equals(selectedBody, all) && string.Equals(selectedVesselType, all) ) {
                         addBookmark = true;
-                    } else if( _selectedBodyIndex == 0 ) {
+                    } else if( string.Equals(selectedBody, all) ) {
                         addBookmark = string.Equals(
-                            bookmark.VesselType.ToString(), 
-                            _availableVesselTypes[_selectedVesselTypeIndex]
+                            bookmark.GetBookmarkDisplayType().ToString(), 
+                            selectedVesselType
                         );
-                    } else if( _selectedVesselTypeIndex == 0 ) {
+                    } else if( string.Equals(selectedVesselType, all) ) {
                         addBookmark = string.Equals(
                             vessel.mainBody.bodyName, 
-                            _availableBodies[_selectedBodyIndex]
+                            selectedBody
                         );
                     } else {
                         addBookmark = string.Equals(
                                 vessel.mainBody.bodyName, 
-                                _availableBodies[_selectedBodyIndex]
+                                selectedBody
                             ) 
                             && 
                             string.Equals(
-                                bookmark.VesselType.ToString(), 
-                                _availableVesselTypes[_selectedVesselTypeIndex]
+                                bookmark.GetBookmarkDisplayType().ToString(), 
+                                selectedVesselType
                             );
                     }
                     if( addBookmark ) {
                         _availableBookmarks.Add(bookmark);
                     }
                 }
+                this._availableBookmarks.Sort((a, b) => a.Order.CompareTo(b.Order));
+            } catch (Exception e) {
+                ModLogger.LogError($"Error updating available bookmarks: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Update the bookmarks list
+        /// </summary>
+        public void UpdateBookmarks() {
+            try {
+                ModLogger.LogDebug($"Updating bookmarks");
+                
+                this.UpdateAvailableBodies();
+                this.UpdateAvailableVesselTypes();
+                this.UpdateAvailableBookmarks();
             } catch (Exception e) {
                 ModLogger.LogError($"Error updating bookmarks: {e.Message}");
             }
         }
 
-        public string GetSelectedBody() {
-            return _availableBodies[_selectedBodyIndex];
-        }
-
-        public void SetSelectedBodyIndex(int index) {
-            _selectedBodyIndex = index;
-            UpdateBookmarks();
-        }
-
-        public void SelectNextBody() {
-            _selectedBodyIndex = (_selectedBodyIndex + 1) % _availableBodies.Count;
-            UpdateBookmarks();
-        }
-
-        public string GetSelectedVesselType() {
-            return _availableVesselTypes[_selectedVesselTypeIndex];
-        }
-
-        public void SetSelectedVesselTypeIndex(int index) {
-            _selectedVesselTypeIndex = index;
-            UpdateBookmarks();
-        }
-
-        public void SelectNextVesselType() {
-            _selectedVesselTypeIndex = (_selectedVesselTypeIndex + 1) % _availableVesselTypes.Count;
-            UpdateBookmarks();
-        }
-
+        /// <summary>
+        /// Clear the filters
+        /// </summary>
         public void ClearFilters() {
             _selectedBodyIndex = 0;
             _selectedVesselTypeIndex = 0;
