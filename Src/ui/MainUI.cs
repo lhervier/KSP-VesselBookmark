@@ -12,32 +12,20 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
     /// User interface for managing bookmarks
     /// </summary>
     [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
-    public class VesselBookmarkUI : MonoBehaviour {
+    public class MainUI : MonoBehaviour {
         
         private static readonly int BUTTON_HEIGHT = 20;
         private static readonly int BUTTON_WIDTH = 20;
 
         private ApplicationLauncherButton _toolbarButton;
         private Rect _mainWindowRect = new Rect(100, 100, 500, 600);
-        private bool _mainWindowsVisible = false;
         private int _mainWindowID;
         
         private Rect _editWindowRect = new Rect(200, 200, 400, 200);
-        private bool _editWindowVisible = false;
         private int _editWindowID;
         
         private Vector2 _scrollPosition = Vector2.zero;
         
-        // Filters
-        private CelestialBody _selectedBody = null;
-        private int _selectedBodyIndex = 0;
-        private VesselType? _selectedVesselType = null;
-        private int _selectedVesselTypeIndex = 0;
-        
-        // Edit window
-        private Bookmark _editingBookmark = null;
-        private string _editComment = "";
-
         // Icon cache
         private Dictionary<VesselType, VesselBookmarkButton> _vesselTypeButtons = new Dictionary<VesselType, VesselBookmarkButton>();
         private VesselBookmarkButton _removeButton;
@@ -46,9 +34,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private VesselBookmarkButton _goToButton;
         private VesselBookmarkButton _editButton;
         
-        // Hover state
-        private uint _hoveredBookmarkID = 0;
-
         // UI styles with white text
         private GUIStyle _labelStyle;
         private GUIStyle _buttonStyle;
@@ -59,10 +44,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private Texture2D _activeVesselBackground;
         private Texture2D _activeVesselBorder;
 
-        // Bookmarks list to display in the UI (cached for performance)
-        private List<Bookmark> _availableBookmarks = new List<Bookmark>();
-        private List<CelestialBody> _availableBodies = new List<CelestialBody>();
-        private List<VesselType> _availableVesselTypes = new List<VesselType>();
+        private MainUIController _mainUIController;
+        private EditCommentUIController _editUIController;
 
         private void Awake() {
             _mainWindowID = UnityEngine.Random.Range(1000, 2000);
@@ -124,6 +107,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             
             // Initialize textures for active vessel highlighting
             InitializeActiveVesselTextures();
+
+            this._mainUIController = new MainUIController();
+            this._editUIController = new EditCommentUIController();
         }
         
         /// <summary>
@@ -143,38 +129,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         private void OnBookmarksUpdated() {
             ModLogger.LogDebug($"OnBookmarksUpdated");
-            
-            _availableBookmarks.Clear();
-            _availableBodies.Clear();
-            _availableVesselTypes.Clear();
-
-            foreach (Bookmark bookmark in BookmarkManager.Instance.Bookmarks) {
-                Vessel vessel = bookmark.GetVessel();
-                if( vessel != null && !_availableBodies.Contains(vessel.mainBody) ) {
-                    _availableBodies.Add(vessel.mainBody);
-                }
-
-                if( !_availableVesselTypes.Contains(bookmark.GetBookmarkDisplayType()) ) {
-                    _availableVesselTypes.Add(bookmark.GetBookmarkDisplayType());
-                }
-
-                if( !_availableBookmarks.Contains(bookmark) ) {
-                    bool addBookmark;
-
-                    if( _selectedBody == null && _selectedVesselType == null ) {
-                        addBookmark = true;
-                    } else if( _selectedBody == null ) {
-                        addBookmark = bookmark.VesselType == _selectedVesselType;
-                    } else if( _selectedVesselType == null ) {
-                        addBookmark = vessel.mainBody == _selectedBody;
-                    } else {
-                        addBookmark = vessel.mainBody == _selectedBody && bookmark.VesselType == _selectedVesselType;
-                    }
-                    if( addBookmark ) {
-                        _availableBookmarks.Add(bookmark);
-                    }
-                }
-            }
+            _mainUIController.UpdateBookmarks();
         }
 
         private void EnsureWhiteTextStyles() {
@@ -262,8 +217,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// Toolbar button click handler (activation)
         /// </summary>
         private void OnToggleOn() {
-            _mainWindowsVisible = true;
-            _editWindowVisible = false;
+            _mainUIController.MainWindowsVisible = true;
+            _editUIController.CancelCommentEdition();
             BookmarkManager.Instance.RefreshBookmarks();
         }
         
@@ -271,8 +226,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// Toolbar button click handler (deactivation)
         /// </summary>
         private void OnToggleOff() {
-            _mainWindowsVisible = false;
-            _editWindowVisible = false;
+            _mainUIController.MainWindowsVisible = false;
+            _editUIController.CancelCommentEdition();
         }
         
         private void OnGUI() {
@@ -280,7 +235,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUI.skin = HighLogic.Skin;
             EnsureWhiteTextStyles();
             
-            if (_mainWindowsVisible) {
+            if (_mainUIController.MainWindowsVisible) {
                 _mainWindowRect = GUILayout.Window(
                     _mainWindowID,
                     _mainWindowRect,
@@ -295,7 +250,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 _mainWindowRect.y = Mathf.Clamp(_mainWindowRect.y, 0, Screen.height - _mainWindowRect.height);
             }
             
-            if (_editWindowVisible) {
+            if (_editUIController.IsEditingComment()) {
                 _editWindowRect = GUILayout.Window(
                     _editWindowID,
                     _editWindowRect,
@@ -319,9 +274,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             
             // Header
             GUILayout.BeginHorizontal();
-            var filteredCount = _availableBookmarks.Count;
+            var filteredCount = _mainUIController.AvailableBookmarks.Count;
             GUILayout.Label(
-                ModLocalization.GetString("labelBookmarks", filteredCount, _availableBookmarks.Count),
+                ModLocalization.GetString("labelBookmarks", filteredCount, _mainUIController.AvailableBookmarks.Count),
                 _labelStyle,
                 GUILayout.ExpandWidth(true)
             );
@@ -355,8 +310,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 BookmarkManager.Instance.RefreshBookmarks();
             }
             if (GUILayout.Button(ModLocalization.GetString("buttonClose"), _buttonStyle, GUILayout.Width(80))) {
-                _mainWindowsVisible = false;
-                _editWindowVisible = false;
+                _mainUIController.MainWindowsVisible = false;
+                _editUIController.CancelCommentEdition();
                 if (_toolbarButton != null) {
                     _toolbarButton.SetFalse();
                 }
@@ -374,11 +329,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             // Bookmarks list
             _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, false, true);
             
-            if (_availableBookmarks.Count == 0) {
+            if (_mainUIController.AvailableBookmarks.Count == 0) {
                 GUILayout.Label(ModLocalization.GetString("labelNoBookmarks"), _labelStyle);
             } else {
-                foreach (Bookmark bookmark in _availableBookmarks) {
-                    DrawBookmarkItem(bookmark);
+                for(int i = 0; i < _mainUIController.AvailableBookmarks.Count; i++) {
+                    Bookmark bookmark = _mainUIController.AvailableBookmarks[i];
+                    DrawBookmarkItem(bookmark, i);
                 }
             }
             
@@ -419,26 +375,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.Label(ModLocalization.GetString("labelBody"), _labelStyle, GUILayout.Width(50));
             
             // Create dropdown options for body
-            string[] bodyOptions = new string[_availableBodies.Count + 1];
-            bodyOptions[0] = ModLocalization.GetString("labelAll");
-            for (int i = 0; i < _availableBodies.Count; i++) {
-                bodyOptions[i + 1] = _availableBodies[i].bodyName;
-            }
-            
-            string currentBodyName;
-            if( _selectedBody != null) {
-                currentBodyName = _selectedBody.bodyName;
-            } else {
-                currentBodyName = ModLocalization.GetString("labelAll");
-            }
+            string currentBodyName= _mainUIController.GetSelectedBody();
             if (GUILayout.Button(currentBodyName, _buttonStyle, GUILayout.Width(120))) {
-                _selectedBodyIndex = (_selectedBodyIndex + 1) % bodyOptions.Length;
-                if (_selectedBodyIndex == 0) {
-                    _selectedBody = null;
-                } else {
-                    _selectedBody = _availableBodies[_selectedBodyIndex - 1];
-                }
-                this.OnBookmarksUpdated();
+                _mainUIController.SelectNextBody();
             }
             
             GUILayout.Space(10);
@@ -447,36 +386,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.Label(ModLocalization.GetString("labelType"), _labelStyle, GUILayout.Width(50));
             
             // Create dropdown options for vessel type
-            string[] vesselTypeOptions = new string[_availableVesselTypes.Count + 1];
-            vesselTypeOptions[0] = ModLocalization.GetString("labelAll");
-            for (int i = 0; i < _availableVesselTypes.Count; i++) {
-                vesselTypeOptions[i + 1] = _availableVesselTypes[i].ToString();
-            }
-            
-            string currentVesselTypeName;
-            if( _selectedVesselType.HasValue) {
-                currentVesselTypeName = GetVesselTypeDisplayName(_selectedVesselType.Value);
-            } else {
-                currentVesselTypeName = ModLocalization.GetString("labelAll");
-            }
+            string currentVesselTypeName = _mainUIController.GetSelectedVesselType();
             if (GUILayout.Button(currentVesselTypeName, _buttonStyle, GUILayout.Width(100))) {
-                _selectedVesselTypeIndex = (_selectedVesselTypeIndex + 1) % vesselTypeOptions.Length;
-                if (_selectedVesselTypeIndex == 0) {
-                    _selectedVesselType = null;
-                } else {
-                    _selectedVesselType = _availableVesselTypes[_selectedVesselTypeIndex - 1];
-                }
-                this.OnBookmarksUpdated();
+                _mainUIController.SelectNextVesselType();
             }
 
             GUILayout.FlexibleSpace();
             
             if (GUILayout.Button(ModLocalization.GetString("buttonClear"), _buttonStyle, GUILayout.Width(60))) {
-                _selectedBody = null;
-                _selectedVesselType = null;
-                _selectedBodyIndex = 0;
-                _selectedVesselTypeIndex = 0;
-                this.OnBookmarksUpdated();
+                _mainUIController.ClearFilters();
             }
             
             GUILayout.EndHorizontal();
@@ -491,8 +409,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.BeginVertical();
             
             GUILayout.Label(ModLocalization.GetString("labelComment"), _labelStyle);
-            _editComment = GUILayout.TextArea(
-                _editComment, 
+            _editUIController.EditedComment = GUILayout.TextArea(
+                _editUIController.EditedComment, 
                 _textAreaStyle,
                 GUILayout.Height(100), 
                 GUILayout.ExpandWidth(true)
@@ -502,18 +420,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             
             GUILayout.BeginHorizontal();
             if (GUILayout.Button(ModLocalization.GetString("buttonSave"), _buttonStyle)) {
-                if (_editingBookmark != null) {
-                    _editingBookmark.Comment = _editComment;
-                    this.OnBookmarksUpdated();
-                }
-                _editWindowVisible = false;
-                _editingBookmark = null;
-                _editComment = "";
+                _editUIController.SaveComment();
             }
             if (GUILayout.Button(ModLocalization.GetString("buttonCancel"), _buttonStyle)) {
-                _editWindowVisible = false;
-                _editingBookmark = null;
-                _editComment = "";
+                _editUIController.CancelCommentEdition();
             }
             GUILayout.EndHorizontal();
             
@@ -526,7 +436,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// <summary>
         /// Draws a bookmark item
         /// </summary>
-        private void DrawBookmarkItem(Bookmark bookmark) {
+        private void DrawBookmarkItem(Bookmark bookmark, int currentIndex) {
             string bookmarkName;
             if( !string.IsNullOrEmpty(bookmark.GetBookmarkDisplayName())) {
                 bookmarkName = bookmark.GetBookmarkDisplayName();
@@ -536,7 +446,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             string comment = bookmark.Comment;
             
-            bool isHovered = _hoveredBookmarkID == bookmark.GetBookmarkID();
+            bool isHovered = _mainUIController.HoveredBookmarkID == bookmark.GetBookmarkID();
             
             // Check if this bookmark corresponds to the active vessel
             bool isActiveVessel = false;
@@ -576,9 +486,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.Label($"<b>{bookmarkName}</b>", _labelStyle, GUILayout.Width(150));
             GUILayout.FlexibleSpace();
             
-            int currentIndex = _availableBookmarks.IndexOf(bookmark);
             bool canMoveUp = currentIndex > 0;
-            bool canMoveDown = currentIndex < _availableBookmarks.Count - 1;
+            bool canMoveDown = currentIndex < _mainUIController.AvailableBookmarks.Count - 1;
                 
             // Small spacing before buttons
             GUILayout.Space(5);
@@ -587,9 +496,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _editButton.Draw(
                 () => isHovered,
                 () => {
-                    _editingBookmark = bookmark;
-                    _editComment = bookmark.Comment;
-                    _editWindowVisible = true;
+                    _editUIController.EditComment(bookmark);
                 }
             );
             
@@ -605,8 +512,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                         return;
                     }
                     if (VesselNavigator.NavigateToVessel(vessel)) {
-                        _mainWindowsVisible = false;
-                        _editWindowVisible = false;
+                        _mainUIController.MainWindowsVisible = false;
+                        _editUIController.CancelCommentEdition();
                         if (_toolbarButton != null) {
                             _toolbarButton.SetFalse();
                         }
@@ -621,7 +528,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             System.Action moveUpAction = null;
             if( canMoveUp ) {
                 moveUpAction = () => {
-                    Bookmark previousBookmark = _availableBookmarks[currentIndex - 1];
+                    Bookmark previousBookmark = _mainUIController.AvailableBookmarks[currentIndex - 1];
                     BookmarkManager.Instance.SwapBookmarks(
                         bookmark, 
                         previousBookmark
@@ -637,7 +544,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             System.Action moveDownAction = null;
             if( canMoveDown ) {
                 moveDownAction = () => {
-                    Bookmark nextBookmark = _availableBookmarks[currentIndex + 1];
+                    Bookmark nextBookmark = _mainUIController.AvailableBookmarks[currentIndex + 1];
                     BookmarkManager.Instance.SwapBookmarks(
                         bookmark, 
                         nextBookmark
@@ -656,16 +563,16 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 () => isHovered,
                 () => {
                     // Close main window temporarily to ensure confirmation dialog appears on top
-                    bool wasMainWindowVisible = _mainWindowsVisible;
-                    _mainWindowsVisible = false;
+                    bool wasMainWindowVisible = _mainUIController.MainWindowsVisible;
+                    _mainUIController.MainWindowsVisible = false;
                     
                     VesselBookmarkUIDialog.ConfirmRemoval(
                         () => {
                             BookmarkManager.Instance.RemoveBookmark(bookmark);
-                            _mainWindowsVisible = wasMainWindowVisible;
+                            _mainUIController.MainWindowsVisible = wasMainWindowVisible;
                         },
                         () => {
-                            _mainWindowsVisible = wasMainWindowVisible;
+                            _mainUIController.MainWindowsVisible = wasMainWindowVisible;
                         }
                     );
                 }
@@ -729,7 +636,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             // Detect hover and update the hovered bookmark ID
             if (bookmarkRect.Contains(Event.current.mousePosition)) {
-                _hoveredBookmarkID = bookmark.GetBookmarkID();
+                _mainUIController.HoveredBookmarkID = bookmark.GetBookmarkID();
             }
         }
         
