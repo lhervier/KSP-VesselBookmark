@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace com.github.lhervier.ksp.bookmarksmod {
+namespace com.github.lhervier.ksp.bookmarksmod.util {
     
     /// <summary>
     /// Detects and describes vessel situation
@@ -14,46 +14,46 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             try {
                 if (vessel == null) {
                     ModLogger.LogError($"Getting situation: Vessel is null");
-                    return VesselBookmarkLocalization.GetString("situationUnknown");
+                    return ModLocalization.GetString("situationUnknown");
                 }
                 ModLogger.LogDebug($"Getting situation for vessel {vessel.vesselName}");
                 
                 // Check if vessel is destroyed
                 if (vessel.state == Vessel.State.DEAD) {
                     ModLogger.LogDebug($"- Vessel is destroyed");
-                    return VesselBookmarkLocalization.GetString("situationDestroyed");
+                    return ModLocalization.GetString("situationDestroyed");
                 }
                 
                 CelestialBody mainBody = vessel.mainBody;
-                string bodyName = mainBody != null ? mainBody.bodyName : VesselBookmarkLocalization.GetString("situationUnknown");
+                string bodyName = mainBody != null ? mainBody.bodyName : ModLocalization.GetString("situationUnknown");
                 
                 ModLogger.LogDebug($"- Main body: {bodyName}");
                 ModLogger.LogDebug($"- Situation: {vessel.situation}");
                 switch (vessel.situation) {
                     case Vessel.Situations.LANDED:
-                        return VesselBookmarkLocalization.GetString("situationLanded", bodyName);
+                        return ModLocalization.GetString("situationLanded", bodyName);
                         
                     case Vessel.Situations.SPLASHED:
-                        return VesselBookmarkLocalization.GetString("situationSplashed", bodyName);
+                        return ModLocalization.GetString("situationSplashed", bodyName);
                         
                     case Vessel.Situations.PRELAUNCH:
-                        return VesselBookmarkLocalization.GetString("situationPrelaunch", bodyName);
+                        return ModLocalization.GetString("situationPrelaunch", bodyName);
                         
                     case Vessel.Situations.SUB_ORBITAL:
-                        return VesselBookmarkLocalization.GetString("situationSuborbital", bodyName);
+                        return ModLocalization.GetString("situationSuborbital", bodyName);
                         
                     case Vessel.Situations.ORBITING:
-                        return VesselBookmarkLocalization.GetString("situationOrbiting", bodyName);
+                        return ModLocalization.GetString("situationOrbiting", bodyName);
                         
                     case Vessel.Situations.ESCAPING:
-                        return VesselBookmarkLocalization.GetString("situationEscaping", bodyName);
+                        return ModLocalization.GetString("situationEscaping", bodyName);
                         
                     default:
-                        return VesselBookmarkLocalization.GetString("situationInFlight", bodyName);
+                        return ModLocalization.GetString("situationInFlight", bodyName);
                 }
             } catch (System.Exception e) {
                 ModLogger.LogError($"Error getting situation for vessel {vessel.vesselName}: {e.Message}");
-                return VesselBookmarkLocalization.GetString("situationUnknown");
+                return ModLocalization.GetString("situationUnknown");
             }
         }
     }

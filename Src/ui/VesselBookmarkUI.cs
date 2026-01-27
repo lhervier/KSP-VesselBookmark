@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
+using com.github.lhervier.ksp.bookmarksmod.util;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui {
     
@@ -82,7 +83,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             // Initialize remove button
             _removeButton = new VesselBookmarkButton(
                 "VesselBookmarkMod/buttons/remove",
-                VesselBookmarkLocalization.GetString("tooltipRemove"), 
+                ModLocalization.GetString("tooltipRemove"), 
                 BUTTON_WIDTH, 
                 BUTTON_HEIGHT
             );
@@ -90,7 +91,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             // Initialize move up button
             _moveUpButton = new VesselBookmarkButton(
                 "VesselBookmarkMod/buttons/up",
-                VesselBookmarkLocalization.GetString("tooltipMoveUp"), 
+                ModLocalization.GetString("tooltipMoveUp"), 
                 BUTTON_WIDTH, 
                 BUTTON_HEIGHT
             );
@@ -98,7 +99,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             // Initialize move down button
             _moveDownButton = new VesselBookmarkButton(
                 "VesselBookmarkMod/buttons/down",
-                VesselBookmarkLocalization.GetString("tooltipMoveDown"), 
+                ModLocalization.GetString("tooltipMoveDown"), 
                 BUTTON_WIDTH, 
                 BUTTON_HEIGHT
             );
@@ -106,7 +107,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             // Initialize go to button
             _goToButton = new VesselBookmarkButton(
                 "VesselBookmarkMod/buttons/switch",
-                VesselBookmarkLocalization.GetString("tooltipGoTo"), 
+                ModLocalization.GetString("tooltipGoTo"), 
                 BUTTON_WIDTH, 
                 BUTTON_HEIGHT
             );
@@ -114,12 +115,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             // Initialize edit button
             _editButton = new VesselBookmarkButton(
                 "VesselBookmarkMod/buttons/edit",
-                VesselBookmarkLocalization.GetString("tooltipEdit"), 
+                ModLocalization.GetString("tooltipEdit"), 
                 BUTTON_WIDTH, 
                 BUTTON_HEIGHT
             );
 
-            VesselBookmarkManager.Instance.OnBookmarksUpdated.Add(OnBookmarksUpdated);
+            BookmarkManager.Instance.OnBookmarksUpdated.Add(OnBookmarksUpdated);
             
             // Initialize textures for active vessel highlighting
             InitializeActiveVesselTextures();
@@ -147,7 +148,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _availableBodies.Clear();
             _availableVesselTypes.Clear();
 
-            foreach (Bookmark bookmark in VesselBookmarkManager.Instance.Bookmarks) {
+            foreach (Bookmark bookmark in BookmarkManager.Instance.Bookmarks) {
                 Vessel vessel = bookmark.GetVessel();
                 if( vessel != null && !_availableBodies.Contains(vessel.mainBody) ) {
                     _availableBodies.Add(vessel.mainBody);
@@ -210,7 +211,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private void OnDestroy() {
             GameEvents.onGUIApplicationLauncherReady.Remove(OnLauncherReady);
             OnLauncherUnready();
-            VesselBookmarkManager.Instance.OnBookmarksUpdated.Remove(OnBookmarksUpdated);
+            BookmarkManager.Instance.OnBookmarksUpdated.Remove(OnBookmarksUpdated);
             
             // Clean up textures
             if (_activeVesselBackground != null) {
@@ -263,7 +264,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private void OnToggleOn() {
             _mainWindowsVisible = true;
             _editWindowVisible = false;
-            VesselBookmarkManager.Instance.RefreshBookmarks();
+            BookmarkManager.Instance.RefreshBookmarks();
         }
         
         /// <summary>
@@ -284,7 +285,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     _mainWindowID,
                     _mainWindowRect,
                     DrawMainWindow,
-                    VesselBookmarkLocalization.GetString("windowTitle"),
+                    ModLocalization.GetString("windowTitle"),
                     GUILayout.MinWidth(500),
                     GUILayout.MinHeight(400)
                 );
@@ -299,7 +300,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     _editWindowID,
                     _editWindowRect,
                     DrawEditWindow,
-                    VesselBookmarkLocalization.GetString("editWindowTitle"),
+                    ModLocalization.GetString("editWindowTitle"),
                     GUILayout.MinWidth(400),
                     GUILayout.MinHeight(200)
                 );
@@ -320,28 +321,28 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.BeginHorizontal();
             var filteredCount = _availableBookmarks.Count;
             GUILayout.Label(
-                VesselBookmarkLocalization.GetString("labelBookmarks", filteredCount, _availableBookmarks.Count),
+                ModLocalization.GetString("labelBookmarks", filteredCount, _availableBookmarks.Count),
                 _labelStyle,
                 GUILayout.ExpandWidth(true)
             );
             
             // Add bookmark button (for current active vessel)
             if (FlightGlobals.ActiveVessel != null) {
-                if (GUILayout.Button(VesselBookmarkLocalization.GetString("buttonAdd"), _buttonStyle, GUILayout.Width(80))) {
+                if (GUILayout.Button(ModLocalization.GetString("buttonAdd"), _buttonStyle, GUILayout.Width(80))) {
                 
                     uint vesselPersistentID = FlightGlobals.ActiveVessel.persistentId;
                     
-                    if (VesselBookmarkManager.Instance.HasBookmark(BookmarkType.Vessel, vesselPersistentID)) {
+                    if (BookmarkManager.Instance.HasBookmark(BookmarkType.Vessel, vesselPersistentID)) {
                         ScreenMessages.PostScreenMessage(
-                            VesselBookmarkLocalization.GetString("messageBookmarkAlreadyExists"),
+                            ModLocalization.GetString("messageBookmarkAlreadyExists"),
                             2f,
                             ScreenMessageStyle.UPPER_CENTER
                         );
                     } else {
                         VesselBookmark bookmark = new VesselBookmark(vesselPersistentID);
-                        if (VesselBookmarkManager.Instance.AddBookmark(bookmark)) {
+                        if (BookmarkManager.Instance.AddBookmark(bookmark)) {
                             ScreenMessages.PostScreenMessage(
-                                VesselBookmarkLocalization.GetString("messageBookmarkAdded"),
+                                ModLocalization.GetString("messageBookmarkAdded"),
                                 2f,
                                 ScreenMessageStyle.UPPER_CENTER
                             );
@@ -350,10 +351,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 }
             }
             
-            if (GUILayout.Button(VesselBookmarkLocalization.GetString("buttonRefresh"), _buttonStyle, GUILayout.Width(80))) {
-                VesselBookmarkManager.Instance.RefreshBookmarks();
+            if (GUILayout.Button(ModLocalization.GetString("buttonRefresh"), _buttonStyle, GUILayout.Width(80))) {
+                BookmarkManager.Instance.RefreshBookmarks();
             }
-            if (GUILayout.Button(VesselBookmarkLocalization.GetString("buttonClose"), _buttonStyle, GUILayout.Width(80))) {
+            if (GUILayout.Button(ModLocalization.GetString("buttonClose"), _buttonStyle, GUILayout.Width(80))) {
                 _mainWindowsVisible = false;
                 _editWindowVisible = false;
                 if (_toolbarButton != null) {
@@ -374,7 +375,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, false, true);
             
             if (_availableBookmarks.Count == 0) {
-                GUILayout.Label(VesselBookmarkLocalization.GetString("labelNoBookmarks"), _labelStyle);
+                GUILayout.Label(ModLocalization.GetString("labelNoBookmarks"), _labelStyle);
             } else {
                 foreach (Bookmark bookmark in _availableBookmarks) {
                     DrawBookmarkItem(bookmark);
@@ -415,11 +416,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.BeginHorizontal();
             
             // Body filter
-            GUILayout.Label(VesselBookmarkLocalization.GetString("labelBody"), _labelStyle, GUILayout.Width(50));
+            GUILayout.Label(ModLocalization.GetString("labelBody"), _labelStyle, GUILayout.Width(50));
             
             // Create dropdown options for body
             string[] bodyOptions = new string[_availableBodies.Count + 1];
-            bodyOptions[0] = VesselBookmarkLocalization.GetString("labelAll");
+            bodyOptions[0] = ModLocalization.GetString("labelAll");
             for (int i = 0; i < _availableBodies.Count; i++) {
                 bodyOptions[i + 1] = _availableBodies[i].bodyName;
             }
@@ -428,7 +429,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             if( _selectedBody != null) {
                 currentBodyName = _selectedBody.bodyName;
             } else {
-                currentBodyName = VesselBookmarkLocalization.GetString("labelAll");
+                currentBodyName = ModLocalization.GetString("labelAll");
             }
             if (GUILayout.Button(currentBodyName, _buttonStyle, GUILayout.Width(120))) {
                 _selectedBodyIndex = (_selectedBodyIndex + 1) % bodyOptions.Length;
@@ -443,11 +444,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.Space(10);
             
              // Vessel Type filter
-            GUILayout.Label(VesselBookmarkLocalization.GetString("labelType"), _labelStyle, GUILayout.Width(50));
+            GUILayout.Label(ModLocalization.GetString("labelType"), _labelStyle, GUILayout.Width(50));
             
             // Create dropdown options for vessel type
             string[] vesselTypeOptions = new string[_availableVesselTypes.Count + 1];
-            vesselTypeOptions[0] = VesselBookmarkLocalization.GetString("labelAll");
+            vesselTypeOptions[0] = ModLocalization.GetString("labelAll");
             for (int i = 0; i < _availableVesselTypes.Count; i++) {
                 vesselTypeOptions[i + 1] = _availableVesselTypes[i].ToString();
             }
@@ -456,7 +457,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             if( _selectedVesselType.HasValue) {
                 currentVesselTypeName = GetVesselTypeDisplayName(_selectedVesselType.Value);
             } else {
-                currentVesselTypeName = VesselBookmarkLocalization.GetString("labelAll");
+                currentVesselTypeName = ModLocalization.GetString("labelAll");
             }
             if (GUILayout.Button(currentVesselTypeName, _buttonStyle, GUILayout.Width(100))) {
                 _selectedVesselTypeIndex = (_selectedVesselTypeIndex + 1) % vesselTypeOptions.Length;
@@ -470,7 +471,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             GUILayout.FlexibleSpace();
             
-            if (GUILayout.Button(VesselBookmarkLocalization.GetString("buttonClear"), _buttonStyle, GUILayout.Width(60))) {
+            if (GUILayout.Button(ModLocalization.GetString("buttonClear"), _buttonStyle, GUILayout.Width(60))) {
                 _selectedBody = null;
                 _selectedVesselType = null;
                 _selectedBodyIndex = 0;
@@ -489,7 +490,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private void DrawEditWindow(int windowID) {
             GUILayout.BeginVertical();
             
-            GUILayout.Label(VesselBookmarkLocalization.GetString("labelComment"), _labelStyle);
+            GUILayout.Label(ModLocalization.GetString("labelComment"), _labelStyle);
             _editComment = GUILayout.TextArea(
                 _editComment, 
                 _textAreaStyle,
@@ -500,7 +501,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.Space(10);
             
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button(VesselBookmarkLocalization.GetString("buttonSave"), _buttonStyle)) {
+            if (GUILayout.Button(ModLocalization.GetString("buttonSave"), _buttonStyle)) {
                 if (_editingBookmark != null) {
                     _editingBookmark.Comment = _editComment;
                     this.OnBookmarksUpdated();
@@ -509,7 +510,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 _editingBookmark = null;
                 _editComment = "";
             }
-            if (GUILayout.Button(VesselBookmarkLocalization.GetString("buttonCancel"), _buttonStyle)) {
+            if (GUILayout.Button(ModLocalization.GetString("buttonCancel"), _buttonStyle)) {
                 _editWindowVisible = false;
                 _editingBookmark = null;
                 _editComment = "";
@@ -530,7 +531,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             if( !string.IsNullOrEmpty(bookmark.GetBookmarkDisplayName())) {
                 bookmarkName = bookmark.GetBookmarkDisplayName();
             } else {
-                bookmarkName = VesselBookmarkLocalization.GetString("labelModuleNotFound");
+                bookmarkName = ModLocalization.GetString("labelModuleNotFound");
             }
 
             string comment = bookmark.Comment;
@@ -621,7 +622,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             if( canMoveUp ) {
                 moveUpAction = () => {
                     Bookmark previousBookmark = _availableBookmarks[currentIndex - 1];
-                    VesselBookmarkManager.Instance.SwapBookmarks(
+                    BookmarkManager.Instance.SwapBookmarks(
                         bookmark, 
                         previousBookmark
                     );
@@ -637,7 +638,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             if( canMoveDown ) {
                 moveDownAction = () => {
                     Bookmark nextBookmark = _availableBookmarks[currentIndex + 1];
-                    VesselBookmarkManager.Instance.SwapBookmarks(
+                    BookmarkManager.Instance.SwapBookmarks(
                         bookmark, 
                         nextBookmark
                     );
@@ -660,7 +661,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     
                     VesselBookmarkUIDialog.ConfirmRemoval(
                         () => {
-                            VesselBookmarkManager.Instance.RemoveBookmark(bookmark);
+                            BookmarkManager.Instance.RemoveBookmark(bookmark);
                             _mainWindowsVisible = wasMainWindowVisible;
                         },
                         () => {
@@ -681,12 +682,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             if (!string.IsNullOrEmpty(bookmark.VesselSituation)) {
                 GUILayout.Label(bookmark.VesselSituation, _labelStyle, GUILayout.Width(150));
             } else {
-                GUILayout.Label(VesselBookmarkLocalization.GetString("labelUnknownSituation"), _labelStyle, GUILayout.Width(150));
+                GUILayout.Label(ModLocalization.GetString("labelUnknownSituation"), _labelStyle, GUILayout.Width(150));
             }
 
             // Bookmark is prt of 
             if( bookmark.ShouldDrawPartOf() ) {
-                GUILayout.Label(VesselBookmarkLocalization.GetString("labelPartOf", bookmark.VesselName), _labelStyle);
+                GUILayout.Label(ModLocalization.GetString("labelPartOf", bookmark.VesselName), _labelStyle);
             }
             
             GUILayout.EndHorizontal();
@@ -737,18 +738,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         private string GetVesselTypeDisplayName(VesselType type) {
             switch (type) {
-                case VesselType.Base: return VesselBookmarkLocalization.GetString("vesselTypeBase");
-                case VesselType.Debris: return VesselBookmarkLocalization.GetString("vesselTypeDebris");
-                case VesselType.DroppedPart: return VesselBookmarkLocalization.GetString("vesselTypeDebris");
-                case VesselType.Lander: return VesselBookmarkLocalization.GetString("vesselTypeLander");
-                case VesselType.Plane: return VesselBookmarkLocalization.GetString("vesselTypePlane");
-                case VesselType.Probe: return VesselBookmarkLocalization.GetString("vesselTypeProbe");
-                case VesselType.Relay: return VesselBookmarkLocalization.GetString("vesselTypeRelay");
-                case VesselType.Rover: return VesselBookmarkLocalization.GetString("vesselTypeRover");
-                case VesselType.Ship: return VesselBookmarkLocalization.GetString("vesselTypeShip");
-                case VesselType.Station: return VesselBookmarkLocalization.GetString("vesselTypeStation");
+                case VesselType.Base: return ModLocalization.GetString("vesselTypeBase");
+                case VesselType.Debris: return ModLocalization.GetString("vesselTypeDebris");
+                case VesselType.DroppedPart: return ModLocalization.GetString("vesselTypeDebris");
+                case VesselType.Lander: return ModLocalization.GetString("vesselTypeLander");
+                case VesselType.Plane: return ModLocalization.GetString("vesselTypePlane");
+                case VesselType.Probe: return ModLocalization.GetString("vesselTypeProbe");
+                case VesselType.Relay: return ModLocalization.GetString("vesselTypeRelay");
+                case VesselType.Rover: return ModLocalization.GetString("vesselTypeRover");
+                case VesselType.Ship: return ModLocalization.GetString("vesselTypeShip");
+                case VesselType.Station: return ModLocalization.GetString("vesselTypeStation");
                 
-                default: return VesselBookmarkLocalization.GetString("vesselTypeOther");
+                default: return ModLocalization.GetString("vesselTypeOther");
             }
         }
         

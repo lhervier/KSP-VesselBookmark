@@ -9,7 +9,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
     /// <summary>
     /// Central bookmark manager
     /// </summary>
-    public class VesselBookmarkManager {
+    public class BookmarkManager {
         
         /// <summary>
         /// Name of the node in the config file where bookmarks are saved
@@ -20,11 +20,11 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <summary>
         /// Singleton instance
         /// </summary>
-        private static VesselBookmarkManager _instance;
-        public static VesselBookmarkManager Instance {
+        private static BookmarkManager _instance;
+        public static BookmarkManager Instance {
             get {
                 if (_instance == null) {
-                    _instance = new VesselBookmarkManager();
+                    _instance = new BookmarkManager();
                 }
                 return _instance;
             }

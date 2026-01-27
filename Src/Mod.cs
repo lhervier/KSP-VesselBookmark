@@ -7,9 +7,9 @@ using UnityEngine;
 namespace com.github.lhervier.ksp.bookmarksmod {
 	
 	[KSPAddon(KSPAddon.Startup.PSystemSpawn, false)]
-    public class VesselBookmarkMod : MonoBehaviour {
+    public class Mod : MonoBehaviour {
         
-        private VesselBookmarkManager _manager;
+        private BookmarkManager _manager;
         
         protected void Awake() 
         {
@@ -22,7 +22,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             
             // Initialize the bookmark manager
             // The singleton will be created automatically on first access
-            this._manager = VesselBookmarkManager.Instance;
+            this._manager = BookmarkManager.Instance;
             ModLogger.LogInfo("VesselBookmarkManager initialized");
 
             // Subscribe to save/load events

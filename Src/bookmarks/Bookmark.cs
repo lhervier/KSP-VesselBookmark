@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using com.github.lhervier.ksp.bookmarksmod;
+using com.github.lhervier.ksp.bookmarksmod.util;
 
 namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
     
@@ -195,7 +196,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
                 VesselType = vessel.vesselType;
 
                 if( sendEvent ) {
-                    VesselBookmarkManager.Instance.OnBookmarksUpdated.Fire();
+                    BookmarkManager.Instance.OnBookmarksUpdated.Fire();
                 }
 
                 return true;

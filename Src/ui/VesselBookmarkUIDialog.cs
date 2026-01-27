@@ -16,22 +16,22 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             
             // Use localized strings if not provided
             if (string.IsNullOrEmpty(title)) {
-                title = VesselBookmarkLocalization.GetString("dialogRemoveTitle");
+                title = ModLocalization.GetString("dialogRemoveTitle");
             }
             if (string.IsNullOrEmpty(message)) {
-                message = VesselBookmarkLocalization.GetString("dialogRemoveMessage");
+                message = ModLocalization.GetString("dialogRemoveMessage");
             }
             
             DialogGUIBase[] options = new DialogGUIBase[] {
                 new DialogGUIButton(
-                    VesselBookmarkLocalization.GetString("dialogButtonRemove"), 
+                    ModLocalization.GetString("dialogButtonRemove"), 
                     () => {
                         onConfirm();
                     }, 
                     true
                 ),
                 new DialogGUIButton(
-                    VesselBookmarkLocalization.GetString("dialogButtonCancel"), 
+                    ModLocalization.GetString("dialogButtonCancel"), 
                     () => {
                         if (onCancel != null) {
                             onCancel();

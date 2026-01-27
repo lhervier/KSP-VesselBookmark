@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace com.github.lhervier.ksp.bookmarksmod {
+namespace com.github.lhervier.ksp.bookmarksmod.util {
     
     /// <summary>
     /// Manages navigation to vessels

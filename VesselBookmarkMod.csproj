@@ -57,6 +57,7 @@
     <Compile Include="Src/*.cs" />
     <Compile Include="Src/bookmarks/*.cs" />
     <Compile Include="Src/ui/*.cs" />
+    <Compile Include="Src/util/*.cs" />
   </ItemGroup>
   
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />

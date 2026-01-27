@@ -7,7 +7,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
     /// Handles localization for the Vessel Bookmark mod
     /// Uses KSP's standard Localizer system
     /// </summary>
-    public static class VesselBookmarkLocalization {
+    public static class ModLocalization {
         
         /// <summary>
         /// Gets a localized string with parameters
