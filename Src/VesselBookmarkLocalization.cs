@@ -1,7 +1,7 @@
 using System;
 using KSP.Localization;
 
-namespace com.github.lhervier.ksp {
+namespace com.github.lhervier.ksp.bookmarksmod {
     
     /// <summary>
     /// Handles localization for the Vessel Bookmark mod

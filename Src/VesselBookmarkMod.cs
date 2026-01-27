@@ -4,7 +4,7 @@ using System.IO;
 using Expansions.Missions.Editor;
 using UnityEngine;
 
-namespace com.github.lhervier.ksp {
+namespace com.github.lhervier.ksp.bookmarksmod {
 	
 	[KSPAddon(KSPAddon.Startup.PSystemSpawn, false)]
     public class VesselBookmarkMod : MonoBehaviour {

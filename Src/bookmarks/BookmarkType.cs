@@ -1,4 +1,4 @@
-namespace com.github.lhervier.ksp.bookmarks {
+namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
     public enum BookmarkType {
         Unknown = -1,
         Vessel = 0,

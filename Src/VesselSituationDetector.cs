@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace com.github.lhervier.ksp {
+namespace com.github.lhervier.ksp.bookmarksmod {
     
     /// <summary>
     /// Detects and describes vessel situation

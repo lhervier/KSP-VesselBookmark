@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace com.github.lhervier.ksp.ui {
+namespace com.github.lhervier.ksp.bookmarksmod.ui {
     
     /// <summary>
     /// Represents a clickable button with icon, hover icon, and tooltip

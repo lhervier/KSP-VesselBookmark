@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using com.github.lhervier.ksp.bookmarks;
+using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 
-namespace com.github.lhervier.ksp {
+namespace com.github.lhervier.ksp.bookmarksmod {
     
     /// <summary>
     /// Central bookmark manager

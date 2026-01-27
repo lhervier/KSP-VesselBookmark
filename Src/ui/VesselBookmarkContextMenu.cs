@@ -1,7 +1,7 @@
 using UnityEngine;
-using com.github.lhervier.ksp.bookmarks;
+using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 
-namespace com.github.lhervier.ksp {
+namespace com.github.lhervier.ksp.bookmarksmod.ui {
     
     /// <summary>
     /// Custom module that adds bookmark action to command modules

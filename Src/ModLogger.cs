@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace com.github.lhervier.ksp {
+namespace com.github.lhervier.ksp.bookmarksmod {
 	
 	public class ModLogger {
 		private static readonly bool DEBUG = true;

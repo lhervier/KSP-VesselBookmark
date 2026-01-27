@@ -1,8 +1,8 @@
 using System;
 using UnityEngine;
-using com.github.lhervier.ksp.bookmarks;
+using com.github.lhervier.ksp.bookmarksmod;
 
-namespace com.github.lhervier.ksp.bookmarks {
+namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
     
     /// <summary>
     /// Represents a bookmark to a command module of a vessel

@@ -3,9 +3,9 @@ using KSP.UI.Screens;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using com.github.lhervier.ksp.bookmarks;
+using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 
-namespace com.github.lhervier.ksp.ui {
+namespace com.github.lhervier.ksp.bookmarksmod.ui {
     
     /// <summary>
     /// User interface for managing bookmarks

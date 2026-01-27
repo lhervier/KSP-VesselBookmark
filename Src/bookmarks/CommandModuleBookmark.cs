@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using com.github.lhervier.ksp;
 
-namespace com.github.lhervier.ksp.bookmarks {
+namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
     public class CommandModuleBookmark : Bookmark {
         
         /// <summary>

@@ -2,7 +2,7 @@ using System;
 using KSP.UI.Screens;
 using UnityEngine;
 
-namespace com.github.lhervier.ksp {
+namespace com.github.lhervier.ksp.bookmarksmod.ui {
     
     /// <summary>
     /// Helper for simple confirmation dialogs.

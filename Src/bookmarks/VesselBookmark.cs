@@ -1,6 +1,6 @@
 using System;
 
-namespace com.github.lhervier.ksp.bookmarks {
+namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
     public class VesselBookmark : Bookmark {
         
         /// <summary>
