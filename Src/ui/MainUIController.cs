@@ -19,8 +19,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// <summary>
         /// The ID of the hovered bookmark
         /// </summary>
-        
         public uint HoveredBookmarkID { get; set; } = 0;
+        public BookmarkType HoveredBookmarkType { get; set; } = BookmarkType.Unknown;
         
         // Bookmarks list to display in the UI (cached for performance)
         // Only for read access
