@@ -40,7 +40,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 } else {
                     ModLogger.LogDebug($"- ToggleBookmarkEvent: Adding command module bookmark for part {part.flightID}");
                     CommandModuleBookmark newCommandModuleBookmark = new CommandModuleBookmark(part.flightID);
-                    bool added = BookmarkManager.Instance.AddBookmark(newCommandModuleBookmark, true);
+                    bool added = BookmarkManager.Instance.AddBookmark(newCommandModuleBookmark);
                     if (added) {
                         ScreenMessages.PostScreenMessage(
                             ModLocalization.GetString("messageBookmarkAdded"), 

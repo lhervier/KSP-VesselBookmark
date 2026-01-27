@@ -12,6 +12,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
     public class BookmarksListUIController {
 
+        private const string ALL_VESSEL_TYPES = "All";
+
         /// <summary>
         /// Whether the main windows are visible
         /// </summary>
@@ -123,7 +125,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             if( _selectedVesselTypeIndex >= 0 && _selectedVesselTypeIndex < _availableVesselTypes.Count ) {
                 return _availableVesselTypes[_selectedVesselTypeIndex];
             } else {
-                return ModLocalization.GetString("labelAll");
+                return ALL_VESSEL_TYPES;
             }
         }
 
@@ -164,7 +166,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     }
                 }
                 this._availableVesselTypes.Sort();
-                this._availableVesselTypes.Insert(0, ModLocalization.GetString("labelAll"));
+                this._availableVesselTypes.Insert(0, ALL_VESSEL_TYPES);
                 this.SelectVesselType(selectedVesselType, false);
             } catch (Exception e) {
                 ModLogger.LogError($"Error updating available vessel types: {e.Message}");
@@ -192,14 +194,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     }
 
                     bool addBookmark;
-                    if( string.Equals(selectedBody, all) && string.Equals(selectedVesselType, all) ) {
+                    if( string.Equals(selectedBody, all) && string.Equals(selectedVesselType, ALL_VESSEL_TYPES) ) {
                         addBookmark = true;
                     } else if( string.Equals(selectedBody, all) ) {
                         addBookmark = string.Equals(
                             bookmark.GetBookmarkDisplayType().ToString(), 
                             selectedVesselType
                         );
-                    } else if( string.Equals(selectedVesselType, all) ) {
+                    } else if( string.Equals(selectedVesselType, ALL_VESSEL_TYPES) ) {
                         addBookmark = string.Equals(
                             vessel.mainBody.bodyName, 
                             selectedBody

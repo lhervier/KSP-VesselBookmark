@@ -171,7 +171,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.Label(ModLocalization.GetString("labelType"), _uiStyles.LabelStyle, GUILayout.Width(50));
             
             // Create dropdown options for vessel type
-            string currentVesselTypeName = Controller.GetSelectedVesselType();
+            string currentVesselTypeName = ModLocalization.GetString(
+                "vesselType" + Controller.GetSelectedVesselType()
+            );
             if (GUILayout.Button(currentVesselTypeName, _uiStyles.ButtonStyle, GUILayout.Width(100))) {
                 Controller.SelectNextVesselType();
             }
