@@ -9,7 +9,7 @@ using System;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
-    public class MainUIController {
+    public class BookmarksListUIController {
 
         /// <summary>
         /// Whether the main windows are visible
@@ -44,7 +44,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// <summary>
         /// Constructor
         /// </summary>
-        public MainUIController() {
+        public BookmarksListUIController() {
             UpdateBookmarks();
         }
 

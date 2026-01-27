@@ -16,9 +16,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         public EditCommentUIController Controller { get; private set; }
 
-        public EditCommentUI(UIStyles uiStyles) {
+        public EditCommentUI() {
             _editWindowID = UnityEngine.Random.Range(1000, 2000);
             Controller = new EditCommentUIController();
+        }
+
+        public void Initialize(UIStyles uiStyles) {
             _uiStyles = uiStyles;
         }
 

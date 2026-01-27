@@ -10,16 +10,16 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
     public class BookmarkUIController {
         private Bookmark _currentBookmark;
         private int _currentIndex;
-        private MainUIController _mainUIController;
+        private BookmarksListUIController _bookmarksListUIController;
         private EditCommentUIController _editCommentUIController;
 
         public BookmarkUIController(
             Bookmark currentBookmark,
             int currentIndex,
-            MainUIController mainUIController,
+            BookmarksListUIController bookmarksListUIController,
             EditCommentUIController editCommentUIController
         ) { 
-            _mainUIController = mainUIController;
+            _bookmarksListUIController = bookmarksListUIController;
             _editCommentUIController = editCommentUIController;
             _currentBookmark = currentBookmark;
             _currentIndex = currentIndex;
@@ -44,7 +44,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public bool IsHovered() {
-            return (_mainUIController.HoveredBookmarkID == _currentBookmark.GetBookmarkID()) && (_mainUIController.HoveredBookmarkType == _currentBookmark.GetBookmarkType());
+            return (_bookmarksListUIController.HoveredBookmarkID == _currentBookmark.GetBookmarkID()) && (_bookmarksListUIController.HoveredBookmarkType == _currentBookmark.GetBookmarkType());
         }
 
         public bool IsActiveVessel() {
@@ -60,7 +60,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public bool CanMoveDown() {
-            return _currentIndex < _mainUIController.AvailableBookmarks.Count - 1;
+            return _currentIndex < _bookmarksListUIController.AvailableBookmarks.Count - 1;
         }
 
         public void EditComment() {
@@ -74,13 +74,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 return;
             }
             if (VesselNavigator.NavigateToVessel(vessel)) {
-                _mainUIController.MainWindowsVisible = false;
+                _bookmarksListUIController.MainWindowsVisible = false;
                 _editCommentUIController.CancelCommentEdition();
             }
         }
 
         public void MoveUp() {
-            Bookmark previousBookmark = _mainUIController.AvailableBookmarks[_currentIndex - 1];
+            Bookmark previousBookmark = _bookmarksListUIController.AvailableBookmarks[_currentIndex - 1];
             BookmarkManager.Instance.SwapBookmarks(
                 _currentBookmark, 
                 previousBookmark
@@ -88,7 +88,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public void MoveDown() {
-            Bookmark nextBookmark = _mainUIController.AvailableBookmarks[_currentIndex + 1];
+            Bookmark nextBookmark = _bookmarksListUIController.AvailableBookmarks[_currentIndex + 1];
             BookmarkManager.Instance.SwapBookmarks(
                 _currentBookmark, 
                 nextBookmark
@@ -97,16 +97,16 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         public void Remove() {
             // Close main window temporarily to ensure confirmation dialog appears on top
-            bool wasMainWindowVisible = _mainUIController.MainWindowsVisible;
-            _mainUIController.MainWindowsVisible = false;
+            bool wasMainWindowVisible = _bookmarksListUIController.MainWindowsVisible;
+            _bookmarksListUIController.MainWindowsVisible = false;
             
             VesselBookmarkUIDialog.ConfirmRemoval(
                 () => {
                     BookmarkManager.Instance.RemoveBookmark(_currentBookmark);
-                    _mainUIController.MainWindowsVisible = wasMainWindowVisible;
+                    _bookmarksListUIController.MainWindowsVisible = wasMainWindowVisible;
                 },
                 () => {
-                    _mainUIController.MainWindowsVisible = wasMainWindowVisible;
+                    _bookmarksListUIController.MainWindowsVisible = wasMainWindowVisible;
                 }
             );
         }

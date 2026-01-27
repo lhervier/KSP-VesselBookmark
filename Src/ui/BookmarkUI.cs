@@ -25,18 +25,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private Texture2D _activeVesselBorder;
 
         private UIStyles _uiStyles;
-        private MainUIController _mainUIController;
+        private BookmarksListUIController _bookmarksListUIController;
         private EditCommentUIController _editCommentUIController;
 
-        public BookmarkUI(
-            UIStyles uiStyles, 
-            MainUIController mainUIController, 
-            EditCommentUIController editCommentUIController
-        ) {
-            _uiStyles = uiStyles;
-            _mainUIController = mainUIController;
-            _editCommentUIController = editCommentUIController;
-
+        public BookmarkUI() {
             // Initialize vessel type buttons
             _vesselTypeButtons[VesselType.Base] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/base", null, BUTTON_WIDTH, BUTTON_HEIGHT);
             _vesselTypeButtons[VesselType.Debris] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/debris", null, BUTTON_WIDTH, BUTTON_HEIGHT);
@@ -99,11 +91,21 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _activeVesselBorder.Apply();
         }
 
+        public void Initialize(
+            UIStyles uiStyles, 
+            BookmarksListUIController bookmarksListUIController, 
+            EditCommentUIController editCommentUIController
+        ) {
+            _uiStyles = uiStyles;
+            _bookmarksListUIController = bookmarksListUIController;
+            _editCommentUIController = editCommentUIController;
+        }
+
         public void OnGUI(Bookmark bookmark, int currentIndex) {
             BookmarkUIController bookmarkUIController = new BookmarkUIController(
                 bookmark,
                 currentIndex,
-                _mainUIController,
+                _bookmarksListUIController,
                 _editCommentUIController
             );
 
@@ -136,7 +138,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             );
             
             // Bookmark name
-            GUILayout.Label($"<b>{bookmarkUIController.GetBookmarkTitle()} ({bookmark.GetBookmarkType()})</b>", _uiStyles.LabelStyle, GUILayout.Width(150));
+            GUILayout.Label(
+                $"<b>{bookmarkUIController.GetBookmarkTitle()} ({bookmark.GetBookmarkType()})</b>", 
+                _uiStyles.LabelStyle, 
+                GUILayout.Width(250), 
+                GUILayout.Height(BUTTON_HEIGHT)
+            );
             GUILayout.FlexibleSpace();
                 
             // Small spacing before buttons
@@ -201,11 +208,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.Space(BUTTON_WIDTH + 4);
             
             // Vessel situation
-            GUILayout.Label(bookmarkUIController.GetVesselSituation(), _uiStyles.LabelStyle, GUILayout.Width(150));
+            GUILayout.Label(
+                bookmarkUIController.GetVesselSituation(), 
+                _uiStyles.LabelStyle, 
+                GUILayout.Width(150)
+            );
 
-            // Bookmark is prt of 
+            // Bookmark is part of 
             if( bookmark.ShouldDrawPartOf() ) {
-                GUILayout.Label(ModLocalization.GetString("labelPartOf", bookmark.VesselName), _uiStyles.LabelStyle);
+                GUILayout.Label(
+                    ModLocalization.GetString("labelPartOf", bookmark.VesselName), 
+                    _uiStyles.LabelStyle
+                );
             }
             
             GUILayout.EndHorizontal();
@@ -247,8 +261,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             // Detect hover and update the hovered bookmark ID
             if (bookmarkRect.Contains(Event.current.mousePosition)) {
-                _mainUIController.HoveredBookmarkID = bookmark.GetBookmarkID();
-                _mainUIController.HoveredBookmarkType = bookmark.GetBookmarkType();
+                _bookmarksListUIController.HoveredBookmarkID = bookmark.GetBookmarkID();
+                _bookmarksListUIController.HoveredBookmarkType = bookmark.GetBookmarkType();
             }
         }
 
