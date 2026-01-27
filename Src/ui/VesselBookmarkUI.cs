@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 using com.github.lhervier.ksp.bookmarks;
 
-namespace com.github.lhervier.ksp {
+namespace com.github.lhervier.ksp.ui {
     
     /// <summary>
     /// User interface for managing bookmarks
