@@ -35,27 +35,36 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         private List<Bookmark> _bookmarks = new List<Bookmark>();
         public IReadOnlyList<Bookmark> Bookmarks => _bookmarks.AsReadOnly();
-        private List<string> _bookmarksIDs = new List<string>();
+        private BookmarkIds _bookmarksIDs = new BookmarkIds();
 
         public readonly EventVoid OnBookmarksUpdated = new EventVoid("VesselBookmarkManager.OnBookmarksUpdated");
- 
+
         // =======================================================================================
 
-        public Bookmark GetBookmark(string bookmarkID) {
-            return _bookmarks.First(b => string.Equals(b.GetBookmarkID(), bookmarkID));
+        /// <summary>
+        /// Get a bookmark by its unique identifier
+        /// </summary>
+        /// <param name="bookmarkType">The type of the bookmark</param>
+        /// <param name="bookmarkID">The unique identifier of the bookmark</param>
+        /// <returns>The bookmark, or null if not found</returns>
+        public Bookmark GetBookmark(BookmarkType bookmarkType, uint bookmarkID) {
+            return _bookmarks.FirstOrDefault(
+                b => (b.GetBookmarkType() == bookmarkType) && (b.GetBookmarkID() == bookmarkID)
+            );
         }
         
         /// <summary>
         /// Check if a bookmark exists for a command module.
         /// Note: This method has no cost and can be called frequently.
         /// </summary>
-        /// <param name="commandModuleFlightID"></param>
+        /// <param name="bookmarkType">The type of the bookmark</param>
+        /// <param name="bookmarkID">The unique identifier of the bookmark</param>
         /// <returns></returns>
-        public bool HasBookmark(string bookmarkID) {
+        public bool HasBookmark(BookmarkType bookmarkType, uint bookmarkID) {
             try {
-                return _bookmarksIDs.Contains(bookmarkID);
+                return _bookmarksIDs.hasId(bookmarkType, bookmarkID);
             } catch (Exception e) {
-                ModLogger.LogError($"Error checking if bookmark exists for bookmarkID {bookmarkID}: {e.Message}");
+                ModLogger.LogError($"Error checking if bookmark exists for bookmarkType {bookmarkType} and bookmarkID {bookmarkID}: {e.Message}");
                 return false;
             }
         }
@@ -72,11 +81,11 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     ModLogger.LogError("Attempted to add null bookmark");
                     return false;
                 }
-                ModLogger.LogDebug($"Adding bookmark for bookmarkID {bookmark.GetBookmarkID()}");
+                ModLogger.LogDebug($"Adding bookmark for bookmarkType {bookmark.GetBookmarkType()} and bookmarkID {bookmark.GetBookmarkID()}");
                 
                 // Check if bookmark already exists
-                if (this.HasBookmark(bookmark.GetBookmarkID())) {
-                    ModLogger.LogWarning($"Bookmark already exists for bookmarkID {bookmark.GetBookmarkID()}");
+                if (this.HasBookmark(bookmark.GetBookmarkType(), bookmark.GetBookmarkID())) {
+                    ModLogger.LogWarning($"Bookmark already exists for bookmarkType {bookmark.GetBookmarkType()} and bookmarkID {bookmark.GetBookmarkID()}");
                     return false;
                 }
                 
@@ -88,13 +97,13 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 }
 
                 _bookmarks.Add(bookmark);
-                _bookmarksIDs.Add(bookmark.GetBookmarkID());
+                _bookmarksIDs.addId(bookmark.GetBookmarkType(), bookmark.GetBookmarkID());
 
                 bookmark.Refresh(sendEvent);
 
                 return true;
             } catch (Exception e) {
-                ModLogger.LogError($"Error adding bookmark for bookmarkID {bookmark.GetBookmarkID()}: {e.Message}");
+                ModLogger.LogError($"Error adding bookmark for bookmarkType {bookmark.GetBookmarkType()} and bookmarkID {bookmark.GetBookmarkID()}: {e.Message}");
                 return false;
             }
         }
@@ -104,22 +113,21 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="bookmarkID">The unique identifier of the bookmark to remove</param>
         /// <returns>True if the bookmark was removed, false otherwise</returns>
-        public bool RemoveBookmark(string bookmarkID) {
+        public bool RemoveBookmark(Bookmark bookmark) {
             try {
-                ModLogger.LogDebug($"Removing bookmark for bookmarkID {bookmarkID}");
-                Bookmark bookmark = this.GetBookmark(bookmarkID);
                 if( bookmark == null ) {
-                    ModLogger.LogWarning($"Bookmark for bookmarkID {bookmarkID}: Not found");
+                    ModLogger.LogWarning($"Bookmark: Not found");
                     return false;
                 }
-
+                ModLogger.LogDebug($"Removing bookmark for bookmarkType {bookmark.GetBookmarkType()} and bookmarkID {bookmark.GetBookmarkID()}");
+                
                 _bookmarks.Remove(bookmark);
-                _bookmarksIDs.Remove(bookmark.GetBookmarkID());
+                _bookmarksIDs.removeId(bookmark.GetBookmarkType(), bookmark.GetBookmarkID());
                 
                 OnBookmarksUpdated.Fire();
                 return true;
             } catch (Exception e) {
-                ModLogger.LogError($"Error removing bookmark for bookmarkID {bookmarkID}: {e.Message}");
+                ModLogger.LogError($"Error removing bookmark for bookmarkType {bookmark.GetBookmarkType()} and bookmarkID {bookmark.GetBookmarkID()}: {e.Message}");
                 return false;
             }
         }
@@ -129,27 +137,25 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <summary>
         /// Move a bookmark up in the order (decrease Order value)
         /// </summary>
-        /// <param name="bookmarkID">The unique identifier of the bookmark to move up</param>
+        /// <param name="bookmark">The bookmark to move up</param>
         /// <returns>True if the bookmark was moved up, false otherwise</returns>
-        public bool MoveBookmarkUp(string bookmarkID) {
+        public bool MoveBookmarkUp(Bookmark bookmark) {
             try {
-                ModLogger.LogDebug($"Moving bookmark up for bookmarkID {bookmarkID}");
-
-                Bookmark bookmark = this.GetBookmark(bookmarkID);
                 if (bookmark == null) {
-                    ModLogger.LogWarning($"Bookmark for bookmarkID {bookmarkID}: Not found");
+                    ModLogger.LogWarning($"Bookmark: Null");
                     return false;
                 }
-
+                ModLogger.LogDebug($"Moving bookmark up for bookmarkType {bookmark.GetBookmarkType()} and bookmarkID {bookmark.GetBookmarkID()}");
+                
                 if( bookmark.Order <= 0 ) {
-                    ModLogger.LogError($"Bookmark for bookmarkID {bookmarkID} cannot be moved up: Order is {bookmark.Order}");
+                    ModLogger.LogError($"Bookmark: Cannot be moved up: Order is {bookmark.Order}");
                     return false;
                 }
 
                 // Find the bookmark with previous Order
                 Bookmark previous = _bookmarks.Find(b => b.Order == bookmark.Order - 1);
                 if( previous == null ) {
-                    ModLogger.LogWarning($"Bookmark for bookmarkID {bookmarkID}: Previous bookmark not found");
+                    ModLogger.LogWarning($"Bookmark: Previous bookmark not found");
                     return false;
                 }
 
@@ -164,7 +170,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 OnBookmarksUpdated.Fire();
                 return true;
             } catch (Exception e) {
-                ModLogger.LogError($"Error moving bookmark up for bookmarkID {bookmarkID}: {e.Message}");
+                ModLogger.LogError($"Error moving bookmark up: {e.Message}");
                 return false;
             }
         }
@@ -172,27 +178,25 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <summary>
         /// Move a bookmark down in the order (increase Order value)
         /// </summary>
-        /// <param name="bookmarkID">The unique identifier of the bookmark to move down</param>
+        /// <param name="bookmark">The bookmark to move down</param>
         /// <returns>True if the bookmark was moved down, false otherwise</returns>
-        public bool MoveBookmarkDown(string bookmarkID) {
+        public bool MoveBookmarkDown(Bookmark bookmark) {
             try {
-                ModLogger.LogDebug($"Moving bookmark down for bookmarkID {bookmarkID}");
-
-                Bookmark bookmark = this.GetBookmark(bookmarkID);
                 if (bookmark == null) {
-                    ModLogger.LogWarning($"Bookmark for bookmarkID {bookmarkID}: Not found");
+                    ModLogger.LogWarning($"Bookmark: Null");
                     return false;
                 }
+                ModLogger.LogDebug($"Moving bookmark down for bookmarkType {bookmark.GetBookmarkType()} and bookmarkID {bookmark.GetBookmarkID()}");
 
                 if( bookmark.Order >= _bookmarks.Max(b => b.Order) ) {
-                    ModLogger.LogWarning($"Bookmark for bookmarkID {bookmarkID} cannot be moved down: Order is {bookmark.Order}");
+                    ModLogger.LogWarning($"Bookmark: Cannot be moved down: Order is {bookmark.Order}");
                     return false;
                 }
                 
                 // Find the bookmark with next Order
                 Bookmark next = _bookmarks.Find(b => b.Order == bookmark.Order + 1);
                 if( next == null ) {
-                    ModLogger.LogWarning($"Bookmark for bookmarkID {bookmarkID}: Next bookmark not found");
+                    ModLogger.LogWarning($"Bookmark: Next bookmark not found");
                     return false;
                 }
                 
@@ -207,7 +211,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 OnBookmarksUpdated.Fire();
                 return true;
             } catch (Exception e) {
-                ModLogger.LogError($"Error moving bookmark down for bookmarkID {bookmarkID}: {e.Message}");
+                ModLogger.LogError($"Error moving bookmark down: {e.Message}");
                 return false;
             }
         }
@@ -215,24 +219,16 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <summary>
         /// Swap the order of two bookmarks
         /// </summary>
-        /// <param name="bookmarkID1">The unique identifier of the first bookmark to swap</param>
-        /// <param name="bookmarkID2">The unique identifier of the second bookmark to swap</param>
+        /// <param name="bookmark1">The first bookmark to swap</param>
+        /// <param name="bookmark2">The second bookmark to swap</param>
         /// <returns>True if the bookmarks were swapped, false otherwise</returns>
-        public bool SwapBookmarks(string bookmarkID1, string bookmarkID2) {
+        public bool SwapBookmarks(Bookmark bookmark1, Bookmark bookmark2) {
             try {
-                ModLogger.LogDebug($"Swapping bookmarks for bookmarkID1 {bookmarkID1} and bookmarkID2 {bookmarkID2}");
-
-                Bookmark bookmark1 = this.GetBookmark(bookmarkID1);
-                if (bookmark1 == null) {
-                    ModLogger.LogWarning($"Bookmark for bookmarkID {bookmarkID1}: Not found");
+                if( bookmark1 == null || bookmark2 == null ) {
+                    ModLogger.LogWarning($"Bookmark: Null");
                     return false;
                 }
-
-                Bookmark bookmark2 = this.GetBookmark(bookmarkID2);
-                if (bookmark2 == null) {
-                    ModLogger.LogWarning($"Bookmark for bookmarkID {bookmarkID2}: Not found");
-                    return false;
-                }
+                ModLogger.LogDebug($"Swapping bookmarks for bookmarkType1 {bookmark1.GetBookmarkType()} and bookmarkID1 {bookmark1.GetBookmarkID()} and bookmarkType2 {bookmark2.GetBookmarkType()} and bookmarkID2 {bookmark2.GetBookmarkID()}");
 
                 int temp = bookmark1.Order;
                 bookmark1.Order = bookmark2.Order;
@@ -242,7 +238,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 OnBookmarksUpdated.Fire();
                 return true;
             } catch (Exception e) {
-                ModLogger.LogError($"Error swapping bookmarks for bookmarkID1 {bookmarkID1} and bookmarkID2 {bookmarkID2}: {e.Message}");
+                ModLogger.LogError($"Error swapping bookmarks: {e.Message}");
                 return false;
             }
         }
@@ -257,7 +253,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             try {
                 ModLogger.LogDebug($"Loading bookmarks from config node");
                 _bookmarks.Clear();
-                _bookmarksIDs.Clear();
+                _bookmarksIDs.clearIds();
                 
                 if (!node.HasNode(SAVE_NODE_NAME)) {
                     return;
@@ -335,7 +331,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
 
                 foreach (Bookmark bookmark in _bookmarks) {
                     if( !bookmark.Refresh(false) ) {
-                        ModLogger.LogWarning($"Bookmark {bookmark.GetBookmarkID()}: Not found");
+                        ModLogger.LogWarning($"Bookmark {bookmark.GetBookmarkType()} and {bookmark.GetBookmarkID()}: Not found");
                     }
                 }
 
@@ -343,6 +339,31 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             } catch (Exception e) {
                 ModLogger.LogError($"Error refreshing bookmarks: {e.Message}");
             }
+        }
+    }
+
+    /// <summary>
+    /// Class to manage the IDs of the bookmarks
+    /// </summary>
+    class BookmarkIds {
+        private Dictionary<BookmarkType, List<uint>> _bookmarksIDs = new Dictionary<BookmarkType, List<uint>>();
+
+        public bool hasId(BookmarkType bookmarkType, uint bookmarkID) {
+            return _bookmarksIDs.ContainsKey(bookmarkType) && _bookmarksIDs[bookmarkType].Contains(bookmarkID);
+        }
+        public void addId(BookmarkType bookmarkType, uint bookmarkID) {
+            if( !_bookmarksIDs.ContainsKey(bookmarkType) ) {
+                _bookmarksIDs[bookmarkType] = new List<uint>();
+            }
+            _bookmarksIDs[bookmarkType].Add(bookmarkID);
+        }
+        public void removeId(BookmarkType bookmarkType, uint bookmarkID) {
+            if( _bookmarksIDs.ContainsKey(bookmarkType) ) {
+                _bookmarksIDs[bookmarkType].Remove(bookmarkID);
+            }
+        }
+        public void clearIds() {
+            _bookmarksIDs.Clear();
         }
     }
 }

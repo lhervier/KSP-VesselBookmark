@@ -46,7 +46,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private VesselBookmarkButton _editButton;
         
         // Hover state
-        private string _hoveredBookmarkID = "";
+        private uint _hoveredBookmarkID = 0;
 
         // UI styles with white text
         private GUIStyle _labelStyle;
@@ -330,9 +330,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 if (GUILayout.Button(VesselBookmarkLocalization.GetString("buttonAdd"), _buttonStyle, GUILayout.Width(80))) {
                 
                     uint vesselPersistentID = FlightGlobals.ActiveVessel.persistentId;
-                    string bookmarkID = VesselBookmark.ComputeBookmarkID(vesselPersistentID);
                     
-                    if (VesselBookmarkManager.Instance.HasBookmark(bookmarkID)) {
+                    if (VesselBookmarkManager.Instance.HasBookmark(BookmarkType.Vessel, vesselPersistentID)) {
                         ScreenMessages.PostScreenMessage(
                             VesselBookmarkLocalization.GetString("messageBookmarkAlreadyExists"),
                             2f,
@@ -623,8 +622,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 moveUpAction = () => {
                     Bookmark previousBookmark = _availableBookmarks[currentIndex - 1];
                     VesselBookmarkManager.Instance.SwapBookmarks(
-                        bookmark.GetBookmarkID(), 
-                        previousBookmark.GetBookmarkID()
+                        bookmark, 
+                        previousBookmark
                     );
                 };
             }
@@ -639,8 +638,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 moveDownAction = () => {
                     Bookmark nextBookmark = _availableBookmarks[currentIndex + 1];
                     VesselBookmarkManager.Instance.SwapBookmarks(
-                        bookmark.GetBookmarkID(), 
-                        nextBookmark.GetBookmarkID()
+                        bookmark, 
+                        nextBookmark
                     );
                 };
             }
@@ -661,7 +660,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     
                     VesselBookmarkUIDialog.ConfirmRemoval(
                         () => {
-                            VesselBookmarkManager.Instance.RemoveBookmark(bookmark.GetBookmarkID());
+                            VesselBookmarkManager.Instance.RemoveBookmark(bookmark);
                             _mainWindowsVisible = wasMainWindowVisible;
                         },
                         () => {

@@ -6,15 +6,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
     public class CommandModuleBookmark : Bookmark {
         
         /// <summary>
-        /// Compute the unique identifier of the bookmark
-        /// </summary>
-        /// <param name="commandModuleFlightID">The flight ID of the command module</param>
-        /// <returns>The unique identifier of the bookmark</returns>
-        public static string ComputeBookmarkID(uint commandModuleFlightID) {
-            return $"{BookmarkType.CommandModule}:{commandModuleFlightID}";
-        }
-        
-        /// <summary>
         /// Unique identifier of the command module (uses Part.flightID)
         /// </summary>
         public uint CommandModuleFlightID { get; set; }
@@ -53,8 +44,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// Get the unique identifier of the bookmark
         /// </summary>
         /// <returns>The unique identifier of the bookmark</returns>
-        public override string GetBookmarkID() {
-            return ComputeBookmarkID(CommandModuleFlightID);
+        public override uint GetBookmarkID() {
+            return CommandModuleFlightID;
         }
 
         /// <summary>

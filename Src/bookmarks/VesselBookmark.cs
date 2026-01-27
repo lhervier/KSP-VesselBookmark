@@ -1,17 +1,12 @@
 using System;
 
 namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
+
+    /// <summary>
+    /// Represents a bookmark for a vessel
+    /// </summary>
     public class VesselBookmark : Bookmark {
         
-        /// <summary>
-        /// Compute the unique identifier of the bookmark
-        /// </summary>
-        /// <param name="vesselPersistentID">The persistent ID of the vessel</param>
-        /// <returns>The unique identifier of the bookmark</returns>
-        public static string ComputeBookmarkID(uint vesselPersistentID) {
-            return $"{BookmarkType.Vessel}:{vesselPersistentID}";
-        }
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -34,8 +29,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// Get the unique identifier of the bookmark
         /// </summary>
         /// <returns>The unique identifier of the bookmark</returns>
-        public override string GetBookmarkID() {
-            return ComputeBookmarkID(VesselPersistentID);
+        public override uint GetBookmarkID() {
+            return VesselPersistentID;
         }
 
         /// <summary>

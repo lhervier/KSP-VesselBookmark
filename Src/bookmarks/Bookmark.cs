@@ -5,7 +5,7 @@ using com.github.lhervier.ksp.bookmarksmod;
 namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
     
     /// <summary>
-    /// Represents a bookmark to a command module of a vessel
+    /// Base class for all bookmarks
     /// </summary>
     public abstract class Bookmark {
 
@@ -13,7 +13,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// Get the unique identifier of the bookmark
         /// </summary>
         /// <returns>The unique identifier of the bookmark</returns>
-        public abstract string GetBookmarkID();
+        public abstract uint GetBookmarkID();
 
         /// <summary>
         /// Type of the bookmark
