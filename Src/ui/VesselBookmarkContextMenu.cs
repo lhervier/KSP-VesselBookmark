@@ -58,7 +58,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             
             BaseEvent bookmarkEvent = Events["ToggleBookmarkEvent"];
             if (bookmarkEvent != null) {
-                bool hasBookmark = VesselBookmarkManager.Instance.HasBookmark(part.flightID);
+                bool hasBookmark = VesselBookmarkManager.Instance.HasBookmark(CommandModuleBookmark.ComputeBookmarkID(part.flightID));
                 bookmarkEvent.guiName = hasBookmark 
                     ? VesselBookmarkLocalization.GetString("contextMenuRemoveFromBookmarks")
                     : VesselBookmarkLocalization.GetString("contextMenuAddToBookmarks");

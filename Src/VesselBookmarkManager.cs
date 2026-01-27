@@ -35,14 +35,14 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         private List<Bookmark> _bookmarks = new List<Bookmark>();
         public IReadOnlyList<Bookmark> Bookmarks => _bookmarks.AsReadOnly();
-        private List<object> _bookmarksIDs = new List<object>();
+        private List<string> _bookmarksIDs = new List<string>();
 
         public readonly EventVoid OnBookmarksUpdated = new EventVoid("VesselBookmarkManager.OnBookmarksUpdated");
  
         // =======================================================================================
 
-        public Bookmark GetBookmark(object bookmarkID) {
-            return _bookmarks.First(b => object.Equals(b.GetBookmarkID(), bookmarkID));
+        public Bookmark GetBookmark(string bookmarkID) {
+            return _bookmarks.First(b => string.Equals(b.GetBookmarkID(), bookmarkID));
         }
         
         /// <summary>
@@ -51,7 +51,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="commandModuleFlightID"></param>
         /// <returns></returns>
-        public bool HasBookmark(object bookmarkID) {
+        public bool HasBookmark(string bookmarkID) {
             try {
                 return _bookmarksIDs.Contains(bookmarkID);
             } catch (Exception e) {
@@ -104,7 +104,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="bookmarkID">The unique identifier of the bookmark to remove</param>
         /// <returns>True if the bookmark was removed, false otherwise</returns>
-        public bool RemoveBookmark(object bookmarkID) {
+        public bool RemoveBookmark(string bookmarkID) {
             try {
                 ModLogger.LogDebug($"Removing bookmark for bookmarkID {bookmarkID}");
                 Bookmark bookmark = this.GetBookmark(bookmarkID);
@@ -131,7 +131,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="bookmarkID">The unique identifier of the bookmark to move up</param>
         /// <returns>True if the bookmark was moved up, false otherwise</returns>
-        public bool MoveBookmarkUp(object bookmarkID) {
+        public bool MoveBookmarkUp(string bookmarkID) {
             try {
                 ModLogger.LogDebug($"Moving bookmark up for bookmarkID {bookmarkID}");
 
@@ -174,7 +174,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="bookmarkID">The unique identifier of the bookmark to move down</param>
         /// <returns>True if the bookmark was moved down, false otherwise</returns>
-        public bool MoveBookmarkDown(object bookmarkID) {
+        public bool MoveBookmarkDown(string bookmarkID) {
             try {
                 ModLogger.LogDebug($"Moving bookmark down for bookmarkID {bookmarkID}");
 
@@ -218,7 +218,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="bookmarkID1">The unique identifier of the first bookmark to swap</param>
         /// <param name="bookmarkID2">The unique identifier of the second bookmark to swap</param>
         /// <returns>True if the bookmarks were swapped, false otherwise</returns>
-        public bool SwapBookmarks(object bookmarkID1, object bookmarkID2) {
+        public bool SwapBookmarks(string bookmarkID1, string bookmarkID2) {
             try {
                 ModLogger.LogDebug($"Swapping bookmarks for bookmarkID1 {bookmarkID1} and bookmarkID2 {bookmarkID2}");
 
