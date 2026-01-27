@@ -21,9 +21,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private Rect _mainWindowRect = new Rect(100, 100, 500, 600);
         private int _mainWindowID;
         
-        private Rect _editWindowRect = new Rect(200, 200, 400, 200);
-        private int _editWindowID;
-        
         private Vector2 _scrollPosition = Vector2.zero;
         
         // Icon cache
@@ -34,22 +31,17 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private VesselBookmarkButton _goToButton;
         private VesselBookmarkButton _editButton;
         
-        // UI styles with white text
-        private GUIStyle _labelStyle;
-        private GUIStyle _buttonStyle;
-        private GUIStyle _textAreaStyle;
-        private GUIStyle _tooltipStyle;
-        
         // Textures for active vessel highlighting
         private Texture2D _activeVesselBackground;
         private Texture2D _activeVesselBorder;
 
+        private UIStyles _uiStyles;
+
         private MainUIController _mainUIController;
-        private EditCommentUIController _editUIController;
+        private EditCommentUI _editCommentUI;
 
         private void Awake() {
             _mainWindowID = UnityEngine.Random.Range(1000, 2000);
-            _editWindowID = UnityEngine.Random.Range(2000, 3000);
             GameEvents.onGUIApplicationLauncherReady.Add(OnLauncherReady);
             
             // Initialize vessel type buttons
@@ -103,13 +95,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 BUTTON_HEIGHT
             );
 
-            BookmarkManager.Instance.OnBookmarksUpdated.Add(OnBookmarksUpdated);
-            
             // Initialize textures for active vessel highlighting
             InitializeActiveVesselTextures();
 
-            this._mainUIController = new MainUIController();
-            this._editUIController = new EditCommentUIController();
+            BookmarkManager.Instance.OnBookmarksUpdated.Add(OnBookmarksUpdated);
         }
         
         /// <summary>
@@ -129,40 +118,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         private void OnBookmarksUpdated() {
             ModLogger.LogDebug($"OnBookmarksUpdated");
-            _mainUIController.UpdateBookmarks();
-        }
-
-        private void EnsureWhiteTextStyles() {
-            if (_labelStyle != null) {
-                return;
+            if( this._mainUIController != null ) {
+                this._mainUIController.UpdateBookmarks();
             }
-
-            _labelStyle = new GUIStyle(GUI.skin.label) { richText = true };
-            _buttonStyle = new GUIStyle(GUI.skin.button);
-            _textAreaStyle = new GUIStyle(GUI.skin.textArea);
-            _tooltipStyle = new GUIStyle(GUI.skin.box);
-
-            ApplyWhiteText(_labelStyle);
-            ApplyWhiteText(_buttonStyle);
-            ApplyWhiteText(_textAreaStyle);
-            ApplyWhiteText(_tooltipStyle);
         }
 
-        private void ApplyWhiteText(GUIStyle style) {
-            if (style == null) {
-                return;
-            }
-
-            style.normal.textColor = Color.white;
-            style.hover.textColor = Color.white;
-            style.active.textColor = Color.white;
-            style.focused.textColor = Color.white;
-            style.onNormal.textColor = Color.white;
-            style.onHover.textColor = Color.white;
-            style.onActive.textColor = Color.white;
-            style.onFocused.textColor = Color.white;
-        }
-        
         private void OnDestroy() {
             GameEvents.onGUIApplicationLauncherReady.Remove(OnLauncherReady);
             OnLauncherUnready();
@@ -217,8 +177,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// Toolbar button click handler (activation)
         /// </summary>
         private void OnToggleOn() {
-            _mainUIController.MainWindowsVisible = true;
-            _editUIController.CancelCommentEdition();
+            if( this._mainUIController != null ) {
+                this._mainUIController.MainWindowsVisible = true;
+            }
+            if( this._editCommentUI != null ) {
+                this._editCommentUI.Controller.CancelCommentEdition();
+            }
             BookmarkManager.Instance.RefreshBookmarks();
         }
         
@@ -226,14 +190,32 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// Toolbar button click handler (deactivation)
         /// </summary>
         private void OnToggleOff() {
-            _mainUIController.MainWindowsVisible = false;
-            _editUIController.CancelCommentEdition();
+            if( this._mainUIController != null ) {
+                this._mainUIController.MainWindowsVisible = false;
+            }
+            if( this._editCommentUI != null ) {
+                this._editCommentUI.Controller.CancelCommentEdition();
+            }
         }
         
         private void OnGUI() {
+            // Initialise main UI controller
+            if( this._mainUIController == null ) {
+                this._mainUIController = new MainUIController();
+            }
+
+            // Initialise UI styles
+            if( this._uiStyles == null ) {
+                this._uiStyles = new UIStyles();
+            }
+
+            // Initialise edit comment UI
+            if( this._editCommentUI == null ) {
+                this._editCommentUI = new EditCommentUI(_uiStyles);
+            }
+
             // Window style
             GUI.skin = HighLogic.Skin;
-            EnsureWhiteTextStyles();
             
             if (_mainUIController.MainWindowsVisible) {
                 _mainWindowRect = GUILayout.Window(
@@ -250,20 +232,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 _mainWindowRect.y = Mathf.Clamp(_mainWindowRect.y, 0, Screen.height - _mainWindowRect.height);
             }
             
-            if (_editUIController.IsEditingComment()) {
-                _editWindowRect = GUILayout.Window(
-                    _editWindowID,
-                    _editWindowRect,
-                    DrawEditWindow,
-                    ModLocalization.GetString("editWindowTitle"),
-                    GUILayout.MinWidth(400),
-                    GUILayout.MinHeight(200)
-                );
-                
-                // Prevent window from going off screen
-                _editWindowRect.x = Mathf.Clamp(_editWindowRect.x, 0, Screen.width - _editWindowRect.width);
-                _editWindowRect.y = Mathf.Clamp(_editWindowRect.y, 0, Screen.height - _editWindowRect.height);
-            }
+            this._editCommentUI.OnGUI();
         }
         
         /// <summary>
@@ -277,13 +246,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             var filteredCount = _mainUIController.AvailableBookmarks.Count;
             GUILayout.Label(
                 ModLocalization.GetString("labelBookmarks", filteredCount, _mainUIController.AvailableBookmarks.Count),
-                _labelStyle,
+                _uiStyles.LabelStyle,
                 GUILayout.ExpandWidth(true)
             );
             
             // Add bookmark button (for current active vessel)
             if (FlightGlobals.ActiveVessel != null) {
-                if (GUILayout.Button(ModLocalization.GetString("buttonAdd"), _buttonStyle, GUILayout.Width(80))) {
+                if (GUILayout.Button(ModLocalization.GetString("buttonAdd"), _uiStyles.ButtonStyle, GUILayout.Width(80))) {
                 
                     uint vesselPersistentID = FlightGlobals.ActiveVessel.persistentId;
                     
@@ -306,12 +275,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 }
             }
             
-            if (GUILayout.Button(ModLocalization.GetString("buttonRefresh"), _buttonStyle, GUILayout.Width(80))) {
+            if (GUILayout.Button(ModLocalization.GetString("buttonRefresh"), _uiStyles.ButtonStyle, GUILayout.Width(80))) {
                 BookmarkManager.Instance.RefreshBookmarks();
             }
-            if (GUILayout.Button(ModLocalization.GetString("buttonClose"), _buttonStyle, GUILayout.Width(80))) {
+            if (GUILayout.Button(ModLocalization.GetString("buttonClose"), _uiStyles.ButtonStyle, GUILayout.Width(80))) {
                 _mainUIController.MainWindowsVisible = false;
-                _editUIController.CancelCommentEdition();
+                _editCommentUI.Controller.CancelCommentEdition();
                 if (_toolbarButton != null) {
                     _toolbarButton.SetFalse();
                 }
@@ -330,7 +299,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, false, true);
             
             if (_mainUIController.AvailableBookmarks.Count == 0) {
-                GUILayout.Label(ModLocalization.GetString("labelNoBookmarks"), _labelStyle);
+                GUILayout.Label(ModLocalization.GetString("labelNoBookmarks"), _uiStyles.LabelStyle);
             } else {
                 for(int i = 0; i < _mainUIController.AvailableBookmarks.Count; i++) {
                     Bookmark bookmark = _mainUIController.AvailableBookmarks[i];
@@ -356,7 +325,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     tooltipRect.y = mousePos.y - tooltipRect.height - 10;
                 }
                 
-                GUI.Box(tooltipRect, GUI.tooltip, _tooltipStyle);
+                GUI.Box(tooltipRect, GUI.tooltip, _uiStyles.TooltipStyle);
             }
             
             // Allow window dragging
@@ -372,65 +341,34 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.BeginHorizontal();
             
             // Body filter
-            GUILayout.Label(ModLocalization.GetString("labelBody"), _labelStyle, GUILayout.Width(50));
+            GUILayout.Label(ModLocalization.GetString("labelBody"), _uiStyles.LabelStyle, GUILayout.Width(50));
             
             // Create dropdown options for body
             string currentBodyName= _mainUIController.GetSelectedBody();
-            if (GUILayout.Button(currentBodyName, _buttonStyle, GUILayout.Width(120))) {
+            if (GUILayout.Button(currentBodyName, _uiStyles.ButtonStyle, GUILayout.Width(120))) {
                 _mainUIController.SelectNextBody();
             }
             
             GUILayout.Space(10);
             
              // Vessel Type filter
-            GUILayout.Label(ModLocalization.GetString("labelType"), _labelStyle, GUILayout.Width(50));
+            GUILayout.Label(ModLocalization.GetString("labelType"), _uiStyles.LabelStyle, GUILayout.Width(50));
             
             // Create dropdown options for vessel type
             string currentVesselTypeName = _mainUIController.GetSelectedVesselType();
-            if (GUILayout.Button(currentVesselTypeName, _buttonStyle, GUILayout.Width(100))) {
+            if (GUILayout.Button(currentVesselTypeName, _uiStyles.ButtonStyle, GUILayout.Width(100))) {
                 _mainUIController.SelectNextVesselType();
             }
 
             GUILayout.FlexibleSpace();
             
-            if (GUILayout.Button(ModLocalization.GetString("buttonClear"), _buttonStyle, GUILayout.Width(60))) {
+            if (GUILayout.Button(ModLocalization.GetString("buttonClear"), _uiStyles.ButtonStyle, GUILayout.Width(60))) {
                 _mainUIController.ClearFilters();
             }
             
             GUILayout.EndHorizontal();
             
             GUILayout.EndVertical();
-        }
-        
-        /// <summary>
-        /// Draws the edit window
-        /// </summary>
-        private void DrawEditWindow(int windowID) {
-            GUILayout.BeginVertical();
-            
-            GUILayout.Label(ModLocalization.GetString("labelComment"), _labelStyle);
-            _editUIController.EditedComment = GUILayout.TextArea(
-                _editUIController.EditedComment, 
-                _textAreaStyle,
-                GUILayout.Height(100), 
-                GUILayout.ExpandWidth(true)
-            );
-            
-            GUILayout.Space(10);
-            
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button(ModLocalization.GetString("buttonSave"), _buttonStyle)) {
-                _editUIController.SaveComment();
-            }
-            if (GUILayout.Button(ModLocalization.GetString("buttonCancel"), _buttonStyle)) {
-                _editUIController.CancelCommentEdition();
-            }
-            GUILayout.EndHorizontal();
-            
-            GUILayout.EndVertical();
-            
-            // Allow window dragging
-            GUI.DragWindow();
         }
         
         /// <summary>
@@ -483,7 +421,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             );
             
             // Bookmark name
-            GUILayout.Label($"<b>{bookmarkName} ({bookmark.GetBookmarkType()})</b>", _labelStyle, GUILayout.Width(150));
+            GUILayout.Label($"<b>{bookmarkName} ({bookmark.GetBookmarkType()})</b>", _uiStyles.LabelStyle, GUILayout.Width(150));
             GUILayout.FlexibleSpace();
             
             bool canMoveUp = currentIndex > 0;
@@ -496,7 +434,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _editButton.Draw(
                 () => isHovered,
                 () => {
-                    _editUIController.EditComment(bookmark);
+                    _editCommentUI.Controller.EditComment(bookmark);
                 }
             );
             
@@ -513,7 +451,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     }
                     if (VesselNavigator.NavigateToVessel(vessel)) {
                         _mainUIController.MainWindowsVisible = false;
-                        _editUIController.CancelCommentEdition();
+                        _editCommentUI.Controller.CancelCommentEdition();
                         if (_toolbarButton != null) {
                             _toolbarButton.SetFalse();
                         }
@@ -587,14 +525,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             
             // Vessel situation
             if (!string.IsNullOrEmpty(bookmark.VesselSituation)) {
-                GUILayout.Label(bookmark.VesselSituation, _labelStyle, GUILayout.Width(150));
+                GUILayout.Label(bookmark.VesselSituation, _uiStyles.LabelStyle, GUILayout.Width(150));
             } else {
-                GUILayout.Label(ModLocalization.GetString("labelUnknownSituation"), _labelStyle, GUILayout.Width(150));
+                GUILayout.Label(ModLocalization.GetString("labelUnknownSituation"), _uiStyles.LabelStyle, GUILayout.Width(150));
             }
 
             // Bookmark is prt of 
             if( bookmark.ShouldDrawPartOf() ) {
-                GUILayout.Label(ModLocalization.GetString("labelPartOf", bookmark.VesselName), _labelStyle);
+                GUILayout.Label(ModLocalization.GetString("labelPartOf", bookmark.VesselName), _uiStyles.LabelStyle);
             }
             
             GUILayout.EndHorizontal();
@@ -604,7 +542,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             if( !string.IsNullOrEmpty(comment) ) {
             GUILayout.BeginHorizontal();
                 GUILayout.Space(BUTTON_WIDTH + 4);
-                GUILayout.Label(comment, _labelStyle, GUILayout.ExpandWidth(true));
+                GUILayout.Label(comment, _uiStyles.LabelStyle, GUILayout.ExpandWidth(true));
                 GUILayout.EndHorizontal();
             }
             Rect line3Rect = GUILayoutUtility.GetLastRect();
