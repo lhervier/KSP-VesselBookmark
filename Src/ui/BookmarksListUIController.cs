@@ -44,10 +44,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public IReadOnlyList<string> AvailableVesselTypes => _availableVesselTypes.AsReadOnly();
         private int _selectedVesselTypeIndex = 0;
 
-        /// <summary>
-        /// Fixed list of options for the test combobox (to verify ComboBox UI works).
-        /// </summary>
-        public static readonly string[] TestComboOptions = new[] { "Option A", "Option B", "Option C" };
+        public List<string> TestComboOptions1 = new List<string> { "Option A", "Option B", "Option C" };
+        public List<string> TestComboOptions2 = new List<string> { "Option 1", "Option 2", "Option 3", "Option 4", "Option 5" };
 
         private const float SEARCH_DEBOUNCE_SECONDS = 0.2f;
         private string _searchText = string.Empty;
