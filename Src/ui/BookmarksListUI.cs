@@ -57,7 +57,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 _mainWindowRect.x = Mathf.Clamp(_mainWindowRect.x, 0, Screen.width - _mainWindowRect.width);
                 _mainWindowRect.y = Mathf.Clamp(_mainWindowRect.y, 0, Screen.height - _mainWindowRect.height);
 
-                ComboBox.DrawGUI();
+                ComboBox.DrawGUI(_uiStyles.ComboPopupStyle, _uiStyles.ComboGridStyle, _uiStyles.ComboGridSelectedStyle);
             }
         }
 

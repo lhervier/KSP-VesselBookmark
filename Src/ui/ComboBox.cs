@@ -55,26 +55,17 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         private static string _selectedEntry;
 
-        static ComboBox() {
-            _popupStyle = new GUIStyle(GUI.skin.window);
-            _popupStyle.border.top = _popupStyle.border.bottom;
-            _popupStyle.padding.top = _popupStyle.padding.bottom;
-            _gridStyle = new GUIStyle(GUI.skin.button);
-            _gridStyleSelected = new GUIStyle(GUI.skin.button);
-            var t = new Texture2D(1, 1);
-            t.SetPixel(0, 0, new Color(0.35f, 0.35f, 0.5f, 0.9f));
-            t.Apply();
-            _gridStyleSelected.normal.background = t;
-        }
-
         /// <summary>
         /// Must be called every frame in OnGUI when the bookmarks window is visible,
         /// so the popup is drawn and can receive clicks.
         /// </summary>
-        public static void DrawGUI() {
+        public static void DrawGUI(GUIStyle popupStyle, GUIStyle gridStyle, GUIStyle gridStyleSelected) {
             if (_popupOwner == null || _rect.height == 0 || !_popupActive) {
                 return;
             }
+            _popupStyle = popupStyle;
+            _gridStyle = gridStyle;
+            _gridStyleSelected = gridStyleSelected;
 
             _rect.x = Mathf.Clamp(_rect.x, 0, Screen.width - _rect.width);
             _rect.y = Mathf.Clamp(_rect.y, 0, Screen.height - _rect.height);
