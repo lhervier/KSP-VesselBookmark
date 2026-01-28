@@ -1,6 +1,4 @@
-- On ne peut pas bookmarker un vaisseau s'il n'a pas de module de commande
-    => Ajouter un bouton "Add bookmark to current vessel"
-    => Ca fait ajouter un "type" de bookmark (vessel ou commandModule)
+- Ajouter un filtre texte
 - Remplacer le filtre sur le type par une liste d'icônes cliquables
 
 - Les tooltip ne peuvent pas débroder par dessus la fenetre
