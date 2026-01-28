@@ -1,3 +1,4 @@
+using ClickThroughFix;
 using KSP.Localization;
 using KSP.UI.Screens;
 using System.Collections.Generic;
@@ -39,7 +40,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public void OnGUI() {
             if (Controller.MainWindowsVisible) {
                 Controller.ProcessSearchDebounce();
-                _mainWindowRect = GUILayout.Window(
+                _mainWindowRect = ClickThruBlocker.GUILayoutWindow(
                     _mainWindowID,
                     _mainWindowRect,
                     DrawMainWindow,

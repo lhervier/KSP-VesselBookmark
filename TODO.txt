@@ -1,6 +1,5 @@
 - Remplacer le filtre sur le type par une liste d'icônes cliquables
 - Afficher dans combien de temps est le prochain noeud de manoeuvre
-- Ajouter ClickThroughBlocker
 - Redonner le nom du bookmark dans la fenetre de suppression
 
 - Le comportement n'est pas le bon quand on monte ou descend avec une selection.

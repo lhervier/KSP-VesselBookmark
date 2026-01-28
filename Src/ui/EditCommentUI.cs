@@ -1,3 +1,4 @@
+using ClickThroughFix;
 using KSP.Localization;
 using KSP.UI.Screens;
 using System.Collections.Generic;
@@ -29,7 +30,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             if (!Controller.IsEditingComment()) {
                 return;
             }
-            _editWindowRect = GUILayout.Window(
+            _editWindowRect = ClickThruBlocker.GUILayoutWindow(
                 _editWindowID,
                 _editWindowRect,
                 DrawEditWindow,

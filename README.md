@@ -16,7 +16,10 @@ A Kerbal Space Program mod that allows you to bookmark vessels by their command 
 
 1. Download the latest release from the [releases page](https://github.com/lhervier/KSP-VesselBookmark/releases)
 2. Extract the `VesselBookmarkMod` folder to your `KSP/GameData/` directory
-3. Ensure you have [ModuleManager](https://github.com/sarbian/ModuleManager) installed (required for the mod to function)
+3. Ensure you have the following dependencies installed in `GameData`:
+   - [ModuleManager](https://github.com/sarbian/ModuleManager) (required for the mod to function)
+   - [Click Through Blocker](https://forum.kerbalspaceprogram.com/topic/170747-112x-click-through-blocker-new-dependency/) (prevents clicks from passing through the bookmark windows)
+   - [Toolbar Controller](https://forum.kerbalspaceprogram.com/topic/169848-112x-toolbar-controller-for-mod-developers/) (toolbar integration)
 
 ## Usage
 
@@ -62,7 +65,7 @@ The "Go to" button will:
 ### Compatibility
 
 - **KSP Version**: Compatible with KSP 1.x (tested with KSP 1.12+)
-- **Dependencies**: Requires ModuleManager
+- **Dependencies**: Requires ModuleManager, Click Through Blocker, and Toolbar Controller
 - **Mod Conflicts**: Should be compatible with most mods. If you encounter issues, please report them.
 
 ## Building from Source
@@ -72,6 +75,7 @@ The "Go to" button will:
 - .NET Framework 4.7.2 or later
 - Visual Studio or MSBuild
 - Kerbal Space Program installed (for assembly references)
+- Click Through Blocker installed in `KSP/GameData/000_ClickThroughBlocker/` (for compilation; the DLL is referenced from there)
 
 ### Build Steps
 
