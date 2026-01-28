@@ -251,5 +251,42 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _selectedVesselTypeIndex = 0;
             UpdateBookmarks();
         }
+
+        // ======================================================================
+
+        /// <summary>
+        /// Whether to show the add vessel bookmark button
+        /// </summary>
+        /// <returns>Whether to show the add vessel bookmark button</returns>
+        public bool CanAddVesselBookmark() {
+            return FlightGlobals.ActiveVessel != null;
+        }
+
+        public void AddVesselBookmark() {
+            if( !CanAddVesselBookmark() ) {
+                ModLogger.LogWarning("Cannot add vessel bookmark: no active vessel");
+                return;
+            }
+
+            uint vesselPersistentID = FlightGlobals.ActiveVessel.persistentId;
+            
+            if (BookmarkManager.Instance.HasBookmark(BookmarkType.Vessel, vesselPersistentID)) {
+                ScreenMessages.PostScreenMessage(
+                    ModLocalization.GetString("messageBookmarkAlreadyExists"),
+                    2f,
+                    ScreenMessageStyle.UPPER_CENTER
+                );
+                return;
+            }
+
+            VesselBookmark bookmark = new VesselBookmark(vesselPersistentID);
+            if (BookmarkManager.Instance.AddBookmark(bookmark)) {
+                ScreenMessages.PostScreenMessage(
+                    ModLocalization.GetString("messageBookmarkAdded"),
+                    2f,
+                    ScreenMessageStyle.UPPER_CENTER
+                );
+            }
+        }
     }
 }

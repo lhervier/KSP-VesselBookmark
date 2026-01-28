@@ -69,27 +69,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             );
             
             // Add bookmark button (for current active vessel)
-            if (FlightGlobals.ActiveVessel != null) {
+            if (Controller.CanAddVesselBookmark()) {
                 if (GUILayout.Button(ModLocalization.GetString("buttonAdd"), _uiStyles.ButtonStyle, GUILayout.Width(80))) {
-                
-                    uint vesselPersistentID = FlightGlobals.ActiveVessel.persistentId;
-                    
-                    if (BookmarkManager.Instance.HasBookmark(BookmarkType.Vessel, vesselPersistentID)) {
-                        ScreenMessages.PostScreenMessage(
-                            ModLocalization.GetString("messageBookmarkAlreadyExists"),
-                            2f,
-                            ScreenMessageStyle.UPPER_CENTER
-                        );
-                    } else {
-                        VesselBookmark bookmark = new VesselBookmark(vesselPersistentID);
-                        if (BookmarkManager.Instance.AddBookmark(bookmark)) {
-                            ScreenMessages.PostScreenMessage(
-                                ModLocalization.GetString("messageBookmarkAdded"),
-                                2f,
-                                ScreenMessageStyle.UPPER_CENTER
-                            );
-                        }
-                    }
+                    Controller.AddVesselBookmark();
                 }
             }
             
@@ -97,8 +79,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 BookmarkManager.Instance.RefreshBookmarks();
             }
             if (GUILayout.Button(ModLocalization.GetString("buttonClose"), _uiStyles.ButtonStyle, GUILayout.Width(80))) {
-                Controller.MainWindowsVisible = false;
                 _editCommentUIController.CancelCommentEdition();
+                Controller.MainWindowsVisible = false;
                 this.OnClosed.Fire();
             }
             GUILayout.EndHorizontal();
