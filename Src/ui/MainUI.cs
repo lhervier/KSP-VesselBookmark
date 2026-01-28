@@ -144,7 +144,5 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             this._bookmarksListUI.OnGUI();
             this._editCommentUI.OnGUI();
         }
-        
-        
     }
 }
