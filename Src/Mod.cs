@@ -29,7 +29,15 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             GameEvents.onGameStateCreated.Add(OnGameStateCreated);
             GameEvents.onGameStatePostLoad.Add(OnGameStatePostLoad);
             GameEvents.onGameStateSave.Add(OnGameStateSave);
+            
+            // Subscribe to vessel events
             GameEvents.onVesselWasModified.Add(OnVesselWasModified);
+            GameEvents.onVesselDestroy.Add(OnVesselDestroy);
+
+            // Subscribe to alarm events
+            GameEvents.onAlarmAdded.Add(OnAlarmAdded);
+            GameEvents.onAlarmRemoved.Add(OnAlarmRemoved);
+            GameEvents.onAlarmTriggered.Add(OnAlarmTriggered);
 
             ModLogger.LogInfo("Events subscribed");
         }
@@ -41,7 +49,15 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             GameEvents.onGameStateCreated.Remove(OnGameStateCreated);
             GameEvents.onGameStatePostLoad.Remove(OnGameStatePostLoad);
             GameEvents.onGameStateSave.Remove(OnGameStateSave);
+
+            // Unsubscribe from vessel events
             GameEvents.onVesselWasModified.Remove(OnVesselWasModified);
+            GameEvents.onVesselDestroy.Remove(OnVesselDestroy);
+            
+            // Unsubscribe from alarm events
+            GameEvents.onAlarmAdded.Remove(OnAlarmAdded);
+            GameEvents.onAlarmRemoved.Remove(OnAlarmRemoved);
+            GameEvents.onAlarmTriggered.Remove(OnAlarmTriggered);
 
             _manager = null;
 
@@ -78,6 +94,38 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="vessel">The vessel that was modified</param>
         private void OnVesselWasModified(Vessel vessel) {
+            this._manager.RefreshBookmarks();
+        }
+
+        /// <summary>
+        /// Called when a vessel is destroyed
+        /// </summary>
+        /// <param name="vessel">The vessel that was destroyed</param>
+        private void OnVesselDestroy(Vessel vessel) {
+            this._manager.RefreshBookmarks();
+        }
+
+        /// <summary>
+        /// Called when an alarm is added
+        /// </summary>
+        /// <param name="alarm">The alarm that was added</param>
+        private void OnAlarmAdded(AlarmTypeBase alarm) {
+            this._manager.RefreshBookmarks();
+        }
+
+        /// <summary>
+        /// Called when an alarm is removed
+        /// </summary>
+        /// <param name="alarm">The alarm that was removed</param>
+        private void OnAlarmRemoved(uint alarmID) {
+            this._manager.RefreshBookmarks();
+        }
+
+        /// <summary>
+        /// Called when an alarm is triggered
+        /// </summary>
+        /// <param name="alarm">The alarm that was triggered</param>
+        private void OnAlarmTriggered(AlarmTypeBase alarm) {
             this._manager.RefreshBookmarks();
         }
     }

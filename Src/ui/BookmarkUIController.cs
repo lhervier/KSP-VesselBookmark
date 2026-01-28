@@ -76,7 +76,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public void SwitchToVessel() {
-            Vessel vessel = _currentBookmark.GetVessel();
+            Vessel vessel = _currentBookmark.Vessel;
             if( vessel == null ) {
                 ModLogger.LogWarning($"Bookmark {_currentBookmark.GetBookmarkID()}: Vessel not found");
                 return;

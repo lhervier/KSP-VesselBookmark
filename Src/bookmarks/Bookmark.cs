@@ -43,9 +43,19 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         public VesselType VesselType { get; set; }
 
         /// <summary>
+        /// The vessel for the bookmark (not saved)
+        /// </summary>
+        public Vessel Vessel { get; set; }
+
+        /// <summary>
         /// Vessel position
         /// </summary>
         public string VesselSituation { get; set; }
+
+        /// <summary>
+        /// If the bookmark has an alarm
+        /// </summary>
+        public bool HasAlarm { get; set; }
 
         /// <summary>
         /// Custom order for sorting bookmarks (lower values appear first)
@@ -64,16 +74,36 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
             Comment = "";
             VesselSituation = "";
             VesselPersistentID = 0;
+            HasAlarm = false;
             VesselName = "";
             VesselType = VesselType.Unknown;
             Order = 0;
             CreationTime = Planetarium.GetUniversalTime();
+            Vessel = null;
         }
 
         public Bookmark(ConfigNode node) : this() {
             Load(node);
         }
+
+        /// <summary>
+        /// Draw the title of the bookmark
+        /// </summary>
+        public abstract string GetBookmarkDisplayName();
+
+        /// <summary>
+        /// Draw the type of the bookmark
+        /// </summary>
+        public abstract VesselType GetBookmarkDisplayType();
         
+        /// <summary>
+        /// Should draw the part of the bookmark
+        /// </summary>
+        /// <returns>True if the part of the bookmark should be drawn, false otherwise</returns>
+        public abstract bool ShouldDrawPartOf();
+        
+        // =====================================================================
+
         /// <summary>
         /// Saves the specific data of the bookmark to a ConfigNode
         /// </summary>
@@ -92,6 +122,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
             node.AddValue("vesselName", VesselName);
             node.AddValue("vesselType", (int) VesselType);
             node.AddValue("order", Order);
+            node.AddValue("hasAlarm", HasAlarm);
             SaveSpecificData(node);
         }
         
@@ -132,6 +163,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
                 throw new Exception("order not found in the bookmark node");
             }
 
+            if (node.HasValue("hasAlarm")) {
+                bool.TryParse(node.GetValue("hasAlarm"), out bool hasAlarm);
+                HasAlarm = hasAlarm;
+            } else {
+                HasAlarm = false;
+            }
+
             if (node.HasValue("creationTime")) {
                 double.TryParse(node.GetValue("creationTime"), out double time);
                 CreationTime = time;
@@ -142,11 +180,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
             LoadSpecificData(node);
         }
         
+        // =====================================================================
+
         /// <summary>
         /// Get the vessel for the bookmark
         /// </summary>
         /// <returns>The vessel for the bookmark</returns>
-        public Vessel GetVessel() {
+        private Vessel GetVessel() {
             try {
                 ModLogger.LogDebug($"Getting vessel for bookmark {GetBookmarkID()}");
                 if( VesselPersistentID == 0 ) {
@@ -168,6 +208,34 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
             }
         }
 
+        private bool CheckHasAlarm() {
+            try {
+                ModLogger.LogDebug($"Checking if bookmark {GetBookmarkID()} has an alarm");
+                if( Vessel == null ) {
+                    ModLogger.LogWarning($"Bookmark {GetBookmarkID()}: Vessel not found");
+                    return false;
+                }
+
+                DictionaryValueList<uint, AlarmTypeBase> alarms = AlarmClockScenario.Instance.alarms;
+                ModLogger.LogDebug($"Bookmark {GetBookmarkID()}: Found {alarms.Count} alarms");
+                foreach (AlarmTypeBase alarm in alarms.Values) {
+                    if( alarm.Vessel == null ) {
+                        ModLogger.LogWarning($"Bookmark {GetBookmarkID()}: Alarm vessel not found");
+                        continue;
+                    }
+                    if( alarm.Vessel.persistentId == Vessel.persistentId ) {
+                        ModLogger.LogDebug($"Bookmark {GetBookmarkID()}: Alarm found");
+                        return true;
+                    }
+                }
+                ModLogger.LogDebug($"Bookmark {GetBookmarkID()}: No alarm found");
+                return false;
+            } catch (Exception e) {
+                ModLogger.LogError($"Error checking if bookmark {GetBookmarkID()} has an alarm: {e.Message}");
+                return false;
+            }
+        }
+
         /// <summary>
         /// Refresh the bookmark
         /// </summary>
@@ -186,14 +254,16 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
                     return false;
                 }
 
-                Vessel vessel = this.GetVessel();
-                if( vessel == null ) {
+                Vessel = this.GetVessel();
+                if( Vessel == null ) {
                     ModLogger.LogWarning($"Bookmark {GetBookmarkID()}: Vessel not found");
                     return false;
                 }
-                VesselSituation = VesselSituationDetector.GetSituation(vessel);
-                VesselName = vessel.vesselName;
-                VesselType = vessel.vesselType;
+                VesselSituation = VesselSituationDetector.GetSituation(Vessel);
+                VesselName = Vessel.vesselName;
+                VesselType = Vessel.vesselType;
+
+                HasAlarm = CheckHasAlarm();
 
                 if( sendEvent ) {
                     BookmarkManager.Instance.OnBookmarksUpdated.Fire();
@@ -205,21 +275,5 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
                 return false;
             }
         }
-
-        /// <summary>
-        /// Draw the title of the bookmark
-        /// </summary>
-        public abstract string GetBookmarkDisplayName();
-
-        /// <summary>
-        /// Draw the type of the bookmark
-        /// </summary>
-        public abstract VesselType GetBookmarkDisplayType();
-        
-        /// <summary>
-        /// Should draw the part of the bookmark
-        /// </summary>
-        /// <returns>True if the part of the bookmark should be drawn, false otherwise</returns>
-        public abstract bool ShouldDrawPartOf();
     }
 }

@@ -63,10 +63,10 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo Copying icon file
-copy /y "GameData\VesselBookmarkMod\icon.png" "Release\VesselBookmarkMod"
+echo Copying icons files
+copy /y "GameData\VesselBookmarkMod\*.png" "Release\VesselBookmarkMod"
 if errorlevel 1 (
-    echo ERROR: Failed to copy the icon file
+    echo ERROR: Failed to copy the icon files
     exit /b 1
 )
 

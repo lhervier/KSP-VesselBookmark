@@ -14,6 +14,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         // Icon cache
         private Dictionary<VesselType, VesselBookmarkButton> _vesselTypeButtons = new Dictionary<VesselType, VesselBookmarkButton>();
+        private VesselBookmarkButton _alarmIcon;
         private VesselBookmarkButton _removeButton;
         private VesselBookmarkButton _moveUpButton;
         private VesselBookmarkButton _moveDownButton;
@@ -40,6 +41,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _vesselTypeButtons[VesselType.Ship] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/ship", null, BUTTON_WIDTH, BUTTON_HEIGHT);
             _vesselTypeButtons[VesselType.Station] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/station", null, BUTTON_WIDTH, BUTTON_HEIGHT);
             
+            // Initialize alarm icon
+            _alarmIcon = new VesselBookmarkButton(
+                "VesselBookmarkMod/alarm",
+                null,
+                BUTTON_WIDTH,
+                BUTTON_HEIGHT
+            );
+
             // Initialize remove button
             _removeButton = new VesselBookmarkButton(
                 "VesselBookmarkMod/buttons/remove",
@@ -140,15 +149,22 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 null
             );
             
+            // Alarm icon
+            if( bookmark.HasAlarm ) {
+                _alarmIcon.Draw(
+                    () => bookmark.HasAlarm,
+                    null
+                );
+            }
+                
             // Bookmark name
             GUILayout.Label(
                 $"<b>{bookmarkUIController.GetBookmarkTitle()}</b>", 
                 _uiStyles.LabelStyle, 
-                GUILayout.Width(250), 
-                GUILayout.Height(BUTTON_HEIGHT)
+                GUILayout.Width(250)
             );
             GUILayout.FlexibleSpace();
-                
+
             // Small spacing before buttons
             GUILayout.Space(5);
             

@@ -1,10 +1,9 @@
 - Ajouter un filtre texte
 - Remplacer le filtre sur le type par une liste d'icônes cliquables
-- Afficher s'il existe une alarme sur le vaisseau correspondant
 - Afficher dans combien de temps est le prochain noeud de manoeuvre
 - Ajouter ClickThroughBlocker
 
-- Attention, il peut ne pas y avoir de vesselNameing sur un module de commande !!
+- Attention, il peut ne pas y avoir de vesselNaming sur un module de commande !!
     => Utiliser le nom du vaisseau à la place !
 - Le comportement n'est pas le bon quand on monte ou descend avec une selection.
 

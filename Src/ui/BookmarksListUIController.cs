@@ -98,7 +98,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 string selectedBody = GetSelectedBody();
                 this._availableBodies.Clear();
                 foreach (Bookmark bookmark in BookmarkManager.Instance.Bookmarks) {
-                    Vessel vessel = bookmark.GetVessel();
+                    Vessel vessel = bookmark.Vessel;
                     if( vessel == null ) {
                         continue;
                     }
@@ -189,7 +189,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 string all = ModLocalization.GetString("labelAll");
                 
                 foreach (Bookmark bookmark in BookmarkManager.Instance.Bookmarks) {
-                    Vessel vessel = bookmark.GetVessel();
+                    Vessel vessel = bookmark.Vessel;
                     if( vessel == null ) {
                         continue;
                     }
