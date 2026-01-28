@@ -33,40 +33,30 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// <summary>
         /// The list of available bodies
         /// </summary>
-        private List<string> _availableBodies = new List<string>();
-        public IReadOnlyList<string> AvailableBodies => _availableBodies.AsReadOnly();
-        private int _selectedBodyIndex = 0;
-        
-        /// <summary>
-        /// The list of available vessel types
-        /// </summary>
-        private List<string> _availableVesselTypes = new List<string>();
-        public IReadOnlyList<string> AvailableVesselTypes => _availableVesselTypes.AsReadOnly();
-        private int _selectedVesselTypeIndex = 0;
-
-        public List<string> TestComboOptions1 = new List<string> { "Option A", "Option B", "Option C" };
-        private string _selectedTestComboOption1 = "Option A";
-        public string SelectedTestComboOption1 { 
-            get => _selectedTestComboOption1; 
+        public List<string> AvailableBodies = new List<string>();
+        private string _selectedBody = ModLocalization.GetString("labelAll");
+        public string SelectedBody { 
+            get => _selectedBody; 
             set {
-                string previousValue = _selectedTestComboOption1;
-                _selectedTestComboOption1 = value;
-                if( previousValue != _selectedTestComboOption1 ) {
-                    ModLogger.LogInfo($"Test combo option 1 changed from {previousValue} to {_selectedTestComboOption1}");
+                string previousValue = _selectedBody;
+                _selectedBody = value;
+                if( previousValue != _selectedBody ) {
                     UpdateBookmarks();
                 }
             }
         }
-
-        public List<string> TestComboOptions2 = new List<string> { "Option 1", "Option 2", "Option 3", "Option 4", "Option 5" };
-        private string _selectedTestComboOption2 = "Option 1";
-        public string SelectedTestComboOption2 { 
-            get => _selectedTestComboOption2; 
+        
+        /// <summary>
+        /// The list of available vessel types
+        /// </summary>
+        public List<string> AvailableVesselTypes = new List<string>();
+        private string _selectedVesselType = ALL_VESSEL_TYPES;
+        public string SelectedVesselType { 
+            get => _selectedVesselType; 
             set {
-                string previousValue = _selectedTestComboOption2;
-                _selectedTestComboOption2 = value;
-                if( previousValue != _selectedTestComboOption2 ) {
-                    ModLogger.LogInfo($"Test combo option 2 changed from {previousValue} to {_selectedTestComboOption2}");
+                string previousValue = _selectedVesselType;
+                _selectedVesselType = value;
+                if( previousValue != _selectedVesselType ) {
                     UpdateBookmarks();
                 }
             }
@@ -109,63 +99,32 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         // ======================================================================
 
         /// <summary>
-        /// Get the selected body
-        /// </summary>
-        /// <returns>The selected body</returns>
-        public string GetSelectedBody() {
-            if( _selectedBodyIndex >= 0 && _selectedBodyIndex < _availableBodies.Count ) {
-                return _availableBodies[_selectedBodyIndex];
-            } else {
-                return ModLocalization.GetString("labelAll");
-            }
-        }
-
-        /// <summary>
-        /// Select a body
-        /// </summary>
-        /// <param name="bodyName">The name of the body to select</param>
-        /// <param name="updateBookmarks">Whether to update the bookmarks list</param>
-        public void SelectBody(string bodyName, bool updateBookmarks = true) {
-            if( this._availableBodies.Contains(bodyName) ) {
-                this._selectedBodyIndex = this._availableBodies.IndexOf(bodyName);
-            } else {
-                this._selectedBodyIndex = 0;
-            }
-            if( updateBookmarks ) {
-                UpdateBookmarks();
-            }
-        }
-
-        /// <summary>
-        /// Select the next body
-        /// </summary>
-        public void SelectNextBody() {
-            _selectedBodyIndex = (_selectedBodyIndex + 1) % _availableBodies.Count;
-            UpdateBookmarks();
-        }
-
-        /// <summary>
         /// Update the available bodies
         /// </summary>
         private void UpdateAvailableBodies() {
             try {
                 ModLogger.LogDebug($"Updating available bodies");
-                string selectedBody = GetSelectedBody();
-                this._availableBodies.Clear();
+                string selectedBody = _selectedBody;
+                this.AvailableBodies.Clear();
                 foreach (Bookmark bookmark in BookmarkManager.Instance.Bookmarks) {
                     Vessel vessel = bookmark.Vessel;
                     if( vessel == null ) {
                         continue;
                     }
                     string vesselBodyName = vessel.mainBody.bodyName;
-                    if( !_availableBodies.Contains(vesselBodyName) ) {
-                        _availableBodies.Add(vesselBodyName);
+                    if( !AvailableBodies.Contains(vesselBodyName) ) {
+                        AvailableBodies.Add(vesselBodyName);
                     }
                 }
                 // Sort bodies by distance to Kerbol with moons interleaved
-                this._availableBodies = CelestialBodySorter.SortBodyNames(this._availableBodies);
-                this._availableBodies.Insert(0, ModLocalization.GetString("labelAll"));
-                this.SelectBody(selectedBody, false);
+                this.AvailableBodies = CelestialBodySorter.SortBodyNames(this.AvailableBodies);
+                this.AvailableBodies.Insert(0, ModLocalization.GetString("labelAll"));
+                
+                if( !this.AvailableBodies.Contains(selectedBody) ) {
+                    _selectedBody = this.AvailableBodies[0];
+                } else {
+                    _selectedBody = selectedBody;
+                }
             } catch (Exception e) {
                 ModLogger.LogError($"Error updating available bodies: {e.Message}");
             }
@@ -173,57 +132,26 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         // ======================================================================
 
-        /// <summary>
-        /// Get the selected vessel type
-        /// </summary>
-        /// <returns>The selected vessel type</returns>
-        public string GetSelectedVesselType() {
-            if( _selectedVesselTypeIndex >= 0 && _selectedVesselTypeIndex < _availableVesselTypes.Count ) {
-                return _availableVesselTypes[_selectedVesselTypeIndex];
-            } else {
-                return ALL_VESSEL_TYPES;
-            }
-        }
-
-        /// <summary>
-        /// Select a vessel type
-        /// </summary>
-        /// <param name="vesselTypeName">The name of the vessel type to select</param>
-        /// <param name="updateBookmarks">Whether to update the bookmarks list</param>
-        public void SelectVesselType(string vesselTypeName, bool updateBookmarks = true) {
-            if( this._availableVesselTypes.Contains(vesselTypeName) ) {
-                this._selectedVesselTypeIndex = this._availableVesselTypes.IndexOf(vesselTypeName);
-            } else {
-                this._selectedVesselTypeIndex = 0;
-            }
-            if( updateBookmarks ) {
-                UpdateBookmarks();
-            }
-        }
-
-        /// <summary>
-        /// Select the next vessel type
-        /// </summary>
-        public void SelectNextVesselType() {
-            _selectedVesselTypeIndex = (_selectedVesselTypeIndex + 1) % _availableVesselTypes.Count;
-            UpdateBookmarks();
-        }
-
         private void UpdateAvailableVesselTypes() {
             try {
                 ModLogger.LogDebug($"Updating available vessel types");
-                string selectedVesselType = GetSelectedVesselType();
-                this._availableVesselTypes.Clear();
+                string selectedVesselType = _selectedVesselType;
+                this.AvailableVesselTypes.Clear();
                 foreach (Bookmark bookmark in BookmarkManager.Instance.Bookmarks) {
                     VesselType vesselType = bookmark.GetBookmarkDisplayType();
                     string vesselTypeName = vesselType.ToString();
-                    if( !_availableVesselTypes.Contains(vesselTypeName) ) {
-                        _availableVesselTypes.Add(vesselTypeName);
+                    if( !AvailableVesselTypes.Contains(vesselTypeName) ) {
+                        AvailableVesselTypes.Add(vesselTypeName);
                     }
                 }
-                this._availableVesselTypes.Sort();
-                this._availableVesselTypes.Insert(0, ALL_VESSEL_TYPES);
-                this.SelectVesselType(selectedVesselType, false);
+                this.AvailableVesselTypes.Sort();
+                this.AvailableVesselTypes.Insert(0, ALL_VESSEL_TYPES);
+
+                if( !this.AvailableVesselTypes.Contains(selectedVesselType) ) {
+                    _selectedVesselType = this.AvailableVesselTypes[0];
+                } else {
+                    _selectedVesselType = selectedVesselType;
+                }
             } catch (Exception e) {
                 ModLogger.LogError($"Error updating available vessel types: {e.Message}");
             }
@@ -239,8 +167,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 ModLogger.LogDebug($"Updating available bookmarks");
                 this._availableBookmarks.Clear();
                 
-                string selectedBody = GetSelectedBody();
-                string selectedVesselType = GetSelectedVesselType();
+                string selectedBody = _selectedBody;
+                string selectedVesselType = _selectedVesselType;
                 string all = ModLocalization.GetString("labelAll");
                 
                 foreach (Bookmark bookmark in BookmarkManager.Instance.Bookmarks) {
@@ -319,8 +247,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// Clear the filters
         /// </summary>
         public void ClearFilters() {
-            _selectedBodyIndex = 0;
-            _selectedVesselTypeIndex = 0;
+            _selectedBody = ModLocalization.GetString("labelAll");
+            _selectedVesselType = ALL_VESSEL_TYPES;
             UpdateBookmarks();
         }
 

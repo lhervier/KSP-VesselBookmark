@@ -18,8 +18,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         private UIStyles _uiStyles;
 
-        private static readonly object _testCombo1Caller = new object();
-        private static readonly object _testCombo2Caller = new object();
+        private static readonly object _bodyCaller = new object();
+        private static readonly object _vesselTypeCaller = new object();
 
         public BookmarksListUIController Controller { get; private set; }
         private EditCommentUIController _editCommentUIController;
@@ -167,10 +167,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.Label(ModLocalization.GetString("labelBody"), _uiStyles.LabelStyle, GUILayout.Width(50));
             
             // Create dropdown options for body
-            string currentBodyName= Controller.GetSelectedBody();
-            if (GUILayout.Button(currentBodyName, _uiStyles.ButtonStyle, GUILayout.Width(120))) {
-                Controller.SelectNextBody();
-            }
+            Controller.SelectedBody = ComboBox.Box(
+                Controller.SelectedBody, 
+                Controller.AvailableBodies, 
+                _bodyCaller, 
+                _uiStyles.ButtonStyle, 
+                false
+            );
             
             GUILayout.Space(10);
             
@@ -178,31 +181,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.Label(ModLocalization.GetString("labelType"), _uiStyles.LabelStyle, GUILayout.Width(50));
             
             // Create dropdown options for vessel type
-            string currentVesselTypeName = ModLocalization.GetString(
-                "vesselType" + Controller.GetSelectedVesselType()
-            );
-            if (GUILayout.Button(currentVesselTypeName, _uiStyles.ButtonStyle, GUILayout.Width(100))) {
-                Controller.SelectNextVesselType();
-            }
-
-            GUILayout.Space(10);
-
-            // Test combobox 1
-            List<string> testOptions1 = Controller.TestComboOptions1;
-            Controller.SelectedTestComboOption1 = ComboBox.Box(
-                Controller.SelectedTestComboOption1, 
-                testOptions1, 
-                _testCombo1Caller, 
-                _uiStyles.ButtonStyle, 
-                false
-            );
-            
-            // Test combobox 1
-            List<string> testOptions2 = Controller.TestComboOptions2;
-            Controller.SelectedTestComboOption2 = ComboBox.Box(
-                Controller.SelectedTestComboOption2, 
-                testOptions2, 
-                _testCombo2Caller, 
+            Controller.SelectedVesselType = ComboBox.Box(
+                Controller.SelectedVesselType, 
+                Controller.AvailableVesselTypes, 
+                _vesselTypeCaller, 
                 _uiStyles.ButtonStyle, 
                 false
             );
