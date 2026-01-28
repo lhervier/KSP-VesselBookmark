@@ -73,6 +73,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 if (GUILayout.Button(ModLocalization.GetString("buttonAdd"), _uiStyles.ButtonStyle, GUILayout.Width(80))) {
                     Controller.AddVesselBookmark();
                 }
+            } else {
+                // Same button, but disabled
+                GUI.enabled = false;
+                GUILayout.Button(ModLocalization.GetString("buttonAdd"), _uiStyles.ButtonStyle, GUILayout.Width(80));                
+                GUI.enabled = true;
             }
             
             if (GUILayout.Button(ModLocalization.GetString("buttonRefresh"), _uiStyles.ButtonStyle, GUILayout.Width(80))) {
