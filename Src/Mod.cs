@@ -33,6 +33,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             // Subscribe to vessel events
             GameEvents.onVesselWasModified.Add(OnVesselWasModified);
             GameEvents.onVesselDestroy.Add(OnVesselDestroy);
+            GameEvents.onVesselRename.Add(OnVesselRename);
 
             // Subscribe to alarm events
             GameEvents.onAlarmAdded.Add(OnAlarmAdded);
@@ -53,6 +54,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             // Unsubscribe from vessel events
             GameEvents.onVesselWasModified.Remove(OnVesselWasModified);
             GameEvents.onVesselDestroy.Remove(OnVesselDestroy);
+            GameEvents.onVesselRename.Remove(OnVesselRename);
             
             // Unsubscribe from alarm events
             GameEvents.onAlarmAdded.Remove(OnAlarmAdded);
@@ -102,6 +104,14 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="vessel">The vessel that was destroyed</param>
         private void OnVesselDestroy(Vessel vessel) {
+            this._manager.RefreshBookmarks();
+        }
+
+        /// <summary>
+        /// Called when a vessel is renamed
+        /// </summary>
+        /// <param name="vessel">The vessel that was renamed</param>
+        private void OnVesselRename(GameEvents.HostedFromToAction<Vessel, string> action) {
             this._manager.RefreshBookmarks();
         }
 

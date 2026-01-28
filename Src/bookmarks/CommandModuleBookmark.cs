@@ -160,30 +160,40 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// <returns>True if the command module bookmark was refreshed, false otherwise</returns>
         protected override bool RefreshSpecific() {
             try {
-                VesselNaming naming;
                 uint persistentId;
+                string cmName;
+                VesselType cmType;
+                
                 Part commandModulePart = GetPart(CommandModuleFlightID);
                 if (commandModulePart != null) {
-                    naming = commandModulePart.vesselNaming;
                     persistentId = commandModulePart.vessel.persistentId;
+                    if( commandModulePart.vesselNaming == null ) {
+                        cmName = commandModulePart.vessel.vesselName;
+                        cmType = commandModulePart.vessel.vesselType;
+                    } else {
+                        cmName = commandModulePart.vesselNaming.vesselName;
+                        cmType = commandModulePart.vesselNaming.vesselType;
+                    }
                 } else {
                     ProtoPartSnapshot commandModuleProtoPartSnapshot = GetProtoPartSnapshot(CommandModuleFlightID);
                     if (commandModuleProtoPartSnapshot != null) {
-                        naming = commandModuleProtoPartSnapshot.vesselNaming;
                         persistentId = commandModuleProtoPartSnapshot.pVesselRef.persistentId;
+                        if( commandModuleProtoPartSnapshot.vesselNaming == null ) {
+                            cmName = commandModuleProtoPartSnapshot.pVesselRef.vesselName;
+                            cmType = commandModuleProtoPartSnapshot.pVesselRef.vesselType;
+                        } else {
+                            cmName = commandModuleProtoPartSnapshot.vesselNaming.vesselName;
+                            cmType = commandModuleProtoPartSnapshot.vesselNaming.vesselType;
+                        }
                     } else {
                         ModLogger.LogWarning($"Bookmark {CommandModuleFlightID}: Command module part or protoPartSnapshot not found");
                         return false;
                     }
                 }
-                if( naming == null ) {
-                    ModLogger.LogWarning($"Bookmark {CommandModuleFlightID}: Vessel naming not found");
-                    return false;
-                } 
                 
-                CommandModuleName = naming.vesselName;
-                CommandModuleType = naming.vesselType;
                 VesselPersistentID = persistentId;
+                CommandModuleName = cmName;
+                CommandModuleType = cmType;
                 
                 return true;
             } catch (Exception e) {
