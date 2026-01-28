@@ -1,8 +1,10 @@
-- Remplacer le filtre sur le type par une liste d'icônes cliquables
+TODO :
 - Afficher dans combien de temps est le prochain noeud de manoeuvre
 
+Bug fixes :
+- On devrait memoriser le corps celeste et la situation au lieu de son libellé traduit.
 - Le comportement n'est pas le bon quand on monte ou descend avec une selection.
-- On devrait memoriser le corps celest et la situation au lieu de son libellé traduit.
 
+Known bugs :
 - Les tooltip ne peuvent pas débroder par dessus la fenetre
 - Fenêtre de saisie du commentaire: Ajouter des ascenseurs pour le cas où saisie est longue.
