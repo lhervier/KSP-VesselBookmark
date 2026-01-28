@@ -129,6 +129,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             
             // Line 1: Icon, Module name, and action buttons (aligned right)
             GUILayout.BeginHorizontal();
+
+            // Indentation
+            GUILayout.Space(20);
             
             // Vessel type icon
             VesselBookmarkButton vesselTypeButton = GetVesselTypeButton(bookmark.GetBookmarkDisplayType());
@@ -205,13 +208,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             // Line 2: Situation and vessel name (if different from command module name)
             GUILayout.BeginHorizontal();
-            GUILayout.Space(BUTTON_WIDTH + 4);
+            GUILayout.Space(20 + BUTTON_WIDTH + 4);
             
             // Vessel situation
             GUILayout.Label(
                 bookmarkUIController.GetVesselSituation(), 
                 _uiStyles.LabelStyle, 
-                GUILayout.Width(150)
+                GUILayout.Width(250)
             );
 
             // Bookmark is part of 
