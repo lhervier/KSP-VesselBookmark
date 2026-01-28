@@ -18,9 +18,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         private UIStyles _uiStyles;
 
-        /// <summary>Selected index for the test combobox (fixed list from controller).</summary>
-        private int _testComboSelectedIndex1 = 0;
-        private int _testComboSelectedIndex2 = 0;
         private static readonly object _testCombo1Caller = new object();
         private static readonly object _testCombo2Caller = new object();
 
@@ -191,38 +188,24 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.Space(10);
 
             // Test combobox 1
-            string[] testOptions = Controller.TestComboOptions1.ToArray();
-            int newTestIndex = ComboBox.Box(
-                _testComboSelectedIndex1, 
-                testOptions, 
+            List<string> testOptions1 = Controller.TestComboOptions1;
+            Controller.SelectedTestComboOption1 = ComboBox.Box(
+                Controller.SelectedTestComboOption1, 
+                testOptions1, 
                 _testCombo1Caller, 
                 _uiStyles.ButtonStyle, 
-                false,
-                _uiStyles.ComboPopupStyle,
-                _uiStyles.ComboGridStyle,
-                _uiStyles.ComboGridSelectedStyle
+                false
             );
-            if (newTestIndex != _testComboSelectedIndex1) {
-                ModLogger.LogInfo($"Test combo1 selected: index={newTestIndex}, value=\"{testOptions[newTestIndex]}\"");
-            }
-            _testComboSelectedIndex1 = newTestIndex;
-
+            
             // Test combobox 1
-            testOptions = Controller.TestComboOptions2.ToArray();
-            newTestIndex = ComboBox.Box(
-                _testComboSelectedIndex2, 
-                testOptions, 
+            List<string> testOptions2 = Controller.TestComboOptions2;
+            Controller.SelectedTestComboOption2 = ComboBox.Box(
+                Controller.SelectedTestComboOption2, 
+                testOptions2, 
                 _testCombo2Caller, 
                 _uiStyles.ButtonStyle, 
-                false,
-                _uiStyles.ComboPopupStyle,
-                _uiStyles.ComboGridStyle,
-                _uiStyles.ComboGridSelectedStyle
+                false
             );
-            if (newTestIndex != _testComboSelectedIndex2) {
-                ModLogger.LogInfo($"Test combo2 selected: index={newTestIndex}, value=\"{testOptions[newTestIndex]}\"");
-            }
-            _testComboSelectedIndex2 = newTestIndex;
 
             GUILayout.FlexibleSpace();
             

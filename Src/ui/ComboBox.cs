@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
@@ -9,15 +10,50 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
     /// </summary>
     public static class ComboBox {
 
-        private static Rect _rect;
-        private static object _popupOwner;
-        private static string[] _entries;
-        private static bool _popupActive;
-        private static int _selectedItem;
+        /// <summary>
+        /// ID of the popup used to display entries.
+        /// </summary>
         private static readonly int _id = GUIUtility.GetControlID(FocusType.Passive);
+        
+        /// <summary>
+        /// Rectangle of the popup used to display entries.
+        /// </summary>
+        private static Rect _rect;
+
+        /// <summary>
+        /// Object that owns the popup.
+        /// </summary>
+        private static object _popupOwner;
+
+        /// <summary>
+        /// Whether the popup is active.
+        /// </summary>
+        private static bool _popupActive;
+        
+        /// <summary>
+        /// Style of the popup.
+        /// </summary>
         private static GUIStyle _popupStyle;
+
+        /// <summary>
+        /// Style of the grid items in the popup.
+        /// </summary>
         private static GUIStyle _gridStyle;
+
+        /// <summary>
+        /// Style of the selected item in the popup.
+        /// </summary>
         private static GUIStyle _gridStyleSelected;
+
+        /// <summary>
+        /// List of entries to display in the popup.
+        /// </summary>
+        private static List<string> _entries;
+        
+        /// <summary>
+        /// Value selected by the user.
+        /// </summary>
+        private static string _selectedEntry;
 
         static ComboBox() {
             _popupStyle = new GUIStyle(GUI.skin.window);
@@ -43,18 +79,28 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _rect.x = Mathf.Clamp(_rect.x, 0, Screen.width - _rect.width);
             _rect.y = Mathf.Clamp(_rect.y, 0, Screen.height - _rect.height);
 
-            _rect = GUILayout.Window(_id, _rect, _DrawPopup, "", _popupStyle);
+            _rect = GUILayout.Window(
+                _id, 
+                _rect, 
+                _DrawPopup, 
+                "", 
+                _popupStyle
+            );
 
             if (Event.current.type == EventType.MouseDown && !_rect.Contains(Event.current.mousePosition)) {
                 _popupOwner = null;
             }
         }
 
+        /// <summary>
+        /// Draws the popup window.
+        /// </summary>
+        /// <param name="windowID">ID of the window.</param>
         private static void _DrawPopup(int windowID) {
-            for (int i = 0; i < _entries.Length; i++) {
-                GUIStyle style = (i == _selectedItem) ? _gridStyleSelected : _gridStyle;
+            for (int i = 0; i < _entries.Count; i++) {
+                GUIStyle style = string.Equals(_entries[i], _selectedEntry) ? _gridStyleSelected : _gridStyle;
                 if (GUILayout.Button(_entries[i], style)) {
-                    _selectedItem = i;
+                    _selectedEntry = _entries[i];
                     _popupActive = false;
                 }
             }
@@ -71,41 +117,45 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// <param name="popupStyle">Style for the popup window (e.g. UIStyles.ComboPopupStyle). If null, uses default.</param>
         /// <param name="gridStyle">Style for the list items in the popup (e.g. UIStyles.ComboGridStyle). If null, uses default.</param>
         /// <param name="gridStyleSelected">Style for the currently selected item in the list (e.g. UIStyles.ComboGridSelectedStyle). If null, uses default.</param>
-        /// <returns>New selected index (same or updated after popup selection)</returns>
-        public static int Box(int selectedIndex, string[] entries, object caller, GUIStyle buttonStyle, bool expandWidth = true, GUIStyle popupStyle = null, GUIStyle gridStyle = null, GUIStyle gridStyleSelected = null) {
-            if (entries == null || entries.Length == 0) {
-                return 0;
+        /// <returns>New selected value (same or updated after popup selection)</returns>
+        public static string Box(
+            string selectedEntry, 
+            List<string> entries, 
+            object caller, 
+            GUIStyle buttonStyle, 
+            bool expandWidth = true
+        ) {
+            if (entries == null || entries.Count == 0) {
+                return string.Empty;
             }
-            if (entries.Length == 1) {
-                GUILayout.Label(entries[0], buttonStyle ?? GUI.skin.label, expandWidth ? GUILayout.ExpandWidth(true) : GUILayout.ExpandWidth(false));
-                return 0;
+            if (entries.Count == 1) {
+                GUILayout.Label(
+                    entries[0], 
+                    buttonStyle ?? GUI.skin.label, 
+                    expandWidth ? GUILayout.ExpandWidth(true) : GUILayout.ExpandWidth(false)
+                );
+                return entries[0];
             }
 
-            if (selectedIndex >= entries.Length) {
-                selectedIndex = entries.Length - 1;
-            }
-            if (selectedIndex < 0) {
-                selectedIndex = 0;
+            if( !entries.Contains(selectedEntry) ) {
+                selectedEntry = entries[0];
             }
 
             if (_popupOwner == caller && !_popupActive) {
                 _popupOwner = null;
-                selectedIndex = _selectedItem;
+                selectedEntry = _selectedEntry;
                 GUI.changed = true;
             }
 
             bool guiChanged = GUI.changed;
             var layoutOption = expandWidth ? GUILayout.ExpandWidth(true) : GUILayout.ExpandWidth(false);
-            if (GUILayout.Button("↓ " + entries[selectedIndex] + " ↓", buttonStyle ?? GUI.skin.button, layoutOption)) {
+            if (GUILayout.Button("↓ " + selectedEntry + " ↓", buttonStyle ?? GUI.skin.button, layoutOption)) {
                 GUI.changed = guiChanged;
                 _popupOwner = caller;
                 _popupActive = true;
                 _entries = entries;
-                _selectedItem = selectedIndex;
+                _selectedEntry = selectedEntry;
                 _rect = new Rect(0, 0, 0, 0);
-                _popupStyle = popupStyle ?? _popupStyle;
-                _gridStyle = gridStyle ?? _gridStyle;
-                _gridStyleSelected = gridStyleSelected ?? _gridStyleSelected;
             }
 
             if (Event.current.type == EventType.Repaint && _popupOwner == caller && _rect.height == 0) {
@@ -117,7 +167,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 _rect.y = _rect.y + mousePos.y - clippedMousePos.y;
             }
 
-            return selectedIndex;
+            return selectedEntry;
         }
     }
 }

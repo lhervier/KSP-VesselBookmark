@@ -45,7 +45,32 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private int _selectedVesselTypeIndex = 0;
 
         public List<string> TestComboOptions1 = new List<string> { "Option A", "Option B", "Option C" };
+        private string _selectedTestComboOption1 = "Option A";
+        public string SelectedTestComboOption1 { 
+            get => _selectedTestComboOption1; 
+            set {
+                string previousValue = _selectedTestComboOption1;
+                _selectedTestComboOption1 = value;
+                if( previousValue != _selectedTestComboOption1 ) {
+                    ModLogger.LogInfo($"Test combo option 1 changed from {previousValue} to {_selectedTestComboOption1}");
+                    UpdateBookmarks();
+                }
+            }
+        }
+
         public List<string> TestComboOptions2 = new List<string> { "Option 1", "Option 2", "Option 3", "Option 4", "Option 5" };
+        private string _selectedTestComboOption2 = "Option 1";
+        public string SelectedTestComboOption2 { 
+            get => _selectedTestComboOption2; 
+            set {
+                string previousValue = _selectedTestComboOption2;
+                _selectedTestComboOption2 = value;
+                if( previousValue != _selectedTestComboOption2 ) {
+                    ModLogger.LogInfo($"Test combo option 2 changed from {previousValue} to {_selectedTestComboOption2}");
+                    UpdateBookmarks();
+                }
+            }
+        }
 
         private const float SEARCH_DEBOUNCE_SECONDS = 0.2f;
         private string _searchText = string.Empty;
