@@ -92,20 +92,23 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             DrawFilters();
             
             GUILayout.Space(5);
+
+            GUILayout.Space(5);
             
-            // Bookmarks list
-            _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, false, true);
-            
-            if (Controller.AvailableBookmarks.Count == 0) {
+            if( Controller.AvailableBookmarks.Count == 0 ) {
                 GUILayout.Label(ModLocalization.GetString("labelNoBookmarks"), _uiStyles.LabelStyle);
             } else {
+                // Bookmarks list
+                _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, false, true);
+                
+                GUILayout.Label(ModLocalization.GetString("labelAddCommandModuleBookmark"), _uiStyles.LabelStyle);
                 for(int i = 0; i < Controller.AvailableBookmarks.Count; i++) {
                     Bookmark bookmark = Controller.AvailableBookmarks[i];
                     this._bookmarkUI.OnGUI(bookmark, i);
                 }
+
+                GUILayout.EndScrollView();
             }
-            
-            GUILayout.EndScrollView();
             
             GUILayout.EndVertical();
             
