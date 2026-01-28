@@ -39,9 +39,19 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             ComboPopupStyle.border.top = ComboPopupStyle.border.bottom;
             ComboPopupStyle.padding.top = ComboPopupStyle.padding.bottom;
 
+            // Style grille : aspect libellé (sans bordure), cliquable avec hover
+            ComboGridStyle.border = new RectOffset(0, 0, 0, 0);
+            ComboGridStyle.normal.background = null;
+            var hoverBg = new Texture2D(1, 1);
+            hoverBg.SetPixel(0, 0, new Color(0.3f, 0.3f, 0.4f, 0.6f));
+            hoverBg.Apply();
+            ComboGridStyle.hover.background = hoverBg;
+            ComboGridStyle.active.background = hoverBg;
+
             var selectedBg = new Texture2D(1, 1);
             selectedBg.SetPixel(0, 0, new Color(0.35f, 0.35f, 0.5f, 0.9f));
             selectedBg.Apply();
+            ComboGridSelectedStyle.border = new RectOffset(0, 0, 0, 0);
             ComboGridSelectedStyle.normal.background = selectedBg;
             ComboGridSelectedStyle.hover.background = selectedBg;
             ComboGridSelectedStyle.active.background = selectedBg;
