@@ -210,25 +210,20 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
 
         private bool CheckHasAlarm() {
             try {
-                ModLogger.LogDebug($"Checking if bookmark {GetBookmarkID()} has an alarm");
                 if( Vessel == null ) {
                     ModLogger.LogWarning($"Bookmark {GetBookmarkID()}: Vessel not found");
                     return false;
                 }
 
                 DictionaryValueList<uint, AlarmTypeBase> alarms = AlarmClockScenario.Instance.alarms;
-                ModLogger.LogDebug($"Bookmark {GetBookmarkID()}: Found {alarms.Count} alarms");
                 foreach (AlarmTypeBase alarm in alarms.Values) {
                     if( alarm.Vessel == null ) {
-                        ModLogger.LogWarning($"Bookmark {GetBookmarkID()}: Alarm vessel not found");
                         continue;
                     }
                     if( alarm.Vessel.persistentId == Vessel.persistentId ) {
-                        ModLogger.LogDebug($"Bookmark {GetBookmarkID()}: Alarm found");
                         return true;
                     }
                 }
-                ModLogger.LogDebug($"Bookmark {GetBookmarkID()}: No alarm found");
                 return false;
             } catch (Exception e) {
                 ModLogger.LogError($"Error checking if bookmark {GetBookmarkID()} has an alarm: {e.Message}");
