@@ -211,20 +211,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.Space(20 + BUTTON_WIDTH + 4);
             
             // Vessel situation
+            string situation = bookmarkUIController.GetVesselSituation();
+            if( bookmark.ShouldDrawPartOf() ) {
+                situation += " (" + bookmark.VesselName + ")";
+            }
             GUILayout.Label(
-                bookmarkUIController.GetVesselSituation(), 
-                _uiStyles.LabelStyle, 
-                GUILayout.Width(250)
+                situation, 
+                _uiStyles.LabelStyle
             );
 
-            // Bookmark is part of 
-            if( bookmark.ShouldDrawPartOf() ) {
-                GUILayout.Label(
-                    ModLocalization.GetString("labelPartOf", bookmark.VesselName), 
-                    _uiStyles.LabelStyle
-                );
-            }
-            
             GUILayout.EndHorizontal();
             Rect line2Rect = GUILayoutUtility.GetLastRect();
 
