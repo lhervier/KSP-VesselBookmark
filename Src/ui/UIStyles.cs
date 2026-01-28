@@ -14,17 +14,37 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public GUIStyle ButtonStyle { get; private set; }
         public GUIStyle TextAreaStyle { get; private set; }
         public GUIStyle TooltipStyle { get; private set; }
-        
+        public GUIStyle ComboPopupStyle { get; private set; }
+        public GUIStyle ComboGridStyle { get; private set; }
+        /// <summary>Style for the currently selected item in the combobox list.</summary>
+        public GUIStyle ComboGridSelectedStyle { get; private set; }
+
         public UIStyles() {
             LabelStyle = new GUIStyle(GUI.skin.label) { richText = true };
             ButtonStyle = new GUIStyle(GUI.skin.button);
             TextAreaStyle = new GUIStyle(GUI.skin.textArea);
             TooltipStyle = new GUIStyle(GUI.skin.box);
-        
+            ComboPopupStyle = new GUIStyle(GUI.skin.window);
+            ComboGridStyle = new GUIStyle(GUI.skin.button);
+            ComboGridSelectedStyle = new GUIStyle(GUI.skin.button);
+
             ApplyWhiteText(LabelStyle);
             ApplyWhiteText(ButtonStyle);
             ApplyWhiteText(TextAreaStyle);
             ApplyWhiteText(TooltipStyle);
+            ApplyWhiteText(ComboPopupStyle);
+            ApplyWhiteText(ComboGridStyle);
+            ApplyWhiteText(ComboGridSelectedStyle);
+
+            ComboPopupStyle.border.top = ComboPopupStyle.border.bottom;
+            ComboPopupStyle.padding.top = ComboPopupStyle.padding.bottom;
+
+            var selectedBg = new Texture2D(1, 1);
+            selectedBg.SetPixel(0, 0, new Color(0.35f, 0.35f, 0.5f, 0.9f));
+            selectedBg.Apply();
+            ComboGridSelectedStyle.normal.background = selectedBg;
+            ComboGridSelectedStyle.hover.background = selectedBg;
+            ComboGridSelectedStyle.active.background = selectedBg;
         }
 
         private void ApplyWhiteText(GUIStyle style) {

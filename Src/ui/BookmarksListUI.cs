@@ -6,6 +6,7 @@ using System.Linq;
 using UnityEngine;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.bookmarksmod.util;
+using com.github.lhervier.ksp.bookmarksmod;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
@@ -16,6 +17,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private Vector2 _scrollPosition = Vector2.zero;
 
         private UIStyles _uiStyles;
+
+        /// <summary>Selected index for the test combobox (fixed list from controller).</summary>
+        private int _testComboSelectedIndex = 0;
+        private static readonly object _testComboCaller = new object();
 
         public BookmarksListUIController Controller { get; private set; }
         private EditCommentUIController _editCommentUIController;
@@ -52,6 +57,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 // Prevent window from going off screen
                 _mainWindowRect.x = Mathf.Clamp(_mainWindowRect.x, 0, Screen.width - _mainWindowRect.width);
                 _mainWindowRect.y = Mathf.Clamp(_mainWindowRect.y, 0, Screen.height - _mainWindowRect.height);
+
+                ComboBox.DrawGUI();
             }
         }
 
@@ -178,6 +185,16 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             if (GUILayout.Button(currentVesselTypeName, _uiStyles.ButtonStyle, GUILayout.Width(100))) {
                 Controller.SelectNextVesselType();
             }
+
+            GUILayout.Space(10);
+
+            // Test combobox (fixed list from controller, log on selection)
+            string[] testOptions = BookmarksListUIController.TestComboOptions;
+            int newTestIndex = ComboBox.Box(_testComboSelectedIndex, testOptions, _testComboCaller, _uiStyles.ButtonStyle, false, _uiStyles.ComboPopupStyle, _uiStyles.ComboGridStyle, _uiStyles.ComboGridSelectedStyle);
+            if (newTestIndex != _testComboSelectedIndex) {
+                ModLogger.LogInfo($"Test combo selected: index={newTestIndex}, value=\"{testOptions[newTestIndex]}\"");
+            }
+            _testComboSelectedIndex = newTestIndex;
 
             GUILayout.FlexibleSpace();
             
