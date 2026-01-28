@@ -11,7 +11,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         
         private const string ConfirmDialogTag = "VesselBookmarkConfirmRemove";
         
-        public static void ConfirmRemoval(Action onConfirm, Action onCancel = null, string title = null, string message = null) {
+        public static void ConfirmRemoval(Action onConfirm, Action onCancel = null, string title = null, string message = null, string bookmarkName = null) {
             if (onConfirm == null) return;
             
             // Use localized strings if not provided
@@ -19,7 +19,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 title = ModLocalization.GetString("dialogRemoveTitle");
             }
             if (string.IsNullOrEmpty(message)) {
-                message = ModLocalization.GetString("dialogRemoveMessage");
+                message = string.IsNullOrEmpty(bookmarkName)
+                    ? ModLocalization.GetString("dialogRemoveMessage")
+                    : ModLocalization.GetString("dialogRemoveMessageWithName", bookmarkName);
             }
             
             DialogGUIBase[] options = new DialogGUIBase[] {

@@ -118,6 +118,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             bool wasMainWindowVisible = _bookmarksListUIController.MainWindowsVisible;
             _bookmarksListUIController.MainWindowsVisible = false;
             
+            string displayName = !string.IsNullOrEmpty(_currentBookmark.GetBookmarkDisplayName())
+                ? _currentBookmark.GetBookmarkDisplayName()
+                : ModLocalization.GetString("labelModuleNotFound");
             VesselBookmarkUIDialog.ConfirmRemoval(
                 () => {
                     BookmarkManager.Instance.RemoveBookmark(_currentBookmark);
@@ -125,7 +128,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 },
                 () => {
                     _bookmarksListUIController.MainWindowsVisible = wasMainWindowVisible;
-                }
+                },
+                bookmarkName: displayName
             );
         }
     }
