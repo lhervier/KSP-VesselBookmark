@@ -27,8 +27,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         
         // Bookmarks list to display in the UI (cached for performance)
         // Only for read access
-        private List<Bookmark> _availableBookmarks = new List<Bookmark>();
-        public IReadOnlyList<Bookmark> AvailableBookmarks => _availableBookmarks.AsReadOnly();
+        private Dictionary<BookmarkType, List<Bookmark>> _availableBookmarks = new Dictionary<BookmarkType, List<Bookmark>>();
+        public IReadOnlyDictionary<BookmarkType, List<Bookmark>> AvailableBookmarks => _availableBookmarks;
         
         /// <summary>
         /// The list of available bodies
@@ -219,10 +219,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                             );
                     }
                     if( addBookmark ) {
-                        _availableBookmarks.Add(bookmark);
+                        if( !_availableBookmarks.ContainsKey(bookmark.GetBookmarkType()) ) {
+                            _availableBookmarks.Add(bookmark.GetBookmarkType(), new List<Bookmark>());
+                        }
+                        _availableBookmarks[bookmark.GetBookmarkType()].Add(bookmark);
                     }
                 }
-                this._availableBookmarks.Sort((a, b) => a.Order.CompareTo(b.Order));
+                foreach( var bookmarks in _availableBookmarks.Values ) {
+                    bookmarks.Sort((a, b) => a.Order.CompareTo(b.Order));
+                }
             } catch (Exception e) {
                 ModLogger.LogError($"Error updating available bookmarks: {e.Message}");
             }

@@ -98,13 +98,22 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             if( Controller.AvailableBookmarks.Count == 0 ) {
                 GUILayout.Label(ModLocalization.GetString("labelNoBookmarks"), _uiStyles.LabelStyle);
             } else {
-                // Bookmarks list
                 _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, false, true);
                 
                 GUILayout.Label(ModLocalization.GetString("labelAddCommandModuleBookmark"), _uiStyles.LabelStyle);
-                for(int i = 0; i < Controller.AvailableBookmarks.Count; i++) {
-                    Bookmark bookmark = Controller.AvailableBookmarks[i];
-                    this._bookmarkUI.OnGUI(bookmark, i);
+                if( Controller.AvailableBookmarks.ContainsKey(BookmarkType.CommandModule) ) {
+                    for(int i = 0; i < Controller.AvailableBookmarks[BookmarkType.CommandModule].Count; i++) {
+                        Bookmark bookmark = Controller.AvailableBookmarks[BookmarkType.CommandModule][i];
+                        this._bookmarkUI.OnGUI(bookmark, i);
+                    }
+                }
+
+                GUILayout.Label(ModLocalization.GetString("labelAddVesselBookmark"), _uiStyles.LabelStyle);
+                if( Controller.AvailableBookmarks.ContainsKey(BookmarkType.Vessel) ) {
+                    for(int i = 0; i < Controller.AvailableBookmarks[BookmarkType.Vessel].Count; i++) {
+                        Bookmark bookmark = Controller.AvailableBookmarks[BookmarkType.Vessel][i];
+                        this._bookmarkUI.OnGUI(bookmark, i);
+                    }
                 }
 
                 GUILayout.EndScrollView();

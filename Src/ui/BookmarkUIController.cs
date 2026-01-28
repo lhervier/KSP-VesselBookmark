@@ -56,11 +56,19 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public bool CanMoveUp() {
+            if( !_bookmarksListUIController.AvailableBookmarks.ContainsKey(_currentBookmark.GetBookmarkType()) ) {
+                ModLogger.LogWarning($"Bookmark {_currentBookmark.GetBookmarkID()}: Bookmark type {_currentBookmark.GetBookmarkType()} not found");
+                return false;
+            }
             return _currentIndex > 0;
         }
 
         public bool CanMoveDown() {
-            return _currentIndex < _bookmarksListUIController.AvailableBookmarks.Count - 1;
+            if( !_bookmarksListUIController.AvailableBookmarks.ContainsKey(_currentBookmark.GetBookmarkType()) ) {
+                ModLogger.LogWarning($"Bookmark {_currentBookmark.GetBookmarkID()}: Bookmark type {_currentBookmark.GetBookmarkType()} not found");
+                return false;
+            }
+            return _currentIndex < _bookmarksListUIController.AvailableBookmarks[_currentBookmark.GetBookmarkType()].Count - 1;
         }
 
         public void EditComment() {
@@ -80,7 +88,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public void MoveUp() {
-            Bookmark previousBookmark = _bookmarksListUIController.AvailableBookmarks[_currentIndex - 1];
+            if( !CanMoveUp() ) {
+                ModLogger.LogWarning($"Bookmark {_currentBookmark.GetBookmarkID()}: Cannot move up");
+                return;
+            }
+            List<Bookmark> bookmarks = _bookmarksListUIController.AvailableBookmarks[_currentBookmark.GetBookmarkType()];
+            Bookmark previousBookmark = bookmarks[_currentIndex - 1];
             BookmarkManager.Instance.SwapBookmarks(
                 _currentBookmark, 
                 previousBookmark
@@ -88,7 +101,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public void MoveDown() {
-            Bookmark nextBookmark = _bookmarksListUIController.AvailableBookmarks[_currentIndex + 1];
+            if( !CanMoveDown() ) {
+                ModLogger.LogWarning($"Bookmark {_currentBookmark.GetBookmarkID()}: Bookmark type {_currentBookmark.GetBookmarkType()} not found");
+                return;
+            }
+            List<Bookmark> bookmarks = _bookmarksListUIController.AvailableBookmarks[_currentBookmark.GetBookmarkType()];
+            Bookmark nextBookmark = bookmarks[_currentIndex + 1];
             BookmarkManager.Instance.SwapBookmarks(
                 _currentBookmark, 
                 nextBookmark

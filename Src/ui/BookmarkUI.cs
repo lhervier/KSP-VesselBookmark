@@ -139,7 +139,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             
             // Bookmark name
             GUILayout.Label(
-                $"<b>{bookmarkUIController.GetBookmarkTitle()} ({bookmark.GetBookmarkType()})</b>", 
+                $"<b>{bookmarkUIController.GetBookmarkTitle()}</b>", 
                 _uiStyles.LabelStyle, 
                 GUILayout.Width(250), 
                 GUILayout.Height(BUTTON_HEIGHT)
