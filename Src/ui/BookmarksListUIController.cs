@@ -44,6 +44,33 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public IReadOnlyList<string> AvailableVesselTypes => _availableVesselTypes.AsReadOnly();
         private int _selectedVesselTypeIndex = 0;
 
+        private const float SEARCH_DEBOUNCE_SECONDS = 0.2f;
+        private string _searchText = string.Empty;
+        private float _searchTextChangeTime = -1f;
+
+        /// <summary>
+        /// Texte saisi dans la zone de recherche/filtre (pour usage futur).
+        /// Au changement, déclenche un rafraîchissement des signets après 200 ms sans frappe.
+        /// </summary>
+        public string SearchText {
+            get => _searchText;
+            set {
+                if (value == _searchText) return;
+                _searchText = value ?? string.Empty;
+                _searchTextChangeTime = Time.realtimeSinceStartup;
+            }
+        }
+
+        /// <summary>
+        /// À appeler chaque frame (ex. depuis OnGUI). Déclenche RefreshBookmarks 200 ms après la dernière modification de SearchText.
+        /// </summary>
+        public void ProcessSearchDebounce() {
+            if (_searchTextChangeTime < 0f) return;
+            if (Time.realtimeSinceStartup - _searchTextChangeTime < SEARCH_DEBOUNCE_SECONDS) return;
+            _searchTextChangeTime = -1f;
+            BookmarkManager.Instance.RefreshBookmarks();
+        }
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -218,6 +245,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                                 selectedVesselType
                             );
                     }
+
+                    if( addBookmark && !string.IsNullOrEmpty(SearchText) ) {
+                        string fullSearchText = bookmark.GetBookmarkDisplayName() + " ";
+                        fullSearchText += bookmark.VesselSituation + " ";   // Situation contains celestial body name
+                        fullSearchText += bookmark.VesselName + " ";
+                        fullSearchText += ModLocalization.GetString("vesselType" + bookmark.GetBookmarkDisplayType()) + " ";
+                        fullSearchText += bookmark.Comment + " ";
+                        if( !fullSearchText.ToLower().Contains(SearchText.ToLower()) ) {
+                            addBookmark = false;
+                        }
+                    }
+
                     if( addBookmark ) {
                         if( !_availableBookmarks.ContainsKey(bookmark.GetBookmarkType()) ) {
                             _availableBookmarks.Add(bookmark.GetBookmarkType(), new List<Bookmark>());

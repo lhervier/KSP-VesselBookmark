@@ -1,10 +1,10 @@
-- Ajouter un filtre texte
 - Remplacer le filtre sur le type par une liste d'icônes cliquables
 - Afficher dans combien de temps est le prochain noeud de manoeuvre
 - Ajouter ClickThroughBlocker
 - Redonner le nom du bookmark dans la fenetre de suppression
 
 - Le comportement n'est pas le bon quand on monte ou descend avec une selection.
+- On devrait memoriser le corps celest et la situation au lieu de son libellé traduit.
 
 - Les tooltip ne peuvent pas débroder par dessus la fenetre
 - Fenêtre de saisie du commentaire: Ajouter des ascenseurs pour le cas où saisie est longue.

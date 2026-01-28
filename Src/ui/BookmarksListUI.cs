@@ -38,6 +38,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         public void OnGUI() {
             if (Controller.MainWindowsVisible) {
+                Controller.ProcessSearchDebounce();
                 _mainWindowRect = GUILayout.Window(
                     _mainWindowID,
                     _mainWindowRect,
@@ -183,6 +184,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 Controller.ClearFilters();
             }
             
+            GUILayout.EndHorizontal();
+            
+            // Zone de saisie de texte
+            GUILayout.BeginHorizontal();
+            GUILayout.Space(50);
+            Controller.SearchText = GUILayout.TextField(Controller.SearchText, GUILayout.ExpandWidth(true));
             GUILayout.EndHorizontal();
             
             GUILayout.EndVertical();
