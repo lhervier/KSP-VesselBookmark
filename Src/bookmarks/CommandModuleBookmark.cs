@@ -206,7 +206,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// Get the display name of the command module bookmark
         /// </summary>
         /// <returns>The display name of the command module bookmark</returns>
-        public override string GetBookmarkDisplayName() {
+        public override string GetBookmarkTitle() {
             return CommandModuleName;
         }
 

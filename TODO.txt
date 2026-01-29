@@ -2,7 +2,6 @@ TODO :
 - Afficher dans combien de temps est le prochain noeud de manoeuvre
 
 Bug fixes :
-- On devrait memoriser le corps celeste et la situation au lieu de son libellé traduit.
 - Le comportement n'est pas le bon quand on monte ou descend avec une selection.
 
 Known bugs :

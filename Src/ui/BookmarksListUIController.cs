@@ -203,8 +203,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     }
 
                     if( addBookmark && !string.IsNullOrEmpty(SearchText) ) {
-                        string fullSearchText = bookmark.GetBookmarkDisplayName() + " ";
-                        fullSearchText += bookmark.VesselSituation + " ";   // Situation contains celestial body name
+                        string fullSearchText = bookmark.GetBookmarkTitle() + " ";
+                        fullSearchText += bookmark.VesselSituationLabel + " ";   // Situation contains celestial body name
                         fullSearchText += bookmark.VesselName + " ";
                         fullSearchText += ModLocalization.GetString("vesselType" + bookmark.GetBookmarkDisplayType()) + " ";
                         fullSearchText += bookmark.Comment + " ";

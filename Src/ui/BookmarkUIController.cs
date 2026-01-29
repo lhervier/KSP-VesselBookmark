@@ -27,20 +27,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         public string GetBookmarkTitle() {
             string bookmarkName;
-            if( !string.IsNullOrEmpty(_currentBookmark.GetBookmarkDisplayName())) {
-                bookmarkName = _currentBookmark.GetBookmarkDisplayName();
+            if( !string.IsNullOrEmpty(_currentBookmark.GetBookmarkTitle())) {
+                bookmarkName = _currentBookmark.GetBookmarkTitle();
             } else {
                 bookmarkName = ModLocalization.GetString("labelModuleNotFound");
             }
             return bookmarkName;
-        }
-
-        public string GetVesselSituation() {
-            if (!string.IsNullOrEmpty(_currentBookmark.VesselSituation)) {
-                return _currentBookmark.VesselSituation;
-            } else {
-                return ModLocalization.GetString("labelUnknownSituation");
-            }
         }
 
         public bool IsHovered() {
@@ -118,9 +110,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             bool wasMainWindowVisible = _bookmarksListUIController.MainWindowsVisible;
             _bookmarksListUIController.MainWindowsVisible = false;
             
-            string displayName = !string.IsNullOrEmpty(_currentBookmark.GetBookmarkDisplayName())
-                ? _currentBookmark.GetBookmarkDisplayName()
-                : ModLocalization.GetString("labelModuleNotFound");
+            string displayName = this.GetBookmarkTitle();
             VesselBookmarkUIDialog.ConfirmRemoval(
                 () => {
                     BookmarkManager.Instance.RemoveBookmark(_currentBookmark);

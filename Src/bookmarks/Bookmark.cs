@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using com.github.lhervier.ksp.bookmarksmod;
 using com.github.lhervier.ksp.bookmarksmod.util;
+using System.Linq;
 
 namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
     
@@ -9,17 +10,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
     /// Base class for all bookmarks
     /// </summary>
     public abstract class Bookmark {
-
-        /// <summary>
-        /// Get the unique identifier of the bookmark
-        /// </summary>
-        /// <returns>The unique identifier of the bookmark</returns>
-        public abstract uint GetBookmarkID();
-
-        /// <summary>
-        /// Type of the bookmark
-        /// </summary>
-        public abstract BookmarkType GetBookmarkType();
 
         /// <summary>
         /// User-editable comment
@@ -43,15 +33,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         public VesselType VesselType { get; set; }
 
         /// <summary>
-        /// The vessel for the bookmark (not saved)
+        /// The main body of the vessel
         /// </summary>
-        public Vessel Vessel { get; set; }
+        public CelestialBody VesselBody { get; set; }
 
         /// <summary>
-        /// Vessel position
+        /// The situation of the vessel
         /// </summary>
-        public string VesselSituation { get; set; }
-
+        public Vessel.Situations VesselSituation { get; set; }
+        
         /// <summary>
         /// If the bookmark has an alarm
         /// </summary>
@@ -67,12 +57,28 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// </summary>
         public double CreationTime { get; set; }
         
+        // ==================
+        //  Transient fields
+        // ==================
+        
+        /// <summary>
+        /// The vessel for the bookmark (not saved)
+        /// </summary>
+        public Vessel Vessel { get; set; }
+
+        /// <summary>
+        /// The label of the vessel situation
+        /// </summary>
+        public string VesselSituationLabel { get; set; }
+
         /// <summary>
         /// Constructor
         /// </summary>
         protected Bookmark() {
             Comment = "";
-            VesselSituation = "";
+            VesselSituation = Vessel.Situations.PRELAUNCH;
+            VesselBody = null;
+            VesselSituationLabel = "";
             VesselPersistentID = 0;
             HasAlarm = false;
             VesselName = "";
@@ -87,9 +93,20 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         }
 
         /// <summary>
+        /// Get the unique identifier of the bookmark
+        /// </summary>
+        /// <returns>The unique identifier of the bookmark</returns>
+        public abstract uint GetBookmarkID();
+
+        /// <summary>
+        /// Type of the bookmark
+        /// </summary>
+        public abstract BookmarkType GetBookmarkType();
+
+        /// <summary>
         /// Draw the title of the bookmark
         /// </summary>
-        public abstract string GetBookmarkDisplayName();
+        public abstract string GetBookmarkTitle();
 
         /// <summary>
         /// Draw the type of the bookmark
@@ -117,7 +134,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
             node.AddValue("bookmarkType", (int) GetBookmarkType());
             node.AddValue("comment", Comment);
             node.AddValue("creationTime", CreationTime);
-            node.AddValue("vesselSituation", VesselSituation);
+            node.AddValue("vesselSituation", VesselSituation.ToString());
+            node.AddValue("vesselBody", VesselBody.bodyName);
             node.AddValue("vesselPersistentID", VesselPersistentID);
             node.AddValue("vesselName", VesselName);
             node.AddValue("vesselType", (int) VesselType);
@@ -139,6 +157,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         public void Load(ConfigNode node) {
             Comment = node.GetValue("comment") ?? "";
             
+            // Mandatory fields
+            
             if( node.HasValue("vesselPersistentID") ) {
                 uint.TryParse(node.GetValue("vesselPersistentID"), out uint persistentID);
                 VesselPersistentID = persistentID;
@@ -146,9 +166,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
                 throw new Exception("vesselPersistentID not found in the bookmark node");
             }
 
-            VesselSituation = node.GetValue("vesselSituation") ?? "";
-            VesselName = node.GetValue("vesselName") ?? "";
-            
             if (node.HasValue("vesselType")) {
                 int.TryParse(node.GetValue("vesselType"), out int vesselType);
                 VesselType = (VesselType) vesselType;
@@ -163,6 +180,33 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
                 throw new Exception("order not found in the bookmark node");
             }
 
+            // Optional fields
+
+            VesselSituation = Vessel.Situations.PRELAUNCH;
+            if( node.HasValue("vesselSituation") ) {
+                string situation = node.GetValue("vesselSituation");
+                if( Enum.TryParse<Vessel.Situations>(situation, out Vessel.Situations parsedSituation) ) {
+                    VesselSituation = parsedSituation;
+                } else {
+                    ModLogger.LogWarning($"Invalid vesselSituation value '{situation}' in the bookmark node, using PRELAUNCH as default");
+                }
+            } else {
+                ModLogger.LogWarning("vesselSituation not found in the bookmark node");
+            }
+
+            if( node.HasValue("vesselBody") ) {
+                string bodyName = node.GetValue("vesselBody");
+                VesselBody = FlightGlobals.Bodies.FirstOrDefault(b => b.bodyName == bodyName);
+                if( VesselBody == null ) {
+                    ModLogger.LogWarning($"Vessel body {bodyName} not found");
+                }
+            } else {
+                ModLogger.LogWarning("vesselBody not found in the bookmark node");
+                VesselBody = null;
+            }
+
+            VesselName = node.GetValue("vesselName") ?? "";
+            
             if (node.HasValue("hasAlarm")) {
                 bool.TryParse(node.GetValue("hasAlarm"), out bool hasAlarm);
                 HasAlarm = hasAlarm;
@@ -174,7 +218,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
                 double.TryParse(node.GetValue("creationTime"), out double time);
                 CreationTime = time;
             } else {
-                throw new Exception("creationTime not found in the bookmark node");
+                ModLogger.LogWarning("creationTime not found in the bookmark node");
+                CreationTime = Planetarium.GetUniversalTime();
             }
             
             LoadSpecificData(node);
@@ -183,10 +228,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         // =====================================================================
 
         /// <summary>
-        /// Get the vessel for the bookmark
+        /// Find the vessel for the bookmark
         /// </summary>
         /// <returns>The vessel for the bookmark</returns>
-        private Vessel GetVessel() {
+        private Vessel FindVessel() {
             try {
                 ModLogger.LogDebug($"Getting vessel for bookmark {GetBookmarkID()}");
                 if( VesselPersistentID == 0 ) {
@@ -232,6 +277,46 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         }
 
         /// <summary>
+        /// Gets a textual description of vessel situation
+        /// </summary>
+        /// <returns>The label for the situation</returns>
+        public string GetSituationLabel() {
+            try {
+                if( VesselBody == null ) {
+                    ModLogger.LogError($"Getting situation: Body is null");
+                    return ModLocalization.GetString("situationUnknown");
+                }
+                ModLogger.LogDebug($"Getting situation labeled as {VesselSituation} for vessel on body {VesselBody.bodyName}");
+                
+                switch (VesselSituation) {
+                    case Vessel.Situations.LANDED:
+                        return ModLocalization.GetString("situationLanded", VesselBody.bodyName);
+                        
+                    case Vessel.Situations.SPLASHED:
+                        return ModLocalization.GetString("situationSplashed", VesselBody.bodyName);
+                        
+                    case Vessel.Situations.PRELAUNCH:
+                        return ModLocalization.GetString("situationPrelaunch", VesselBody.bodyName);
+                        
+                    case Vessel.Situations.SUB_ORBITAL:
+                        return ModLocalization.GetString("situationSuborbital", VesselBody.bodyName);
+                        
+                    case Vessel.Situations.ORBITING:
+                        return ModLocalization.GetString("situationOrbiting", VesselBody.bodyName);
+                        
+                    case Vessel.Situations.ESCAPING:
+                        return ModLocalization.GetString("situationEscaping", VesselBody.bodyName);
+                        
+                    default:
+                        return ModLocalization.GetString("situationInFlight", VesselBody.bodyName);
+                }
+            } catch (System.Exception e) {
+                ModLogger.LogError($"Error getting situation labeled as {VesselSituation} for vessel on body {VesselBody.bodyName}: {e.Message}");
+                return ModLocalization.GetString("situationUnknown");
+            }
+        }
+
+        /// <summary>
         /// Refresh the bookmark
         /// </summary>
         /// <returns>True if the bookmark was refreshed, false otherwise</returns>
@@ -249,15 +334,19 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
                     return false;
                 }
 
-                Vessel = this.GetVessel();
+                Vessel = this.FindVessel();
                 if( Vessel == null ) {
                     ModLogger.LogWarning($"Bookmark {GetBookmarkID()}: Vessel not found");
                     return false;
                 }
-                VesselSituation = VesselSituationDetector.GetSituation(Vessel);
+                
                 VesselName = Vessel.vesselName;
                 VesselType = Vessel.vesselType;
-
+                
+                VesselSituation = Vessel.situation;
+                VesselBody = Vessel.mainBody;
+                VesselSituationLabel = GetSituationLabel();
+                
                 HasAlarm = CheckHasAlarm();
 
                 if( sendEvent ) {

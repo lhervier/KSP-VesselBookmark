@@ -227,7 +227,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.Space(20 + BUTTON_WIDTH + 4);
             
             // Vessel situation
-            string situation = bookmarkUIController.GetVesselSituation();
+            string situation = bookmark.VesselSituationLabel;
             if( bookmark.ShouldDrawPartOf() ) {
                 situation += " (" + bookmark.VesselName + ")";
             }

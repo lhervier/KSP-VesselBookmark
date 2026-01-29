@@ -67,7 +67,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// Get the display name of the vessel bookmark
         /// </summary>
         /// <returns>The display name of the vessel bookmark</returns>
-        public override string GetBookmarkDisplayName() {
+        public override string GetBookmarkTitle() {
             return VesselName;
         }
 
