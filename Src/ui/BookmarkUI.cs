@@ -282,7 +282,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             // Detect hover and update the hovered bookmark ID
             if (bookmarkRect.Contains(Event.current.mousePosition)) {
                 _bookmarksListUIController.HoveredBookmarkID = bookmark.GetBookmarkID();
-                _bookmarksListUIController.HoveredBookmarkType = bookmark.GetBookmarkType();
+                _bookmarksListUIController.HoveredBookmarkType = bookmark.BookmarkType;
             }
         }
 

@@ -214,10 +214,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     }
 
                     if( addBookmark ) {
-                        if( !_availableBookmarks.ContainsKey(bookmark.GetBookmarkType()) ) {
-                            _availableBookmarks.Add(bookmark.GetBookmarkType(), new List<Bookmark>());
+                        if( !_availableBookmarks.ContainsKey(bookmark.BookmarkType) ) {
+                            _availableBookmarks.Add(bookmark.BookmarkType, new List<Bookmark>());
                         }
-                        _availableBookmarks[bookmark.GetBookmarkType()].Add(bookmark);
+                        _availableBookmarks[bookmark.BookmarkType].Add(bookmark);
                     }
                 }
                 foreach( var bookmarks in _availableBookmarks.Values ) {

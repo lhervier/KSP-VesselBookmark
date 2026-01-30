@@ -16,14 +16,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         }
 
         /// <summary>
-        /// Returns the type of the bookmark
-        /// </summary>
-        /// <returns>The type of the bookmark</returns>
-        public override BookmarkType GetBookmarkType() {
-            return BookmarkType.Vessel;
-        }
-
-        /// <summary>
         /// Get the display name of the vessel bookmark
         /// </summary>
         /// <returns>The display name of the vessel bookmark</returns>
@@ -42,14 +34,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// <summary>
         /// Constructor
         /// </summary>
-        public VesselBookmark() {
+        public VesselBookmark() : base(BookmarkType.Vessel) {
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="vesselPersistentID">The persistent ID of the vessel</param>
-        public VesselBookmark(uint vesselPersistentID) {
+        public VesselBookmark(uint vesselPersistentID) : this() {
             VesselPersistentID = vesselPersistentID;
         }
     }

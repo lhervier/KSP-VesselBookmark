@@ -24,7 +24,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// <summary>
         /// Type of the bookmark
         /// </summary>
-        public abstract BookmarkType GetBookmarkType();
+        public BookmarkType BookmarkType { get; set; } = BookmarkType.Unknown;
 
         // =============================================================
         //      Associated vessel data
@@ -105,5 +105,19 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// The label of the vessel situation
         /// </summary>
         public string VesselSituationLabel { get; set; } = "";
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public Bookmark() {
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="bookmarkType">The type of the bookmark</param>
+        public Bookmark(BookmarkType bookmarkType) : this() {
+            BookmarkType = bookmarkType;
+        }
     }
 }

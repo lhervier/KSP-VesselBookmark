@@ -207,7 +207,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="bookmark"></param>
         /// <returns>True if the bookmark was saved, false otherwise</returns>
         public static bool SaveBookmark(ConfigNode node, Bookmark bookmark) {
-            node.AddValue("bookmarkType", (int) bookmark.GetBookmarkType());
+            node.AddValue("bookmarkType", (int) bookmark.BookmarkType);
             node.AddValue("comment", bookmark.Comment);
             node.AddValue("creationTime", bookmark.CreationTime);
             node.AddValue("vesselSituation", bookmark.VesselSituation.ToString());
@@ -247,7 +247,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 foreach (Bookmark bookmark in bookmarks) {
                     ConfigNode bookmarkNode = bookmarksNode.AddNode(BOOKMARK_NODE_NAME);
                     if( !SaveBookmark(bookmarkNode, bookmark) ) {
-                        ModLogger.LogError($"Error saving bookmark {bookmark.GetBookmarkType()} and {bookmark.GetBookmarkID()} to config node");
+                        ModLogger.LogError($"Error saving bookmark {bookmark.BookmarkType} and {bookmark.GetBookmarkID()} to config node");
                         return false;
                     }
                 }

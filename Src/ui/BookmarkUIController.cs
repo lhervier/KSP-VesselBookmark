@@ -36,7 +36,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public bool IsHovered() {
-            return (_bookmarksListUIController.HoveredBookmarkID == _currentBookmark.GetBookmarkID()) && (_bookmarksListUIController.HoveredBookmarkType == _currentBookmark.GetBookmarkType());
+            return (_bookmarksListUIController.HoveredBookmarkID == _currentBookmark.GetBookmarkID()) && (_bookmarksListUIController.HoveredBookmarkType == _currentBookmark.BookmarkType);
         }
 
         public bool IsActiveVessel() {
@@ -48,19 +48,19 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public bool CanMoveUp() {
-            if( !_bookmarksListUIController.AvailableBookmarks.ContainsKey(_currentBookmark.GetBookmarkType()) ) {
-                ModLogger.LogWarning($"Bookmark {_currentBookmark.GetBookmarkID()}: Bookmark type {_currentBookmark.GetBookmarkType()} not found");
+            if( !_bookmarksListUIController.AvailableBookmarks.ContainsKey(_currentBookmark.BookmarkType) ) {
+                ModLogger.LogWarning($"Bookmark {_currentBookmark.GetBookmarkID()}: Bookmark type {_currentBookmark.BookmarkType} not found");
                 return false;
             }
             return _currentIndex > 0;
         }
 
         public bool CanMoveDown() {
-            if( !_bookmarksListUIController.AvailableBookmarks.ContainsKey(_currentBookmark.GetBookmarkType()) ) {
-                ModLogger.LogWarning($"Bookmark {_currentBookmark.GetBookmarkID()}: Bookmark type {_currentBookmark.GetBookmarkType()} not found");
+            if( !_bookmarksListUIController.AvailableBookmarks.ContainsKey(_currentBookmark.BookmarkType) ) {
+                ModLogger.LogWarning($"Bookmark {_currentBookmark.GetBookmarkID()}: Bookmark type {_currentBookmark.BookmarkType} not found");
                 return false;
             }
-            return _currentIndex < _bookmarksListUIController.AvailableBookmarks[_currentBookmark.GetBookmarkType()].Count - 1;
+            return _currentIndex < _bookmarksListUIController.AvailableBookmarks[_currentBookmark.BookmarkType].Count - 1;
         }
 
         public void EditComment() {
@@ -84,7 +84,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 ModLogger.LogWarning($"Bookmark {_currentBookmark.GetBookmarkID()}: Cannot move up");
                 return;
             }
-            List<Bookmark> bookmarks = _bookmarksListUIController.AvailableBookmarks[_currentBookmark.GetBookmarkType()];
+            List<Bookmark> bookmarks = _bookmarksListUIController.AvailableBookmarks[_currentBookmark.BookmarkType];
             Bookmark previousBookmark = bookmarks[_currentIndex - 1];
             BookmarkManager.Instance.SwapBookmarks(
                 _currentBookmark, 
@@ -94,10 +94,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         public void MoveDown() {
             if( !CanMoveDown() ) {
-                ModLogger.LogWarning($"Bookmark {_currentBookmark.GetBookmarkID()}: Bookmark type {_currentBookmark.GetBookmarkType()} not found");
+                ModLogger.LogWarning($"Bookmark {_currentBookmark.GetBookmarkID()}: Bookmark type {_currentBookmark.BookmarkType} not found");
                 return;
             }
-            List<Bookmark> bookmarks = _bookmarksListUIController.AvailableBookmarks[_currentBookmark.GetBookmarkType()];
+            List<Bookmark> bookmarks = _bookmarksListUIController.AvailableBookmarks[_currentBookmark.BookmarkType];
             Bookmark nextBookmark = bookmarks[_currentIndex + 1];
             BookmarkManager.Instance.SwapBookmarks(
                 _currentBookmark, 

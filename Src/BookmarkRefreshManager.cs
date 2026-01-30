@@ -81,7 +81,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             try {
                 ModLogger.LogDebug($"Getting vessel for bookmark {bookmark.GetBookmarkID()}");
                 if( bookmark.VesselPersistentID == 0 ) {
-                    ModLogger.LogWarning($"Bookmark {bookmark.GetBookmarkID()} and {bookmark.GetBookmarkType()}: Vessel persistent ID is empty");
+                    ModLogger.LogWarning($"Bookmark {bookmark.GetBookmarkID()} and {bookmark.BookmarkType}: Vessel persistent ID is empty");
                     return null;
                 }
                 foreach (Vessel vessel in FlightGlobals.Vessels) {
@@ -94,7 +94,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 }
                 return null;
             } catch (Exception e) {
-                ModLogger.LogError($"Error getting vessel for bookmark {bookmark.GetBookmarkID()} and {bookmark.GetBookmarkType()}: {e.Message}");
+                ModLogger.LogError($"Error getting vessel for bookmark {bookmark.GetBookmarkID()} and {bookmark.BookmarkType}: {e.Message}");
                 return null;
             }
         }
@@ -216,7 +216,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
 
                 return true;
             } catch (Exception e) {
-                ModLogger.LogError($"Error refreshing command module bookmark {bookmark.GetBookmarkType()} and {bookmark.GetBookmarkID()}: {e.Message}");
+                ModLogger.LogError($"Error refreshing command module bookmark {bookmark.BookmarkType} and {bookmark.GetBookmarkID()}: {e.Message}");
                 return false;
             }
         }
@@ -226,7 +226,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         public static bool RefreshBookmark(Bookmark bookmark) {
             try {
-                ModLogger.LogDebug($"Refreshing bookmark {bookmark.GetBookmarkType()} and {bookmark.GetBookmarkID()}");
+                ModLogger.LogDebug($"Refreshing bookmark {bookmark.BookmarkType} and {bookmark.GetBookmarkID()}");
 
                 if( bookmark is CommandModuleBookmark commandModuleBookmark ) {
                     if( !RefreshCommandModuleBookmark(commandModuleBookmark) ) {
@@ -236,7 +236,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 } else if( bookmark is VesselBookmark vesselBookmark ) {
                     // Nothing...
                 } else {
-                    ModLogger.LogWarning($"Bookmark {bookmark.GetBookmarkType()} and {bookmark.GetBookmarkID()}: Unknown bookmark type");
+                    ModLogger.LogWarning($"Bookmark {bookmark.BookmarkType} and {bookmark.GetBookmarkID()}: Unknown bookmark type");
                     return false;
                 }
                 
@@ -257,7 +257,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
 
                 return true;
             } catch (Exception e) {
-                ModLogger.LogError($"Error refreshing bookmark {bookmark.GetBookmarkType()} and {bookmark.GetBookmarkID()}: {e.Message}");
+                ModLogger.LogError($"Error refreshing bookmark {bookmark.BookmarkType} and {bookmark.GetBookmarkID()}: {e.Message}");
                 return false;
             }
         }
