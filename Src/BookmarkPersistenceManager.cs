@@ -67,25 +67,14 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 // Instanciate the bookmark
                 Bookmark bookmark;
                 if( bookmarkType == BookmarkType.CommandModule ) {
-                    uint commandModuleFlightID = GetUintNodeValue(node, "commandModuleFlightID");
-                    bookmark = new CommandModuleBookmark(bookmarkID) { 
-                        CommandModuleFlightID = commandModuleFlightID 
-                    };
+                    bookmark = new CommandModuleBookmark(bookmarkID);
                 } else if( bookmarkType == BookmarkType.Vessel ) {
                     bookmark = new VesselBookmark(bookmarkID);
-                    // Nothing more...
                 } else {
                     throw new Exception($"Invalid bookmark type {bookmarkType}");
                 }
 
                 // Load common fields
-                bookmark.BookmarkTitle = node.GetValue("bookmarkTitle") ?? "";
-                try {
-                    bookmark.BookmarkVesselType = (VesselType) GetIntNodeValue(node, "bookmarkVesselType");
-                } catch (Exception e) {
-                    ModLogger.LogWarning($"bookmarkVesselType not found in the bookmark node : {e.Message}");
-                    bookmark.BookmarkVesselType = VesselType.Unknown;
-                }
                 bookmark.Comment = node.GetValue("comment") ?? "";
                 bookmark.Order = GetIntNodeValue(node, "order");        // Mandatory
                 try {
@@ -95,43 +84,6 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     bookmark.CreationTime = Planetarium.GetUniversalTime();
                 }
                 
-                // Load vessel information (may be refreshed, but at startup, they are not yet present)
-                bookmark.VesselPersistentID = GetUintNodeValue(node, "vesselPersistentID");
-                bookmark.VesselName = node.GetValue("vesselName") ?? "";
-                try {
-                    bookmark.VesselType = (VesselType) GetIntNodeValue(node, "vesselType");
-                } catch (Exception e) {
-                    ModLogger.LogWarning($"vesselType not found in the bookmark node : {e.Message}");
-                    bookmark.VesselType = VesselType.Unknown;
-                }
-                try {
-                    bookmark.VesselSituation = (Vessel.Situations) GetIntNodeValue(node, "vesselSituation");
-                } catch (Exception e) {
-                    ModLogger.LogWarning($"vesselSituation not found in the bookmark node : {e.Message}");
-                    bookmark.VesselSituation = Vessel.Situations.PRELAUNCH;
-                }
-                try {
-                    bookmark.VesselBody = FlightGlobals.Bodies.FirstOrDefault(b => b.bodyName == node.GetValue("vesselBody"));
-                } catch (Exception e) {
-                    ModLogger.LogWarning($"vesselBody not found in the bookmark node : {e.Message}");
-                    bookmark.VesselBody = null;
-                }
-                try {
-                    bookmark.HasAlarm = bool.Parse(node.GetValue("hasAlarm"));
-                } catch (Exception e) {
-                    ModLogger.LogWarning($"hasAlarm not found in the bookmark node : {e.Message}");
-                    bookmark.HasAlarm = false;
-                }
-
-                // ========================== Load specific data ==========================
-
-                if( bookmark is CommandModuleBookmark commandModuleBookmark ) {
-                    commandModuleBookmark.CommandModuleName = node.GetValue("commandModuleName") ?? "";
-                    commandModuleBookmark.CommandModuleType = (VesselType) GetIntNodeValue(node, "commandModuleType");
-                } else if( bookmark is VesselBookmark vesselBookmark ) {
-                    // Nothing...
-                }
-
                 return bookmark;
             } catch (Exception e) {
                 ModLogger.LogError($"Error loading bookmark from config node: {e.Message}");
@@ -181,27 +133,9 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             node.AddValue("bookmarkID", bookmark.BookmarkID);
             node.AddValue("bookmarkType", (int) bookmark.BookmarkType);
 
-            node.AddValue("bookmarkTitle", bookmark.BookmarkTitle);
-            node.AddValue("bookmarkVesselType", (int) bookmark.BookmarkVesselType);
             node.AddValue("comment", bookmark.Comment);
             node.AddValue("order", bookmark.Order);
             node.AddValue("creationTime", bookmark.CreationTime);
-            
-            node.AddValue("vesselPersistentID", bookmark.VesselPersistentID);
-            node.AddValue("vesselName", bookmark.VesselName);
-            node.AddValue("vesselType", (int) bookmark.VesselType);
-            node.AddValue("vesselSituation", bookmark.VesselSituation.ToString());
-            node.AddValue("vesselBody", bookmark.VesselBody.bodyName);
-            node.AddValue("hasAlarm", bookmark.HasAlarm);
-            
-            if( bookmark is CommandModuleBookmark commandModuleBookmark ) {
-                node.AddValue("commandModuleFlightID", commandModuleBookmark.CommandModuleFlightID);
-                node.AddValue("commandModuleName", commandModuleBookmark.CommandModuleName);
-                node.AddValue("commandModuleType", (int) commandModuleBookmark.CommandModuleType);
-            } else if( bookmark is VesselBookmark vesselBookmark ) {
-                // Nothing...
-            }
-            
             return true;
         }
 

@@ -10,6 +10,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// </summary>
         public uint CommandModuleFlightID { get; set; } = 0;
         
+        // =============================================================
+        //      Associated command module data
+        //        Recomputed on refresh, but stored for display 
+        //        and caching purposes
+        // =============================================================
+
         /// <summary>
         /// Command module name (updated dynamically)
         /// </summary>

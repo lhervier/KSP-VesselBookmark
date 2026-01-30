@@ -31,17 +31,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         // =============================================================
 
         /// <summary>
-        /// Draw the title of the bookmark
-        /// </summary>
-        public string BookmarkTitle = "";
-
-        /// <summary>
-        /// Vessel type associated to the bookmark
-        /// (different from the type of the vessel attached to the bookmark)
-        /// </summary>
-        public VesselType BookmarkVesselType { get; set; } = VesselType.Unknown;
-        
-        /// <summary>
         /// User-editable comment
         /// </summary>
         public string Comment { get; set; } = "";
@@ -56,11 +45,32 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// </summary>
         public double CreationTime { get; set; } = Planetarium.GetUniversalTime();
         
+        // =============================================================
+        //      Fields computed from the bookmark data
+        //        Not saved, but used for display purposes
+        // =============================================================
+
+        /// <summary>
+        /// Draw the title of the bookmark
+        /// </summary>
+        public string BookmarkTitle = "";
+
+        /// <summary>
+        /// Vessel type associated to the bookmark
+        /// (different from the type of the vessel attached to the bookmark)
+        /// </summary>
+        public VesselType BookmarkVesselType { get; set; } = VesselType.Unknown;
+        
         // ==============================================================
         //      Associated vessel data
         //        Recomputed on refresh, but stored for display 
         //        and caching purposes
         // ==============================================================
+
+        /// <summary>
+        /// The vessel for the bookmark (not saved)
+        /// </summary>
+        public Vessel Vessel { get; set; } = null;
 
         /// <summary>
         /// Persistent identifier of the vessel
@@ -89,23 +99,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         public Vessel.Situations VesselSituation { get; set; } = Vessel.Situations.PRELAUNCH;
         
         /// <summary>
-        /// If the bookmark has an alarm
-        /// </summary>
-        public bool HasAlarm { get; set; } = false;
-
-        // ============================================================
-        //  Transient fields. Not saved, but used for display purposes
-        // ============================================================
-        
-        /// <summary>
-        /// The vessel for the bookmark (not saved)
-        /// </summary>
-        public Vessel Vessel { get; set; } = null;
-
-        /// <summary>
         /// The label of the vessel situation
         /// </summary>
         public string VesselSituationLabel { get; set; } = "";
+
+        /// <summary>
+        /// If the bookmark has an alarm
+        /// </summary>
+        public bool HasAlarm { get; set; } = false;
 
         /// <summary>
         /// Constructor

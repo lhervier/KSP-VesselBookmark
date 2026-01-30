@@ -233,6 +233,16 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             try {
                 ModLogger.LogDebug($"Refreshing bookmark {bookmark.BookmarkType} and {bookmark.BookmarkID}");
 
+                // Checking for mandatory values
+                if( bookmark.BookmarkID == 0 ) {
+                    ModLogger.LogWarning($"Bookmark {bookmark.BookmarkType} and {bookmark.BookmarkID}: Bookmark ID is 0");
+                    return false;
+                }
+                if( bookmark.BookmarkType == BookmarkType.Unknown ) {
+                    ModLogger.LogWarning($"Bookmark {bookmark.BookmarkType} and {bookmark.BookmarkID}: Bookmark type is unknown");
+                    return false;
+                }
+
                 if( bookmark is CommandModuleBookmark commandModuleBookmark ) {
                     if( !RefreshCommandModuleBookmark(commandModuleBookmark) ) {
                         ModLogger.LogWarning($"Bookmark {commandModuleBookmark.BookmarkID}: Failed to refresh command module bookmark");
