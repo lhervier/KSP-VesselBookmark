@@ -87,7 +87,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="vessel">The vessel that was modified</param>
         private void OnVesselWasModified(Vessel vessel) {
-            BookmarkManager.RefreshBookmarksInAnyInstance();
+            BookmarkManager.RefreshBookmarks();
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="vessel">The vessel that was destroyed</param>
         private void OnVesselDestroy(Vessel vessel) {
-            BookmarkManager.RefreshBookmarksInAnyInstance();
+            BookmarkManager.RefreshBookmarks();
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="vessel">The vessel that was renamed</param>
         private void OnVesselRename(GameEvents.HostedFromToAction<Vessel, string> action) {
-            BookmarkManager.RefreshBookmarksInAnyInstance();
+            BookmarkManager.RefreshBookmarks();
         }
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="alarm">The alarm that was added</param>
         private void OnAlarmAdded(AlarmTypeBase alarm) {
-            BookmarkManager.RefreshBookmarksInAnyInstance();
+            BookmarkManager.RefreshBookmarks();
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="alarm">The alarm that was removed</param>
         private void OnAlarmRemoved(uint alarmID) {
-            BookmarkManager.RefreshBookmarksInAnyInstance();
+            BookmarkManager.RefreshBookmarks();
         }
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="alarm">The alarm that was triggered</param>
         private void OnAlarmTriggered(AlarmTypeBase alarm) {
-            BookmarkManager.RefreshBookmarksInAnyInstance();
+            BookmarkManager.RefreshBookmarks();
         }
     }
 }

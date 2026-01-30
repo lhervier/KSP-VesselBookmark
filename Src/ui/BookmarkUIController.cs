@@ -78,7 +78,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             BookmarkManager manager = BookmarkManager.GetInstance(_currentBookmark.BookmarkType);
             while( _currentBookmark.Order > previousBookmark.Order ) {
-                manager.MoveBookmarkUpInInstance(_currentBookmark, false);
+                manager._MoveBookmarkUp(_currentBookmark, false);
             }
             BookmarkManager.OnBookmarksUpdated.Fire();
         }
@@ -93,7 +93,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             BookmarkManager manager = BookmarkManager.GetInstance(_currentBookmark.BookmarkType);
             while( _currentBookmark.Order < nextBookmark.Order ) {
-                manager.MoveBookmarkDownInInstance(_currentBookmark, false);
+                manager._MoveBookmarkDown(_currentBookmark, false);
             }
             BookmarkManager.OnBookmarksUpdated.Fire();
         }
@@ -106,7 +106,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             string displayName = this.GetBookmarkTitle();
             VesselBookmarkUIDialog.ConfirmRemoval(
                 () => {
-                    BookmarkManager.RemoveBookmarkFromAnyInstance(_currentBookmark);
+                    BookmarkManager.RemoveBookmark(_currentBookmark);
                     _bookmarksListUIController.MainWindowsVisible = wasMainWindowVisible;
                 },
                 () => {

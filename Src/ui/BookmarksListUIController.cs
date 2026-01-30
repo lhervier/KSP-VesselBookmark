@@ -122,7 +122,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 ModLogger.LogDebug($"Updating available bodies");
                 string selectedBody = _selectedBody;
                 this.AvailableBodies.Clear();
-                foreach (Bookmark bookmark in BookmarkManager.GetAllBookmarksInAnyInstance()) {
+                foreach (Bookmark bookmark in BookmarkManager.GetAllBookmarks()) {
                     Vessel vessel = bookmark.Vessel;
                     if( vessel == null ) {
                         continue;
@@ -153,7 +153,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 ModLogger.LogDebug($"Updating available vessel types");
                 string selectedVesselType = _selectedVesselType;
                 this.AvailableVesselTypes.Clear();
-                foreach (Bookmark bookmark in BookmarkManager.GetAllBookmarksInAnyInstance()) {
+                foreach (Bookmark bookmark in BookmarkManager.GetAllBookmarks()) {
                     VesselType vesselType = bookmark.BookmarkVesselType;
                     string vesselTypeName = vesselType.ToString();
                     if( !AvailableVesselTypes.Contains(vesselTypeName) ) {
@@ -270,7 +270,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             
             BookmarkManager manager = BookmarkManager.GetInstance(BookmarkType.Vessel);
 
-            if (manager.HasBookmarkInInstance(vesselPersistentID)) {
+            if (manager.HasBookmark(vesselPersistentID)) {
                 ScreenMessages.PostScreenMessage(
                     ModLocalization.GetString("messageBookmarkAlreadyExists"),
                     2f,
@@ -280,7 +280,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             }
 
             VesselBookmark bookmark = new VesselBookmark(vesselPersistentID);
-            if (manager.AddBookmarkToInstance(bookmark)) {
+            if (manager._AddBookmark(bookmark)) {
                 ScreenMessages.PostScreenMessage(
                     ModLocalization.GetString("messageBookmarkAdded"),
                     2f,

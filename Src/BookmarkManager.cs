@@ -34,7 +34,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// Get all bookmarks in any instance
         /// </summary>
         /// <returns>A list of all bookmarks</returns>
-        public static List<Bookmark> GetAllBookmarksInAnyInstance() {
+        public static List<Bookmark> GetAllBookmarks() {
             List<Bookmark> bookmarks = new List<Bookmark>();
             foreach( var instance in _instances ) {
                 bookmarks.AddAll(instance.Value.Bookmarks);
@@ -48,8 +48,8 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="bookmarkType">The type of the bookmark</param>
         /// <param name="bookmarkID">The unique identifier of the bookmark</param>
         /// <returns>True if the bookmark exists, false otherwise</returns>
-        public static bool HasBookmarkInAnyInstance(BookmarkType bookmarkType, uint bookmarkID) {
-            return GetInstance(bookmarkType).HasBookmarkInInstance(bookmarkID);
+        public static bool HasBookmark(BookmarkType bookmarkType, uint bookmarkID) {
+            return GetInstance(bookmarkType).HasBookmark(bookmarkID);
         }
 
         /// <summary>
@@ -58,8 +58,8 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="bookmarkType">The type of the bookmark</param>
         /// <param name="bookmarkID">The unique identifier of the bookmark</param>
         /// <returns>The bookmark, or null if not found</returns>
-        public static Bookmark GetBookmarkInAnyInstance(BookmarkType bookmarkType, uint bookmarkID) {
-            return GetInstance(bookmarkType).GetBookmarkInInstance(bookmarkID);
+        public static Bookmark GetBookmark(BookmarkType bookmarkType, uint bookmarkID) {
+            return GetInstance(bookmarkType).GetBookmark(bookmarkID);
         }
 
         /// <summary>
@@ -68,8 +68,8 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="bookmark">The bookmark to add</param>
         /// <param name="sendEvent">True if the OnBookmarksUpdated event should be fired, false otherwise</param>
         /// <returns>True if the bookmark was added, false otherwise</returns>
-        public static bool AddBookmarkToAnyInstance(Bookmark bookmark, bool sendEvent = true) {
-            return GetInstance(bookmark.BookmarkType).AddBookmarkToInstance(bookmark, sendEvent);
+        public static bool AddBookmark(Bookmark bookmark, bool sendEvent = true) {
+            return GetInstance(bookmark.BookmarkType)._AddBookmark(bookmark, sendEvent);
         }
 
         /// <summary>
@@ -78,8 +78,8 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="bookmark">The bookmark to remove</param>
         /// <param name="sendEvent">True if the OnBookmarksUpdated event should be fired, false otherwise</param>
         /// <returns>True if the bookmark was removed, false otherwise</returns>
-        public static bool RemoveBookmarkFromAnyInstance(Bookmark bookmark, bool sendEvent = true) {
-            return GetInstance(bookmark.BookmarkType).RemoveBookmarkFromInstance(bookmark, sendEvent);
+        public static bool RemoveBookmark(Bookmark bookmark, bool sendEvent = true) {
+            return GetInstance(bookmark.BookmarkType)._RemoveBookmark(bookmark, sendEvent);
         }
 
         /// <summary>
@@ -88,8 +88,8 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="bookmark">The bookmark to move up</param>
         /// <param name="sendEvent">True if the OnBookmarksUpdated event should be fired, false otherwise</param>
         /// <returns>True if the bookmark was moved up, false otherwise</returns>
-        public static bool MoveBookmarkUpInAnyInstance(Bookmark bookmark, bool sendEvent = true) {
-            return GetInstance(bookmark.BookmarkType).MoveBookmarkUpInInstance(bookmark, sendEvent);
+        public static bool MoveBookmarkUp(Bookmark bookmark, bool sendEvent = true) {
+            return GetInstance(bookmark.BookmarkType)._MoveBookmarkUp(bookmark, sendEvent);
         }
 
         /// <summary>
@@ -98,17 +98,17 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="bookmark">The bookmark to move down</param>
         /// <param name="sendEvent">True if the OnBookmarksUpdated event should be fired, false otherwise</param>
         /// <returns>True if the bookmark was moved down, false otherwise</returns>
-        public static bool MoveBookmarkDownInAnyInstance(Bookmark bookmark, bool sendEvent = true) {
-            return GetInstance(bookmark.BookmarkType).MoveBookmarkDownInInstance(bookmark, sendEvent);
+        public static bool MoveBookmarkDown(Bookmark bookmark, bool sendEvent = true) {
+            return GetInstance(bookmark.BookmarkType)._MoveBookmarkDown(bookmark, sendEvent);
         }
 
         /// <summary>
         /// Refresh all bookmarks in any instance
         /// </summary>
         /// <param name="sendEvent">True if the OnBookmarksUpdated event should be fired, false otherwise</param>
-        public static void RefreshBookmarksInAnyInstance(bool sendEvent = true) {
+        public static void RefreshBookmarks(bool sendEvent = true) {
             foreach( var instance in _instances ) {
-                instance.Value.RefreshBookmarksInInstance(false);
+                instance.Value._RefreshBookmarks(false);
             }
             if( sendEvent ) {
                 OnBookmarksUpdated.Fire();
@@ -132,7 +132,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
 
                 // Add bookmarks to the list
                 foreach (Bookmark bookmark in bookmarks) {
-                    GetInstance(bookmark.BookmarkType).AddBookmarkToInstance(bookmark, false);
+                    GetInstance(bookmark.BookmarkType)._AddBookmark(bookmark, false);
                 }
 
                 OnBookmarksUpdated.Fire();
@@ -147,7 +147,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="node"></param>
         public static void SaveBookmarks(ConfigNode node) {
-            List<Bookmark> bookmarks = GetAllBookmarksInAnyInstance();
+            List<Bookmark> bookmarks = GetAllBookmarks();
             BookmarkPersistenceManager.SaveBookmarks(node, bookmarks);
         }
 
@@ -177,7 +177,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="bookmarkID">The unique identifier of the bookmark</param>
         /// <returns>The bookmark, or null if not found</returns>
-        public Bookmark GetBookmarkInInstance(uint bookmarkID) {
+        public Bookmark GetBookmark(uint bookmarkID) {
             return _bookmarks.FirstOrDefault(
                 b => b.BookmarkID == bookmarkID
             );
@@ -189,7 +189,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="bookmarkID">The unique identifier of the bookmark</param>
         /// <returns></returns>
-        public bool HasBookmarkInInstance(uint bookmarkID) {
+        public bool HasBookmark(uint bookmarkID) {
             try {
                 return _bookmarksIDs.Contains(bookmarkID);
             } catch (Exception e) {
@@ -204,7 +204,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="bookmark">The bookmark to add</param>
         /// <param name="sendEvent">True if the OnBookmarksUpdated event should be fired, false otherwise</param>
         /// <returns>True if the bookmark was added, false otherwise</returns>
-        public bool AddBookmarkToInstance(Bookmark bookmark, bool sendEvent = true) {
+        private bool _AddBookmark(Bookmark bookmark, bool sendEvent = true) {
             try {
                 if( bookmark == null ) {
                     ModLogger.LogError("Attempted to add null bookmark");
@@ -218,7 +218,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 }
                 
                 // Check if bookmark already exists
-                if (this.HasBookmarkInInstance(bookmark.BookmarkID)) {
+                if (this.HasBookmark(bookmark.BookmarkID)) {
                     ModLogger.LogWarning($"Bookmark already exists for bookmarkType {bookmark.BookmarkType} and bookmarkID {bookmark.BookmarkID}");
                     return false;
                 }
@@ -253,7 +253,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="bookmarkID">The unique identifier of the bookmark to remove</param>
         /// <returns>True if the bookmark was removed, false otherwise</returns>
-        public bool RemoveBookmarkFromInstance(Bookmark bookmark, bool sendEvent = true) {
+        private bool _RemoveBookmark(Bookmark bookmark, bool sendEvent = true) {
             try {
                 if( bookmark == null ) {
                     ModLogger.LogWarning($"Bookmark: Not found");
@@ -292,7 +292,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="bookmark">The bookmark to move up</param>
         /// <returns>True if the bookmark was moved up, false otherwise</returns>
-        public bool MoveBookmarkUpInInstance(Bookmark bookmark, bool sendEvent = true) {
+        private bool _MoveBookmarkUp(Bookmark bookmark, bool sendEvent = true) {
             try {
                 if (bookmark == null) {
                     ModLogger.LogWarning($"Bookmark: Null");
@@ -328,7 +328,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="bookmark">The bookmark to move down</param>
         /// <returns>True if the bookmark was moved down, false otherwise</returns>
-        public bool MoveBookmarkDownInInstance(Bookmark bookmark, bool sendEvent = true) {
+        private bool _MoveBookmarkDown(Bookmark bookmark, bool sendEvent = true) {
             try {
                 if (bookmark == null) {
                     ModLogger.LogWarning($"Bookmark: Null");
@@ -365,7 +365,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// Refresh all bookmarks in the instance
         /// </summary>
         /// <param name="sendEvent">True if the OnBookmarksUpdated event should be fired, false otherwise</param>
-        public void RefreshBookmarksInInstance(bool sendEvent = true) {
+        private void _RefreshBookmarks(bool sendEvent = true) {
             try {
                 ModLogger.LogDebug($"Refreshing bookmarks");
 

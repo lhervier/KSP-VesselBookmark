@@ -90,7 +90,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             if( this._editCommentUI != null ) {
                 this._editCommentUI.Controller.CancelCommentEdition();
             }
-            BookmarkManager.RefreshBookmarksInAnyInstance();
+            BookmarkManager.RefreshBookmarks();
         }
         
         /// <summary>
