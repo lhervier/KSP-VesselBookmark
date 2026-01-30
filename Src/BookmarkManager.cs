@@ -12,12 +12,6 @@ namespace com.github.lhervier.ksp.bookmarksmod {
     public class BookmarkManager {
         
         /// <summary>
-        /// Name of the node in the config file where bookmarks are saved
-        /// </summary>
-        private const string SAVE_NODE_NAME = "VESSEL_BOOKMARKS";
-        private const string BOOKMARK_NODE_NAME = "BOOKMARK";
-        
-        /// <summary>
         /// Singleton instance
         /// </summary>
         private static BookmarkManager _instance;
@@ -257,7 +251,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
 
                 // Load bookmarks from config node
                 // and sort them by order
-                List<Bookmark> bookmarks = BookmarkPersistence.LoadBookmarks(node);
+                List<Bookmark> bookmarks = BookmarkPersistenceManager.LoadBookmarks(node);
                 
                 // Add bookmarks to the list
                 bookmarks.Sort((a, b) => a.Order.CompareTo(b.Order));
@@ -277,7 +271,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="node"></param>
         public void SaveBookmarks(ConfigNode node) {
-            BookmarkPersistence.SaveBookmarks(node, _bookmarks);
+            BookmarkPersistenceManager.SaveBookmarks(node, _bookmarks);
         }
 
         // =======================================================================================

@@ -5,7 +5,7 @@ using UnityEngine;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 
 namespace com.github.lhervier.ksp.bookmarksmod {
-    public class BookmarkPersistence {
+    public class BookmarkPersistenceManager {
 
         /// <summary>
         /// Name of the node in the config file where bookmarks are saved
