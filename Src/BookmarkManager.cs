@@ -367,7 +367,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="sendEvent">True if the OnBookmarksUpdated event should be fired, false otherwise</param>
         private void _RefreshBookmarks(bool sendEvent = true) {
             try {
-                ModLogger.LogDebug($"Refreshing bookmarks");
+                ModLogger.LogDebug($"Refreshing bookmarks for bookmarkType {_bookmarkType}");
 
                 foreach (Bookmark bookmark in _bookmarks) {
                     if( !BookmarkRefreshManager.RefreshBookmark(bookmark) ) {
