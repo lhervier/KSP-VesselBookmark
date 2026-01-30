@@ -8,23 +8,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
     public class VesselBookmark : Bookmark {
         
         /// <summary>
-        /// Constructor
-        /// </summary>
-        public VesselBookmark() : base() {
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="vesselPersistentID">The persistent ID of the vessel</param>
-        public VesselBookmark(uint vesselPersistentID) : base() {
-            if( vesselPersistentID == 0 ) {
-                throw new Exception("vesselPersistentID cannot be 0");
-            }
-            VesselPersistentID = vesselPersistentID;
-        }
-
-        /// <summary>
         /// Get the unique identifier of the bookmark
         /// </summary>
         /// <returns>The unique identifier of the bookmark</returns>
@@ -54,6 +37,20 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// <returns>The display type of the vessel bookmark</returns>
         public override VesselType GetBookmarkDisplayType() {
             return VesselType;
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public VesselBookmark() {
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="vesselPersistentID">The persistent ID of the vessel</param>
+        public VesselBookmark(uint vesselPersistentID) {
+            VesselPersistentID = vesselPersistentID;
         }
 
         /// <summary>
