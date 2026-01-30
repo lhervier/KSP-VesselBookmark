@@ -8,14 +8,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
     public class VesselBookmark : Bookmark {
         
         /// <summary>
-        /// Get the unique identifier of the bookmark
-        /// </summary>
-        /// <returns>The unique identifier of the bookmark</returns>
-        public override uint GetBookmarkID() {
-            return VesselPersistentID;
-        }
-
-        /// <summary>
         /// Get the display name of the vessel bookmark
         /// </summary>
         /// <returns>The display name of the vessel bookmark</returns>
@@ -34,15 +26,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// <summary>
         /// Constructor
         /// </summary>
-        public VesselBookmark() : base(BookmarkType.Vessel) {
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="vesselPersistentID">The persistent ID of the vessel</param>
-        public VesselBookmark(uint vesselPersistentID) : this() {
-            VesselPersistentID = vesselPersistentID;
+        /// <param name="bookmarkID">The ID of the bookmark</param>
+        public VesselBookmark(uint bookmarkID) : base(BookmarkType.Vessel, bookmarkID) {
         }
     }
 }

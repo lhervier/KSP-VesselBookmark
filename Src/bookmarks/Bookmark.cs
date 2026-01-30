@@ -16,52 +16,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         // =============================================================
 
         /// <summary>
-        /// Get the unique identifier of the bookmark
+        /// Unique identifier of the bookmark
+        /// Value depends on the bookmark type
         /// </summary>
-        /// <returns>The unique identifier of the bookmark</returns>
-        public abstract uint GetBookmarkID();
+        public uint BookmarkID { get; protected set; } = 0;
 
         /// <summary>
         /// Type of the bookmark
         /// </summary>
         public BookmarkType BookmarkType { get; set; } = BookmarkType.Unknown;
-
-        // =============================================================
-        //      Associated vessel data
-        // =============================================================
-
-        /// <summary>
-        /// Persistent identifier of the vessel
-        /// Only used for vessel bookmarks
-        /// </summary>
-        public uint VesselPersistentID { get; set; } = 0;
-
-        // =========== Cached vessel data ===========
-
-        /// <summary>
-        /// Name of the vessel
-        /// </summary>
-        public string VesselName { get; set; } = "";
-
-        /// <summary>
-        /// Type of the vessel
-        /// </summary>
-        public VesselType VesselType { get; set; } = VesselType.Unknown;
-
-        /// <summary>
-        /// The main body of the vessel
-        /// </summary>
-        public CelestialBody VesselBody { get; set; } = null;
-
-        /// <summary>
-        /// The situation of the vessel
-        /// </summary>
-        public Vessel.Situations VesselSituation { get; set; } = Vessel.Situations.PRELAUNCH;
-        
-        /// <summary>
-        /// If the bookmark has an alarm
-        /// </summary>
-        public bool HasAlarm { get; set; } = false;
 
         // =============================================================
         //      Other common bookmark data
@@ -92,9 +55,46 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// </summary>
         public double CreationTime { get; set; } = Planetarium.GetUniversalTime();
         
-        // ==================
-        //  Transient fields
-        // ==================
+        // ==============================================================
+        //      Associated vessel data
+        //        Recomputed on refresh, but stored for display 
+        //        and caching purposes
+        // ==============================================================
+
+        /// <summary>
+        /// Persistent identifier of the vessel
+        /// Only used for vessel bookmarks
+        /// </summary>
+        public uint VesselPersistentID { get; set; } = 0;
+
+        /// <summary>
+        /// Name of the vessel
+        /// </summary>
+        public string VesselName { get; set; } = "";
+
+        /// <summary>
+        /// Type of the vessel
+        /// </summary>
+        public VesselType VesselType { get; set; } = VesselType.Unknown;
+
+        /// <summary>
+        /// The main body of the vessel
+        /// </summary>
+        public CelestialBody VesselBody { get; set; } = null;
+
+        /// <summary>
+        /// The situation of the vessel
+        /// </summary>
+        public Vessel.Situations VesselSituation { get; set; } = Vessel.Situations.PRELAUNCH;
+        
+        /// <summary>
+        /// If the bookmark has an alarm
+        /// </summary>
+        public bool HasAlarm { get; set; } = false;
+
+        // ============================================================
+        //  Transient fields. Not saved, but used for display purposes
+        // ============================================================
         
         /// <summary>
         /// The vessel for the bookmark (not saved)
@@ -109,15 +109,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// <summary>
         /// Constructor
         /// </summary>
-        public Bookmark() {
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
         /// <param name="bookmarkType">The type of the bookmark</param>
-        public Bookmark(BookmarkType bookmarkType) : this() {
+        public Bookmark(BookmarkType bookmarkType, uint bookmarkID) {
             BookmarkType = bookmarkType;
+            BookmarkID = bookmarkID;
         }
     }
 }

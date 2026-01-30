@@ -36,7 +36,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public bool IsHovered() {
-            return (_bookmarksListUIController.HoveredBookmarkID == _currentBookmark.GetBookmarkID()) && (_bookmarksListUIController.HoveredBookmarkType == _currentBookmark.BookmarkType);
+            return (_bookmarksListUIController.HoveredBookmarkID == _currentBookmark.BookmarkID) && (_bookmarksListUIController.HoveredBookmarkType == _currentBookmark.BookmarkType);
         }
 
         public bool IsActiveVessel() {
@@ -49,7 +49,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         public bool CanMoveUp() {
             if( !_bookmarksListUIController.AvailableBookmarks.ContainsKey(_currentBookmark.BookmarkType) ) {
-                ModLogger.LogWarning($"Bookmark {_currentBookmark.GetBookmarkID()}: Bookmark type {_currentBookmark.BookmarkType} not found");
+                ModLogger.LogWarning($"Bookmark {_currentBookmark.BookmarkID}: Bookmark type {_currentBookmark.BookmarkType} not found");
                 return false;
             }
             return _currentIndex > 0;
@@ -57,7 +57,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         public bool CanMoveDown() {
             if( !_bookmarksListUIController.AvailableBookmarks.ContainsKey(_currentBookmark.BookmarkType) ) {
-                ModLogger.LogWarning($"Bookmark {_currentBookmark.GetBookmarkID()}: Bookmark type {_currentBookmark.BookmarkType} not found");
+                ModLogger.LogWarning($"Bookmark {_currentBookmark.BookmarkID}: Bookmark type {_currentBookmark.BookmarkType} not found");
                 return false;
             }
             return _currentIndex < _bookmarksListUIController.AvailableBookmarks[_currentBookmark.BookmarkType].Count - 1;
@@ -70,7 +70,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public void SwitchToVessel() {
             Vessel vessel = _currentBookmark.Vessel;
             if( vessel == null ) {
-                ModLogger.LogWarning($"Bookmark {_currentBookmark.GetBookmarkID()}: Vessel not found");
+                ModLogger.LogWarning($"Bookmark {_currentBookmark.BookmarkID}: Vessel not found");
                 return;
             }
             if (VesselNavigator.NavigateToVessel(vessel)) {
@@ -81,7 +81,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         public void MoveUp() {
             if( !CanMoveUp() ) {
-                ModLogger.LogWarning($"Bookmark {_currentBookmark.GetBookmarkID()}: Cannot move up");
+                ModLogger.LogWarning($"Bookmark {_currentBookmark.BookmarkID}: Cannot move up");
                 return;
             }
             List<Bookmark> bookmarks = _bookmarksListUIController.AvailableBookmarks[_currentBookmark.BookmarkType];
@@ -94,7 +94,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         public void MoveDown() {
             if( !CanMoveDown() ) {
-                ModLogger.LogWarning($"Bookmark {_currentBookmark.GetBookmarkID()}: Bookmark type {_currentBookmark.BookmarkType} not found");
+                ModLogger.LogWarning($"Bookmark {_currentBookmark.BookmarkID}: Bookmark type {_currentBookmark.BookmarkType} not found");
                 return;
             }
             List<Bookmark> bookmarks = _bookmarksListUIController.AvailableBookmarks[_currentBookmark.BookmarkType];

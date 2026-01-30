@@ -18,31 +18,37 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         // ====================================================
 
         /// <summary>
-        /// Load a command module bookmark from a config node
+        /// Get an integer value from a config node
         /// </summary>
-        /// <param name="node"></param>
-        /// <param name="bookmark"></param>
-        /// <returns>True if the command module bookmark was loaded, false otherwise</returns>
-        private static bool LoadCommandModuleBookmark(ConfigNode node, CommandModuleBookmark bookmark) {
-            if (node.HasValue("commandModuleFlightID")) {
-                uint.TryParse(node.GetValue("commandModuleFlightID"), out uint flightID);
-                bookmark.CommandModuleFlightID = flightID;
-            } else {
-                ModLogger.LogError("commandModuleFlightID not found in the bookmark node");
-                return false;
+        /// <param name="node">Config node to get the value from</param>
+        /// <param name="valueName">Name of the value to get</param>
+        /// <returns>The value of the integer</returns>
+        private static int GetIntNodeValue(ConfigNode node, string valueName) {
+            if( !node.HasValue(valueName) ) {
+                throw new Exception($"{valueName} not found in the bookmark node");
             }
 
-            bookmark.CommandModuleName = node.GetValue("commandModuleName") ?? "";
-            
-            if (node.HasValue("commandModuleType")) {
-                int.TryParse(node.GetValue("commandModuleType"), out int vesselType);
-                bookmark.CommandModuleType = (VesselType) vesselType;
-            } else {
-                ModLogger.LogError("commandModuleType not found in the bookmark node");
-                return false;
+            if( !int.TryParse(node.GetValue(valueName), out int value) ) {
+                throw new Exception($"{valueName} is not a valid integer");  
             }
-            
-            return true;
+            return value;
+        }
+
+        /// <summary>
+        /// Get an integer value from a config node
+        /// </summary>
+        /// <param name="node">Config node to get the value from</param>
+        /// <param name="valueName">Name of the value to get</param>
+        /// <returns>The value of the integer</returns>
+        private static uint GetUintNodeValue(ConfigNode node, string valueName) {
+            if( !node.HasValue(valueName) ) {
+                throw new Exception($"{valueName} not found in the bookmark node");
+            }
+
+            if( !uint.TryParse(node.GetValue(valueName), out uint value) ) {
+                throw new Exception($"{valueName} is not a valid integer");
+            }
+            return value;
         }
 
         /// <summary>
@@ -54,102 +60,67 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             try {
                 ModLogger.LogDebug($"Loading bookmark from config node");
 
-                // Instantiate the bookmark
+                // Load bookmark type and vessel persistent ID (mandatory fields)
+                BookmarkType bookmarkType = (BookmarkType) GetIntNodeValue(node, "bookmarkType");
+                uint bookmarkID = GetUintNodeValue(node, "bookmarkID");
+                
+                // Instanciate the bookmark
                 Bookmark bookmark;
-                if( node.HasValue("bookmarkType") ) {
-                    int.TryParse(node.GetValue("bookmarkType"), out int bookmarkTypeInt);
-                    BookmarkType bookmarkType = (BookmarkType) bookmarkTypeInt;
-                    if( bookmarkType == BookmarkType.CommandModule ) {
-                        bookmark = new CommandModuleBookmark();
-                    } else if( bookmarkType == BookmarkType.Vessel ) {
-                        bookmark = new VesselBookmark();
-                    } else {
-                        ModLogger.LogError($"Invalid bookmark type {bookmarkType}");
-                        return null;
-                    }
+                if( bookmarkType == BookmarkType.CommandModule ) {
+                    uint commandModuleFlightID = GetUintNodeValue(node, "commandModuleFlightID");
+                    bookmark = new CommandModuleBookmark(bookmarkID) { 
+                        CommandModuleFlightID = commandModuleFlightID 
+                    };
+                } else if( bookmarkType == BookmarkType.Vessel ) {
+                    bookmark = new VesselBookmark(bookmarkID);
+                    // Nothing more...
                 } else {
-                    ModLogger.LogError("bookmarkType not found in the bookmark node");
-                    return null;
-                }
-                
-                // Mandatory fields
-                
-                if( node.HasValue("vesselPersistentID") ) {
-                    uint.TryParse(node.GetValue("vesselPersistentID"), out uint persistentID);
-                    bookmark.VesselPersistentID = persistentID;
-                } else {
-                    ModLogger.LogError("vesselPersistentID not found in the bookmark node");
-                    return null;
+                    throw new Exception($"Invalid bookmark type {bookmarkType}");
                 }
 
-                if (node.HasValue("vesselType")) {
-                    int.TryParse(node.GetValue("vesselType"), out int vesselType);
-                    bookmark.VesselType = (VesselType) vesselType;
-                } else {
-                    ModLogger.LogError("vesselType not found in the bookmark node");
-                    return null;
-                }
-                
-                if (node.HasValue("order")) {
-                    int.TryParse(node.GetValue("order"), out int order);
-                    bookmark.Order = order;
-                } else {
-                    ModLogger.LogError("order not found in the bookmark node");
-                    return null;
-                }
-
-                // Optional fields
-
+                // Load common fields
+                bookmark.Order = GetIntNodeValue(node, "order");        // Mandatory
                 bookmark.Comment = node.GetValue("comment") ?? "";
-                
-                bookmark.VesselSituation = Vessel.Situations.PRELAUNCH;
-                if( node.HasValue("vesselSituation") ) {
-                    string situation = node.GetValue("vesselSituation");
-                    if( Enum.TryParse<Vessel.Situations>(situation, out Vessel.Situations parsedSituation) ) {
-                        bookmark.VesselSituation = parsedSituation;
-                    } else {
-                        ModLogger.LogWarning($"Invalid vesselSituation value '{situation}' in the bookmark node, using PRELAUNCH as default");
-                    }
-                } else {
-                    ModLogger.LogWarning("vesselSituation not found in the bookmark node");
-                }
-
-                if( node.HasValue("vesselBody") ) {
-                    string bodyName = node.GetValue("vesselBody");
-                    bookmark.VesselBody = FlightGlobals.Bodies.FirstOrDefault(b => b.bodyName == bodyName);
-                    if( bookmark.VesselBody == null ) {
-                        ModLogger.LogWarning($"Vessel body {bodyName} not found");
-                    }
-                } else {
-                    ModLogger.LogWarning("vesselBody not found in the bookmark node");
-                    bookmark.VesselBody = null;
-                }
-
-                bookmark.VesselName = node.GetValue("vesselName") ?? "";
-                
-                if (node.HasValue("hasAlarm")) {
-                    bool.TryParse(node.GetValue("hasAlarm"), out bool hasAlarm);
-                    bookmark.HasAlarm = hasAlarm;
-                } else {
-                    bookmark.HasAlarm = false;
-                }
-
-                if (node.HasValue("creationTime")) {
-                    double.TryParse(node.GetValue("creationTime"), out double time);
-                    bookmark.CreationTime = time;
-                } else {
-                    ModLogger.LogWarning("creationTime not found in the bookmark node");
+                try {
+                    bookmark.CreationTime = double.Parse(node.GetValue("creationTime"));
+                } catch (Exception e) {
+                    ModLogger.LogWarning($"creationTime not found in the bookmark node : {e.Message}");
                     bookmark.CreationTime = Planetarium.GetUniversalTime();
                 }
                 
+                // Load vessel information (may be refreshed, but at startup, they are not yet present)
+                bookmark.VesselPersistentID = GetUintNodeValue(node, "vesselPersistentID");
+                bookmark.VesselName = node.GetValue("vesselName") ?? "";
+                try {
+                    bookmark.VesselType = (VesselType) GetIntNodeValue(node, "vesselType");
+                } catch (Exception e) {
+                    ModLogger.LogWarning($"vesselType not found in the bookmark node : {e.Message}");
+                    bookmark.VesselType = VesselType.Unknown;
+                }
+                try {
+                    bookmark.VesselSituation = (Vessel.Situations) GetIntNodeValue(node, "vesselSituation");
+                } catch (Exception e) {
+                    ModLogger.LogWarning($"vesselSituation not found in the bookmark node : {e.Message}");
+                    bookmark.VesselSituation = Vessel.Situations.PRELAUNCH;
+                }
+                try {
+                    bookmark.VesselBody = FlightGlobals.Bodies.FirstOrDefault(b => b.bodyName == node.GetValue("vesselBody"));
+                } catch (Exception e) {
+                    ModLogger.LogWarning($"vesselBody not found in the bookmark node : {e.Message}");
+                    bookmark.VesselBody = null;
+                }
+                try {
+                    bookmark.HasAlarm = bool.Parse(node.GetValue("hasAlarm"));
+                } catch (Exception e) {
+                    ModLogger.LogWarning($"hasAlarm not found in the bookmark node : {e.Message}");
+                    bookmark.HasAlarm = false;
+                }
+
                 // ========================== Load specific data ==========================
 
                 if( bookmark is CommandModuleBookmark commandModuleBookmark ) {
-                    bool success = LoadCommandModuleBookmark(node, commandModuleBookmark);
-                    if( !success ) {
-                        ModLogger.LogError("Error loading command module bookmark from config node");
-                        return null;
-                    }
+                    commandModuleBookmark.CommandModuleName = node.GetValue("commandModuleName") ?? "";
+                    commandModuleBookmark.CommandModuleType = (VesselType) GetIntNodeValue(node, "commandModuleType");
                 } else if( bookmark is VesselBookmark vesselBookmark ) {
                     // Nothing...
                 }
@@ -193,13 +164,6 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         //      Saving bookmarks
         // ====================================================
 
-        public static bool SaveCommandModuleBookmark(ConfigNode node, CommandModuleBookmark bookmark) {
-            node.AddValue("commandModuleFlightID", bookmark.CommandModuleFlightID);
-            node.AddValue("commandModuleName", bookmark.CommandModuleName);
-            node.AddValue("commandModuleType", (int) bookmark.CommandModuleType);
-            return true;
-        }
-
         /// <summary>
         /// Save a bookmark to a config node
         /// </summary>
@@ -207,23 +171,22 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="bookmark"></param>
         /// <returns>True if the bookmark was saved, false otherwise</returns>
         public static bool SaveBookmark(ConfigNode node, Bookmark bookmark) {
+            node.AddValue("bookmarkID", bookmark.BookmarkID);
             node.AddValue("bookmarkType", (int) bookmark.BookmarkType);
             node.AddValue("comment", bookmark.Comment);
+            node.AddValue("order", bookmark.Order);
             node.AddValue("creationTime", bookmark.CreationTime);
-            node.AddValue("vesselSituation", bookmark.VesselSituation.ToString());
-            node.AddValue("vesselBody", bookmark.VesselBody.bodyName);
             node.AddValue("vesselPersistentID", bookmark.VesselPersistentID);
             node.AddValue("vesselName", bookmark.VesselName);
             node.AddValue("vesselType", (int) bookmark.VesselType);
-            node.AddValue("order", bookmark.Order);
+            node.AddValue("vesselSituation", bookmark.VesselSituation.ToString());
+            node.AddValue("vesselBody", bookmark.VesselBody.bodyName);
             node.AddValue("hasAlarm", bookmark.HasAlarm);
             
             if( bookmark is CommandModuleBookmark commandModuleBookmark ) {
-                bool success = SaveCommandModuleBookmark(node, commandModuleBookmark);
-                if( !success ) {
-                    ModLogger.LogError("Error saving command module bookmark to config node");
-                    return false;
-                }
+                node.AddValue("commandModuleFlightID", commandModuleBookmark.CommandModuleFlightID);
+                node.AddValue("commandModuleName", commandModuleBookmark.CommandModuleName);
+                node.AddValue("commandModuleType", (int) commandModuleBookmark.CommandModuleType);
             } else if( bookmark is VesselBookmark vesselBookmark ) {
                 // Nothing...
             }
@@ -247,7 +210,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 foreach (Bookmark bookmark in bookmarks) {
                     ConfigNode bookmarkNode = bookmarksNode.AddNode(BOOKMARK_NODE_NAME);
                     if( !SaveBookmark(bookmarkNode, bookmark) ) {
-                        ModLogger.LogError($"Error saving bookmark {bookmark.BookmarkType} and {bookmark.GetBookmarkID()} to config node");
+                        ModLogger.LogError($"Error saving bookmark {bookmark.BookmarkType} and {bookmark.BookmarkID} to config node");
                         return false;
                     }
                 }

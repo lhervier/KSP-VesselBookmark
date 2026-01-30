@@ -21,14 +21,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         public VesselType CommandModuleType { get; set; } = VesselType.Unknown;
         
         /// <summary>
-        /// Get the unique identifier of the bookmark
-        /// </summary>
-        /// <returns>The unique identifier of the bookmark</returns>
-        public override uint GetBookmarkID() {
-            return CommandModuleFlightID;
-        }
-
-        /// <summary>
         /// Get the display name of the command module bookmark
         /// </summary>
         /// <returns>The display name of the command module bookmark</returns>
@@ -47,15 +39,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// <summary>
         /// Constructor
         /// </summary>
-        public CommandModuleBookmark() : base(BookmarkType.CommandModule) {
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="commandModuleFlightID">The flight ID of the command module</param>
-        public CommandModuleBookmark(uint commandModuleFlightID) : this() {
-            CommandModuleFlightID = commandModuleFlightID;
+        /// <param name="bookmarkID">The ID of the bookmark</param>
+        public CommandModuleBookmark(uint bookmarkID) : base(BookmarkType.CommandModule, bookmarkID) {
         }
     }
 }
