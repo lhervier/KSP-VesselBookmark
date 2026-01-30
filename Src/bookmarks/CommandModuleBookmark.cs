@@ -56,38 +56,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         }
 
         /// <summary>
-        /// Saves the specific data of the command module bookmark to a ConfigNode
-        /// </summary>
-        /// <param name="node">The ConfigNode to save the specific data to</param>
-        protected override void SaveSpecificData(ConfigNode node) {
-            node.AddValue("commandModuleFlightID", CommandModuleFlightID);
-            node.AddValue("commandModuleName", CommandModuleName);
-            node.AddValue("commandModuleType", (int) CommandModuleType);
-        }
-
-        /// <summary>
-        /// Loads the specific data of the command module bookmark from a ConfigNode
-        /// </summary>
-        /// <param name="node">The ConfigNode to load the specific data from</param>
-        protected override void LoadSpecificData(ConfigNode node) {
-            if (node.HasValue("commandModuleFlightID")) {
-                uint.TryParse(node.GetValue("commandModuleFlightID"), out uint flightID);
-                CommandModuleFlightID = flightID;
-            } else {
-                throw new Exception("commandModuleFlightID not found in the bookmark node");
-            }
-
-            CommandModuleName = node.GetValue("commandModuleName") ?? "";
-            
-            if (node.HasValue("commandModuleType")) {
-                int.TryParse(node.GetValue("commandModuleType"), out int vesselType);
-                CommandModuleType = (VesselType) vesselType;
-            } else {
-                throw new Exception("commandModuleType not found in the bookmark node");
-            }
-        }
-
-        /// <summary>
         /// Get command module part for a command module
         /// </summary>
         /// <param name="commandModuleFlightID"></param>

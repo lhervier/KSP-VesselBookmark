@@ -254,40 +254,14 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 ModLogger.LogDebug($"Loading bookmarks from config node");
                 _bookmarks.Clear();
                 _bookmarksIDs.clearIds();
-                
-                if (!node.HasNode(SAVE_NODE_NAME)) {
-                    return;
-                }
-                ConfigNode bookmarksNode = node.GetNode(SAVE_NODE_NAME);
-                ConfigNode[] bookmarkNodes = bookmarksNode.GetNodes(BOOKMARK_NODE_NAME);
-                
-                // Sort nodes by order, so we will add them in the correct order
-                bookmarkNodes = bookmarkNodes.OrderBy(b => {
-                    int order = 0;
-                    if (b.HasValue("order")) {
-                        int.TryParse(b.GetValue("order"), out order);
-                    }
-                    return order;
-                }).ToArray();
 
-                foreach (ConfigNode bookmarkNode in bookmarkNodes) {
-                    BookmarkType bookmarkType = BookmarkType.Unknown;
-                    if (bookmarkNode.HasValue("bookmarkType")) {
-                        int.TryParse(bookmarkNode.GetValue("bookmarkType"), out int bookmarkTypeInt);
-                        bookmarkType = (BookmarkType) bookmarkTypeInt;
-                    }
-
-                    Bookmark bookmark = null;
-                    if( bookmarkType == BookmarkType.CommandModule ) {
-                        bookmark = new CommandModuleBookmark();
-                    } else if( bookmarkType == BookmarkType.Vessel ) {
-                        bookmark = new VesselBookmark();
-                    } else {
-                        ModLogger.LogError($"Bookmark type {bookmarkType} not supported");
-                        continue;
-                    }
-                    bookmark.Load(bookmarkNode);
-                    
+                // Load bookmarks from config node
+                // and sort them by order
+                List<Bookmark> bookmarks = BookmarkPersistence.LoadBookmarks(node);
+                
+                // Add bookmarks to the list
+                bookmarks.Sort((a, b) => a.Order.CompareTo(b.Order));
+                foreach (Bookmark bookmark in bookmarks) {
                     this.AddBookmark(bookmark, false);
                 }
 
@@ -303,22 +277,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="node"></param>
         public void SaveBookmarks(ConfigNode node) {
-            try {
-                ModLogger.LogDebug($"Saving bookmarks to config node");
-
-                if (node.HasNode(SAVE_NODE_NAME)) {
-                    node.RemoveNode(SAVE_NODE_NAME);
-                }
-                
-                ConfigNode bookmarksNode = node.AddNode(SAVE_NODE_NAME);
-                foreach (Bookmark bookmark in _bookmarks) {
-                    ConfigNode bookmarkNode = bookmarksNode.AddNode(BOOKMARK_NODE_NAME);
-                    bookmark.Save(bookmarkNode);
-                }
-                ModLogger.LogInfo($"{_bookmarks.Count} bookmark(s) saved");
-            } catch (Exception e) {
-                ModLogger.LogError($"Error saving bookmarks: {e.Message}");
-            }
+            BookmarkPersistence.SaveBookmarks(node, _bookmarks);
         }
 
         // =======================================================================================

@@ -41,20 +41,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         }
 
         /// <summary>
-        /// Saves the specific data of the vessel bookmark to a ConfigNode
-        /// </summary>
-        /// <param name="node">The ConfigNode to save the specific data to</param>
-        protected override void SaveSpecificData(ConfigNode node) {
-        }
-
-        /// <summary>
-        /// Loads the specific data of the vessel bookmark from a ConfigNode
-        /// </summary>
-        /// <param name="node">The ConfigNode to load the specific data from</param>
-        protected override void LoadSpecificData(ConfigNode node) {
-        }
-
-        /// <summary>
         /// Refresh the vessel bookmark
         /// </summary>
         /// <returns>True if the vessel bookmark was refreshed, false otherwise</returns>
