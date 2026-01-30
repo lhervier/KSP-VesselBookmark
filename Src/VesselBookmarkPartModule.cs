@@ -21,7 +21,6 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 ModLogger.LogDebug($"ToggleBookmarkEvent: Part flightID {part.flightID}");
 
                 BookmarkManager manager = BookmarkManager.GetInstance(BookmarkType.CommandModule);
-
                 Bookmark bookmark = manager.GetBookmark(part.flightID);
                 
                 if (bookmark != null) {
@@ -30,7 +29,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                         ? bookmark.BookmarkTitle
                         : ModLocalization.GetString("labelModuleNotFound");
                     VesselBookmarkUIDialog.ConfirmRemoval(() => {
-                        bool removed = manager._RemoveBookmark(bookmark);
+                        bool removed = BookmarkManager.RemoveBookmark(bookmark);
                         if (removed) {
                             ScreenMessages.PostScreenMessage(
                                 ModLocalization.GetString("messageBookmarkRemoved"), 
@@ -42,7 +41,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 } else {
                     ModLogger.LogDebug($"- ToggleBookmarkEvent: Adding command module bookmark for part {part.flightID}");
                     CommandModuleBookmark newCommandModuleBookmark = new CommandModuleBookmark(part.flightID);
-                    bool added = manager._AddBookmark(newCommandModuleBookmark);
+                    bool added = BookmarkManager.AddBookmark(newCommandModuleBookmark);
                     if (added) {
                         ScreenMessages.PostScreenMessage(
                             ModLocalization.GetString("messageBookmarkAdded"), 

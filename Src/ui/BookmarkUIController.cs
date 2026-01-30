@@ -76,9 +76,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             List<Bookmark> bookmarks = _bookmarksListUIController.AvailableBookmarks[_currentBookmark.BookmarkType];
             Bookmark previousBookmark = bookmarks[_currentIndex - 1];
 
-            BookmarkManager manager = BookmarkManager.GetInstance(_currentBookmark.BookmarkType);
             while( _currentBookmark.Order > previousBookmark.Order ) {
-                manager._MoveBookmarkUp(_currentBookmark, false);
+                BookmarkManager.MoveBookmarkUp(_currentBookmark, false);
             }
             BookmarkManager.OnBookmarksUpdated.Fire();
         }
@@ -91,9 +90,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             List<Bookmark> bookmarks = _bookmarksListUIController.AvailableBookmarks[_currentBookmark.BookmarkType];
             Bookmark nextBookmark = bookmarks[_currentIndex + 1];
 
-            BookmarkManager manager = BookmarkManager.GetInstance(_currentBookmark.BookmarkType);
             while( _currentBookmark.Order < nextBookmark.Order ) {
-                manager._MoveBookmarkDown(_currentBookmark, false);
+                BookmarkManager.MoveBookmarkDown(_currentBookmark, false);
             }
             BookmarkManager.OnBookmarksUpdated.Fire();
         }

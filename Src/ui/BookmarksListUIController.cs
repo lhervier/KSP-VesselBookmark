@@ -269,7 +269,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             uint vesselPersistentID = FlightGlobals.ActiveVessel.persistentId;
             
             BookmarkManager manager = BookmarkManager.GetInstance(BookmarkType.Vessel);
-
             if (manager.HasBookmark(vesselPersistentID)) {
                 ScreenMessages.PostScreenMessage(
                     ModLocalization.GetString("messageBookmarkAlreadyExists"),
@@ -280,7 +279,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             }
 
             VesselBookmark bookmark = new VesselBookmark(vesselPersistentID);
-            if (manager._AddBookmark(bookmark)) {
+            if (BookmarkManager.AddBookmark(bookmark)) {
                 ScreenMessages.PostScreenMessage(
                     ModLocalization.GetString("messageBookmarkAdded"),
                     2f,
