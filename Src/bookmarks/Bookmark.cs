@@ -14,48 +14,48 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// <summary>
         /// User-editable comment
         /// </summary>
-        public string Comment { get; set; }
+        public string Comment { get; set; } = "";
         
         /// <summary>
         /// Persistent identifier of the vessel
         /// Only used for vessel bookmarks
         /// </summary>
-        public uint VesselPersistentID { get; set; }
+        public uint VesselPersistentID { get; set; } = 0;
 
         /// <summary>
         /// Name of the vessel
         /// </summary>
-        public string VesselName { get; set; }
+        public string VesselName { get; set; } = "";
 
         /// <summary>
         /// Type of the vessel
         /// </summary>
-        public VesselType VesselType { get; set; }
+        public VesselType VesselType { get; set; } = VesselType.Unknown;
 
         /// <summary>
         /// The main body of the vessel
         /// </summary>
-        public CelestialBody VesselBody { get; set; }
+        public CelestialBody VesselBody { get; set; } = null;
 
         /// <summary>
         /// The situation of the vessel
         /// </summary>
-        public Vessel.Situations VesselSituation { get; set; }
+        public Vessel.Situations VesselSituation { get; set; } = Vessel.Situations.PRELAUNCH;
         
         /// <summary>
         /// If the bookmark has an alarm
         /// </summary>
-        public bool HasAlarm { get; set; }
+        public bool HasAlarm { get; set; } = false;
 
         /// <summary>
         /// Custom order for sorting bookmarks (lower values appear first)
         /// </summary>
-        public int Order { get; set; }
+        public int Order { get; set; } = 0;
         
         /// <summary>
         /// Bookmark creation date
         /// </summary>
-        public double CreationTime { get; set; }
+        public double CreationTime { get; set; } = Planetarium.GetUniversalTime();
         
         // ==================
         //  Transient fields
@@ -64,28 +64,17 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// <summary>
         /// The vessel for the bookmark (not saved)
         /// </summary>
-        public Vessel Vessel { get; set; }
+        public Vessel Vessel { get; set; } = null;
 
         /// <summary>
         /// The label of the vessel situation
         /// </summary>
-        public string VesselSituationLabel { get; set; }
+        public string VesselSituationLabel { get; set; } = "";
 
         /// <summary>
         /// Constructor
         /// </summary>
         protected Bookmark() {
-            Comment = "";
-            VesselSituation = Vessel.Situations.PRELAUNCH;
-            VesselBody = null;
-            VesselSituationLabel = "";
-            VesselPersistentID = 0;
-            HasAlarm = false;
-            VesselName = "";
-            VesselType = VesselType.Unknown;
-            Order = 0;
-            CreationTime = Planetarium.GetUniversalTime();
-            Vessel = null;
         }
 
         public Bookmark(ConfigNode node) : this() {
