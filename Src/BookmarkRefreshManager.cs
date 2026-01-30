@@ -111,7 +111,6 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     ModLogger.LogError($"Getting situation: Body is null");
                     return ModLocalization.GetString("situationUnknown");
                 }
-                ModLogger.LogDebug($"Getting situation labeled as {situation} for vessel on body {body.bodyName}");
                 
                 switch (situation) {
                     case Vessel.Situations.LANDED:
