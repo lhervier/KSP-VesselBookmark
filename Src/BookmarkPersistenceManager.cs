@@ -80,6 +80,12 @@ namespace com.github.lhervier.ksp.bookmarksmod {
 
                 // Load common fields
                 bookmark.BookmarkTitle = node.GetValue("bookmarkTitle") ?? "";
+                try {
+                    bookmark.BookmarkVesselType = (VesselType) GetIntNodeValue(node, "bookmarkVesselType");
+                } catch (Exception e) {
+                    ModLogger.LogWarning($"bookmarkVesselType not found in the bookmark node : {e.Message}");
+                    bookmark.BookmarkVesselType = VesselType.Unknown;
+                }
                 bookmark.Comment = node.GetValue("comment") ?? "";
                 bookmark.Order = GetIntNodeValue(node, "order");        // Mandatory
                 try {
@@ -176,6 +182,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             node.AddValue("bookmarkType", (int) bookmark.BookmarkType);
 
             node.AddValue("bookmarkTitle", bookmark.BookmarkTitle);
+            node.AddValue("bookmarkVesselType", (int) bookmark.BookmarkVesselType);
             node.AddValue("comment", bookmark.Comment);
             node.AddValue("order", bookmark.Order);
             node.AddValue("creationTime", bookmark.CreationTime);

@@ -138,7 +138,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 string selectedVesselType = _selectedVesselType;
                 this.AvailableVesselTypes.Clear();
                 foreach (Bookmark bookmark in BookmarkManager.Instance.Bookmarks) {
-                    VesselType vesselType = bookmark.GetBookmarkDisplayType();
+                    VesselType vesselType = bookmark.BookmarkVesselType;
                     string vesselTypeName = vesselType.ToString();
                     if( !AvailableVesselTypes.Contains(vesselTypeName) ) {
                         AvailableVesselTypes.Add(vesselTypeName);
@@ -182,7 +182,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                         addBookmark = true;
                     } else if( string.Equals(selectedBody, all) ) {
                         addBookmark = string.Equals(
-                            bookmark.GetBookmarkDisplayType().ToString(), 
+                            bookmark.BookmarkVesselType.ToString(), 
                             selectedVesselType
                         );
                     } else if( string.Equals(selectedVesselType, ALL_VESSEL_TYPES) ) {
@@ -197,7 +197,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                             ) 
                             && 
                             string.Equals(
-                                bookmark.GetBookmarkDisplayType().ToString(), 
+                                bookmark.BookmarkVesselType.ToString(), 
                                 selectedVesselType
                             );
                     }
@@ -206,7 +206,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                         string fullSearchText = bookmark.BookmarkTitle + " ";
                         fullSearchText += bookmark.VesselSituationLabel + " ";   // Situation contains celestial body name
                         fullSearchText += bookmark.VesselName + " ";
-                        fullSearchText += ModLocalization.GetString("vesselType" + bookmark.GetBookmarkDisplayType()) + " ";
+                        fullSearchText += ModLocalization.GetString("vesselType" + bookmark.BookmarkVesselType) + " ";
                         fullSearchText += bookmark.Comment + " ";
                         if( !fullSearchText.ToLower().Contains(SearchText.ToLower()) ) {
                             addBookmark = false;

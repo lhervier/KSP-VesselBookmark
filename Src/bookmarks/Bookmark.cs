@@ -36,9 +36,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         public string BookmarkTitle = "";
 
         /// <summary>
-        /// Draw the type of the bookmark
+        /// Vessel type associated to the bookmark
+        /// (different from the type of the vessel attached to the bookmark)
         /// </summary>
-        public abstract VesselType GetBookmarkDisplayType();
+        public VesselType BookmarkVesselType { get; set; } = VesselType.Unknown;
         
         /// <summary>
         /// User-editable comment

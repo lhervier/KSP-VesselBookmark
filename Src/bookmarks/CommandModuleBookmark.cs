@@ -21,14 +21,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         public VesselType CommandModuleType { get; set; } = VesselType.Unknown;
         
         /// <summary>
-        /// Get the display type of the command module bookmark
-        /// </summary>
-        /// <returns>The display type of the command module bookmark</returns>
-        public override VesselType GetBookmarkDisplayType() {
-            return CommandModuleType;
-        }
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="flightID">The flight ID of the command module</param>

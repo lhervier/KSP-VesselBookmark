@@ -8,14 +8,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
     public class VesselBookmark : Bookmark {
         
         /// <summary>
-        /// Get the display type of the vessel bookmark
-        /// </summary>
-        /// <returns>The display type of the vessel bookmark</returns>
-        public override VesselType GetBookmarkDisplayType() {
-            return VesselType;
-        }
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="bookmarkID">The ID of the bookmark</param>

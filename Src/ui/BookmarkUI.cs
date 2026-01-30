@@ -143,7 +143,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.Space(20);
             
             // Vessel type icon
-            VesselBookmarkButton vesselTypeButton = GetVesselTypeButton(bookmark.GetBookmarkDisplayType());
+            VesselBookmarkButton vesselTypeButton = GetVesselTypeButton(bookmark.BookmarkVesselType);
             vesselTypeButton.Draw(
                 () => vesselTypeButton != null,
                 null

@@ -217,6 +217,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 bookmark.CommandModuleType = cmType;
 
                 bookmark.BookmarkTitle = bookmark.CommandModuleName;
+                bookmark.BookmarkVesselType = bookmark.CommandModuleType;
                 
                 return true;
             } catch (Exception e) {
@@ -262,6 +263,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                         // Nothing more
                     } else if( bookmark is VesselBookmark vesselBookmark ) {
                         vesselBookmark.BookmarkTitle = vesselBookmark.VesselName;
+                        vesselBookmark.BookmarkVesselType = vesselBookmark.VesselType;
                     }
                 }
 
