@@ -8,18 +8,24 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// <summary>
         /// Unique identifier of the command module (uses Part.flightID)
         /// </summary>
-        public uint CommandModuleFlightID { get; set; }
+        public uint CommandModuleFlightID { get; set; } = 0;
         
         /// <summary>
         /// Command module name (updated dynamically)
         /// </summary>
-        public string CommandModuleName { get; set; }
+        public string CommandModuleName { get; set; } = "";
 
         /// <summary>
         /// Command module type
         /// </summary>
-        public VesselType CommandModuleType { get; set; }
+        public VesselType CommandModuleType { get; set; } = VesselType.Unknown;
         
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public CommandModuleBookmark() : base() {
+        }
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -31,13 +37,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
             CommandModuleFlightID = commandModuleFlightID;
             CommandModuleName = "";
             CommandModuleType = VesselType.Unknown;
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="node">The ConfigNode to load the bookmark from</param>
-        public CommandModuleBookmark(ConfigNode node) : base(node) {
         }
 
         /// <summary>

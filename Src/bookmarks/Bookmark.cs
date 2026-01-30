@@ -74,11 +74,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// <summary>
         /// Constructor
         /// </summary>
-        protected Bookmark() {
-        }
-
-        public Bookmark(ConfigNode node) : this() {
-            Load(node);
+        public Bookmark() {
         }
 
         /// <summary>

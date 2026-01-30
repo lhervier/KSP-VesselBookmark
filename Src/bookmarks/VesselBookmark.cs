@@ -10,19 +10,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// <summary>
         /// Constructor
         /// </summary>
+        public VesselBookmark() : base() {
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
         /// <param name="vesselPersistentID">The persistent ID of the vessel</param>
         public VesselBookmark(uint vesselPersistentID) : base() {
             if( vesselPersistentID == 0 ) {
                 throw new Exception("vesselPersistentID cannot be 0");
             }
             VesselPersistentID = vesselPersistentID;
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="node">The ConfigNode to load the bookmark from</param>
-        public VesselBookmark(ConfigNode node) : base(node) {
         }
 
         /// <summary>

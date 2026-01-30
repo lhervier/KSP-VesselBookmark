@@ -279,13 +279,14 @@ namespace com.github.lhervier.ksp.bookmarksmod {
 
                     Bookmark bookmark = null;
                     if( bookmarkType == BookmarkType.CommandModule ) {
-                        bookmark = new CommandModuleBookmark(bookmarkNode);
+                        bookmark = new CommandModuleBookmark();
                     } else if( bookmarkType == BookmarkType.Vessel ) {
-                        bookmark = new VesselBookmark(bookmarkNode);
+                        bookmark = new VesselBookmark();
                     } else {
                         ModLogger.LogError($"Bookmark type {bookmarkType} not supported");
                         continue;
                     }
+                    bookmark.Load(bookmarkNode);
                     
                     this.AddBookmark(bookmark, false);
                 }
