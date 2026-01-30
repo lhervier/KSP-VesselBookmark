@@ -56,7 +56,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <returns></returns>
         public bool HasBookmark(BookmarkType bookmarkType, uint bookmarkID) {
             try {
-                return _bookmarksIDs.hasId(bookmarkType, bookmarkID);
+                return _bookmarksIDs.HasId(bookmarkType, bookmarkID);
             } catch (Exception e) {
                 ModLogger.LogError($"Error checking if bookmark exists for bookmarkType {bookmarkType} and bookmarkID {bookmarkID}: {e.Message}");
                 return false;
@@ -95,7 +95,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 }
 
                 _bookmarks.Add(bookmark);
-                _bookmarksIDs.addId(bookmark.BookmarkType, bookmark.BookmarkID);
+                _bookmarksIDs.AddId(bookmark.BookmarkType, bookmark.BookmarkID);
 
                 if( sendEvent ) {
                     OnBookmarksUpdated.Fire();
@@ -122,7 +122,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 ModLogger.LogDebug($"Removing bookmark for bookmarkType {bookmark.BookmarkType} and bookmarkID {bookmark.BookmarkID}");
                 
                 _bookmarks.Remove(bookmark);
-                _bookmarksIDs.removeId(bookmark.BookmarkType, bookmark.BookmarkID);
+                _bookmarksIDs.RemoveId(bookmark.BookmarkType, bookmark.BookmarkID);
                 
                 OnBookmarksUpdated.Fire();
                 return true;
@@ -253,7 +253,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             try {
                 ModLogger.LogDebug($"Loading bookmarks from config node");
                 _bookmarks.Clear();
-                _bookmarksIDs.clearIds();
+                _bookmarksIDs.ClearIds();
 
                 // Load bookmarks from config node
                 // and sort them by order
@@ -308,21 +308,21 @@ namespace com.github.lhervier.ksp.bookmarksmod {
     class BookmarkIds {
         private Dictionary<BookmarkType, List<uint>> _bookmarksIDs = new Dictionary<BookmarkType, List<uint>>();
 
-        public bool hasId(BookmarkType bookmarkType, uint bookmarkID) {
+        public bool HasId(BookmarkType bookmarkType, uint bookmarkID) {
             return _bookmarksIDs.ContainsKey(bookmarkType) && _bookmarksIDs[bookmarkType].Contains(bookmarkID);
         }
-        public void addId(BookmarkType bookmarkType, uint bookmarkID) {
+        public void AddId(BookmarkType bookmarkType, uint bookmarkID) {
             if( !_bookmarksIDs.ContainsKey(bookmarkType) ) {
                 _bookmarksIDs[bookmarkType] = new List<uint>();
             }
             _bookmarksIDs[bookmarkType].Add(bookmarkID);
         }
-        public void removeId(BookmarkType bookmarkType, uint bookmarkID) {
+        public void RemoveId(BookmarkType bookmarkType, uint bookmarkID) {
             if( _bookmarksIDs.ContainsKey(bookmarkType) ) {
                 _bookmarksIDs[bookmarkType].Remove(bookmarkID);
             }
         }
-        public void clearIds() {
+        public void ClearIds() {
             _bookmarksIDs.Clear();
         }
     }
