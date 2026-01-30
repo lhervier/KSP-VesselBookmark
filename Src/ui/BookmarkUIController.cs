@@ -26,13 +26,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public string GetBookmarkTitle() {
-            string bookmarkName;
-            if( !string.IsNullOrEmpty(_currentBookmark.GetBookmarkTitle())) {
-                bookmarkName = _currentBookmark.GetBookmarkTitle();
-            } else {
-                bookmarkName = ModLocalization.GetString("labelModuleNotFound");
+            if( string.IsNullOrEmpty(_currentBookmark.BookmarkTitle)) {
+                return ModLocalization.GetString("labelModuleNotFound");
             }
-            return bookmarkName;
+            return _currentBookmark.BookmarkTitle;
         }
 
         public bool IsHovered() {

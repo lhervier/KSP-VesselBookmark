@@ -27,8 +27,8 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 
                 if (bookmark != null) {
                     ModLogger.LogDebug($"- ToggleBookmarkEvent: Removing command module bookmark for part {part.flightID}");
-                    string displayName = !string.IsNullOrEmpty(bookmark.GetBookmarkTitle())
-                        ? bookmark.GetBookmarkTitle()
+                    string displayName = !string.IsNullOrEmpty(bookmark.BookmarkTitle)
+                        ? bookmark.BookmarkTitle
                         : ModLocalization.GetString("labelModuleNotFound");
                     VesselBookmarkUIDialog.ConfirmRemoval(() => {
                         bool removed = BookmarkManager.Instance.RemoveBookmark(bookmark);

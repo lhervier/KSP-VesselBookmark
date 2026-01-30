@@ -177,6 +177,8 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <returns>True if the command module bookmark was refreshed, false otherwise</returns>
         private static bool RefreshCommandModuleBookmark(CommandModuleBookmark bookmark) {
             try {
+                bookmark.CommandModuleFlightID = bookmark.BookmarkID;
+                
                 uint vesselPersistentId;
                 string cmName;
                 VesselType cmType;
@@ -214,6 +216,8 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 bookmark.CommandModuleName = cmName;
                 bookmark.CommandModuleType = cmType;
 
+                bookmark.BookmarkTitle = bookmark.CommandModuleName;
+                
                 return true;
             } catch (Exception e) {
                 ModLogger.LogError($"Error refreshing command module bookmark {bookmark.BookmarkType} and {bookmark.BookmarkID}: {e.Message}");
@@ -235,7 +239,6 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     }
                 } else if( bookmark is VesselBookmark vesselBookmark ) {
                     vesselBookmark.VesselPersistentID = bookmark.BookmarkID;
-                    // Nothing...
                 } else {
                     ModLogger.LogWarning($"Bookmark {bookmark.BookmarkType} and {bookmark.BookmarkID}: Unknown bookmark type");
                     return false;
@@ -254,6 +257,12 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     bookmark.VesselSituationLabel = GetSituationLabel(vessel.mainBody, vessel.situation);
                     
                     bookmark.HasAlarm = CheckHasAlarm(vessel);
+
+                    if( bookmark is CommandModuleBookmark ) {
+                        // Nothing more
+                    } else if( bookmark is VesselBookmark vesselBookmark ) {
+                        vesselBookmark.BookmarkTitle = vesselBookmark.VesselName;
+                    }
                 }
 
                 return true;

@@ -33,7 +33,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// <summary>
         /// Draw the title of the bookmark
         /// </summary>
-        public abstract string GetBookmarkTitle();
+        public string BookmarkTitle = "";
 
         /// <summary>
         /// Draw the type of the bookmark

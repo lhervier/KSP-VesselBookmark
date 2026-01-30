@@ -21,14 +21,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         public VesselType CommandModuleType { get; set; } = VesselType.Unknown;
         
         /// <summary>
-        /// Get the display name of the command module bookmark
-        /// </summary>
-        /// <returns>The display name of the command module bookmark</returns>
-        public override string GetBookmarkTitle() {
-            return CommandModuleName;
-        }
-
-        /// <summary>
         /// Get the display type of the command module bookmark
         /// </summary>
         /// <returns>The display type of the command module bookmark</returns>
@@ -39,8 +31,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="bookmarkID">The ID of the bookmark</param>
-        public CommandModuleBookmark(uint bookmarkID) : base(BookmarkType.CommandModule, bookmarkID) {
+        /// <param name="flightID">The flight ID of the command module</param>
+        public CommandModuleBookmark(uint flightID) : base(BookmarkType.CommandModule, flightID) {
         }
     }
 }
