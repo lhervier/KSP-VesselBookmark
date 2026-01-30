@@ -11,16 +11,32 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
     /// </summary>
     public abstract class Bookmark {
 
+        // =============================================================
+        //    Bookmark identifier 
+        // =============================================================
+
         /// <summary>
-        /// User-editable comment
+        /// Get the unique identifier of the bookmark
         /// </summary>
-        public string Comment { get; set; } = "";
-        
+        /// <returns>The unique identifier of the bookmark</returns>
+        public abstract uint GetBookmarkID();
+
+        /// <summary>
+        /// Type of the bookmark
+        /// </summary>
+        public abstract BookmarkType GetBookmarkType();
+
+        // =============================================================
+        //      Associated vessel data
+        // =============================================================
+
         /// <summary>
         /// Persistent identifier of the vessel
         /// Only used for vessel bookmarks
         /// </summary>
         public uint VesselPersistentID { get; set; } = 0;
+
+        // =========== Cached vessel data ===========
 
         /// <summary>
         /// Name of the vessel
@@ -47,6 +63,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// </summary>
         public bool HasAlarm { get; set; } = false;
 
+        // =============================================================
+        //      Other common bookmark data
+        // =============================================================
+
+        /// <summary>
+        /// User-editable comment
+        /// </summary>
+        public string Comment { get; set; } = "";
+        
         /// <summary>
         /// Custom order for sorting bookmarks (lower values appear first)
         /// </summary>
@@ -76,17 +101,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// </summary>
         public Bookmark() {
         }
-
-        /// <summary>
-        /// Get the unique identifier of the bookmark
-        /// </summary>
-        /// <returns>The unique identifier of the bookmark</returns>
-        public abstract uint GetBookmarkID();
-
-        /// <summary>
-        /// Type of the bookmark
-        /// </summary>
-        public abstract BookmarkType GetBookmarkType();
 
         /// <summary>
         /// Draw the title of the bookmark
