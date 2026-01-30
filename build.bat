@@ -107,3 +107,5 @@ if errorlevel 1 (
 
 
 echo Build Complete
+echo.
+echo Run at: %date% %time%

@@ -24,3 +24,5 @@ if errorlevel 1 (
 
 echo.
 echo Mod installed
+echo.
+echo Run at: %date% %time%
