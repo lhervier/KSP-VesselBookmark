@@ -41,14 +41,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         }
 
         /// <summary>
-        /// Refresh the vessel bookmark
-        /// </summary>
-        /// <returns>True if the vessel bookmark was refreshed, false otherwise</returns>
-        protected override bool RefreshSpecific() {
-            return true;
-        }
-
-        /// <summary>
         /// Get the display name of the vessel bookmark
         /// </summary>
         /// <returns>The display name of the vessel bookmark</returns>

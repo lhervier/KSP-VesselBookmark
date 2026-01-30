@@ -89,11 +89,17 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 } else {
                     bookmark.Order = 0;
                 }
+                if( !BookmarkRefreshManager.RefreshBookmark(bookmark) ) {
+                    ModLogger.LogWarning($"Bookmark {bookmark.GetBookmarkType()} and {bookmark.GetBookmarkID()}: Failed to refresh bookmark");
+                    return false;
+                }
 
                 _bookmarks.Add(bookmark);
                 _bookmarksIDs.addId(bookmark.GetBookmarkType(), bookmark.GetBookmarkID());
 
-                bookmark.Refresh(sendEvent);
+                if( sendEvent ) {
+                    OnBookmarksUpdated.Fire();
+                }
 
                 return true;
             } catch (Exception e) {
@@ -284,7 +290,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 ModLogger.LogDebug($"Refreshing bookmarks");
 
                 foreach (Bookmark bookmark in _bookmarks) {
-                    if( !bookmark.Refresh(false) ) {
+                    if( !BookmarkRefreshManager.RefreshBookmark(bookmark) ) {
                         ModLogger.LogWarning($"Bookmark {bookmark.GetBookmarkType()} and {bookmark.GetBookmarkID()}: Not found");
                     }
                 }
