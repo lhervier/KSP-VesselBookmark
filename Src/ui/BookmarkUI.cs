@@ -158,8 +158,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             }
                 
             // Bookmark name
+            string title = $"<b>{bookmarkUIController.GetBookmarkTitle()}</b>";
+            if( !string.IsNullOrEmpty(bookmark.Comment) ) {
+                title += $"<color=red>{title}</color>";
+            }
             GUILayout.Label(
-                $"<b>{bookmarkUIController.GetBookmarkTitle()}</b>", 
+                title, 
                 _uiStyles.LabelStyle, 
                 GUILayout.Width(250)
             );
