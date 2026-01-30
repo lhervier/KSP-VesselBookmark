@@ -65,13 +65,5 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         public CommandModuleBookmark(uint commandModuleFlightID) {
             CommandModuleFlightID = commandModuleFlightID;
         }
-
-        /// <summary>
-        /// Should draw the part of the command module bookmark
-        /// </summary>
-        /// <returns>True if the part of the command module bookmark should be drawn, false otherwise</returns>
-        public override bool ShouldDrawPartOf() {
-            return VesselName != CommandModuleName;
-        }
     }
 }

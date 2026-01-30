@@ -105,11 +105,5 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// The label of the vessel situation
         /// </summary>
         public string VesselSituationLabel { get; set; } = "";
-
-        /// <summary>
-        /// Should draw the part of the bookmark
-        /// </summary>
-        /// <returns>True if the part of the bookmark should be drawn, false otherwise</returns>
-        public abstract bool ShouldDrawPartOf();
     }
 }

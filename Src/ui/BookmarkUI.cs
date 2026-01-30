@@ -228,7 +228,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             
             // Vessel situation
             string situation = bookmark.VesselSituationLabel;
-            if( bookmark.ShouldDrawPartOf() ) {
+            bool addVesselName = false;
+            if( bookmark is VesselBookmark vesselBookmark ) {
+                addVesselName = false;
+            } else if( bookmark is CommandModuleBookmark commandModuleBookmark ) {
+                addVesselName = commandModuleBookmark.VesselName != commandModuleBookmark.CommandModuleName;
+            }
+            if( addVesselName ) {
                 situation += " (" + bookmark.VesselName + ")";
             }
             GUILayout.Label(

@@ -52,13 +52,5 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         public VesselBookmark(uint vesselPersistentID) {
             VesselPersistentID = vesselPersistentID;
         }
-
-        /// <summary>
-        /// Should draw the part of the vessel bookmark
-        /// </summary>
-        /// <returns>True if the part of the vessel bookmark should be drawn, false otherwise</returns>
-        public override bool ShouldDrawPartOf() {
-            return false;
-        }
     }
 }
