@@ -68,6 +68,16 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         // =============================================================
 
         /// <summary>
+        /// Draw the title of the bookmark
+        /// </summary>
+        public abstract string GetBookmarkTitle();
+
+        /// <summary>
+        /// Draw the type of the bookmark
+        /// </summary>
+        public abstract VesselType GetBookmarkDisplayType();
+        
+        /// <summary>
         /// User-editable comment
         /// </summary>
         public string Comment { get; set; } = "";
@@ -96,22 +106,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// </summary>
         public string VesselSituationLabel { get; set; } = "";
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public Bookmark() {
-        }
-
-        /// <summary>
-        /// Draw the title of the bookmark
-        /// </summary>
-        public abstract string GetBookmarkTitle();
-
-        /// <summary>
-        /// Draw the type of the bookmark
-        /// </summary>
-        public abstract VesselType GetBookmarkDisplayType();
-        
         /// <summary>
         /// Should draw the part of the bookmark
         /// </summary>
