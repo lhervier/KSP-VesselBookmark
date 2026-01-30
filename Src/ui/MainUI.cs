@@ -24,20 +24,20 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         private void Awake() {
             GameEvents.onGUIApplicationLauncherReady.Add(OnLauncherReady);
-            BookmarkManager.Instance.OnBookmarksUpdated.Add(OnBookmarksUpdated);
+            BookmarkManager.OnBookmarksUpdated.Add(OnBookmarksUpdated);
         }
         
         private void OnBookmarksUpdated() {
             ModLogger.LogDebug($"OnBookmarksUpdated");
             if( this._bookmarksListUI != null ) {
-                this._bookmarksListUI.Controller.UpdateBookmarks();
+                this._bookmarksListUI.Controller.UpdateBookmarksSelection();
             }
         }
 
         private void OnDestroy() {
             GameEvents.onGUIApplicationLauncherReady.Remove(OnLauncherReady);
             OnLauncherUnready();
-            BookmarkManager.Instance.OnBookmarksUpdated.Remove(OnBookmarksUpdated);
+            BookmarkManager.OnBookmarksUpdated.Remove(OnBookmarksUpdated);
             
             if( this._bookmarkUI != null ) {
                 this._bookmarkUI.OnDestroy();
@@ -90,7 +90,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             if( this._editCommentUI != null ) {
                 this._editCommentUI.Controller.CancelCommentEdition();
             }
-            BookmarkManager.Instance.RefreshBookmarks();
+            BookmarkManager.RefreshBookmarksInAnyInstance();
         }
         
         /// <summary>

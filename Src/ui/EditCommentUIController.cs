@@ -40,7 +40,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             try {
                 if (_editedBookmark != null) {
                     _editedBookmark.Comment = EditedComment;
-                    BookmarkManager.Instance.OnBookmarksUpdated.Fire();
+                    BookmarkManager.OnBookmarksUpdated.Fire();
                 }
             } catch (Exception e) {
                 ModLogger.LogError($"Error saving edit window: {e.Message}");

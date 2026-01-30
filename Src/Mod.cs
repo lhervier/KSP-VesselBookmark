@@ -9,8 +9,6 @@ namespace com.github.lhervier.ksp.bookmarksmod {
 	[KSPAddon(KSPAddon.Startup.PSystemSpawn, false)]
     public class Mod : MonoBehaviour {
         
-        private BookmarkManager _manager;
-        
         protected void Awake() 
         {
             ModLogger.LogInfo("Awaked");
@@ -20,11 +18,6 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         public void Start() {
             ModLogger.LogInfo("Plugin started");
             
-            // Initialize the bookmark manager
-            // The singleton will be created automatically on first access
-            this._manager = BookmarkManager.Instance;
-            ModLogger.LogInfo("VesselBookmarkManager initialized");
-
             // Subscribe to save/load events
             GameEvents.onGameStateCreated.Add(OnGameStateCreated);
             GameEvents.onGameStatePostLoad.Add(OnGameStatePostLoad);
@@ -61,8 +54,6 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             GameEvents.onAlarmRemoved.Remove(OnAlarmRemoved);
             GameEvents.onAlarmTriggered.Remove(OnAlarmTriggered);
 
-            _manager = null;
-
             ModLogger.LogInfo("Events unsubscribed");
         }
 
@@ -71,7 +62,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="configNode"></param>
         private void OnGameStatePostLoad(ConfigNode configNode) {
-            this._manager.LoadBookmarks(configNode.GetNode("GAME"));
+            BookmarkManager.LoadBookmarks(configNode.GetNode("GAME"));
         }
 
         /// <summary>
@@ -81,14 +72,14 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="game"></param>
         private void OnGameStateCreated(Game game) {
-            this._manager.LoadBookmarks(game.config);
+            BookmarkManager.LoadBookmarks(game.config);
         }
 
         /// <summary>
         /// Save bookmarks to save file
         /// </summary>
         private void OnGameStateSave(ConfigNode node) {
-            this._manager.SaveBookmarks(node);
+            BookmarkManager.SaveBookmarks(node);
         }
 
         /// <summary>
@@ -96,7 +87,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="vessel">The vessel that was modified</param>
         private void OnVesselWasModified(Vessel vessel) {
-            this._manager.RefreshBookmarks();
+            BookmarkManager.RefreshBookmarksInAnyInstance();
         }
 
         /// <summary>
@@ -104,7 +95,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="vessel">The vessel that was destroyed</param>
         private void OnVesselDestroy(Vessel vessel) {
-            this._manager.RefreshBookmarks();
+            BookmarkManager.RefreshBookmarksInAnyInstance();
         }
 
         /// <summary>
@@ -112,7 +103,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="vessel">The vessel that was renamed</param>
         private void OnVesselRename(GameEvents.HostedFromToAction<Vessel, string> action) {
-            this._manager.RefreshBookmarks();
+            BookmarkManager.RefreshBookmarksInAnyInstance();
         }
 
         /// <summary>
@@ -120,7 +111,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="alarm">The alarm that was added</param>
         private void OnAlarmAdded(AlarmTypeBase alarm) {
-            this._manager.RefreshBookmarks();
+            BookmarkManager.RefreshBookmarksInAnyInstance();
         }
 
         /// <summary>
@@ -128,7 +119,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="alarm">The alarm that was removed</param>
         private void OnAlarmRemoved(uint alarmID) {
-            this._manager.RefreshBookmarks();
+            BookmarkManager.RefreshBookmarksInAnyInstance();
         }
 
         /// <summary>
@@ -136,7 +127,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="alarm">The alarm that was triggered</param>
         private void OnAlarmTriggered(AlarmTypeBase alarm) {
-            this._manager.RefreshBookmarks();
+            BookmarkManager.RefreshBookmarksInAnyInstance();
         }
     }
 }

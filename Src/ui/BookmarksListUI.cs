@@ -89,7 +89,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             }
             
             if (GUILayout.Button(ModLocalization.GetString("buttonRefresh"), _uiStyles.ButtonStyle, GUILayout.Width(80))) {
-                BookmarkManager.Instance.RefreshBookmarks();
+                BookmarkManager.RefreshBookmarksInAnyInstance();
             }
             if (GUILayout.Button(ModLocalization.GetString("buttonClose"), _uiStyles.ButtonStyle, GUILayout.Width(80))) {
                 _editCommentUIController.CancelCommentEdition();

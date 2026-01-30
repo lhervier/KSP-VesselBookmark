@@ -41,7 +41,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 string previousValue = _selectedBody;
                 _selectedBody = value;
                 if( previousValue != _selectedBody ) {
-                    UpdateBookmarks();
+                    UpdateBookmarksSelection();
                 }
             }
         }
@@ -57,7 +57,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 string previousValue = _selectedVesselType;
                 _selectedVesselType = value;
                 if( previousValue != _selectedVesselType ) {
-                    UpdateBookmarks();
+                    UpdateBookmarksSelection();
                 }
             }
         }
@@ -86,14 +86,30 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             if (_searchTextChangeTime < 0f) return;
             if (Time.realtimeSinceStartup - _searchTextChangeTime < SEARCH_DEBOUNCE_SECONDS) return;
             _searchTextChangeTime = -1f;
-            BookmarkManager.Instance.RefreshBookmarks();
+            
+            this.UpdateBookmarksSelection();
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
         public BookmarksListUIController() {
-            UpdateBookmarks();
+            UpdateBookmarksSelection();
+        }
+
+        /// <summary>
+        /// Update the bookmarks selection
+        /// </summary>
+        public void UpdateBookmarksSelection() {
+            try {
+                ModLogger.LogDebug($"Updating bookmarks");
+                
+                this.UpdateAvailableBodies();
+                this.UpdateAvailableVesselTypes();
+                this.UpdateAvailableBookmarks();
+            } catch (Exception e) {
+                ModLogger.LogError($"Error updating bookmarks: {e.Message}");
+            }
         }
 
         // ======================================================================
@@ -106,7 +122,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 ModLogger.LogDebug($"Updating available bodies");
                 string selectedBody = _selectedBody;
                 this.AvailableBodies.Clear();
-                foreach (Bookmark bookmark in BookmarkManager.Instance.Bookmarks) {
+                foreach (Bookmark bookmark in BookmarkManager.GetAllBookmarksInAnyInstance()) {
                     Vessel vessel = bookmark.Vessel;
                     if( vessel == null ) {
                         continue;
@@ -137,7 +153,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 ModLogger.LogDebug($"Updating available vessel types");
                 string selectedVesselType = _selectedVesselType;
                 this.AvailableVesselTypes.Clear();
-                foreach (Bookmark bookmark in BookmarkManager.Instance.Bookmarks) {
+                foreach (Bookmark bookmark in BookmarkManager.GetAllBookmarksInAnyInstance()) {
                     VesselType vesselType = bookmark.BookmarkVesselType;
                     string vesselTypeName = vesselType.ToString();
                     if( !AvailableVesselTypes.Contains(vesselTypeName) ) {
@@ -167,79 +183,60 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 ModLogger.LogDebug($"Updating available bookmarks");
                 this._availableBookmarks.Clear();
                 
-                string selectedBody = _selectedBody;
-                string selectedVesselType = _selectedVesselType;
                 string all = ModLocalization.GetString("labelAll");
                 
-                foreach (Bookmark bookmark in BookmarkManager.Instance.Bookmarks) {
-                    Vessel vessel = bookmark.Vessel;
-                    if( vessel == null ) {
-                        continue;
-                    }
+                foreach( var instance in BookmarkManager.Instances.Values ) {
+                    List<Bookmark> selectionedBookmarks = new List<Bookmark>();
+                    foreach( var bookmark in instance.Bookmarks ) {
+                        Vessel vessel = bookmark.Vessel;
+                        if( vessel == null ) {
+                            continue;
+                        }
 
-                    bool addBookmark;
-                    if( string.Equals(selectedBody, all) && string.Equals(selectedVesselType, ALL_VESSEL_TYPES) ) {
-                        addBookmark = true;
-                    } else if( string.Equals(selectedBody, all) ) {
-                        addBookmark = string.Equals(
-                            bookmark.BookmarkVesselType.ToString(), 
-                            selectedVesselType
-                        );
-                    } else if( string.Equals(selectedVesselType, ALL_VESSEL_TYPES) ) {
-                        addBookmark = string.Equals(
-                            vessel.mainBody.bodyName, 
-                            selectedBody
-                        );
-                    } else {
-                        addBookmark = string.Equals(
-                                vessel.mainBody.bodyName, 
-                                selectedBody
-                            ) 
-                            && 
-                            string.Equals(
+                        bool addBookmark;
+                        if( string.Equals(_selectedBody, all) && string.Equals(_selectedVesselType, ALL_VESSEL_TYPES) ) {
+                            addBookmark = true;
+                        } else if( string.Equals(_selectedBody, all) ) {
+                            addBookmark = string.Equals(
                                 bookmark.BookmarkVesselType.ToString(), 
-                                selectedVesselType
+                                _selectedVesselType
                             );
-                    }
+                        } else if( string.Equals(_selectedVesselType, ALL_VESSEL_TYPES) ) {
+                            addBookmark = string.Equals(
+                                vessel.mainBody.bodyName, 
+                                _selectedBody
+                            );
+                        } else {
+                            addBookmark = string.Equals(
+                                    vessel.mainBody.bodyName, 
+                                    _selectedBody
+                                ) 
+                                && 
+                                string.Equals(
+                                    bookmark.BookmarkVesselType.ToString(), 
+                                    _selectedVesselType
+                                );
+                        }
 
-                    if( addBookmark && !string.IsNullOrEmpty(SearchText) ) {
-                        string fullSearchText = bookmark.BookmarkTitle + " ";
-                        fullSearchText += bookmark.VesselSituationLabel + " ";   // Situation contains celestial body name
-                        fullSearchText += bookmark.VesselName + " ";
-                        fullSearchText += ModLocalization.GetString("vesselType" + bookmark.BookmarkVesselType) + " ";
-                        fullSearchText += bookmark.Comment + " ";
-                        if( !fullSearchText.ToLower().Contains(SearchText.ToLower()) ) {
-                            addBookmark = false;
+                        if( addBookmark && !string.IsNullOrEmpty(SearchText) ) {
+                            string fullSearchText = bookmark.BookmarkTitle + " ";
+                            fullSearchText += bookmark.VesselSituationLabel + " ";   // Situation contains celestial body name
+                            fullSearchText += bookmark.VesselName + " ";
+                            fullSearchText += ModLocalization.GetString("vesselType" + bookmark.BookmarkVesselType) + " ";
+                            fullSearchText += bookmark.Comment + " ";
+                            if( !fullSearchText.ToLower().Contains(SearchText.ToLower()) ) {
+                                addBookmark = false;
+                            }
+                        }
+
+                        if( addBookmark ) {
+                            selectionedBookmarks.Add(bookmark);
                         }
                     }
-
-                    if( addBookmark ) {
-                        if( !_availableBookmarks.ContainsKey(bookmark.BookmarkType) ) {
-                            _availableBookmarks.Add(bookmark.BookmarkType, new List<Bookmark>());
-                        }
-                        _availableBookmarks[bookmark.BookmarkType].Add(bookmark);
-                    }
-                }
-                foreach( var bookmarks in _availableBookmarks.Values ) {
-                    bookmarks.Sort((a, b) => a.Order.CompareTo(b.Order));
+                    _availableBookmarks[instance.BookmarkType] = selectionedBookmarks;
                 }
             } catch (Exception e) {
                 ModLogger.LogError($"Error updating available bookmarks: {e.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Update the bookmarks list
-        /// </summary>
-        public void UpdateBookmarks() {
-            try {
-                ModLogger.LogDebug($"Updating bookmarks");
-                
-                this.UpdateAvailableBodies();
-                this.UpdateAvailableVesselTypes();
-                this.UpdateAvailableBookmarks();
-            } catch (Exception e) {
-                ModLogger.LogError($"Error updating bookmarks: {e.Message}");
             }
         }
 
@@ -249,7 +246,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public void ClearFilters() {
             _selectedBody = ModLocalization.GetString("labelAll");
             _selectedVesselType = ALL_VESSEL_TYPES;
-            UpdateBookmarks();
+            _searchText = string.Empty;
+            UpdateBookmarksSelection();
         }
 
         // ======================================================================
@@ -270,7 +268,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             uint vesselPersistentID = FlightGlobals.ActiveVessel.persistentId;
             
-            if (BookmarkManager.Instance.HasBookmark(BookmarkType.Vessel, vesselPersistentID)) {
+            BookmarkManager manager = BookmarkManager.GetInstance(BookmarkType.Vessel);
+
+            if (manager.HasBookmarkInInstance(vesselPersistentID)) {
                 ScreenMessages.PostScreenMessage(
                     ModLocalization.GetString("messageBookmarkAlreadyExists"),
                     2f,
@@ -280,7 +280,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             }
 
             VesselBookmark bookmark = new VesselBookmark(vesselPersistentID);
-            if (BookmarkManager.Instance.AddBookmark(bookmark)) {
+            if (manager.AddBookmarkToInstance(bookmark)) {
                 ScreenMessages.PostScreenMessage(
                     ModLocalization.GetString("messageBookmarkAdded"),
                     2f,

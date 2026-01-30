@@ -45,18 +45,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public bool CanMoveUp() {
-            if( !_bookmarksListUIController.AvailableBookmarks.ContainsKey(_currentBookmark.BookmarkType) ) {
-                ModLogger.LogWarning($"Bookmark {_currentBookmark.BookmarkID}: Bookmark type {_currentBookmark.BookmarkType} not found");
-                return false;
-            }
             return _currentIndex > 0;
         }
 
         public bool CanMoveDown() {
-            if( !_bookmarksListUIController.AvailableBookmarks.ContainsKey(_currentBookmark.BookmarkType) ) {
-                ModLogger.LogWarning($"Bookmark {_currentBookmark.BookmarkID}: Bookmark type {_currentBookmark.BookmarkType} not found");
-                return false;
-            }
             return _currentIndex < _bookmarksListUIController.AvailableBookmarks[_currentBookmark.BookmarkType].Count - 1;
         }
 
@@ -83,10 +75,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             }
             List<Bookmark> bookmarks = _bookmarksListUIController.AvailableBookmarks[_currentBookmark.BookmarkType];
             Bookmark previousBookmark = bookmarks[_currentIndex - 1];
-            BookmarkManager.Instance.SwapBookmarks(
-                _currentBookmark, 
-                previousBookmark
-            );
+
+            BookmarkManager manager = BookmarkManager.GetInstance(_currentBookmark.BookmarkType);
+            while( _currentBookmark.Order > previousBookmark.Order ) {
+                manager.MoveBookmarkUpInInstance(_currentBookmark, false);
+            }
+            BookmarkManager.OnBookmarksUpdated.Fire();
         }
 
         public void MoveDown() {
@@ -96,10 +90,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             }
             List<Bookmark> bookmarks = _bookmarksListUIController.AvailableBookmarks[_currentBookmark.BookmarkType];
             Bookmark nextBookmark = bookmarks[_currentIndex + 1];
-            BookmarkManager.Instance.SwapBookmarks(
-                _currentBookmark, 
-                nextBookmark
-            );
+
+            BookmarkManager manager = BookmarkManager.GetInstance(_currentBookmark.BookmarkType);
+            while( _currentBookmark.Order < nextBookmark.Order ) {
+                manager.MoveBookmarkDownInInstance(_currentBookmark, false);
+            }
+            BookmarkManager.OnBookmarksUpdated.Fire();
         }
 
         public void Remove() {
@@ -110,7 +106,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             string displayName = this.GetBookmarkTitle();
             VesselBookmarkUIDialog.ConfirmRemoval(
                 () => {
-                    BookmarkManager.Instance.RemoveBookmark(_currentBookmark);
+                    BookmarkManager.RemoveBookmarkFromAnyInstance(_currentBookmark);
                     _bookmarksListUIController.MainWindowsVisible = wasMainWindowVisible;
                 },
                 () => {
