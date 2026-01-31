@@ -17,6 +17,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
                 ModLogger.LogError("Attempted to navigate to null vessel");
                 return false;
             }
+
+            ModLogger.LogDebug($"Navigating to vessel {vessel.vesselName}");
             
             // Check if already on this vessel (only if in flight)
             if (HighLogic.LoadedScene == GameScenes.FLIGHT && FlightGlobals.ActiveVessel == vessel) {

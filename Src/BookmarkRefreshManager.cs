@@ -22,9 +22,10 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                         if (part.flightID == commandModuleFlightID) {
                             ModuleCommand commandModule = part.FindModuleImplementing<ModuleCommand>();
                             if (commandModule != null) {
+                                ModLogger.LogDebug($"Command module part {part} found for flightID {commandModuleFlightID}");
                                 return part;
                             } else {
-                                ModLogger.LogWarning($"Bookmark {commandModuleFlightID}: Target part is not a command module");
+                                ModLogger.LogError($"Bookmark {commandModuleFlightID}: Target part is not a command module");
                                 return null;
                             }
                         }
@@ -46,7 +47,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             try {
                 ModLogger.LogDebug($"Getting command module protoPartSnapshot for flightID {commandModuleFlightID}");
                 if( FlightGlobals.VesselsUnloaded == null || FlightGlobals.VesselsUnloaded.Count == 0 ) {
-                    ModLogger.LogWarning($"Bookmark {commandModuleFlightID}: No unloaded vessels found. May happen when first loading a save game. Another event should be emitted soon...");
+                    ModLogger.LogDebug($"No unloaded vessels found. May happen when first loading a save game, or in other contexts... Another event should be emitted soon...");
                     return null;
                 }
                 foreach (Vessel vessel in FlightGlobals.VesselsUnloaded) {
@@ -59,8 +60,10 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                         
                         if (protoPart.flightID == commandModuleFlightID) {
                             if (protoPart.FindModule("ModuleCommand") != null) {
+                                ModLogger.LogDebug($"Command module protoPartSnapshot {protoPart} found for flightID {commandModuleFlightID}");
                                 return protoPart;
                             } else {
+                                ModLogger.LogError($"Command module protoPartSnapshot {protoPart} for flightID {commandModuleFlightID} is not a command module");
                                 return null;
                             }
                         }
@@ -79,22 +82,25 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <returns>The vessel for the bookmark</returns>
         private static Vessel FindVessel(Bookmark bookmark) {
             try {
-                ModLogger.LogDebug($"Getting vessel for bookmark {bookmark.BookmarkID}");
+                ModLogger.LogDebug($"Getting vessel for bookmark {bookmark}");
                 if( bookmark.VesselPersistentID == 0 ) {
-                    ModLogger.LogWarning($"Bookmark {bookmark.BookmarkID} and {bookmark.BookmarkType}: Vessel persistent ID is empty");
+                    ModLogger.LogError($"Bookmark {bookmark}: Vessel persistent ID is empty");
                     return null;
                 }
                 foreach (Vessel vessel in FlightGlobals.Vessels) {
                     if (vessel == null || vessel.persistentId != bookmark.VesselPersistentID) continue;
+                    ModLogger.LogDebug($"Vessel {vessel} found for bookmark {bookmark} in loaded vessels");
                     return vessel;
                 }
                 foreach (Vessel vessel in FlightGlobals.VesselsUnloaded) {
                     if (vessel == null || vessel.persistentId != bookmark.VesselPersistentID) continue;
+                    ModLogger.LogDebug($"Vessel {vessel} found for bookmark {bookmark} in unloaded vessels");
                     return vessel;
                 }
+                ModLogger.LogDebug($"No vessel found for bookmark {bookmark}");
                 return null;
             } catch (Exception e) {
-                ModLogger.LogError($"Error getting vessel for bookmark {bookmark.BookmarkID} and {bookmark.BookmarkType}: {e.Message}");
+                ModLogger.LogError($"Error getting vessel for bookmark {bookmark}: {e.Message}");
                 return null;
             }
         }
@@ -135,7 +141,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                         return ModLocalization.GetString("situationInFlight", body.bodyName);
                 }
             } catch (System.Exception e) {
-                ModLogger.LogError($"Error getting situation labeled as {situation} for vessel on body {body.bodyName}: {e.Message}");
+                ModLogger.LogError($"Error getting situation{situation} for vessel on body {body.bodyName}: {e.Message}");
                 return ModLocalization.GetString("situationUnknown");
             }
         }
@@ -159,9 +165,11 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                         continue;
                     }
                     if( alarm.Vessel.persistentId == vessel.persistentId ) {
+                        ModLogger.LogDebug($"Vessel {vessel.vesselName} has alarm {alarm.Id}");
                         return true;
                     }
                 }
+                ModLogger.LogDebug($"Vessel {vessel.vesselName} has no alarm");
                 return false;
             } catch (Exception e) {
                 ModLogger.LogError($"Error checking if vessel {vessel.vesselName} has an alarm: {e.Message}");
@@ -176,6 +184,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <returns>True if the command module bookmark was refreshed, false otherwise</returns>
         private static bool RefreshCommandModuleBookmark(CommandModuleBookmark bookmark) {
             try {
+                ModLogger.LogDebug($"Refreshing command module bookmark {bookmark}");
                 bookmark.CommandModuleFlightID = bookmark.BookmarkID;
                 
                 uint vesselPersistentId;
@@ -184,28 +193,34 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 
                 Part commandModulePart = GetPart(bookmark.CommandModuleFlightID);
                 if (commandModulePart != null) {
+                    ModLogger.LogDebug($"- Command module part {bookmark.CommandModuleFlightID} found");
                     vesselPersistentId = commandModulePart.vessel.persistentId;
                     if( commandModulePart.vesselNaming == null ) {
+                        ModLogger.LogDebug($"- Command module part {bookmark.CommandModuleFlightID} has no naming. Using vessel name and type from the vessel");
                         cmName = commandModulePart.vessel.vesselName;
                         cmType = commandModulePart.vessel.vesselType;
                     } else {
+                        ModLogger.LogDebug($"- Command module part {bookmark.CommandModuleFlightID} has a naming. Using it...");
                         cmName = commandModulePart.vesselNaming.vesselName;
                         cmType = commandModulePart.vesselNaming.vesselType;
                     }
                 } else {
+                    ModLogger.LogDebug($"- Command module part {bookmark.CommandModuleFlightID} not found. Trying to get it from the protoPartSnapshot");
                     ProtoPartSnapshot commandModuleProtoPartSnapshot = GetProtoPartSnapshot(bookmark.CommandModuleFlightID);
                     if (commandModuleProtoPartSnapshot != null) {
+                        ModLogger.LogDebug($"- Command module protoPartSnapshot {bookmark.CommandModuleFlightID} found");
                         vesselPersistentId = commandModuleProtoPartSnapshot.pVesselRef.persistentId;
                         if( commandModuleProtoPartSnapshot.vesselNaming == null ) {
+                            ModLogger.LogDebug($"- Command module protoPartSnapshot {bookmark.CommandModuleFlightID} has no naming. Using name and type from the protoVessel");
                             cmName = commandModuleProtoPartSnapshot.pVesselRef.vesselName;
                             cmType = commandModuleProtoPartSnapshot.pVesselRef.vesselType;
                         } else {
+                            ModLogger.LogDebug($"- Command module protoPartSnapshot {bookmark.CommandModuleFlightID} has a naming. Using it...");
                             cmName = commandModuleProtoPartSnapshot.vesselNaming.vesselName;
                             cmType = commandModuleProtoPartSnapshot.vesselNaming.vesselType;
                         }
                     } else {
-                        ModLogger.LogWarning($"Bookmark {bookmark.CommandModuleFlightID}: Command module part or protoPartSnapshot not found. May happen when first loading a save game. Another event should be emitted soon...");
-                        vesselPersistentId = bookmark.VesselPersistentID;
+                        ModLogger.LogDebug($"- Command module part or protoPartSnapshot {bookmark.CommandModuleFlightID} not found. May happen... Keeping value stored int the bookmark itself...");                        vesselPersistentId = bookmark.VesselPersistentID;
                         cmName = bookmark.VesselName;
                         cmType = bookmark.VesselType;
                     }
@@ -218,9 +233,10 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 bookmark.BookmarkTitle = bookmark.CommandModuleName;
                 bookmark.BookmarkVesselType = bookmark.CommandModuleType;
                 
+                ModLogger.LogDebug($"Command module bookmark {bookmark} refreshed");
                 return true;
             } catch (Exception e) {
-                ModLogger.LogError($"Error refreshing command module bookmark {bookmark.BookmarkType} and {bookmark.BookmarkID}: {e.Message}");
+                ModLogger.LogError($"Error refreshing command module bookmark {bookmark}: {e.Message}");
                 return false;
             }
         }
@@ -230,33 +246,36 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         public static bool RefreshBookmark(Bookmark bookmark) {
             try {
-                ModLogger.LogDebug($"Refreshing bookmark {bookmark.BookmarkType} and {bookmark.BookmarkID}");
+                ModLogger.LogDebug($"Refreshing bookmark {bookmark}");
 
                 // Checking for mandatory values
                 if( bookmark.BookmarkID == 0 ) {
-                    ModLogger.LogWarning($"Bookmark {bookmark.BookmarkType} and {bookmark.BookmarkID}: Bookmark ID is 0");
+                    ModLogger.LogWarning($"Bookmark {bookmark}: Bookmark ID is 0");
                     return false;
                 }
                 if( bookmark.BookmarkType == BookmarkType.Unknown ) {
-                    ModLogger.LogWarning($"Bookmark {bookmark.BookmarkType} and {bookmark.BookmarkID}: Bookmark type is unknown");
+                    ModLogger.LogWarning($"Bookmark {bookmark}: Bookmark type is unknown");
                     return false;
                 }
 
                 if( bookmark is CommandModuleBookmark commandModuleBookmark ) {
                     if( !RefreshCommandModuleBookmark(commandModuleBookmark) ) {
-                        ModLogger.LogWarning($"Bookmark {commandModuleBookmark.BookmarkID}: Failed to refresh command module bookmark");
+                        ModLogger.LogDebug($"Bookmark {commandModuleBookmark}: Failed to refresh command module bookmark. Let's continue with next one...");
                         return false;
                     }
                 } else if( bookmark is VesselBookmark vesselBookmark ) {
                     vesselBookmark.VesselPersistentID = bookmark.BookmarkID;
                 } else {
-                    ModLogger.LogWarning($"Bookmark {bookmark.BookmarkType} and {bookmark.BookmarkID}: Unknown bookmark type");
+                    ModLogger.LogError($"Bookmark {bookmark}: Unknown bookmark type");
                     return false;
                 }
                 
-                Vessel vessel = FindVessel(bookmark);
+                Vessel vessel = null;
+                if( bookmark.VesselPersistentID != 0 ) {    // May happen if we were unable to refresh a command module bookmark.
+                    vessel = FindVessel(bookmark);
+                }
                 if( vessel == null ) {
-                    ModLogger.LogWarning($"Bookmark {bookmark.BookmarkID}: Cannot refresh vessel bookmark properties: Vessel not found. May happen when first loading a save game. Another event should be emitted soon...");
+                    ModLogger.LogDebug($"Bookmark {bookmark}: Cannot refresh vessel bookmark properties: Vessel not found. May happen when first loading a save game, but not only... Another event should be emitted soon...");
                 } else {
                     bookmark.Vessel = vessel;
                     bookmark.VesselName = vessel.vesselName;
@@ -276,9 +295,10 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     }
                 }
 
+                ModLogger.LogDebug($"Bookmark {bookmark} refreshed");
                 return true;
             } catch (Exception e) {
-                ModLogger.LogError($"Error refreshing bookmark {bookmark.BookmarkType} and {bookmark.BookmarkID}: {e.Message}");
+                ModLogger.LogError($"Error refreshing bookmark {bookmark}: {e.Message}");
                 return false;
             }
         }

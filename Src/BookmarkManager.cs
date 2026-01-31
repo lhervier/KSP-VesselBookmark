@@ -107,6 +107,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="sendEvent">True if the OnBookmarksUpdated event should be fired, false otherwise</param>
         public static void RefreshBookmarks(bool sendEvent = true) {
+            ModLogger.LogInfo($"Refreshing bookmarks");
             foreach( var instance in _instances ) {
                 instance.Value._RefreshBookmarks(false);
             }
@@ -121,7 +122,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="node"></param>
         public static void LoadBookmarks(ConfigNode node) {
             try {
-                ModLogger.LogDebug($"Loading bookmarks from config node");
+                ModLogger.LogInfo($"Loading bookmarks");
                 
                 // Load bookmarks from config node
                 List<Bookmark> bookmarks = BookmarkPersistenceManager.LoadBookmarks(node);
@@ -147,8 +148,14 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="node"></param>
         public static void SaveBookmarks(ConfigNode node) {
-            List<Bookmark> bookmarks = GetAllBookmarks();
-            BookmarkPersistenceManager.SaveBookmarks(node, bookmarks);
+            try {
+                ModLogger.LogInfo($"Saving bookmarks");
+                List<Bookmark> bookmarks = GetAllBookmarks();
+                BookmarkPersistenceManager.SaveBookmarks(node, bookmarks);
+                ModLogger.LogInfo($"{bookmarks.Count} bookmark(s) saved");
+            } catch (Exception e) {
+                ModLogger.LogError($"Error saving bookmarks: {e.Message}");
+            }
         }
 
         // ==============================================================================================
@@ -193,7 +200,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             try {
                 return _bookmarksIDs.Contains(bookmarkID);
             } catch (Exception e) {
-                ModLogger.LogError($"Error checking if bookmark exists for bookmarkType {_bookmarkType} and bookmarkID {bookmarkID}: {e.Message}");
+                ModLogger.LogError($"Error checking if bookmark {bookmarkID} ({_bookmarkType}) exists: {e.Message}");
                 return false;
             }
         }
@@ -210,16 +217,16 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     ModLogger.LogError("Attempted to add null bookmark");
                     return false;
                 }
-                ModLogger.LogDebug($"Adding bookmark for bookmarkType {bookmark.BookmarkType} and bookmarkID {bookmark.BookmarkID}");
+                ModLogger.LogDebug($"Adding bookmark {bookmark}");
                 
                 if( bookmark.BookmarkType != _bookmarkType ) {
-                    ModLogger.LogError($"Attempted to add bookmark with bookmarkType {bookmark.BookmarkType} to bookmark manager with bookmarkType {_bookmarkType}");
+                    ModLogger.LogError($"Attempted to add bookmark {bookmark} to bookmark manager: Bookmark type mismatch. Should be {_bookmarkType}");
                     return false;
                 }
                 
                 // Check if bookmark already exists
                 if (this.HasBookmark(bookmark.BookmarkID)) {
-                    ModLogger.LogWarning($"Bookmark already exists for bookmarkType {bookmark.BookmarkType} and bookmarkID {bookmark.BookmarkID}");
+                    ModLogger.LogDebug($"Bookmark {bookmark} Already exists. Nothing to do...");
                     return false;
                 }
                 
@@ -228,7 +235,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 
                 // Refresh bookmark to load transient fields
                 if( !BookmarkRefreshManager.RefreshBookmark(bookmark) ) {
-                    ModLogger.LogWarning($"Bookmark {bookmark.BookmarkType} and {bookmark.BookmarkID}: Failed to refresh bookmark");
+                    ModLogger.LogWarning($"Bookmark {bookmark}: Failed to refresh bookmark");
                     return false;
                 }
 
@@ -243,7 +250,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
 
                 return true;
             } catch (Exception e) {
-                ModLogger.LogError($"Error adding bookmark for bookmarkType {bookmark.BookmarkType} and bookmarkID {bookmark.BookmarkID}: {e.Message}");
+                ModLogger.LogError($"Error adding bookmark {bookmark}: {e.Message}");
                 return false;
             }
         }
@@ -256,13 +263,13 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         private bool _RemoveBookmark(Bookmark bookmark, bool sendEvent = true) {
             try {
                 if( bookmark == null ) {
-                    ModLogger.LogWarning($"Bookmark: Not found");
+                    ModLogger.LogWarning($"Bookmark: Cannot remove null bookmark");
                     return false;
                 }
-                ModLogger.LogDebug($"Removing bookmark for bookmarkType {bookmark.BookmarkType} and bookmarkID {bookmark.BookmarkID}");
+                ModLogger.LogDebug($"Removing bookmark {bookmark}");
 
                 if( bookmark.BookmarkType != _bookmarkType ) {
-                    ModLogger.LogError($"Attempted to remove bookmark with bookmarkType {bookmark.BookmarkType} from bookmark manager with bookmarkType {_bookmarkType}");
+                    ModLogger.LogError($"Attempted to remove bookmark {bookmark}: Bookmark type mismatch. Should be {_bookmarkType}");
                     return false;
                 }
                 
@@ -280,7 +287,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
 
                 return true;
             } catch (Exception e) {
-                ModLogger.LogError($"Error removing bookmark for bookmarkType {bookmark.BookmarkType} and bookmarkID {bookmark.BookmarkID}: {e.Message}");
+                ModLogger.LogError($"Error removing bookmark {bookmark}: {e.Message}");
                 return false;
             }
         }
@@ -295,13 +302,13 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         private bool _MoveBookmarkUp(Bookmark bookmark, bool sendEvent = true) {
             try {
                 if (bookmark == null) {
-                    ModLogger.LogWarning($"Bookmark: Null");
+                    ModLogger.LogWarning($"Unable to move bookmark up: Null bookmark");
                     return false;
                 }
-                ModLogger.LogDebug($"Moving bookmark up for bookmarkType {bookmark.BookmarkType} and bookmarkID {bookmark.BookmarkID}");
+                ModLogger.LogDebug($"Moving bookmark {bookmark} up");
                 
                 if( bookmark.BookmarkType != _bookmarkType ) {
-                    ModLogger.LogError($"Attempted to move bookmark with bookmarkType {bookmark.BookmarkType} up in bookmark manager with bookmarkType {_bookmarkType}");
+                    ModLogger.LogError($"Attempted to move bookmark {bookmark} up: Bookmark type mismatch. Should be {_bookmarkType}");
                     return false;
                 }
 
@@ -316,9 +323,10 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     OnBookmarksUpdated.Fire();
                 }
 
+                ModLogger.LogInfo($"Bookmark {bookmark} moved up");
                 return true;
             } catch (Exception e) {
-                ModLogger.LogError($"Error moving bookmark up: {e.Message}");
+                ModLogger.LogError($"Error moving bookmark {bookmark} up: {e.Message}");
                 return false;
             }
         }
@@ -331,13 +339,13 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         private bool _MoveBookmarkDown(Bookmark bookmark, bool sendEvent = true) {
             try {
                 if (bookmark == null) {
-                    ModLogger.LogWarning($"Bookmark: Null");
+                    ModLogger.LogWarning($"Unable to move bookmark down: Null bookmark");
                     return false;
                 }
-                ModLogger.LogDebug($"Moving bookmark down for bookmarkType {bookmark.BookmarkType} and bookmarkID {bookmark.BookmarkID}");
+                ModLogger.LogDebug($"Moving bookmark {bookmark} down");
 
                 if( bookmark.BookmarkType != _bookmarkType ) {
-                    ModLogger.LogError($"Attempted to move bookmark with bookmarkType {bookmark.BookmarkType} down in bookmark manager with bookmarkType {_bookmarkType}");
+                    ModLogger.LogError($"Attempted to move bookmark {bookmark} down: Bookmark type mismatch. Should be {_bookmarkType}");
                     return false;
                 }
                 
@@ -352,9 +360,10 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     OnBookmarksUpdated.Fire();
                 }
 
+                ModLogger.LogInfo($"Bookmark {bookmark} moved down");
                 return true;
             } catch (Exception e) {
-                ModLogger.LogError($"Error moving bookmark down: {e.Message}");
+                ModLogger.LogError($"Error moving bookmark {bookmark} down: {e.Message}");
                 return false;
             }
         }
@@ -371,13 +380,14 @@ namespace com.github.lhervier.ksp.bookmarksmod {
 
                 foreach (Bookmark bookmark in _bookmarks) {
                     if( !BookmarkRefreshManager.RefreshBookmark(bookmark) ) {
-                        ModLogger.LogWarning($"Bookmark {bookmark.BookmarkType} and {bookmark.BookmarkID}: Not found");
+                        ModLogger.LogWarning($"Unable to refresh bookmark {bookmark}: Let's continue with next one...");
                     }
                 }
 
                 if( sendEvent ) {
                     OnBookmarksUpdated.Fire();
                 }
+                ModLogger.LogInfo($"Bookmarks for bookmarkType {_bookmarkType} refreshed");
             } catch (Exception e) {
                 ModLogger.LogError($"Error refreshing bookmarks: {e.Message}");
             }

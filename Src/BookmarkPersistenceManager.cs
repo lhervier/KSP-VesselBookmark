@@ -109,7 +109,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             foreach (ConfigNode bookmarkNode in bookmarkNodes) {
                 Bookmark bookmark = LoadBookmark(bookmarkNode);
                 if( bookmark == null ) {
-                    ModLogger.LogError($"Error loading bookmark from config node");
+                    ModLogger.LogWarning($"Bookmark not loaded from config node: Let's continue to next one...");
                     continue;
                 }
                 bookmarks.Add(bookmark);
@@ -155,7 +155,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 foreach (Bookmark bookmark in bookmarks) {
                     ConfigNode bookmarkNode = bookmarksNode.AddNode(BOOKMARK_NODE_NAME);
                     if( !SaveBookmark(bookmarkNode, bookmark) ) {
-                        ModLogger.LogError($"Error saving bookmark {bookmark.BookmarkType} and {bookmark.BookmarkID} to config node");
+                        ModLogger.LogError($"Error saving bookmark {bookmark} to config node: Let's continue to next one...");
                         return false;
                     }
                 }

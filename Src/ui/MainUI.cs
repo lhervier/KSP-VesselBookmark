@@ -28,7 +28,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
         
         private void OnBookmarksUpdated() {
-            ModLogger.LogDebug($"OnBookmarksUpdated");
             if( this._bookmarksListUI != null ) {
                 this._bookmarksListUI.Controller.UpdateBookmarksSelection();
             }

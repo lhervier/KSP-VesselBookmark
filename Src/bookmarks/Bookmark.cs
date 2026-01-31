@@ -116,5 +116,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
             BookmarkType = bookmarkType;
             BookmarkID = bookmarkID;
         }
+
+        /// <summary>
+        /// Return a string representation of the bookmark
+        /// </summary>
+        /// <returns>A string representation of the bookmark</returns>
+        public override string ToString() {
+            return $"{BookmarkID} ({BookmarkType})";
+        }
     }
 }

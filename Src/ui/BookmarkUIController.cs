@@ -59,7 +59,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public void SwitchToVessel() {
             Vessel vessel = _currentBookmark.Vessel;
             if( vessel == null ) {
-                ModLogger.LogWarning($"Bookmark {_currentBookmark.BookmarkID}: Vessel not found");
+                ModLogger.LogWarning($"Bookmark {_currentBookmark}: Vessel not found. Cannot switch to vessel.");
                 return;
             }
             if (VesselNavigator.NavigateToVessel(vessel)) {
@@ -70,7 +70,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         public void MoveUp() {
             if( !CanMoveUp() ) {
-                ModLogger.LogWarning($"Bookmark {_currentBookmark.BookmarkID}: Cannot move up");
+                ModLogger.LogWarning($"Bookmark {_currentBookmark}: Can't move up. Current index {_currentIndex} is the first index for this bookmark type.");
                 return;
             }
             List<Bookmark> bookmarks = _bookmarksListUIController.AvailableBookmarks[_currentBookmark.BookmarkType];
@@ -84,7 +84,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         public void MoveDown() {
             if( !CanMoveDown() ) {
-                ModLogger.LogWarning($"Bookmark {_currentBookmark.BookmarkID}: Bookmark type {_currentBookmark.BookmarkType} not found");
+                ModLogger.LogWarning($"Bookmark {_currentBookmark}: Can't move down. Current index {_currentIndex} is the last index for this bookmark type.");
                 return;
             }
             List<Bookmark> bookmarks = _bookmarksListUIController.AvailableBookmarks[_currentBookmark.BookmarkType];
