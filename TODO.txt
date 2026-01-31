@@ -1,4 +1,11 @@
 TODO :
+- Ajouter une fenetre pour la config => Passage en debug on/off
+- Remplacer les boutons par des icones :
+    - Reinitialiser les filtres
+    - Fermer la fenetre
+    - Rafraichir les bookmarks
+    - Ajouter un bookmark
+    - Et le futur bouton pour la config
 - Afficher dans combien de temps est le prochain noeud de manoeuvre
 
 Bugs :
