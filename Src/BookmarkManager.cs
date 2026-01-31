@@ -73,6 +73,16 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         }
 
         /// <summary>
+        /// Clear all bookmarks from any instance
+        /// </summary>
+        public static void ClearBookmarks() {
+            ModLogger.LogDebug($"Clearing all bookmarks");
+            foreach( var instance in _instances ) {
+                instance.Value._ClearBookmarks();
+            }
+        }
+
+        /// <summary>
         /// Remove a bookmark from any instance
         /// </summary>
         /// <param name="bookmark">The bookmark to remove</param>
@@ -132,6 +142,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 bookmarks.Sort((a, b) => a.Order.CompareTo(b.Order));
 
                 // Add bookmarks to the list
+                ClearBookmarks();
                 foreach (Bookmark bookmark in bookmarks) {
                     GetInstance(bookmark.BookmarkType)._AddBookmark(bookmark, false);
                 }
@@ -253,6 +264,15 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 ModLogger.LogError($"Error adding bookmark {bookmark}: {e.Message}");
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Clear all bookmarks from the instance
+        /// </summary>
+        private void _ClearBookmarks() {
+            ModLogger.LogDebug($"Clearing bookmarks for bookmarkType {_bookmarkType}");
+            _bookmarks.Clear();
+            _bookmarksIDs.Clear();
         }
 
         /// <summary>
