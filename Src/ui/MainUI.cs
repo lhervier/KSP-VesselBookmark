@@ -41,6 +41,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             
             if( this._bookmarkUI != null ) {
                 this._bookmarkUI.OnDestroy();
+                this._bookmarkUI = null;
+            }
+            this._editCommentUI = null;
+            if( this._bookmarksListUI != null ) {
+                this._bookmarksListUI.OnClosed.Remove(OnBookmarksListUIClosed);
+                this._bookmarksListUI = null;
             }
         }
         
@@ -105,6 +111,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             }
         }
         
+        private void OnBookmarksListUIClosed() {
+            if (_toolbarButton != null) {
+                _toolbarButton.SetFalse();
+            }
+        }
+
         private void OnGUI() {
             // Initialise external components
             if( this._uiStyles == null ) {
@@ -118,11 +130,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             }
             if( this._bookmarksListUI == null ) {
                 this._bookmarksListUI = new BookmarksListUI();
-                this._bookmarksListUI.OnClosed.Add(() => {
-                    if (_toolbarButton != null) {
-                        _toolbarButton.SetFalse();
-                    }
-                });
+                this._bookmarksListUI.OnClosed.Add(OnBookmarksListUIClosed);
             }
 
             // Inject dependencies

@@ -2,7 +2,7 @@ TODO :
 - Afficher dans combien de temps est le prochain noeud de manoeuvre
 
 Bugs :
-- [LOG 02:02:27.895] [KSPCF:MemoryLeaks] A destroyed VesselBookmarkMod:MainUI instance is owning a BookmarksListUI.OnClosed callback. No action has been taken, but unless this mod is relying on this pattern, this is likely a memory leak.
+
 
 Known bugs :
 - Les tooltip ne peuvent pas déboder par dessus la fenetre
