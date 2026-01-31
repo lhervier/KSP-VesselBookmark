@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
+using com.github.lhervier.ksp.bookmarksmod.util;
 
 namespace com.github.lhervier.ksp.bookmarksmod {
     public class BookmarkPersistenceManager {
@@ -18,40 +18,6 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         // ====================================================
 
         /// <summary>
-        /// Get an integer value from a config node
-        /// </summary>
-        /// <param name="node">Config node to get the value from</param>
-        /// <param name="valueName">Name of the value to get</param>
-        /// <returns>The value of the integer</returns>
-        private static int GetIntNodeValue(ConfigNode node, string valueName) {
-            if( !node.HasValue(valueName) ) {
-                throw new Exception($"{valueName} not found in the bookmark node");
-            }
-
-            if( !int.TryParse(node.GetValue(valueName), out int value) ) {
-                throw new Exception($"{valueName} is not a valid integer");  
-            }
-            return value;
-        }
-
-        /// <summary>
-        /// Get an integer value from a config node
-        /// </summary>
-        /// <param name="node">Config node to get the value from</param>
-        /// <param name="valueName">Name of the value to get</param>
-        /// <returns>The value of the integer</returns>
-        private static uint GetUintNodeValue(ConfigNode node, string valueName) {
-            if( !node.HasValue(valueName) ) {
-                throw new Exception($"{valueName} not found in the bookmark node");
-            }
-
-            if( !uint.TryParse(node.GetValue(valueName), out uint value) ) {
-                throw new Exception($"{valueName} is not a valid integer");
-            }
-            return value;
-        }
-
-        /// <summary>
         /// Load a bookmark from a config node
         /// </summary>
         /// <param name="node"></param>
@@ -61,8 +27,8 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 ModLogger.LogDebug($"Loading bookmark from config node");
 
                 // Load bookmark type and vessel persistent ID (mandatory fields)
-                BookmarkType bookmarkType = (BookmarkType) GetIntNodeValue(node, "bookmarkType");
-                uint bookmarkID = GetUintNodeValue(node, "bookmarkID");
+                BookmarkType bookmarkType = (BookmarkType) ConfigNodeUtils.GetIntNodeValue(node, "bookmarkType", true);
+                uint bookmarkID = ConfigNodeUtils.GetUintNodeValue(node, "bookmarkID", true);
                 
                 // Instanciate the bookmark
                 Bookmark bookmark;
@@ -76,14 +42,10 @@ namespace com.github.lhervier.ksp.bookmarksmod {
 
                 // Load common fields
                 bookmark.Comment = node.GetValue("comment") ?? "";
-                bookmark.Order = GetIntNodeValue(node, "order");        // Mandatory
-                try {
-                    bookmark.CreationTime = double.Parse(node.GetValue("creationTime"));
-                } catch (Exception e) {
-                    ModLogger.LogWarning($"creationTime not found in the bookmark node : {e.Message}");
-                    bookmark.CreationTime = Planetarium.GetUniversalTime();
-                }
+                bookmark.Order = ConfigNodeUtils.GetIntNodeValue(node, "order", true);
+                bookmark.CreationTime = ConfigNodeUtils.GetDoubleNodeValue(node, "creationTime", false, Planetarium.GetUniversalTime());
                 
+                ModLogger.LogInfo($"Bookmark {bookmark} loaded from config node");
                 return bookmark;
             } catch (Exception e) {
                 ModLogger.LogError($"Error loading bookmark from config node: {e.Message}");
