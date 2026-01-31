@@ -11,6 +11,7 @@ using KSP.UI.Screens.DebugToolbar.Screens.Cheats;
 namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
     public class BookmarksListUIController {
+        private static readonly ModLogger LOGGER = new ModLogger("BookmarksListUIController");
 
         private const string ALL_VESSEL_TYPES = "All";
 
@@ -116,13 +117,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         public void UpdateBookmarksSelection() {
             try {
-                ModLogger.LogDebug($"Updating bookmarks");
+                LOGGER.LogDebug($"Updating bookmarks");
                 
                 this.UpdateAvailableBodies();
                 this.UpdateAvailableVesselTypes();
                 this.UpdateAvailableBookmarks();
             } catch (Exception e) {
-                ModLogger.LogError($"Error updating bookmarks: {e.Message}");
+                LOGGER.LogError($"Error updating bookmarks: {e.Message}");
             }
         }
 
@@ -133,7 +134,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         private void UpdateAvailableBodies() {
             try {
-                ModLogger.LogDebug($"Updating available bodies");
+                LOGGER.LogDebug($"Updating available bodies");
                 string selectedBody = _selectedBody;
                 this.AvailableBodies.Clear();
                 foreach (Bookmark bookmark in BookmarkManager.GetAllBookmarks()) {
@@ -156,7 +157,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     _selectedBody = selectedBody;
                 }
             } catch (Exception e) {
-                ModLogger.LogError($"Error updating available bodies: {e.Message}");
+                LOGGER.LogError($"Error updating available bodies: {e.Message}");
             }
         }
 
@@ -164,7 +165,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         private void UpdateAvailableVesselTypes() {
             try {
-                ModLogger.LogDebug($"Updating available vessel types");
+                LOGGER.LogDebug($"Updating available vessel types");
                 string selectedVesselType = _selectedVesselType;
                 this.AvailableVesselTypes.Clear();
                 foreach (Bookmark bookmark in BookmarkManager.GetAllBookmarks()) {
@@ -183,7 +184,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     _selectedVesselType = selectedVesselType;
                 }
             } catch (Exception e) {
-                ModLogger.LogError($"Error updating available vessel types: {e.Message}");
+                LOGGER.LogError($"Error updating available vessel types: {e.Message}");
             }
         }
 
@@ -194,7 +195,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         private void UpdateAvailableBookmarks() {
             try {
-                ModLogger.LogDebug($"Updating available bookmarks");
+                LOGGER.LogDebug($"Updating available bookmarks");
                 this._availableBookmarks.Clear();
                 
                 string all = ModLocalization.GetString("labelAll");
@@ -256,7 +257,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     _availableBookmarks[instance.BookmarkType] = selectionedBookmarks;
                 }
             } catch (Exception e) {
-                ModLogger.LogError($"Error updating available bookmarks: {e.Message}");
+                LOGGER.LogError($"Error updating available bookmarks: {e.Message}");
             }
         }
 
@@ -283,7 +284,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         public void AddVesselBookmark() {
             if( !CanAddVesselBookmark() ) {
-                ModLogger.LogWarning("Cannot add vessel bookmark: no active vessel");
+                LOGGER.LogWarning("Cannot add vessel bookmark: no active vessel");
                 return;
             }
 

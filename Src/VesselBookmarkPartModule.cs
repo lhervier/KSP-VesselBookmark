@@ -10,21 +10,23 @@ namespace com.github.lhervier.ksp.bookmarksmod {
     /// Injected into command parts via ModuleManager configuration
     /// </summary>
     public class VesselBookmarkPartModule : PartModule {
-        
+
+        private static readonly ModLogger LOGGER = new ModLogger("VesselBookmarkPartModule");
+
         [KSPEvent(guiActive = true, guiActiveUnfocused = true, guiName = "Toggle Bookmark", active = true)]
         public void ToggleBookmarkEvent() {
             try {
                 if (part == null) {
-                    ModLogger.LogWarning($"ToggleBookmarkEvent: Part is null");
+                    LOGGER.LogWarning($"ToggleBookmarkEvent: Part is null");
                     return;
                 }
-                ModLogger.LogDebug($"ToggleBookmarkEvent: Part flightID {part.flightID}");
+                LOGGER.LogDebug($"ToggleBookmarkEvent: Part flightID {part.flightID}");
 
                 BookmarkManager manager = BookmarkManager.GetInstance(BookmarkType.CommandModule);
                 Bookmark bookmark = manager.GetBookmark(part.flightID);
                 
                 if (bookmark != null) {
-                    ModLogger.LogDebug($"ToggleBookmarkEvent: Removing command module bookmark for part {part.flightID}");
+                    LOGGER.LogDebug($"ToggleBookmarkEvent: Removing command module bookmark for part {part.flightID}");
                     string displayName = !string.IsNullOrEmpty(bookmark.BookmarkTitle)
                         ? bookmark.BookmarkTitle
                         : ModLocalization.GetString("labelModuleNotFound");
@@ -39,7 +41,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                         }
                     }, bookmarkName: displayName);
                 } else {
-                    ModLogger.LogDebug($"ToggleBookmarkEvent: Adding command module bookmark for part {part.flightID}");
+                    LOGGER.LogDebug($"ToggleBookmarkEvent: Adding command module bookmark for part {part.flightID}");
                     CommandModuleBookmark newCommandModuleBookmark = new CommandModuleBookmark(part.flightID);
                     bool added = BookmarkManager.AddBookmark(newCommandModuleBookmark);
                     if (added) {
@@ -49,7 +51,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                             ScreenMessageStyle.UPPER_CENTER
                         );
                     } else {
-                        ModLogger.LogDebug($"ToggleBookmarkEvent: Bookmark not added for part {part.flightID}");
+                        LOGGER.LogDebug($"ToggleBookmarkEvent: Bookmark not added for part {part.flightID}");
                         ScreenMessages.PostScreenMessage(
                             ModLocalization.GetString("messageBookmarkAdded"), 
                             2f, 
@@ -60,7 +62,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 
                 UpdateEventName();
             } catch (Exception e) {
-                ModLogger.LogError($"Error in ToggleBookmarkEvent: {e.Message}");
+                LOGGER.LogError($"Error in ToggleBookmarkEvent: {e.Message}");
             }
         }
         
@@ -77,7 +79,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         private void UpdateEventName() {
             try {
                 if (part == null || Events == null) {
-                    ModLogger.LogWarning($"UpdateEventName: Part is null or Events is null");
+                    LOGGER.LogWarning($"UpdateEventName: Part is null or Events is null");
                     return;
                 }
 
@@ -91,7 +93,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                         : ModLocalization.GetString("contextMenuAddToBookmarks");
                 }
             } catch (Exception e) {
-                ModLogger.LogError($"Error in UpdateEventName: {e.Message}");
+                LOGGER.LogError($"Error in UpdateEventName: {e.Message}");
             }
         }
     }

@@ -10,6 +10,8 @@ using System;
 namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
     public class EditCommentUIController {
+        
+        private static readonly ModLogger LOGGER = new ModLogger("EditCommentUIController");
 
         /// <summary>
         /// Whether the edit window is visible
@@ -43,7 +45,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     BookmarkManager.OnBookmarksUpdated.Fire();
                 }
             } catch (Exception e) {
-                ModLogger.LogError($"Error saving edit window: {e.Message}");
+                LOGGER.LogError($"Error saving edit window: {e.Message}");
             }
             _editingComment = false;
         }

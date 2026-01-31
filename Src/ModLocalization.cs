@@ -8,7 +8,9 @@ namespace com.github.lhervier.ksp.bookmarksmod {
     /// Uses KSP's standard Localizer system
     /// </summary>
     public static class ModLocalization {
-        
+
+        private static readonly ModLogger LOGGER = new ModLogger("ModLocalization");
+
         /// <summary>
         /// Gets a localized string with parameters
         /// </summary>
@@ -22,7 +24,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             try {
                 return Localizer.Format($"#LOC_{key}", args);
             } catch (Exception e) {
-                ModLogger.LogWarning($"Error formatting localization string '{key}': {e.Message}");
+                LOGGER.LogWarning($"Error formatting localization string '{key}': {e.Message}");
                 return $"[{key}]";
             }
         }

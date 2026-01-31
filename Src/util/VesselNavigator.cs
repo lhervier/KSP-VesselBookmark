@@ -6,7 +6,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
     /// Manages navigation to vessels
     /// </summary>
     public static class VesselNavigator {
-        
+
+        private static readonly ModLogger LOGGER = new ModLogger("VesselNavigator");
+
         /// <summary>
         /// Navigate to a vessel (changes active vessel)
         /// Handles loaded and unloaded vessels, as well as map view
@@ -14,15 +16,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
         /// </summary>
         public static bool NavigateToVessel(Vessel vessel) {
             if (vessel == null) {
-                ModLogger.LogError("Attempted to navigate to null vessel");
+                LOGGER.LogError("Attempted to navigate to null vessel");
                 return false;
             }
 
-            ModLogger.LogDebug($"Navigating to vessel {vessel.vesselName}");
-            
+            LOGGER.LogDebug($"Navigating to vessel {vessel.vesselName}");
+
             // Check if already on this vessel (only if in flight)
             if (HighLogic.LoadedScene == GameScenes.FLIGHT && FlightGlobals.ActiveVessel == vessel) {
-                ModLogger.LogDebug($"Already on vessel {vessel.vesselName}");
+                LOGGER.LogDebug($"Already on vessel {vessel.vesselName}");
                 return true;
             }
             
@@ -31,10 +33,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
             {
                 try {
                     FlightGlobals.SetActiveVessel(vessel);
-                    ModLogger.LogDebug($"Navigating to {vessel.vesselName} (scene: {HighLogic.LoadedScene}, loaded: {vessel.loaded})");
+                    LOGGER.LogDebug($"Navigating to {vessel.vesselName} (scene: {HighLogic.LoadedScene}, loaded: {vessel.loaded})");
                     return true;
                 } catch (System.Exception e) {
-                    ModLogger.LogError($"Error navigating to {vessel.vesselName}: {e.Message}");
+                    LOGGER.LogError($"Error navigating to {vessel.vesselName}: {e.Message}");
                     return false;
                 }
             

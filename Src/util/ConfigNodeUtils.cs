@@ -3,6 +3,9 @@ using System;
 
 namespace com.github.lhervier.ksp.bookmarksmod.util {
     public static class ConfigNodeUtils {
+        
+        private static readonly ModLogger LOGGER = new ModLogger("ConfigNodeUtils");
+
         /// <summary>
         /// Get an integer value from a config node
         /// </summary>
@@ -13,7 +16,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
         /// <returns>The value of the integer</returns>
         public static int GetIntNodeValue(ConfigNode node, string valueName, bool raiseException, int defaultValue = 0) {
             if( !node.HasValue(valueName) ) {
-                ModLogger.LogWarning($"{valueName} not found in the bookmark node");
+                LOGGER.LogWarning($"{valueName} not found in the bookmark node");
                 if( raiseException ) {
                     throw new Exception($"{valueName} not found in the bookmark node");
                 }
@@ -21,7 +24,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
             }
 
             if( !int.TryParse(node.GetValue(valueName), out int value) ) {
-                ModLogger.LogWarning($"{valueName} is not a valid integer");
+                LOGGER.LogWarning($"{valueName} is not a valid integer");
                 if( raiseException ) {
                     throw new Exception($"{valueName} is not a valid integer");  
                 }
@@ -40,7 +43,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
         /// <returns>The value of the integer</returns>
         public static uint GetUintNodeValue(ConfigNode node, string valueName, bool raiseException, uint defaultValue = 0) {
             if( !node.HasValue(valueName) ) {
-                ModLogger.LogWarning($"{valueName} not found in the bookmark node");
+                LOGGER.LogWarning($"{valueName} not found in the bookmark node");
                 if( raiseException ) {
                     throw new Exception($"{valueName} not found in the bookmark node");
                 }
@@ -48,7 +51,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
             }
 
             if( !uint.TryParse(node.GetValue(valueName), out uint value) ) {
-                ModLogger.LogWarning($"{valueName} is not a valid unsigned integer");
+                LOGGER.LogWarning($"{valueName} is not a valid unsigned integer");
                 if( raiseException ) {
                     throw new Exception($"{valueName} is not a valid unsigned integer");
                 }
@@ -67,7 +70,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
         /// <returns>The value of the integer</returns>
         public static double GetDoubleNodeValue(ConfigNode node, string valueName, bool raiseException, double defaultValue = 0) {
             if( !node.HasValue(valueName) ) {
-                ModLogger.LogWarning($"{valueName} not found in the bookmark node");
+                LOGGER.LogWarning($"{valueName} not found in the bookmark node");
                 if( raiseException ) {
                     throw new Exception($"{valueName} not found in the bookmark node");
                 }
@@ -75,7 +78,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
             }
 
             if( !double.TryParse(node.GetValue(valueName), out double value) ) {
-                ModLogger.LogWarning($"{valueName} is not a valid double");
+                LOGGER.LogWarning($"{valueName} is not a valid double");
                 if( raiseException ) {
                     throw new Exception($"{valueName} is not a valid double");
                 }

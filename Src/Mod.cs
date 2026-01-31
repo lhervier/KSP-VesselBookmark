@@ -8,15 +8,17 @@ namespace com.github.lhervier.ksp.bookmarksmod {
 	
 	[KSPAddon(KSPAddon.Startup.PSystemSpawn, false)]
     public class Mod : MonoBehaviour {
-        
+
+        private static readonly ModLogger LOGGER = new ModLogger("Mod");
+
         protected void Awake() 
         {
-            ModLogger.LogInfo("Awaked");
+            LOGGER.LogInfo("Awaked");
             DontDestroyOnLoad(this);
         }
 
         public void Start() {
-            ModLogger.LogInfo("Plugin started");
+            LOGGER.LogInfo("Plugin started");
             
             // Subscribe to save/load events
             GameEvents.onGameStateCreated.Add(OnGameStateCreated);
@@ -33,11 +35,11 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             GameEvents.onAlarmRemoved.Add(OnAlarmRemoved);
             GameEvents.onAlarmTriggered.Add(OnAlarmTriggered);
 
-            ModLogger.LogInfo("Events subscribed");
+            LOGGER.LogInfo("Events subscribed");
         }
 
         public void OnDestroy() {
-            ModLogger.LogInfo("Plugin stopped");
+            LOGGER.LogInfo("Plugin stopped");
 
             // Unsubscribe from save/load events
             GameEvents.onGameStateCreated.Remove(OnGameStateCreated);
@@ -54,7 +56,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             GameEvents.onAlarmRemoved.Remove(OnAlarmRemoved);
             GameEvents.onAlarmTriggered.Remove(OnAlarmTriggered);
 
-            ModLogger.LogInfo("Events unsubscribed");
+            LOGGER.LogInfo("Events unsubscribed");
         }
 
         /// <summary>

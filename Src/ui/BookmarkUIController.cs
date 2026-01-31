@@ -8,6 +8,7 @@ using com.github.lhervier.ksp.bookmarksmod.util;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui {
     public class BookmarkUIController {
+        private static readonly ModLogger LOGGER = new ModLogger("BookmarkUIController");
         private Bookmark _currentBookmark;
         private int _currentIndex;
         private BookmarksListUIController _bookmarksListUIController;
@@ -59,7 +60,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public void SwitchToVessel() {
             Vessel vessel = _currentBookmark.Vessel;
             if( vessel == null ) {
-                ModLogger.LogWarning($"Bookmark {_currentBookmark}: Vessel not found. Cannot switch to vessel.");
+                LOGGER.LogWarning($"Bookmark {_currentBookmark}: Vessel not found. Cannot switch to vessel.");
                 return;
             }
             if (VesselNavigator.NavigateToVessel(vessel)) {
@@ -70,7 +71,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         public void MoveUp() {
             if( !CanMoveUp() ) {
-                ModLogger.LogWarning($"Bookmark {_currentBookmark}: Can't move up. Current index {_currentIndex} is the first index for this bookmark type.");
+                LOGGER.LogWarning($"Bookmark {_currentBookmark}: Can't move up. Current index {_currentIndex} is the first index for this bookmark type.");
                 return;
             }
             List<Bookmark> bookmarks = _bookmarksListUIController.AvailableBookmarks[_currentBookmark.BookmarkType];
@@ -84,7 +85,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         public void MoveDown() {
             if( !CanMoveDown() ) {
-                ModLogger.LogWarning($"Bookmark {_currentBookmark}: Can't move down. Current index {_currentIndex} is the last index for this bookmark type.");
+                LOGGER.LogWarning($"Bookmark {_currentBookmark}: Can't move down. Current index {_currentIndex} is the last index for this bookmark type.");
                 return;
             }
             List<Bookmark> bookmarks = _bookmarksListUIController.AvailableBookmarks[_currentBookmark.BookmarkType];

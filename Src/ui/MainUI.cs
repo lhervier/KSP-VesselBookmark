@@ -13,7 +13,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
     /// </summary>
     [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
     public class MainUI : MonoBehaviour {
-        
+
+        private static readonly ModLogger LOGGER = new ModLogger("MainUI");
+
         private ApplicationLauncherButton _toolbarButton;
                 
         private UIStyles _uiStyles;
@@ -66,7 +68,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                         GameDatabase.Instance.GetTexture("VesselBookmarkMod/icon", false) ?? Texture2D.whiteTexture
                     );
                 } catch (System.Exception e) {
-                    ModLogger.LogError($"Error creating Toolbar button: {e.Message}");
+                    LOGGER.LogError($"Error creating Toolbar button: {e.Message}");
                 }
             }
         }
@@ -79,7 +81,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 try {
                     ApplicationLauncher.Instance.RemoveModApplication(_toolbarButton);
                 } catch (System.Exception e) {
-                    ModLogger.LogError($"Error removing Toolbar button: {e.Message}");
+                    LOGGER.LogError($"Error removing Toolbar button: {e.Message}");
                 }
                 _toolbarButton = null;
             }

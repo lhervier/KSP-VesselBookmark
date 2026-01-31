@@ -6,7 +6,8 @@ using com.github.lhervier.ksp.bookmarksmod.util;
 
 namespace com.github.lhervier.ksp.bookmarksmod {
     public class BookmarkPersistenceManager {
-
+        private static readonly ModLogger LOGGER = new ModLogger("BookmarkPersistenceManager");
+        
         /// <summary>
         /// Name of the node in the config file where bookmarks are saved
         /// </summary>
@@ -24,7 +25,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <returns>The loaded bookmark</returns>
         private static Bookmark LoadBookmark(ConfigNode node) {
             try {
-                ModLogger.LogDebug($"Loading bookmark from config node");
+                LOGGER.LogDebug($"Loading bookmark from config node");
 
                 // Load bookmark type and vessel persistent ID (mandatory fields)
                 BookmarkType bookmarkType = (BookmarkType) ConfigNodeUtils.GetIntNodeValue(node, "bookmarkType", true);
@@ -45,10 +46,10 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 bookmark.Order = ConfigNodeUtils.GetIntNodeValue(node, "order", true);
                 bookmark.CreationTime = ConfigNodeUtils.GetDoubleNodeValue(node, "creationTime", false, Planetarium.GetUniversalTime());
                 
-                ModLogger.LogInfo($"Bookmark {bookmark} loaded from config node");
+                LOGGER.LogInfo($"Bookmark {bookmark} loaded from config node");
                 return bookmark;
             } catch (Exception e) {
-                ModLogger.LogError($"Error loading bookmark from config node: {e.Message}");
+                LOGGER.LogError($"Error loading bookmark from config node: {e.Message}");
                 return null;
             }
         }
@@ -59,7 +60,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="node"></param>
         /// <returns>List of loaded bookmarks</returns>
         public static List<Bookmark> LoadBookmarks(ConfigNode node) {
-            ModLogger.LogDebug($"Loading bookmarks from config node");
+            LOGGER.LogDebug($"Loading bookmarks from config node");
             
             List<Bookmark> bookmarks = new List<Bookmark>();
             if (!node.HasNode(SAVE_NODE_NAME)) {
@@ -71,13 +72,13 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             foreach (ConfigNode bookmarkNode in bookmarkNodes) {
                 Bookmark bookmark = LoadBookmark(bookmarkNode);
                 if( bookmark == null ) {
-                    ModLogger.LogWarning($"Bookmark not loaded from config node: Let's continue to next one...");
+                    LOGGER.LogWarning($"Bookmark not loaded from config node: Let's continue to next one...");
                     continue;
                 }
                 bookmarks.Add(bookmark);
             }
 
-            ModLogger.LogInfo($"{bookmarks.Count} bookmark(s) loaded");
+            LOGGER.LogInfo($"{bookmarks.Count} bookmark(s) loaded");
             return bookmarks;
         }
 
@@ -107,7 +108,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="node"></param>
         public static bool SaveBookmarks(ConfigNode node, List<Bookmark> bookmarks) {
             try {
-                ModLogger.LogDebug($"Saving bookmarks to config node");
+                LOGGER.LogDebug($"Saving bookmarks to config node");
 
                 if (node.HasNode(SAVE_NODE_NAME)) {
                     node.RemoveNode(SAVE_NODE_NAME);
@@ -117,14 +118,14 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 foreach (Bookmark bookmark in bookmarks) {
                     ConfigNode bookmarkNode = bookmarksNode.AddNode(BOOKMARK_NODE_NAME);
                     if( !SaveBookmark(bookmarkNode, bookmark) ) {
-                        ModLogger.LogError($"Error saving bookmark {bookmark} to config node: Let's continue to next one...");
+                        LOGGER.LogError($"Error saving bookmark {bookmark} to config node: Let's continue to next one...");
                         return false;
                     }
                 }
-                ModLogger.LogInfo($"{bookmarks.Count} bookmark(s) saved");
+                LOGGER.LogInfo($"{bookmarks.Count} bookmark(s) saved");
                 return true;
             } catch (Exception e) {
-                ModLogger.LogError($"Error saving bookmarks: {e.Message}");
+                LOGGER.LogError($"Error saving bookmarks: {e.Message}");
                 return false;
             }
         }

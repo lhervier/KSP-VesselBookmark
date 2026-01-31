@@ -3,28 +3,34 @@ using UnityEngine;
 namespace com.github.lhervier.ksp.bookmarksmod {
 	
 	public class ModLogger {
-		private static readonly bool DEBUG = true;
+		public static bool DEBUG = true;
         private static readonly string MOD_NAME = "VesselBookmarkMod";
-        private static void LogInternal(string level, string message) {
-            Debug.Log($"[{MOD_NAME}][{level}] {message}");
+        private string loggerName = "";
+
+        public ModLogger(string loggerName) {
+            this.loggerName = loggerName;
         }
 
-        public static void LogInfo(string message) {
+        private void LogInternal(string level, string message) {
+            Debug.Log($"[{MOD_NAME}][{loggerName}][{level}] {message}");
+        }
+
+        public void LogInfo(string message) {
             LogInternal("INFO", message);
         }
 
-        public static void LogDebug(string message) {
+        public void LogDebug(string message) {
             if( !DEBUG ) {
                 return;
             }
             LogInternal("DEBUG", message);
         }
 
-        public static void LogWarning(string message) {
+        public void LogWarning(string message) {
             LogInternal("WARNING", message);
         }
 
-        public static void LogError(string message) {
+        public void LogError(string message) {
             LogInternal("ERROR", message);
         }
 	}
