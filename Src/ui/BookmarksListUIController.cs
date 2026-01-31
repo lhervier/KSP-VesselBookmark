@@ -62,6 +62,20 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             }
         }
 
+        /// <summary>
+        /// Filtre : n'afficher que les bookmarks qui ont un commentaire (pour usage futur).
+        /// </summary>
+        private bool _filterHasComment = false;
+        public bool FilterHasComment { 
+            get => _filterHasComment;
+            set {
+                if( _filterHasComment != value ) {
+                    _filterHasComment = value;
+                    UpdateBookmarksSelection();
+                }
+            }
+        }
+
         private const float SEARCH_DEBOUNCE_SECONDS = 0.2f;
         private string _searchText = string.Empty;
         private float _searchTextChangeTime = -1f;
@@ -229,6 +243,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                             }
                         }
 
+                        if( addBookmark && FilterHasComment ) {
+                            if( string.IsNullOrEmpty(bookmark.Comment) ) {
+                                addBookmark = false;
+                            }
+                        }
+
                         if( addBookmark ) {
                             selectionedBookmarks.Add(bookmark);
                         }
@@ -247,6 +267,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _selectedBody = ModLocalization.GetString("labelAll");
             _selectedVesselType = ALL_VESSEL_TYPES;
             _searchText = string.Empty;
+            _filterHasComment = false;
             UpdateBookmarksSelection();
         }
 

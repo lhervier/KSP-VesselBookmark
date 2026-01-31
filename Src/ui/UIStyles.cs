@@ -11,6 +11,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
     public class UIStyles {
         // UI styles with white text
         public GUIStyle LabelStyle { get; private set; }
+        public GUIStyle ToggleStyle { get; private set; }
         public GUIStyle ButtonStyle { get; private set; }
         public GUIStyle TextAreaStyle { get; private set; }
         public GUIStyle TooltipStyle { get; private set; }
@@ -21,6 +22,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         public UIStyles() {
             LabelStyle = new GUIStyle(GUI.skin.label) { richText = true };
+            ToggleStyle = new GUIStyle(GUI.skin.toggle);
             ButtonStyle = new GUIStyle(GUI.skin.button);
             TextAreaStyle = new GUIStyle(GUI.skin.textArea);
             TooltipStyle = new GUIStyle(GUI.skin.box);
@@ -29,6 +31,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             ComboGridSelectedStyle = new GUIStyle(GUI.skin.button);
 
             ApplyWhiteText(LabelStyle);
+            ApplyWhiteText(ToggleStyle);
             ApplyWhiteText(ButtonStyle);
             ApplyWhiteText(TextAreaStyle);
             ApplyWhiteText(TooltipStyle);

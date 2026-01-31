@@ -189,6 +189,19 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 false
             );
 
+            GUILayout.Space(10);
+
+            // Filter: bookmarks with comment — libellé puis case, les deux cliquables
+            string filterWithCommentLabel = ModLocalization.GetString("labelFilterWithComment");
+            GUILayout.Label(filterWithCommentLabel, _uiStyles.LabelStyle);
+            Rect labelRect = GUILayoutUtility.GetLastRect();
+            if (Event.current.type == EventType.MouseDown && labelRect.Contains(Event.current.mousePosition)) {
+                Controller.FilterHasComment = !Controller.FilterHasComment;
+                Event.current.Use();
+            }
+            
+            Controller.FilterHasComment = GUILayout.Toggle(Controller.FilterHasComment, "", _uiStyles.ToggleStyle);
+            
             GUILayout.FlexibleSpace();
             
             if (GUILayout.Button(ModLocalization.GetString("buttonClear"), _uiStyles.ButtonStyle, GUILayout.Width(60))) {
