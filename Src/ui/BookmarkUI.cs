@@ -160,7 +160,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             // Bookmark name
             string title = $"<b>{bookmarkUIController.GetBookmarkTitle()}</b>";
             if( !string.IsNullOrEmpty(bookmark.Comment) ) {
-                title += $"<color=red>{title}</color>";
+                title = $"<color=red>{title}</color>";
             }
             GUILayout.Label(
                 title, 
