@@ -6,10 +6,11 @@ TODO :
     - Rafraichir les bookmarks
     - Ajouter un bookmark
     - Et le futur bouton pour la config
-- Afficher dans combien de temps est le prochain noeud de manoeuvre
-- Définir comme target
-- "Contrôler d'ici"
 - Quand un vaisseau change de situation, il faut rafraichier les bookmarks associés
+
+Maybe :
+- Afficher dans combien de temps est le prochain noeud de manoeuvre
+- "Contrôler d'ici"
 
 Bugs :
 

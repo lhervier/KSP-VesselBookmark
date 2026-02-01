@@ -18,6 +18,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private VesselBookmarkButton _removeButton;
         private VesselBookmarkButton _moveUpButton;
         private VesselBookmarkButton _moveDownButton;
+        private VesselBookmarkButton _setTargetAsButton;
         private VesselBookmarkButton _goToButton;
         private VesselBookmarkButton _editButton;
         
@@ -69,6 +70,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _moveDownButton = new VesselBookmarkButton(
                 "VesselBookmarkMod/buttons/down",
                 ModLocalization.GetString("tooltipMoveDown"), 
+                BUTTON_WIDTH, 
+                BUTTON_HEIGHT
+            );
+
+            // Initialize set target as button
+            _setTargetAsButton = new VesselBookmarkButton(
+                "VesselBookmarkMod/buttons/target",
+                ModLocalization.GetString("tooltipSetTargetAs"), 
                 BUTTON_WIDTH, 
                 BUTTON_HEIGHT
             );
@@ -179,6 +188,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             );
             
             GUILayout.Space(3);
+
+            // "Set target as" button
+            System.Action setTargetAsAction;
+            if( bookmarkUIController.CanSetTargetAs() ) {
+                setTargetAsAction = bookmarkUIController.SetTargetAs;
+            } else {
+                setTargetAsAction = null;
+            }
+            _setTargetAsButton.Draw(bookmarkUIController.IsHovered, setTargetAsAction);
 
             // Go to button (disabled if this is the active vessel)
             System.Action goToAction;

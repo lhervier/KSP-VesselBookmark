@@ -57,6 +57,33 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _editCommentUIController.EditComment(_currentBookmark);
         }
 
+        public bool CanSetTargetAs() {
+            if( FlightGlobals.ActiveVessel == null ) {
+                return false;
+            }
+            if( _currentBookmark.Vessel == null ) {
+                return false;
+            }
+            if( IsActiveVessel() ) {
+                return false;
+            }
+            return true;
+        }
+
+        public void SetTargetAs() {
+            if( !CanSetTargetAs() ) {
+                LOGGER.LogWarning($"Bookmark {_currentBookmark}: Can't set target as. Current vessel or bookmark vessel not found.");
+                return;
+            }
+
+            FlightGlobals flightGlobals = FlightGlobals.fetch;
+            if( flightGlobals == null ) {
+                LOGGER.LogWarning($"Bookmark {_currentBookmark}: FlightGlobals not found. Cannot set target as.");
+                return;
+            }
+            flightGlobals.SetVesselTarget(_currentBookmark.Vessel);
+        }
+
         public void SwitchToVessel() {
             Vessel vessel = _currentBookmark.Vessel;
             if( vessel == null ) {
