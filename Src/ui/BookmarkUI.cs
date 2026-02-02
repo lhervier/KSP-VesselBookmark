@@ -44,7 +44,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             
             // Initialize alarm icon
             _alarmIcon = new VesselBookmarkButton(
-                "VesselBookmarkMod/alarm",
+                "VesselBookmarkMod/buttons/alarm",
                 null,
                 BUTTON_WIDTH,
                 BUTTON_HEIGHT
