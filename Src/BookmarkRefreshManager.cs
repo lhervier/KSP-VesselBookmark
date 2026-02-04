@@ -271,6 +271,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 }
                 if( vessel == null ) {
                     LOGGER.LogDebug($"Bookmark {bookmark}: Cannot refresh vessel bookmark properties: Vessel not found. May happen when first loading a save game, but not only... Another event should be emitted soon...");
+                    bookmark.Vessel = null;
                 } else {
                     bookmark.Vessel = vessel;
                     bookmark.VesselName = vessel.vesselName;
