@@ -215,7 +215,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                             cmType = commandModuleProtoPartSnapshot.vesselNaming.vesselType.ToString();
                         }
                     } else {
-                        LOGGER.LogDebug($"- Command module part or protoPartSnapshot {bookmark.CommandModuleFlightID} not found. May happen... Keeping value stored int the bookmark itself...");                        vesselPersistentId = bookmark.VesselPersistentID;
+                        vesselPersistentId = bookmark.VesselPersistentID;
                         cmName = bookmark.VesselName;
                         cmType = bookmark.VesselType;
                     }
