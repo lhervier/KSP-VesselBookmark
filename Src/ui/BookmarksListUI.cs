@@ -11,7 +11,12 @@ using com.github.lhervier.ksp.bookmarksmod;
 namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
     public class BookmarksListUI {
+        public const string SCROLL_LOCK_ID = "VesselBookmarkMod_ScrollBlock";
+
+        /// <summary>Last known window rect (screen space, top-left origin). Used so Update() can set scroll lock before camera reads input.</summary>
         private Rect _mainWindowRect = new Rect(100, 100, 500, 600);
+        public Rect MainWindowRect => _mainWindowRect;
+
         private int _mainWindowID;
         
         private Vector2 _scrollPosition = Vector2.zero;
@@ -52,12 +57,21 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     GUILayout.MinWidth(500),
                     GUILayout.MinHeight(400)
                 );
-                
+
                 // Prevent window from going off screen
                 _mainWindowRect.x = Mathf.Clamp(_mainWindowRect.x, 0, Screen.width - _mainWindowRect.width);
                 _mainWindowRect.y = Mathf.Clamp(_mainWindowRect.y, 0, Screen.height - _mainWindowRect.height);
 
                 ComboBox.DrawGUI(_uiStyles.ComboPopupStyle, _uiStyles.ComboGridStyle, _uiStyles.ComboGridSelectedStyle);
+
+                // Consume scroll event for IMGUI (scroll list + prevent some handlers from zooming)
+                Vector2 mousePos = Event.current.mousePosition;
+                if (Event.current.type == EventType.ScrollWheel && _mainWindowRect.Contains(mousePos)) {
+                    Event.current.Use();
+                }
+            } else {
+                InputLockManager.RemoveControlLock(SCROLL_LOCK_ID);
+                return;
             }
         }
 

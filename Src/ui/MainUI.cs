@@ -118,6 +118,21 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             }
         }
 
+        private void Update() {
+            // Set scroll/zoom lock at start of frame so camera doesn't zoom when scrolling the bookmark list (KSP reads Input in Update, so OnGUI was too late)
+            if (_bookmarksListUI == null || !_bookmarksListUI.Controller.MainWindowsVisible) {
+                InputLockManager.RemoveControlLock(BookmarksListUI.SCROLL_LOCK_ID);
+                return;
+            }
+            Rect r = _bookmarksListUI.MainWindowRect;
+            Vector2 mouseScreen = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+            if (r.Contains(mouseScreen)) {
+                InputLockManager.SetControlLock(ControlTypes.CAMERAMODES | ControlTypes.CAMERACONTROLS, BookmarksListUI.SCROLL_LOCK_ID);
+            } else {
+                InputLockManager.RemoveControlLock(BookmarksListUI.SCROLL_LOCK_ID);
+            }
+        }
+
         private void OnGUI() {
             // Initialise external components
             if( this._uiStyles == null ) {
