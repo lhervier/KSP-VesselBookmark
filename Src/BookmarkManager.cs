@@ -249,7 +249,6 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 // Refresh bookmark to load transient fields
                 if( !BookmarkRefreshManager.RefreshBookmark(bookmark) ) {
                     LOGGER.LogWarning($"Bookmark {bookmark}: Failed to refresh bookmark");
-                    return false;
                 }
 
                 // Add bookmark to the list

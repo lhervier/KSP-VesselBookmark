@@ -84,6 +84,16 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             flightGlobals.SetVesselTarget(_currentBookmark.Vessel);
         }
 
+        public bool CanSwitchToVessel() {
+            if( _currentBookmark.Vessel == null ) {
+                return false;
+            }
+            if( IsActiveVessel() ) {
+                return false;
+            }
+            return true;
+        }
+
         public void SwitchToVessel() {
             Vessel vessel = _currentBookmark.Vessel;
             if( vessel == null ) {

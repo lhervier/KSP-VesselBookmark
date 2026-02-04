@@ -201,11 +201,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 foreach( var instance in BookmarkManager.Instances.Values ) {
                     List<Bookmark> selectionedBookmarks = new List<Bookmark>();
                     foreach( var bookmark in instance.Bookmarks ) {
-                        Vessel vessel = bookmark.Vessel;
-                        if( vessel == null ) {
-                            continue;
-                        }
-
                         bool addBookmark;
                         if( string.Equals(_selectedBody, all) && string.Equals(_selectedVesselType, ALL_VESSEL_TYPES) ) {
                             addBookmark = true;

@@ -166,16 +166,38 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 );
             }
                 
-            // Bookmark name
-            string title = $"<b>{bookmarkUIController.GetBookmarkTitle()}</b>";
-            if( !string.IsNullOrEmpty(bookmark.Comment) ) {
-                title = $"<color=red>{title}</color>";
+            // Bookmark name: comment always stands out (red); vessel missing = secondary cue (gray or italic)
+            bool hasComment = !string.IsNullOrEmpty(bookmark.Comment);
+            bool vesselExists = bookmark.Vessel != null;
+
+            GUIStyle titleStyle;
+            if( vesselExists ) {
+                if( !hasComment ) {
+                    titleStyle = _uiStyles.LabelTitleStyle;
+                } else {
+                    titleStyle = _uiStyles.LabelCommentStyle;
+                }
+            } else {
+                if( !hasComment ) {
+                    titleStyle = _uiStyles.LabelTitleNoVesselStyle;
+                } else {
+                    titleStyle = _uiStyles.LabelCommentNoVesselStyle;
+                }
+            }
+            string title = bookmarkUIController.GetBookmarkTitle();
+            if( !vesselExists ) {
+                if( bookmark.BookmarkType == BookmarkType.Vessel ) {
+                    title += " (" + ModLocalization.GetString("labelVesselNotFound") + ")";
+                } else {
+                    title += " (" + ModLocalization.GetString("labelCommandModuleNotFound") + ")";
+                }
             }
             GUILayout.Label(
                 title, 
-                _uiStyles.LabelStyle, 
+                titleStyle, 
                 GUILayout.Width(250)
             );
+            
             GUILayout.FlexibleSpace();
 
             // Small spacing before buttons
@@ -200,7 +222,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             // Go to button (disabled if this is the active vessel)
             System.Action goToAction;
-            if (!bookmarkUIController.IsActiveVessel()) {
+            if (bookmarkUIController.CanSwitchToVessel()) {
                 goToAction = bookmarkUIController.SwitchToVessel;
             } else {
                 goToAction = null;

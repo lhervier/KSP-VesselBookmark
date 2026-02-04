@@ -11,6 +11,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
     public class UIStyles {
         // UI styles with white text
         public GUIStyle LabelStyle { get; private set; }
+        public GUIStyle LabelTitleStyle { get; private set; }
+        public GUIStyle LabelTitleNoVesselStyle { get; private set; }
+        public GUIStyle LabelCommentStyle { get; private set; }
+        public GUIStyle LabelCommentNoVesselStyle { get; private set; }
         public GUIStyle ToggleStyle { get; private set; }
         public GUIStyle ButtonStyle { get; private set; }
         public GUIStyle TextAreaStyle { get; private set; }
@@ -22,27 +26,43 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         public UIStyles() {
             LabelStyle = new GUIStyle(GUI.skin.label) { richText = true };
+            ApplyColor(LabelStyle, Color.white);
+
+            // Style for the title of the bookmark
+            LabelTitleStyle = new GUIStyle(LabelStyle) { fontStyle = FontStyle.Bold };
+            ApplyColor(LabelTitleStyle, Color.white);
+
+            // Style for the title of the bookmark when there is a comment
+            LabelCommentStyle = new GUIStyle(LabelStyle) { fontStyle = FontStyle.Italic | FontStyle.Bold };
+            ApplyColor(LabelCommentStyle, Color.red);
+
+            // Style for the title of the bookmark when the vessel is missing
+            LabelTitleNoVesselStyle = new GUIStyle(LabelStyle) { fontStyle = FontStyle.Bold };
+            ApplyColor(LabelTitleNoVesselStyle, Color.gray);
+
+            // Style for the title of the bookmark when there is a comment and the vessel is missing
+            LabelCommentNoVesselStyle = new GUIStyle(LabelStyle) { fontStyle = FontStyle.Italic | FontStyle.Bold };
+            ApplyColor(LabelCommentNoVesselStyle, Color.red);
+
             ToggleStyle = new GUIStyle(GUI.skin.toggle);
+            ApplyColor(ToggleStyle, Color.white);
+
             ButtonStyle = new GUIStyle(GUI.skin.button);
+            ApplyColor(ButtonStyle, Color.white);
+
             TextAreaStyle = new GUIStyle(GUI.skin.textArea);
+            ApplyColor(TextAreaStyle, Color.white);
+
             TooltipStyle = new GUIStyle(GUI.skin.box);
+            ApplyColor(TooltipStyle, Color.white);
+
             ComboPopupStyle = new GUIStyle(GUI.skin.window);
-            ComboGridStyle = new GUIStyle(GUI.skin.button);
-            ComboGridSelectedStyle = new GUIStyle(GUI.skin.button);
-
-            ApplyWhiteText(LabelStyle);
-            ApplyWhiteText(ToggleStyle);
-            ApplyWhiteText(ButtonStyle);
-            ApplyWhiteText(TextAreaStyle);
-            ApplyWhiteText(TooltipStyle);
-            ApplyWhiteText(ComboPopupStyle);
-            ApplyWhiteText(ComboGridStyle);
-            ApplyWhiteText(ComboGridSelectedStyle);
-
             ComboPopupStyle.border.top = ComboPopupStyle.border.bottom;
             ComboPopupStyle.padding.top = ComboPopupStyle.padding.bottom;
+            ApplyColor(ComboPopupStyle, Color.white);
 
             // Style grille : aspect libellé (sans bordure), cliquable avec hover
+            ComboGridStyle = new GUIStyle(GUI.skin.button);
             ComboGridStyle.border = new RectOffset(0, 0, 0, 0);
             ComboGridStyle.normal.background = null;
             var hoverBg = new Texture2D(1, 1);
@@ -50,7 +70,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             hoverBg.Apply();
             ComboGridStyle.hover.background = hoverBg;
             ComboGridStyle.active.background = hoverBg;
+            ApplyColor(ComboGridStyle, Color.white);
 
+            // Style grille : aspect libellé (sans bordure), cliquable avec hover
+            ComboGridSelectedStyle = new GUIStyle(GUI.skin.button);
             var selectedBg = new Texture2D(1, 1);
             selectedBg.SetPixel(0, 0, new Color(0.35f, 0.35f, 0.5f, 0.9f));
             selectedBg.Apply();
@@ -58,17 +81,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             ComboGridSelectedStyle.normal.background = selectedBg;
             ComboGridSelectedStyle.hover.background = selectedBg;
             ComboGridSelectedStyle.active.background = selectedBg;
+            ApplyColor(ComboGridSelectedStyle, Color.white);
         }
 
-        private void ApplyWhiteText(GUIStyle style) {
-            style.normal.textColor = Color.white;
-            style.hover.textColor = Color.white;
-            style.active.textColor = Color.white;
-            style.focused.textColor = Color.white;
-            style.onNormal.textColor = Color.white;
-            style.onHover.textColor = Color.white;
-            style.onActive.textColor = Color.white;
-            style.onFocused.textColor = Color.white;
+        private void ApplyColor(GUIStyle style, Color color) {
+            style.normal.textColor = color;
+            style.hover.textColor = color;
+            style.active.textColor = color;
+            style.focused.textColor = color;
+            style.onNormal.textColor = color;
+            style.onHover.textColor = color;
+            style.onActive.textColor = color;
+            style.onFocused.textColor = color;
         }
     }
 }
