@@ -110,40 +110,40 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <summary>
         /// Gets a textual description of vessel situation
         /// </summary>
-        /// <param name="body">The body of the vessel</param>
+        /// <param name="bodyName">The name of the body of the vessel</param>
         /// <param name="situation">The situation of the vessel</param>
         /// <returns>The label for the situation</returns>
-        private static string GetSituationLabel(CelestialBody body, Vessel.Situations situation) {
+        private static string GetSituationLabel(string bodyName, Vessel.Situations situation) {
             try {
-                if( body == null ) {
+                if( string.IsNullOrEmpty(bodyName) ) {
                     LOGGER.LogError($"Getting situation: Body is null");
                     return ModLocalization.GetString("situationUnknown");
                 }
                 
                 switch (situation) {
                     case Vessel.Situations.LANDED:
-                        return ModLocalization.GetString("situationLanded", body.bodyName);
+                        return ModLocalization.GetString("situationLanded", bodyName);
                         
                     case Vessel.Situations.SPLASHED:
-                        return ModLocalization.GetString("situationSplashed", body.bodyName);
+                        return ModLocalization.GetString("situationSplashed", bodyName);
                         
                     case Vessel.Situations.PRELAUNCH:
-                        return ModLocalization.GetString("situationPrelaunch", body.bodyName);
+                        return ModLocalization.GetString("situationPrelaunch", bodyName);
                         
                     case Vessel.Situations.SUB_ORBITAL:
-                        return ModLocalization.GetString("situationSuborbital", body.bodyName);
+                        return ModLocalization.GetString("situationSuborbital", bodyName);
                         
                     case Vessel.Situations.ORBITING:
-                        return ModLocalization.GetString("situationOrbiting", body.bodyName);
+                        return ModLocalization.GetString("situationOrbiting", bodyName);
                         
                     case Vessel.Situations.ESCAPING:
-                        return ModLocalization.GetString("situationEscaping", body.bodyName);
+                        return ModLocalization.GetString("situationEscaping", bodyName);
                         
                     default:
-                        return ModLocalization.GetString("situationInFlight", body.bodyName);
+                        return ModLocalization.GetString("situationInFlight", bodyName);
                 }
             } catch (System.Exception e) {
-                LOGGER.LogError($"Error getting situation{situation} for vessel on body {body.bodyName}: {e.Message}");
+                LOGGER.LogError($"Error getting situation{situation} for vessel on body {bodyName}: {e.Message}");
                 return ModLocalization.GetString("situationUnknown");
             }
         }
@@ -277,9 +277,9 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     bookmark.VesselName = vessel.vesselName;
                     bookmark.VesselType = vessel.vesselType.ToString();
                     
-                    bookmark.VesselSituation = vessel.situation;
-                    bookmark.VesselBody = vessel.mainBody;
-                    bookmark.VesselSituationLabel = GetSituationLabel(vessel.mainBody, vessel.situation);
+                    bookmark.VesselSituation = vessel.situation.ToString();
+                    bookmark.VesselBodyName = vessel.mainBody?.bodyName ?? "";
+                    bookmark.VesselSituationLabel = GetSituationLabel(bookmark.VesselBodyName, vessel.situation);
                     
                     bookmark.HasAlarm = CheckHasAlarm(vessel);
 

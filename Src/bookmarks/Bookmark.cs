@@ -91,12 +91,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// <summary>
         /// The main body of the vessel
         /// </summary>
-        public CelestialBody VesselBody { get; set; } = null;
+        public string VesselBodyName { get; set; } = "";
 
         /// <summary>
         /// The situation of the vessel
         /// </summary>
-        public Vessel.Situations VesselSituation { get; set; } = Vessel.Situations.PRELAUNCH;
+        public string VesselSituation { get; set; } = "";
         
         /// <summary>
         /// The label of the vessel situation

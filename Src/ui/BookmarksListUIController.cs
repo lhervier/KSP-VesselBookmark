@@ -211,22 +211,22 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                             addBookmark = true;
                         } else if( string.Equals(_selectedBody, all) ) {
                             addBookmark = string.Equals(
-                                bookmark.BookmarkVesselType.ToString(), 
+                                bookmark.BookmarkVesselType, 
                                 _selectedVesselType
                             );
                         } else if( string.Equals(_selectedVesselType, ALL_VESSEL_TYPES) ) {
                             addBookmark = string.Equals(
-                                vessel.mainBody.bodyName, 
+                                bookmark.VesselBodyName, 
                                 _selectedBody
                             );
                         } else {
                             addBookmark = string.Equals(
-                                    vessel.mainBody.bodyName, 
+                                    bookmark.VesselBodyName, 
                                     _selectedBody
                                 ) 
                                 && 
                                 string.Equals(
-                                    bookmark.BookmarkVesselType.ToString(), 
+                                    bookmark.BookmarkVesselType, 
                                     _selectedVesselType
                                 );
                         }
