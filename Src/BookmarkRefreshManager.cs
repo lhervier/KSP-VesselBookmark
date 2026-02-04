@@ -195,29 +195,22 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 
                 Part commandModulePart = GetPart(bookmark.CommandModuleFlightID);
                 if (commandModulePart != null) {
-                    LOGGER.LogDebug($"- Command module part {bookmark.CommandModuleFlightID} found");
                     vesselPersistentId = commandModulePart.vessel.persistentId;
                     if( commandModulePart.vesselNaming == null ) {
-                        LOGGER.LogDebug($"- Command module part {bookmark.CommandModuleFlightID} has no naming. Using vessel name and type from the vessel");
                         cmName = commandModulePart.vessel.vesselName;
                         cmType = commandModulePart.vessel.vesselType.ToString();
                     } else {
-                        LOGGER.LogDebug($"- Command module part {bookmark.CommandModuleFlightID} has a naming. Using it...");
                         cmName = commandModulePart.vesselNaming.vesselName;
                         cmType = commandModulePart.vesselNaming.vesselType.ToString();
                     }
                 } else {
-                    LOGGER.LogDebug($"- Command module part {bookmark.CommandModuleFlightID} not found. Trying to get it from the protoPartSnapshot");
                     ProtoPartSnapshot commandModuleProtoPartSnapshot = GetProtoPartSnapshot(bookmark.CommandModuleFlightID);
                     if (commandModuleProtoPartSnapshot != null) {
-                        LOGGER.LogDebug($"- Command module protoPartSnapshot {bookmark.CommandModuleFlightID} found");
                         vesselPersistentId = commandModuleProtoPartSnapshot.pVesselRef.persistentId;
                         if( commandModuleProtoPartSnapshot.vesselNaming == null ) {
-                            LOGGER.LogDebug($"- Command module protoPartSnapshot {bookmark.CommandModuleFlightID} has no naming. Using name and type from the protoVessel");
                             cmName = commandModuleProtoPartSnapshot.pVesselRef.vesselName;
                             cmType = commandModuleProtoPartSnapshot.pVesselRef.vesselType.ToString();
                         } else {
-                            LOGGER.LogDebug($"- Command module protoPartSnapshot {bookmark.CommandModuleFlightID} has a naming. Using it...");
                             cmName = commandModuleProtoPartSnapshot.vesselNaming.vesselName;
                             cmType = commandModuleProtoPartSnapshot.vesselNaming.vesselType.ToString();
                         }
