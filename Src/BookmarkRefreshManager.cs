@@ -49,7 +49,6 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             try {
                 LOGGER.LogDebug($"Getting command module protoPartSnapshot for flightID {commandModuleFlightID}");
                 if( FlightGlobals.VesselsUnloaded == null || FlightGlobals.VesselsUnloaded.Count == 0 ) {
-                    LOGGER.LogDebug($"No unloaded vessels found. May happen when first loading a save game, or in other contexts... Another event should be emitted soon...");
                     return null;
                 }
                 foreach (Vessel vessel in FlightGlobals.VesselsUnloaded) {
@@ -270,7 +269,6 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     vessel = FindVessel(bookmark);
                 }
                 if( vessel == null ) {
-                    LOGGER.LogDebug($"Bookmark {bookmark}: Cannot refresh vessel bookmark properties: Vessel not found. May happen when first loading a save game, but not only... Another event should be emitted soon...");
                     bookmark.Vessel = null;
                 } else {
                     bookmark.Vessel = vessel;
