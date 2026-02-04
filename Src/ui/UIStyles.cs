@@ -33,11 +33,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             ApplyColor(LabelTitleStyle, Color.white);
 
             // Style for the title of the bookmark when there is a comment
-            LabelCommentStyle = new GUIStyle(LabelStyle) { fontStyle = FontStyle.Italic | FontStyle.Bold };
+            LabelCommentStyle = new GUIStyle(LabelStyle) { fontStyle = FontStyle.Bold };
             ApplyColor(LabelCommentStyle, Color.red);
 
             // Style for the title of the bookmark when the vessel is missing
-            LabelTitleNoVesselStyle = new GUIStyle(LabelStyle) { fontStyle = FontStyle.Bold };
+            LabelTitleNoVesselStyle = new GUIStyle(LabelStyle) { fontStyle = FontStyle.Italic | FontStyle.Bold };
             ApplyColor(LabelTitleNoVesselStyle, Color.gray);
 
             // Style for the title of the bookmark when there is a comment and the vessel is missing
