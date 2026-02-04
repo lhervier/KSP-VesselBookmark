@@ -13,7 +13,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private static readonly int BUTTON_WIDTH = 20;
 
         // Icon cache
-        private Dictionary<VesselType, VesselBookmarkButton> _vesselTypeButtons = new Dictionary<VesselType, VesselBookmarkButton>();
+        private Dictionary<string, VesselBookmarkButton> _vesselTypeButtons = new Dictionary<string, VesselBookmarkButton>();
         private VesselBookmarkButton _alarmIcon;
         private VesselBookmarkButton _removeButton;
         private VesselBookmarkButton _moveUpButton;
@@ -32,15 +32,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         public BookmarkUI() {
             // Initialize vessel type buttons
-            _vesselTypeButtons[VesselType.Base] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/base", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Debris] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/debris", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Lander] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/lander", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Plane] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/plane", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Probe] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/probe", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Relay] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/relay", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Rover] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/rover", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Ship] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/ship", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Station] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/station", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Base.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/base", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Debris.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/debris", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Lander.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/lander", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Plane.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/plane", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Probe.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/probe", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Relay.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/relay", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Rover.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/rover", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Ship.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/ship", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Station.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/station", null, BUTTON_WIDTH, BUTTON_HEIGHT);
             
             // Initialize alarm icon
             _alarmIcon = new VesselBookmarkButton(
@@ -311,7 +311,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// <summary>
         /// Gets icon texture for vessel type
         /// </summary>
-        private VesselBookmarkButton GetVesselTypeButton(VesselType type) {
+        private VesselBookmarkButton GetVesselTypeButton(string type) {
             if (_vesselTypeButtons.ContainsKey(type)) {
                 return _vesselTypeButtons[type];
             }

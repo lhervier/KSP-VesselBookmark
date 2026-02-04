@@ -24,7 +24,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// <summary>
         /// Command module type
         /// </summary>
-        public VesselType CommandModuleType { get; set; } = VesselType.Unknown;
+        public string CommandModuleType { get; set; } = "";
         
         /// <summary>
         /// Constructor

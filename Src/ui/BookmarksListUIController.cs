@@ -169,10 +169,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 string selectedVesselType = _selectedVesselType;
                 this.AvailableVesselTypes.Clear();
                 foreach (Bookmark bookmark in BookmarkManager.GetAllBookmarks()) {
-                    VesselType vesselType = bookmark.BookmarkVesselType;
-                    string vesselTypeName = vesselType.ToString();
-                    if( !AvailableVesselTypes.Contains(vesselTypeName) ) {
-                        AvailableVesselTypes.Add(vesselTypeName);
+                    if( !AvailableVesselTypes.Contains(bookmark.BookmarkVesselType) ) {
+                        AvailableVesselTypes.Add(bookmark.BookmarkVesselType);
                     }
                 }
                 this.AvailableVesselTypes.Sort();

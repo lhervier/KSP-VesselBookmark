@@ -59,7 +59,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// Vessel type associated to the bookmark
         /// (different from the type of the vessel attached to the bookmark)
         /// </summary>
-        public VesselType BookmarkVesselType { get; set; } = VesselType.Unknown;
+        public string BookmarkVesselType { get; set; } = "";
         
         // ==============================================================
         //      Associated vessel data
@@ -86,7 +86,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         /// <summary>
         /// Type of the vessel
         /// </summary>
-        public VesselType VesselType { get; set; } = VesselType.Unknown;
+        public string VesselType { get; set; } = "";
 
         /// <summary>
         /// The main body of the vessel
