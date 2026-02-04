@@ -41,6 +41,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _vesselTypeButtons[VesselType.Rover.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/rover", null, BUTTON_WIDTH, BUTTON_HEIGHT);
             _vesselTypeButtons[VesselType.Ship.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/ship", null, BUTTON_WIDTH, BUTTON_HEIGHT);
             _vesselTypeButtons[VesselType.Station.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/station", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            _vesselTypeButtons[VesselType.Unknown.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/empty", null, BUTTON_WIDTH, BUTTON_HEIGHT);
             
             // Initialize alarm icon
             _alarmIcon = new VesselBookmarkButton(
@@ -154,7 +155,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             // Vessel type icon
             VesselBookmarkButton vesselTypeButton = GetVesselTypeButton(bookmark.BookmarkVesselType);
             vesselTypeButton.Draw(
-                () => vesselTypeButton != null,
+                () => true,
                 null
             );
             
@@ -334,10 +335,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// Gets icon texture for vessel type
         /// </summary>
         private VesselBookmarkButton GetVesselTypeButton(string type) {
-            if (_vesselTypeButtons.ContainsKey(type)) {
-                return _vesselTypeButtons[type];
+            if( string.IsNullOrEmpty(type) ) {
+                return _vesselTypeButtons[VesselType.Unknown.ToString()];
             }
-            return null;
+            if( !_vesselTypeButtons.ContainsKey(type) ) {
+                return _vesselTypeButtons[VesselType.Unknown.ToString()];
+            }
+            return _vesselTypeButtons[type];
         }
 
         public void OnDestroy() {
