@@ -173,7 +173,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             GUIStyle titleStyle;
             if( vesselExists ) {
-                titleStyle = _uiStyles.LabelTitleStyle;
+                if( bookmarkUIController.IsTarget() ) {
+                    titleStyle = _uiStyles.LabelTitleTargetStyle;
+                } else {
+                    titleStyle = _uiStyles.LabelTitleStyle;
+                }
             } else {
                 titleStyle = _uiStyles.LabelTitleNoVesselStyle;
             }

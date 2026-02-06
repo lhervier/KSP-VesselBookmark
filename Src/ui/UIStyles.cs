@@ -20,6 +20,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public GUIStyle LabelTitleStyle { get; private set; }
 
         /// <summary>
+        /// Style for the title of the bookmark when the vessel is the target.
+        /// </summary>
+        public GUIStyle LabelTitleTargetStyle { get; private set; }
+
+        /// <summary>
         /// Style for the title of the bookmark when the vessel is missing.
         /// </summary>
         public GUIStyle LabelTitleNoVesselStyle { get; private set; }
@@ -75,6 +80,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             // Style for the title of the bookmark
             LabelTitleStyle = new GUIStyle(LabelStyle) { fontStyle = FontStyle.Bold };
             ApplyColor(LabelTitleStyle, Color.white);
+
+            // Style for the title of the bookmark when the vessel is the target
+            LabelTitleTargetStyle = new GUIStyle(LabelTitleStyle) { fontStyle = FontStyle.Bold };
+            ApplyColor(LabelTitleTargetStyle, Color.yellow);
 
             // Style for the title of the bookmark when the vessel is missing
             LabelTitleNoVesselStyle = new GUIStyle(LabelStyle) { fontStyle = FontStyle.Italic | FontStyle.Bold };

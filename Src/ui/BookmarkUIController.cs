@@ -26,6 +26,21 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _currentIndex = currentIndex;
         }
 
+        public bool IsTarget() {
+            if( FlightGlobals.ActiveVessel == null ) {
+                return false;
+            }
+            ITargetable target = FlightGlobals.ActiveVessel.targetObject;
+            if( target == null ) {
+                return false;
+            }
+            Vessel targetVessel = target.GetVessel();
+            if( targetVessel == null ) {
+                return false;
+            }
+            return targetVessel.persistentId == _currentBookmark.VesselPersistentID;
+        }
+
         public string GetBookmarkTitle() {
             if( string.IsNullOrEmpty(_currentBookmark.BookmarkTitle)) {
                 return ModLocalization.GetString("labelModuleNotFound");
