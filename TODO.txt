@@ -1,4 +1,7 @@
 TODO :
+- Quand on click sur une ligne, elle reste comme si elle était toujours hover
+- Raccourci clavier pour ouvrir/fermer la fenetre (alt + b ?)
+- Faire ressortir les bookmarks associés à la target du vaisseau courant
 - Ajouter une fenetre pour la config => Passage en debug on/off
 - Remplacer les boutons par des icones :
     - Reinitialiser les filtres
