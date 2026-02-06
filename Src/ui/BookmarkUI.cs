@@ -173,17 +173,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             GUIStyle titleStyle;
             if( vesselExists ) {
-                if( !hasComment ) {
-                    titleStyle = _uiStyles.LabelTitleStyle;
-                } else {
-                    titleStyle = _uiStyles.LabelCommentStyle;
-                }
+                titleStyle = _uiStyles.LabelTitleStyle;
             } else {
-                if( !hasComment ) {
-                    titleStyle = _uiStyles.LabelTitleNoVesselStyle;
-                } else {
-                    titleStyle = _uiStyles.LabelCommentNoVesselStyle;
-                }
+                titleStyle = _uiStyles.LabelTitleNoVesselStyle;
             }
             string title = bookmarkUIController.GetBookmarkTitle();
             if( !vesselExists ) {
@@ -267,7 +259,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.EndHorizontal();
             Rect line1Rect = GUILayoutUtility.GetLastRect();
 
-            // Line 2: Situation and vessel name (if different from command module name)
+            // Line 2: Vessel situation
             GUILayout.BeginHorizontal();
             GUILayout.Space(20 + BUTTON_WIDTH + 4);
             
@@ -292,9 +284,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             // Line 3: Comment
             if( !string.IsNullOrEmpty(bookmark.Comment) ) {
-            GUILayout.BeginHorizontal();
+                GUILayout.BeginHorizontal();
                 GUILayout.Space(BUTTON_WIDTH + 4);
-                GUILayout.Label(bookmark.Comment, _uiStyles.LabelStyle, GUILayout.ExpandWidth(true));
+                GUILayout.Label(
+                    bookmark.Comment, 
+                    _uiStyles.LabelCommentStyle, 
+                    GUILayout.ExpandWidth(true)
+                );
                 GUILayout.EndHorizontal();
             }
             Rect line3Rect = GUILayoutUtility.GetLastRect();
