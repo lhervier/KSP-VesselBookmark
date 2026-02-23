@@ -9,7 +9,7 @@ TODO :
     - Rafraichir les bookmarks
     - Ajouter un bookmark
     - Et le futur bouton pour la config
-- Quand un vaisseau change de situation, il faut rafraichier les bookmarks associés
+- Quand un vaisseau change de situation, il faut rafraichir les bookmarks associés
 
 Maybe :
 - Afficher dans combien de temps est le prochain noeud de manoeuvre
@@ -19,5 +19,9 @@ Bugs :
 
 
 Known bugs :
-- Les tooltip ne peuvent pas déboder par dessus la fenetre
+- Les tooltip ne peuvent pas déborder par dessus la fenetre
 - Fenêtre de saisie du commentaire: Ajouter des ascenseurs pour le cas où la saisie est longue.
+
+Big :
+- Gérer plusieurs listes de bookmarks
+- Gérer l'ensemble des vaisseaux (modules de commande). Mais ça peut devenir lourd...
