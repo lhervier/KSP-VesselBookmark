@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System;
 
 namespace com.github.lhervier.ksp.bookmarksmod.util {
-    public static class ConfigNodeUtils {
+    public static class ConfigNodeExtension {
         
-        private static readonly ModLogger LOGGER = new ModLogger("ConfigNodeUtils");
+        private static readonly ModLogger LOGGER = new ModLogger("ConfigNodeExtension");
 
         private const string NEWLINE_PLACEHOLDER = "%NEWLINE%";
 
@@ -16,7 +16,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
         /// <param name="raiseException">True if an exception should be thrown if the value is not found or not a valid integer, false otherwise</param>
         /// <param name="defaultValue">Default value to return if the value is not found or not a valid integer</param>
         /// <returns>The value of the integer</returns>
-        private static int GetIntNodeValue(ConfigNode node, string valueName, bool raiseException, int defaultValue) {
+        private static int GetIntValue(ConfigNode node, string valueName, bool raiseException, int defaultValue) {
             if( !node.HasValue(valueName) ) {
                 LOGGER.LogWarning($"{valueName} not found in the bookmark node");
                 if( raiseException ) {
@@ -34,11 +34,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
             }
             return value;
         }
-        public static int GetIntNodeValue(ConfigNode node, string valueName, int defaultValue = 0) {
-            return GetIntNodeValue(node, valueName, false, defaultValue);
+        public static int GetIntValue(this ConfigNode node, string valueName, int defaultValue = 0) {
+            return GetIntValue(node, valueName, false, defaultValue);
         }
-        public static int GetMandatoryIntNodeValue(ConfigNode node, string valueName) {
-            return GetIntNodeValue(node, valueName, true, 0);
+        public static int GetMandatoryIntValue(this ConfigNode node, string valueName) {
+            return GetIntValue(node, valueName, true, 0);
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
         /// <param name="raiseException">True if an exception should be thrown if the value is not found or not a valid integer, false otherwise</param>
         /// <param name="defaultValue">Default value to return if the value is not found or not a valid integer</param>
         /// <returns>The value of the integer</returns>
-        private static uint GetUintNodeValue(ConfigNode node, string valueName, bool raiseException, uint defaultValue) {
+        private static uint GetUintValue(ConfigNode node, string valueName, bool raiseException, uint defaultValue) {
             if( !node.HasValue(valueName) ) {
                 LOGGER.LogWarning($"{valueName} not found in the bookmark node");
                 if( raiseException ) {
@@ -67,11 +67,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
             }
             return value;
         }
-        public static uint GetUintNodeValue(ConfigNode node, string valueName, uint defaultValue = 0) {
-            return GetUintNodeValue(node, valueName, false, defaultValue);
+        public static uint GetUintValue(this ConfigNode node, string valueName, uint defaultValue = 0) {
+            return GetUintValue(node, valueName, false, defaultValue);
         }
-        public static uint GetMandatoryUintNodeValue(ConfigNode node, string valueName) {
-            return GetUintNodeValue(node, valueName, true, 0);
+        public static uint GetMandatoryUintValue(this ConfigNode node, string valueName) {
+            return GetUintValue(node, valueName, true, 0);
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
         /// <param name="raiseException">True if an exception should be thrown if the value is not found or not a valid integer, false otherwise</param>
         /// <param name="defaultValue">Default value to return if the value is not found or not a valid integer</param>
         /// <returns>The value of the integer</returns>
-        private static double GetDoubleNodeValue(ConfigNode node, string valueName, bool raiseException, double defaultValue) {
+        private static double GetDoubleValue(ConfigNode node, string valueName, bool raiseException, double defaultValue) {
             if( !node.HasValue(valueName) ) {
                 LOGGER.LogWarning($"{valueName} not found in the bookmark node");
                 if( raiseException ) {
@@ -100,11 +100,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
             }
             return value;
         }
-        public static double GetDoubleNodeValue(ConfigNode node, string valueName, double defaultValue = 0) {
-            return GetDoubleNodeValue(node, valueName, false, defaultValue);
+        public static double GetDoubleValue(this ConfigNode node, string valueName, double defaultValue = 0) {
+            return GetDoubleValue(node, valueName, false, defaultValue);
         }
-        public static double GetMandatoryDoubleNodeValue(ConfigNode node, string valueName) {
-            return GetDoubleNodeValue(node, valueName, true, 0);
+        public static double GetMandatoryDoubleValue(this ConfigNode node, string valueName) {
+            return GetDoubleValue(node, valueName, true, 0);
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
         /// <param name="raiseException">True if an exception should be thrown if the value is not found or not a valid boolean, false otherwise</param>
         /// <param name="defaultValue">Default value to return if the value is not found or not a valid boolean</param>
         /// <returns>The value of the boolean</returns>
-        private static bool GetBoolNodeValue(ConfigNode node, string valueName, bool raiseException, bool defaultValue) {
+        private static bool GetBoolValue(ConfigNode node, string valueName, bool raiseException, bool defaultValue) {
             string value = node.GetValue(valueName);
             if( string.IsNullOrEmpty(value) ) {
                 LOGGER.LogWarning($"{valueName} not found in the bookmark node");
@@ -134,11 +134,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
             }
             return valueBool;
         }
-        public static bool GetBoolNodeValue(ConfigNode node, string valueName, bool defaultValue = false) {
-            return GetBoolNodeValue(node, valueName, false, defaultValue);
+        public static bool GetBoolValue(this ConfigNode node, string valueName, bool defaultValue = false) {
+            return GetBoolValue(node, valueName, false, defaultValue);
         }
-        public static bool GetMandatoryBoolNodeValue(ConfigNode node, string valueName) {
-            return GetBoolNodeValue(node, valueName, true, false);
+        public static bool GetMandatoryBoolValue(this ConfigNode node, string valueName) {
+            return GetBoolValue(node, valueName, true, false);
         }
 
         /// <summary>
@@ -149,7 +149,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
         /// <param name="raiseException">True if an exception should be thrown if the value is not found or not a valid enum, false otherwise</param>
         /// <param name="defaultValue">Default value to return if the value is not found or not a valid enum</param>
         /// <returns>The value of the enum</returns>
-        private static T GetEnumNodeValue<T>(ConfigNode node, string valueName, bool raiseException, T defaultValue) where T : Enum {
+        private static T GetEnumValue<T>(ConfigNode node, string valueName, bool raiseException, T defaultValue) where T : Enum {
             string value = node.GetValue(valueName);
             if( string.IsNullOrEmpty(value) ) {
                 LOGGER.LogWarning($"{valueName} not found in the bookmark node");
@@ -160,11 +160,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
             }
             return (T) Enum.Parse(typeof(T), value);
         }
-        public static T GetEnumNodeValue<T>(ConfigNode node, string valueName, T defaultValue = default) where T : Enum {
-            return GetEnumNodeValue<T>(node, valueName, false, defaultValue);
+        public static T GetEnumValue<T>(this ConfigNode node, string valueName, T defaultValue = default) where T : Enum {
+            return GetEnumValue<T>(node, valueName, false, defaultValue);
         }
-        public static T GetMandatoryEnumNodeValue<T>(ConfigNode node, string valueName) where T : Enum {
-            return GetEnumNodeValue<T>(node, valueName, true, default(T));
+        public static T GetMandatoryEnumValue<T>(this ConfigNode node, string valueName) where T : Enum {
+            return GetEnumValue<T>(node, valueName, true, default(T));
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
         /// <param name="raiseException">True if an exception should be thrown if the value is not found or not a valid string, false otherwise</param>
         /// <param name="defaultValue">Default value to return if the value is not found or not a valid string</param>
         /// <returns>The value of the string</returns>
-        private static string GetStringNodeValue(ConfigNode node, string valueName, bool raiseException, string defaultValue) {
+        private static string GetStringValue(ConfigNode node, string valueName, bool raiseException, string defaultValue) {
             string value = node.GetValue(valueName);
             if( string.IsNullOrEmpty(value) ) {
                 LOGGER.LogWarning($"{valueName} is empty in the bookmark node");
@@ -189,11 +189,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
             value = value.Replace(NEWLINE_PLACEHOLDER, "\n");
             return value;
         }
-        public static string GetStringNodeValue(ConfigNode node, string valueName, string defaultValue = "") {
-            return GetStringNodeValue(node, valueName, false, defaultValue);
+        public static string GetStringValue(this ConfigNode node, string valueName, string defaultValue = "") {
+            return GetStringValue(node, valueName, false, defaultValue);
         }
-        public static string GetMandatoryStringNodeValue(ConfigNode node, string valueName) {
-            return GetStringNodeValue(node, valueName, true, "");
+        public static string GetMandatoryStringValue(this ConfigNode node, string valueName) {
+            return GetStringValue(node, valueName, true, "");
         }
 
         // ===============================================================================================
@@ -205,7 +205,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
         /// <param name="valueName">Name of the value to add</param>
         /// <param name="value">Value to add</param>
         /// <param name="defaultValue">Default value to add if the value is 0</param>
-        public static void AddUintNodeValue(ConfigNode node, string valueName, uint value, uint defaultValue = 0) {
+        public static void AddUintValue(this ConfigNode node, string valueName, uint value, uint defaultValue = 0) {
             if( value == 0 ) {
                 value = defaultValue;
             }
@@ -219,7 +219,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
         /// <param name="valueName">Name of the value to add</param>
         /// <param name="value">Value to add</param>
         /// <param name="defaultValue">Default value to add if the value is 0</param>
-        public static void AddIntNodeValue(ConfigNode node, string valueName, int value, int defaultValue = 0) {
+        public static void AddIntValue(this ConfigNode node, string valueName, int value, int defaultValue = 0) {
             if( value == 0 ) {
                 value = defaultValue;
             }
@@ -233,7 +233,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
         /// <param name="valueName">Name of the value to add</param>
         /// <param name="value">Value to add</param>
         /// <param name="defaultValue">Default value to add if the value is 0</param>
-        public static void AddDoubleNodeValue(ConfigNode node, string valueName, double value, double defaultValue = 0) {
+        public static void AddDoubleValue(this ConfigNode node, string valueName, double value, double defaultValue = 0) {
             if( value == 0 ) {
                 value = defaultValue;
             }
@@ -247,7 +247,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
         /// <param name="valueName">Name of the value to add</param>
         /// <param name="value">Value to add</param>
         /// <param name="defaultValue">Default value to add if the value is false</param>
-        public static void AddBoolNodeValue(ConfigNode node, string valueName, bool value, bool defaultValue = false) {
+        public static void AddBoolValue(this ConfigNode node, string valueName, bool value, bool defaultValue = false) {
             if( value == false ) {
                 value = defaultValue;
             }
@@ -261,16 +261,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
         /// <param name="valueName">Name of the value to set</param>
         /// <param name="value">Value to set</param>
         /// <param name="defaultValue">Default value to set if the value is empty</param>
-        public static void AddStringNodeValue(ConfigNode node, string valueName, string value, string defaultValue = "") {
+        public static void AddStringValue(this ConfigNode node, string valueName, string value, string defaultValue = "") {
             if( string.IsNullOrEmpty(value) ) {
                 value = defaultValue;
-            }
-            
-            // Temporary log the characters ASCII numbers of the comment
-            if( valueName == "comment" && !String.IsNullOrEmpty(value) ) {
-                for( int i = 0; i < value.Length; i++ ) {
-                    LOGGER.LogDebug($"Character {i}: {(int) value[i]}");
-                }
             }
             
             // Process multi line
@@ -285,7 +278,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
         /// <param name="valueName">Name of the value to add</param>
         /// <param name="value">Value to add</param>
         /// <param name="defaultValue">Default value to add if the value is null</param>
-        public static void AddEnumNodeValue<T>(ConfigNode node, string valueName, T value, T defaultValue = default) where T : Enum {
+        public static void AddEnumValue<T>(this ConfigNode node, string valueName, T value, T defaultValue = default) where T : Enum {
             if( value == null ) {
                 value = defaultValue;
             }
