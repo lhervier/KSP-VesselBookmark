@@ -1,8 +1,11 @@
 TODO :
 - Recherche plein texte : On prend la chaine saisie, et on l'éclate selon les espaces. Ca fait des mots. On selectionne tous les vaisseaux qui contiennent tous ces mots.
 - Quand on click sur une ligne, elle reste comme si elle était toujours hover
+    => On pourra alors mettre les boutons "switch to", "set as target" et "edit" en bas de la liste (comme les alarmes)
+- Ajouter une fenetre pour la config 
+    - Passage en debug on/off
+    - Permettre de changer le theme pour être cohérent avec le z-theme
 - Raccourci clavier pour ouvrir/fermer la fenetre (alt + b ?)
-- Ajouter une fenetre pour la config => Passage en debug on/off
 - Remplacer les boutons par des icones :
     - Reinitialiser les filtres
     - Fermer la fenetre
@@ -16,7 +19,7 @@ Maybe :
 - "Contrôler d'ici"
 
 Bugs :
-
+- Quand on choisir une valeur dans une combo, l'évenement hover de la souris est aussi reçu en dessous.
 
 Known bugs :
 - Les tooltip ne peuvent pas déborder par dessus la fenetre
