@@ -29,17 +29,8 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 LOGGER.LogDebug($"Loading bookmark from config node");
 
                 // Load bookmark id and type (mandatory fields)
-                uint bookmarkID = ConfigNodeUtils.GetUintNodeValue(node, "bookmarkID", true);
-                string sBookmarkType = node.GetValue("bookmarkType");
-                if( sBookmarkType == null ) {
-                    LOGGER.LogError($"Bookmark {bookmarkID}: Bookmark type is mandatory");
-                    return null;
-                }
-                BookmarkType bookmarkType = (BookmarkType) Enum.Parse(typeof(BookmarkType), sBookmarkType);
-                if( bookmarkType == BookmarkType.Unknown ) {
-                    LOGGER.LogError($"Bookmark {bookmarkID}: Invalid bookmark type {sBookmarkType}");
-                    return null;
-                }
+                uint bookmarkID = ConfigNodeUtils.GetMandatoryUintNodeValue(node, "bookmarkID");
+                BookmarkType bookmarkType = ConfigNodeUtils.GetMandatoryEnumNodeValue<BookmarkType>(node, "bookmarkType");
 
                 // Instanciate the bookmark from its type
                 Bookmark bookmark;
@@ -52,28 +43,27 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 }
 
                 // Load common fields
-                bookmark.Comment = node.GetValue("comment") ?? "";
-                bookmark.Order = ConfigNodeUtils.GetIntNodeValue(node, "order", true);
-                bookmark.CreationTime = ConfigNodeUtils.GetDoubleNodeValue(node, "creationTime", false, Planetarium.GetUniversalTime());
+                bookmark.Comment = ConfigNodeUtils.GetStringNodeValue(node, "comment");
+                bookmark.Order = ConfigNodeUtils.GetMandatoryIntNodeValue(node, "order");
+                bookmark.CreationTime = ConfigNodeUtils.GetDoubleNodeValue(node, "creationTime", Planetarium.GetUniversalTime());
                 
                 // Load cached fields (need if vessel doesn't exist)
-                bookmark.BookmarkTitle = node.GetValue("bookmarkTitle") ?? "";
-                bookmark.BookmarkVesselType = node.GetValue("bookmarkVesselType") ?? "";
+                bookmark.BookmarkTitle = ConfigNodeUtils.GetStringNodeValue(node, "bookmarkTitle");
+                bookmark.BookmarkVesselType = ConfigNodeUtils.GetStringNodeValue(node, "bookmarkVesselType");
                 
-                bookmark.VesselPersistentID = ConfigNodeUtils.GetUintNodeValue(node, "vesselPersistentID", false, 0);
-                bookmark.VesselName = node.GetValue("vesselName") ?? "";
-                bookmark.VesselType = node.GetValue("vesselType") ?? "";
-                bookmark.VesselBodyName = node.GetValue("vesselBodyName") ?? "";
-                bookmark.VesselSituation = node.GetValue("vesselSituation") ?? "";
-                bookmark.VesselSituationLabel = node.GetValue("vesselSituationLabel") ?? "";
-                string sHasAlarm = node.GetValue("hasAlarm") ?? bool.FalseString;
-                bookmark.HasAlarm = bool.Parse(sHasAlarm);
+                bookmark.VesselPersistentID = ConfigNodeUtils.GetUintNodeValue(node, "vesselPersistentID");
+                bookmark.VesselName = ConfigNodeUtils.GetStringNodeValue(node, "vesselName");
+                bookmark.VesselType = ConfigNodeUtils.GetStringNodeValue(node, "vesselType");
+                bookmark.VesselBodyName = ConfigNodeUtils.GetStringNodeValue(node, "vesselBodyName");
+                bookmark.VesselSituation = ConfigNodeUtils.GetStringNodeValue(node, "vesselSituation");
+                bookmark.VesselSituationLabel = ConfigNodeUtils.GetStringNodeValue(node, "vesselSituationLabel");
+                bookmark.HasAlarm = ConfigNodeUtils.GetBoolNodeValue(node, "hasAlarm");
 
                 if( bookmarkType == BookmarkType.CommandModule ) {
                     CommandModuleBookmark commandModuleBookmark = (CommandModuleBookmark) bookmark;
-                    commandModuleBookmark.CommandModuleFlightID = ConfigNodeUtils.GetUintNodeValue(node, "commandModuleFlightID", false, 0);
-                    commandModuleBookmark.CommandModuleName = node.GetValue("commandModuleName") ?? "";
-                    commandModuleBookmark.CommandModuleType = node.GetValue("commandModuleType") ?? "";
+                    commandModuleBookmark.CommandModuleFlightID = ConfigNodeUtils.GetUintNodeValue(node, "commandModuleFlightID");
+                    commandModuleBookmark.CommandModuleName = ConfigNodeUtils.GetStringNodeValue(node, "commandModuleName");
+                    commandModuleBookmark.CommandModuleType = ConfigNodeUtils.GetStringNodeValue(node, "commandModuleType");
                 } else if( bookmarkType == BookmarkType.Vessel ) {
                     // Nothing more
                 }
@@ -125,29 +115,29 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="bookmark"></param>
         /// <returns>True if the bookmark was saved, false otherwise</returns>
         public static bool SaveBookmark(ConfigNode node, Bookmark bookmark) {
-            node.AddValue("bookmarkID", bookmark.BookmarkID);
-            node.AddValue("bookmarkType", bookmark.BookmarkType.ToString());
+            ConfigNodeUtils.AddUintNodeValue(node, "bookmarkID", bookmark.BookmarkID);
+            ConfigNodeUtils.AddEnumNodeValue(node, "bookmarkType", bookmark.BookmarkType);
 
-            node.AddValue("comment", bookmark.Comment);
-            node.AddValue("order", bookmark.Order);
-            node.AddValue("creationTime", bookmark.CreationTime);
+            ConfigNodeUtils.AddStringNodeValue(node, "comment", bookmark.Comment);
+            ConfigNodeUtils.AddIntNodeValue(node, "order", bookmark.Order);
+            ConfigNodeUtils.AddDoubleNodeValue(node, "creationTime", bookmark.CreationTime);
 
             // Save cached fields
-            node.AddValue("bookmarkTitle", bookmark.BookmarkTitle ?? "");
-            node.AddValue("bookmarkVesselType", bookmark.BookmarkVesselType ?? "");
+            ConfigNodeUtils.AddStringNodeValue(node, "bookmarkTitle", bookmark.BookmarkTitle);
+            ConfigNodeUtils.AddStringNodeValue(node, "bookmarkVesselType", bookmark.BookmarkVesselType);
             
-            node.AddValue("vesselPersistentID", bookmark.VesselPersistentID);
-            node.AddValue("vesselName", bookmark.VesselName ?? "");
-            node.AddValue("vesselType", bookmark.VesselType.ToString());
-            node.AddValue("vesselBodyName", bookmark.VesselBodyName ?? "");
-            node.AddValue("vesselSituation", bookmark.VesselSituation.ToString());
-            node.AddValue("vesselSituationLabel", bookmark.VesselSituationLabel ?? "");
-            node.AddValue("hasAlarm", bookmark.HasAlarm.ToString());
+            ConfigNodeUtils.AddUintNodeValue(node, "vesselPersistentID", bookmark.VesselPersistentID);
+            ConfigNodeUtils.AddStringNodeValue(node, "vesselName", bookmark.VesselName);
+            ConfigNodeUtils.AddStringNodeValue(node, "vesselType", bookmark.VesselType);
+            ConfigNodeUtils.AddStringNodeValue(node, "vesselBodyName", bookmark.VesselBodyName);
+            ConfigNodeUtils.AddStringNodeValue(node, "vesselSituation", bookmark.VesselSituation);
+            ConfigNodeUtils.AddStringNodeValue(node, "vesselSituationLabel", bookmark.VesselSituationLabel);
+            ConfigNodeUtils.AddBoolNodeValue(node, "hasAlarm", bookmark.HasAlarm);
 
             if( bookmark is CommandModuleBookmark commandModuleBookmark ) {
-                node.AddValue("commandModuleFlightID", commandModuleBookmark.CommandModuleFlightID);
-                node.AddValue("commandModuleName", commandModuleBookmark.CommandModuleName);
-                node.AddValue("commandModuleType", commandModuleBookmark.CommandModuleType.ToString());
+                ConfigNodeUtils.AddUintNodeValue(node, "commandModuleFlightID", commandModuleBookmark.CommandModuleFlightID);
+                ConfigNodeUtils.AddStringNodeValue(node, "commandModuleName", commandModuleBookmark.CommandModuleName);
+                ConfigNodeUtils.AddStringNodeValue(node, "commandModuleType", commandModuleBookmark.CommandModuleType);
             } else {
                 // Nothing more
             }
