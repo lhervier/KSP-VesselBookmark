@@ -18,59 +18,104 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public int Height { get; private set; }
         
         /// <summary>
-        /// Creates a new bookmark button
+        /// Starts building a button. Use Build() when done configuring.
         /// </summary>
-        /// <param name="iconPath">Base path to the icon (e.g., "VesselBookmarkMod/buttons/remove"). 
-        /// The class will automatically load variants: _hover, _clicked, _disabled if they exist.</param>
-        /// <param name="tooltip">Tooltip text (optional)</param>
-        /// <param name="width">Button width in pixels</param>
-        /// <param name="height">Button height in pixels</param>
-        public VesselBookmarkButton(
-            string iconPath,
-            string tooltip = "", 
-            int width = 20,
-            int height = 20
-        ) {
-            // Load base icon
-            Icon = GameDatabase.Instance.GetTexture(iconPath, false);
-            
-            // Load hover variant if it exists
-            IconHover = GameDatabase.Instance.GetTexture(iconPath + "_hover", false);
-            
-            // Load clicked variant if it exists
-            IconClicked = GameDatabase.Instance.GetTexture(iconPath + "_clicked", false);
-            
-            // Load disabled variant if it exists
-            IconDisabled = GameDatabase.Instance.GetTexture(iconPath + "_disabled", false);
-            
+        public static VesselBookmarkButtonBuilder Builder() {
+            return new VesselBookmarkButtonBuilder();
+        }
+
+        public sealed class VesselBookmarkButtonBuilder {
+            private string _iconPath = null;
+            public string IconPath => _iconPath;
+            private string _tooltip = "";
+            public string Tooltip => _tooltip;
+            private int _width = 20;
+            public int Width => _width;
+            private int _height = 20;
+            public int Height => _height;
+
+            internal VesselBookmarkButtonBuilder() {
+            }
+
+            public VesselBookmarkButtonBuilder WithIconPath(string iconPath) {
+                _iconPath = iconPath;
+                return this;
+            }
+
+            public VesselBookmarkButtonBuilder WithTooltip(string tooltip) {
+                _tooltip = tooltip ?? "";
+                return this;
+            }
+
+            public VesselBookmarkButtonBuilder WithSize(int width, int height) {
+                _width = width;
+                _height = height;
+                return this;
+            }
+
+            public VesselBookmarkButton Build() {
+                return new VesselBookmarkButton(this);
+            }
+        }
+
+        // =============================================================================
+
+        /// <summary>
+        /// Creates a new button
+        /// </summary>
+        /// <param name="builder">The builder to use to configure the button</param>
+        private VesselBookmarkButton(VesselBookmarkButtonBuilder builder) {
             // Create an empty and transparent texture
             EmptyIcon = new Texture2D(1, 1);
             EmptyIcon.SetPixel(0, 0, Color.clear);
             EmptyIcon.Apply();
 
-            Tooltip = tooltip;
-            Width = width;
-            Height = height;
+            if (!string.IsNullOrEmpty(builder.IconPath)) {
+                Icon = GameDatabase.Instance.GetTexture(builder.IconPath, false);
+                IconHover = GameDatabase.Instance.GetTexture(builder.IconPath + "_hover", false);
+                IconClicked = GameDatabase.Instance.GetTexture(builder.IconPath + "_clicked", false);
+                IconDisabled = GameDatabase.Instance.GetTexture(builder.IconPath + "_disabled", false);
+            } else {
+                Icon = null;
+                IconHover = null;
+                IconClicked = null;
+                IconDisabled = null;
+            }
+
+            Tooltip = builder.Tooltip;
+            Width = builder.Width;
+            Height = builder.Height;
         }
         
+        /// <summary>
+        /// Draws the button
+        /// </summary>
+        /// <param name="isVisible">A function that returns true if the button should be visible, false otherwise</param>
+        /// <param name="onClick">The action to perform when the button is clicked</param>
+        /// <returns>True if the button was clicked, false otherwise</returns>
         public bool Draw(
             Func<bool> isVisible,
-            System.Action OnClick
+            Action onClick
         ) {
             if( !isVisible() ) {
                 this.DrawHidden();
                 return false;
             }
 
-            if( OnClick == null ) {
+            if( onClick == null ) {
                 this.DrawDisabled();
                 return false;
             } else {
-                return this.DrawEnabled(OnClick);
+                return this.DrawEnabled(onClick);
             }
         }
 
-        private bool DrawEnabled(System.Action OnClick) {
+        /// <summary>
+        /// Draws the button in enabled state (can be clicked)
+        /// </summary>
+        /// <param name="onClick">The action to perform when the button is clicked</param>
+        /// <returns>True if the button was clicked, false otherwise</returns>
+        private bool DrawEnabled(Action onClick) {
             // Reserve space for button and get its rect
             Rect iconRect = GUILayoutUtility.GetRect(Width, Height, GUILayout.Width(Width), GUILayout.Height(Height));
             
@@ -101,8 +146,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             // Handle click
             bool wasClicked = false;
             if (isClicking) {
-                if (OnClick != null) {
-                    OnClick();
+                if (onClick != null) {
+                    onClick();
                 }
                 Event.current.Use();
                 wasClicked = true;
@@ -129,6 +174,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUI.DrawTexture(iconRect, iconToUse);
         }
 
+        /// <summary>
+        /// Draws the button in hidden state (no interactions, no tooltip, no hover)
+        /// </summary>
         public void DrawHidden() {
             Rect iconRect = GUILayoutUtility.GetRect(Width, Height, GUILayout.Width(Width), GUILayout.Height(Height));
             GUI.DrawTexture(iconRect, EmptyIcon);

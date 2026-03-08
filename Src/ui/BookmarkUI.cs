@@ -1,3 +1,4 @@
+using System;
 using KSP.Localization;
 using KSP.UI.Screens;
 using System.Collections.Generic;
@@ -32,72 +33,48 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         public BookmarkUI() {
             // Initialize vessel type buttons
-            _vesselTypeButtons[VesselType.Base.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/base", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Debris.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/debris", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Lander.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/lander", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Plane.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/plane", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Probe.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/probe", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Relay.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/relay", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Rover.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/rover", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Ship.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/ship", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Station.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/station", null, BUTTON_WIDTH, BUTTON_HEIGHT);
-            _vesselTypeButtons[VesselType.Unknown.ToString()] = new VesselBookmarkButton("VesselBookmarkMod/vessel_types/empty", null, BUTTON_WIDTH, BUTTON_HEIGHT);
+            foreach( VesselType vesselType in Enum.GetValues(typeof(VesselType)) ) {
+                _vesselTypeButtons[vesselType.ToString()] = VesselBookmarkButton.Builder()
+                    .WithIconPath("VesselBookmarkMod/vessel_types/" + vesselType.ToString().ToLower())
+                    .WithSize(BUTTON_WIDTH, BUTTON_HEIGHT)
+                    .Build();
+            }
             
-            // Initialize alarm icon
-            _alarmIcon = new VesselBookmarkButton(
-                "VesselBookmarkMod/buttons/alarm",
-                null,
-                BUTTON_WIDTH,
-                BUTTON_HEIGHT
-            );
-
-            // Initialize remove button
-            _removeButton = new VesselBookmarkButton(
-                "VesselBookmarkMod/buttons/remove",
-                ModLocalization.GetString("tooltipRemove"), 
-                BUTTON_WIDTH, 
-                BUTTON_HEIGHT
-            );
-            
-            // Initialize move up button
-            _moveUpButton = new VesselBookmarkButton(
-                "VesselBookmarkMod/buttons/up",
-                ModLocalization.GetString("tooltipMoveUp"), 
-                BUTTON_WIDTH, 
-                BUTTON_HEIGHT
-            );
-            
-            // Initialize move down button
-            _moveDownButton = new VesselBookmarkButton(
-                "VesselBookmarkMod/buttons/down",
-                ModLocalization.GetString("tooltipMoveDown"), 
-                BUTTON_WIDTH, 
-                BUTTON_HEIGHT
-            );
-
-            // Initialize set target as button
-            _setTargetAsButton = new VesselBookmarkButton(
-                "VesselBookmarkMod/buttons/target",
-                ModLocalization.GetString("tooltipSetTargetAs"), 
-                BUTTON_WIDTH, 
-                BUTTON_HEIGHT
-            );
-            
-            // Initialize go to button
-            _goToButton = new VesselBookmarkButton(
-                "VesselBookmarkMod/buttons/switch",
-                ModLocalization.GetString("tooltipGoTo"), 
-                BUTTON_WIDTH, 
-                BUTTON_HEIGHT
-            );
-            
-            // Initialize edit button
-            _editButton = new VesselBookmarkButton(
-                "VesselBookmarkMod/buttons/edit",
-                ModLocalization.GetString("tooltipEdit"), 
-                BUTTON_WIDTH, 
-                BUTTON_HEIGHT
-            );
+            // Initialize action buttons
+            _alarmIcon = VesselBookmarkButton.Builder()
+                .WithIconPath("VesselBookmarkMod/buttons/alarm")
+                .WithSize(BUTTON_WIDTH, BUTTON_HEIGHT)
+                .Build();
+            _removeButton = VesselBookmarkButton.Builder()
+                .WithIconPath("VesselBookmarkMod/buttons/remove")
+                .WithTooltip(ModLocalization.GetString("tooltipRemove"))
+                .WithSize(BUTTON_WIDTH, BUTTON_HEIGHT)
+                .Build();
+            _moveUpButton = VesselBookmarkButton.Builder()
+                .WithIconPath("VesselBookmarkMod/buttons/up")
+                .WithTooltip(ModLocalization.GetString("tooltipMoveUp"))
+                .WithSize(BUTTON_WIDTH, BUTTON_HEIGHT)
+                .Build();
+            _moveDownButton = VesselBookmarkButton.Builder()
+                .WithIconPath("VesselBookmarkMod/buttons/down")
+                .WithTooltip(ModLocalization.GetString("tooltipMoveDown"))
+                .WithSize(BUTTON_WIDTH, BUTTON_HEIGHT)
+                .Build();
+            _setTargetAsButton = VesselBookmarkButton.Builder()
+                .WithIconPath("VesselBookmarkMod/buttons/target")
+                .WithTooltip(ModLocalization.GetString("tooltipSetTargetAs"))
+                .WithSize(BUTTON_WIDTH, BUTTON_HEIGHT)
+                .Build();
+            _goToButton = VesselBookmarkButton.Builder()
+                .WithIconPath("VesselBookmarkMod/buttons/switch")
+                .WithTooltip(ModLocalization.GetString("tooltipGoTo"))
+                .WithSize(BUTTON_WIDTH, BUTTON_HEIGHT)
+                .Build();
+            _editButton = VesselBookmarkButton.Builder()
+                .WithIconPath("VesselBookmarkMod/buttons/edit")
+                .WithTooltip(ModLocalization.GetString("tooltipEdit"))
+                .WithSize(BUTTON_WIDTH, BUTTON_HEIGHT)
+                .Build();
 
             // Background texture (slightly tinted blue-green)
             _activeVesselBackground = new Texture2D(1, 1);

@@ -13,6 +13,7 @@ TODO :
     - Ajouter un bookmark
     - Et le futur bouton pour la config
 - Quand un vaisseau change de situation, il faut rafraichir les bookmarks associés
+- Afficher un tooltip sur l'icône d'alarme, avec le libellé de l'alarme.
 
 Maybe :
 - Afficher dans combien de temps est le prochain noeud de manoeuvre
