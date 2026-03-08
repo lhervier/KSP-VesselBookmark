@@ -49,7 +49,22 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public bool IsHovered() {
-            return (_bookmarksListUIController.HoveredBookmarkID == _currentBookmark.BookmarkID) && (_bookmarksListUIController.HoveredBookmarkType == _currentBookmark.BookmarkType);
+            return _bookmarksListUIController.IsHovered(_currentBookmark);
+        }
+
+        public bool IsSelected() {
+            return _bookmarksListUIController.IsSelected(_currentBookmark);
+        }
+
+        public bool IsHoveredOrSelected() {
+            return IsHovered() || IsSelected();
+        }
+
+        /// <summary>
+        /// Ensures the current bookmark line is selected (e.g. when clicking a button on that line).
+        /// </summary>
+        private void SelectCurrentLine() {
+            _bookmarksListUIController.SetSelected(_currentBookmark);
         }
 
         public bool IsActiveVessel() {
@@ -69,6 +84,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public void EditComment() {
+            SelectCurrentLine();
             _editCommentUIController.EditComment(_currentBookmark);
         }
 
@@ -86,6 +102,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public void SetTargetAs() {
+            SelectCurrentLine();
             if( !CanSetTargetAs() ) {
                 LOGGER.LogWarning($"Bookmark {_currentBookmark}: Can't set target as. Current vessel or bookmark vessel not found.");
                 return;
@@ -110,6 +127,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public void SwitchToVessel() {
+            SelectCurrentLine();
             Vessel vessel = _currentBookmark.Vessel;
             if( vessel == null ) {
                 LOGGER.LogWarning($"Bookmark {_currentBookmark}: Vessel not found. Cannot switch to vessel.");
@@ -122,6 +140,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public void MoveUp() {
+            SelectCurrentLine();
             if( !CanMoveUp() ) {
                 LOGGER.LogWarning($"Bookmark {_currentBookmark}: Can't move up. Current index {_currentIndex} is the first index for this bookmark type.");
                 return;
@@ -136,6 +155,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public void MoveDown() {
+            SelectCurrentLine();
             if( !CanMoveDown() ) {
                 LOGGER.LogWarning($"Bookmark {_currentBookmark}: Can't move down. Current index {_currentIndex} is the last index for this bookmark type.");
                 return;
@@ -150,6 +170,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public void Remove() {
+            SelectCurrentLine();
             // Close main window temporarily to ensure confirmation dialog appears on top
             bool wasMainWindowVisible = _bookmarksListUIController.MainWindowsVisible;
             _bookmarksListUIController.MainWindowsVisible = false;

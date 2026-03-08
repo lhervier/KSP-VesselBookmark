@@ -136,8 +136,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 boxStyle.normal.background = _activeVesselBackground;
                 // Add border by setting border values
                 boxStyle.border = new RectOffset(2, 2, 2, 2);
-            } else if (bookmarkUIController.IsHovered()) {
-                // Hovered bookmark: use hover background
+            } else if (bookmarkUIController.IsHoveredOrSelected()) {
+                // Hovered or selected bookmark: use hover background
                 Texture2D hoverBg = new Texture2D(1, 1);
                 hoverBg.SetPixel(0, 0, new Color(0.3f, 0.3f, 0.3f, 1f));
                 hoverBg.Apply();
@@ -202,7 +202,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             
             // Edit button
             _editButton.Draw(
-                bookmarkUIController.IsHovered,
+                bookmarkUIController.IsHoveredOrSelected,
                 bookmarkUIController.EditComment
             );
             
@@ -215,7 +215,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             } else {
                 setTargetAsAction = null;
             }
-            _setTargetAsButton.Draw(bookmarkUIController.IsHovered, setTargetAsAction);
+            _setTargetAsButton.Draw(bookmarkUIController.IsHoveredOrSelected, setTargetAsAction);
 
             // Go to button (disabled if this is the active vessel)
             System.Action goToAction;
@@ -224,7 +224,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             } else {
                 goToAction = null;
             }
-            _goToButton.Draw(bookmarkUIController.IsHovered, goToAction);
+            _goToButton.Draw(bookmarkUIController.IsHoveredOrSelected, goToAction);
             
             GUILayout.Space(3);
 
@@ -236,7 +236,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 moveUpAction = null;
             }
             _moveUpButton.Draw(
-                bookmarkUIController.IsHovered,
+                bookmarkUIController.IsHoveredOrSelected,
                 moveUpAction
             );
         
@@ -248,7 +248,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 moveDownAction = null;
             }
             _moveDownButton.Draw(
-                bookmarkUIController.IsHovered,
+                bookmarkUIController.IsHoveredOrSelected,
                 moveDownAction
             );
             
@@ -256,7 +256,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             
             // Remove button
             _removeButton.Draw(
-                bookmarkUIController.IsHovered,
+                bookmarkUIController.IsHoveredOrSelected,
                 bookmarkUIController.Remove
             );
             
@@ -326,8 +326,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             // Detect hover and update the hovered bookmark ID
             if (bookmarkRect.Contains(Event.current.mousePosition)) {
-                _bookmarksListUIController.HoveredBookmarkID = bookmark.BookmarkID;
-                _bookmarksListUIController.HoveredBookmarkType = bookmark.BookmarkType;
+                _bookmarksListUIController.SetHovered(bookmark);
+            }
+
+            // On left click on the row (when not consumed by a button), set this line as the current bookmark
+            if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && bookmarkRect.Contains(Event.current.mousePosition)) {
+                _bookmarksListUIController.SetSelected(bookmark);
+                Event.current.Use();
             }
         }
 

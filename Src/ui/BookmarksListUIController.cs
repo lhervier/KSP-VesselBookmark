@@ -23,8 +23,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// <summary>
         /// The ID of the hovered bookmark
         /// </summary>
-        public uint HoveredBookmarkID { get; set; } = 0;
-        public BookmarkType HoveredBookmarkType { get; set; } = BookmarkType.Unknown;
+        private uint _hoveredBookmarkID { get; set; } = 0;
+        private BookmarkType _hoveredBookmarkType { get; set; } = BookmarkType.Unknown;
+
+        /// <summary>
+        /// The ID of the currently selected bookmark (stays selected when clicking the row).
+        /// </summary>
+        private uint _selectedBookmarkID { get; set; } = 0;
+        private BookmarkType _selectedBookmarkType { get; set; } = BookmarkType.Unknown;
         
         // Bookmarks list to display in the UI (cached for performance)
         // Only for read access
@@ -259,6 +265,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     }
                     _availableBookmarks[instance.BookmarkType] = selectionedBookmarks;
                 }
+
+                // Clear selection if the selected bookmark is no longer in the filtered list
+                if (_selectedBookmarkID != 0 && _availableBookmarks.TryGetValue(_selectedBookmarkType, out List<Bookmark> list)) {
+                    if (!list.Any(b => b.BookmarkID == _selectedBookmarkID)) {
+                        _selectedBookmarkID = 0;
+                        _selectedBookmarkType = BookmarkType.Unknown;
+                    }
+                }
             } catch (Exception e) {
                 LOGGER.LogError($"Error updating available bookmarks: {e.Message}");
             }
@@ -277,6 +291,42 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         // ======================================================================
 
+        /// <summary>
+        /// Whether the given bookmark is hovered
+        /// </summary>
+        /// <param name="bookmark">The bookmark to check</param>
+        /// <returns>Whether the given bookmark is hovered</returns>
+        public bool IsHovered(Bookmark bookmark) {
+            return _hoveredBookmarkID == bookmark.BookmarkID && _hoveredBookmarkType == bookmark.BookmarkType;
+        }
+
+        /// <summary>
+        /// Set the hovered bookmark
+        /// </summary>
+        /// <param name="bookmark">The bookmark to set as hovered</param>
+        public void SetHovered(Bookmark bookmark) {
+            _hoveredBookmarkID = bookmark.BookmarkID;
+            _hoveredBookmarkType = bookmark.BookmarkType;
+        }
+
+        /// <summary>
+        /// Whether the given bookmark is selected
+        /// </summary>
+        /// <param name="bookmark">The bookmark to check</param>
+        /// <returns>Whether the given bookmark is selected</returns>
+        public bool IsSelected(Bookmark bookmark) {
+            return _selectedBookmarkID == bookmark.BookmarkID && _selectedBookmarkType == bookmark.BookmarkType;
+        }
+
+        /// <summary>
+        /// Set the selected bookmark
+        /// </summary>
+        /// <param name="bookmark">The bookmark to set as selected</param>
+        public void SetSelected(Bookmark bookmark) {
+            _selectedBookmarkID = bookmark.BookmarkID;
+            _selectedBookmarkType = bookmark.BookmarkType;
+        }
+        
         /// <summary>
         /// Whether to show the add vessel bookmark button
         /// </summary>
