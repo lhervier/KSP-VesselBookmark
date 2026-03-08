@@ -12,8 +12,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
     public class BookmarksListUIController {
         private static readonly ModLogger LOGGER = new ModLogger("BookmarksListUIController");
-
-        private const string ALL_VESSEL_TYPES = "All";
+        private static readonly float SEARCH_DEBOUNCE_SECONDS = 0.2f;
+        private static readonly string ALL_VESSEL_TYPES = "All";
 
         /// <summary>
         /// Whether the main windows are visible
@@ -35,6 +35,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// The list of available bodies
         /// </summary>
         public List<string> AvailableBodies = new List<string>();
+        
+        /// <summary>
+        /// The selected body
+        /// </summary>
         private string _selectedBody = ModLocalization.GetString("labelAll");
         public string SelectedBody { 
             get => _selectedBody; 
@@ -51,6 +55,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// The list of available vessel types
         /// </summary>
         public List<string> AvailableVesselTypes = new List<string>();
+        
+        /// <summary>
+        /// The selected vessel type
+        /// </summary>
         private string _selectedVesselType = ALL_VESSEL_TYPES;
         public string SelectedVesselType { 
             get => _selectedVesselType; 
@@ -77,7 +85,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             }
         }
 
-        private const float SEARCH_DEBOUNCE_SECONDS = 0.2f;
+        /// <summary>
+        /// The text in the search box
+        /// </summary>
         private string _searchText = string.Empty;
         private float _searchTextChangeTime = -1f;
 
@@ -275,6 +285,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             return FlightGlobals.ActiveVessel != null;
         }
 
+        /// <summary>
+        /// Add a vessel bookmark
+        /// </summary>
         public void AddVesselBookmark() {
             if( !CanAddVesselBookmark() ) {
                 LOGGER.LogWarning("Cannot add vessel bookmark: no active vessel");
