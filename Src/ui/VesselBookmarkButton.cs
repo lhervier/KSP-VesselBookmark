@@ -82,7 +82,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 IconDisabled = null;
             }
 
-            Tooltip = builder.Tooltip;
+            Tooltip = string.IsNullOrEmpty(builder.Tooltip) ? null : builder.Tooltip;
             Width = builder.Width;
             Height = builder.Height;
         }
