@@ -21,16 +21,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public bool MainWindowsVisible { get; set; } = false;
 
         /// <summary>
-        /// The ID of the hovered bookmark
+        /// The currently hovered bookmark (null if none).
         /// </summary>
-        private uint _hoveredBookmarkID { get; set; } = 0;
-        private BookmarkType _hoveredBookmarkType { get; set; } = BookmarkType.Unknown;
+        private Bookmark _hoveredBookmark = null;
 
         /// <summary>
-        /// The ID of the currently selected bookmark (stays selected when clicking the row).
+        /// The currently selected bookmark (stays selected when clicking the row). Null if none.
         /// </summary>
-        private uint _selectedBookmarkID { get; set; } = 0;
-        private BookmarkType _selectedBookmarkType { get; set; } = BookmarkType.Unknown;
+        private Bookmark _selectedBookmark = null;
         
         // Bookmarks list to display in the UI (cached for performance)
         // Only for read access
@@ -267,11 +265,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 }
 
                 // Clear selection if the selected bookmark is no longer in the filtered list
-                if (_selectedBookmarkID != 0 && _availableBookmarks.TryGetValue(_selectedBookmarkType, out List<Bookmark> list)) {
-                    if (!list.Any(b => b.BookmarkID == _selectedBookmarkID)) {
-                        _selectedBookmarkID = 0;
-                        _selectedBookmarkType = BookmarkType.Unknown;
-                    }
+                if (_selectedBookmark != null && !_availableBookmarks.Values.Any(list => list.Contains(_selectedBookmark))) {
+                    _selectedBookmark = null;
                 }
             } catch (Exception e) {
                 LOGGER.LogError($"Error updating available bookmarks: {e.Message}");
@@ -297,7 +292,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// <param name="bookmark">The bookmark to check</param>
         /// <returns>Whether the given bookmark is hovered</returns>
         public bool IsHovered(Bookmark bookmark) {
-            return _hoveredBookmarkID == bookmark.BookmarkID && _hoveredBookmarkType == bookmark.BookmarkType;
+            return bookmark != null && _hoveredBookmark == bookmark;
         }
 
         /// <summary>
@@ -305,8 +300,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         /// <param name="bookmark">The bookmark to set as hovered</param>
         public void SetHovered(Bookmark bookmark) {
-            _hoveredBookmarkID = bookmark.BookmarkID;
-            _hoveredBookmarkType = bookmark.BookmarkType;
+            _hoveredBookmark = bookmark;
+        }
+
+        /// <summary>
+        /// Returns the currently hovered bookmark, or null if none.
+        /// </summary>
+        public Bookmark GetHoveredBookmark() {
+            return _hoveredBookmark;
         }
 
         /// <summary>
@@ -315,7 +316,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// <param name="bookmark">The bookmark to check</param>
         /// <returns>Whether the given bookmark is selected</returns>
         public bool IsSelected(Bookmark bookmark) {
-            return _selectedBookmarkID == bookmark.BookmarkID && _selectedBookmarkType == bookmark.BookmarkType;
+            return bookmark != null && _selectedBookmark == bookmark;
         }
 
         /// <summary>
@@ -323,8 +324,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         /// <param name="bookmark">The bookmark to set as selected</param>
         public void SetSelected(Bookmark bookmark) {
-            _selectedBookmarkID = bookmark.BookmarkID;
-            _selectedBookmarkType = bookmark.BookmarkType;
+            _selectedBookmark = bookmark;
+        }
+
+        /// <summary>
+        /// Returns the currently selected bookmark, or null if none.
+        /// </summary>
+        public Bookmark GetSelectedBookmark() {
+            return _selectedBookmark;
         }
         
         /// <summary>
