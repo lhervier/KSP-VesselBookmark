@@ -16,10 +16,24 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private UIStyles _uiStyles;
 
         public EditCommentUIController Controller { get; private set; }
+        private VesselBookmarkButton _saveButton;
+        private VesselBookmarkButton _cancelButton;
 
         public EditCommentUI() {
             _editWindowID = UnityEngine.Random.Range(1000, 2000);
             Controller = new EditCommentUIController();
+            _saveButton = VesselBookmarkButton.Builder()
+                .WithIconPath("VesselBookmarkMod/buttons/save")
+                .WithLabel(ModLocalization.GetString("buttonSave"))
+                .WithTooltip(ModLocalization.GetString("buttonSave"))
+                .WithIconSize(20, 20)
+                .Build();
+            _cancelButton = VesselBookmarkButton.Builder()
+                .WithIconPath("VesselBookmarkMod/buttons/cancel")
+                .WithLabel(ModLocalization.GetString("buttonCancel"))
+                .WithTooltip(ModLocalization.GetString("buttonCancel"))
+                .WithIconSize(20, 20)
+                .Build();
         }
 
         public void Initialize(UIStyles uiStyles) {
@@ -61,12 +75,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.Space(10);
             
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button(ModLocalization.GetString("buttonSave"), _uiStyles.ButtonStyle)) {
-                Controller.SaveComment();
-            }
-            if (GUILayout.Button(ModLocalization.GetString("buttonCancel"), _uiStyles.ButtonStyle)) {
-                Controller.CancelCommentEdition();
-            }
+            _saveButton.Draw(() => true, Controller.SaveComment);
+            _cancelButton.Draw(() => true, Controller.CancelCommentEdition);
             GUILayout.EndHorizontal();
             
             GUILayout.EndVertical();

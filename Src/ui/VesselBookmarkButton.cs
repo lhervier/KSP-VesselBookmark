@@ -1,41 +1,39 @@
 using System;
 using UnityEngine;
+using KSP;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui {
-    
+
     /// <summary>
-    /// Represents a clickable button with icon, hover icon, and tooltip
+    /// Simple button with optional icon and text, using the standard KSP button (no custom drawing).
     /// </summary>
     public class VesselBookmarkButton {
-        
-        public Texture2D Icon { get; private set; }
-        public Texture2D IconHover { get; private set; }
-        public Texture2D IconClicked { get; private set; }
-        public Texture2D IconDisabled { get; private set; }
-        public Texture2D EmptyIcon { get; private set; }
+
+        public Texture2D Icon { get; private set; } = null;
+        public Texture2D IconHover { get; private set; } = null;
+        public Texture2D IconClicked { get; private set; } = null;
+        public Texture2D IconDisabled { get; private set; } = null;
         public string Tooltip { get; private set; }
-        public int Width { get; private set; }
-        public int Height { get; private set; }
-        
-        /// <summary>
-        /// Starts building a button. Use Build() when done configuring.
-        /// </summary>
+        public string Label { get; private set; }
+        public int IconWidth { get; private set; }
+        public int IconHeight { get; private set; }
+        public float? ButtonWidth { get; private set; }
+
+        private bool _isPressed;
+
         public static VesselBookmarkButtonBuilder Builder() {
             return new VesselBookmarkButtonBuilder();
         }
 
         public sealed class VesselBookmarkButtonBuilder {
-            private string _iconPath = null;
-            public string IconPath => _iconPath;
-            private string _tooltip = "";
-            public string Tooltip => _tooltip;
-            private int _width = 20;
-            public int Width => _width;
-            private int _height = 20;
-            public int Height => _height;
+            internal string _iconPath;
+            internal string _tooltip = "";
+            internal string _label = null;
+            internal int _iconWidth = 20;
+            internal int _iconHeight = 20;
+            internal float? _buttonWidth = null;
 
-            internal VesselBookmarkButtonBuilder() {
-            }
+            internal VesselBookmarkButtonBuilder() { }
 
             public VesselBookmarkButtonBuilder WithIconPath(string iconPath) {
                 _iconPath = iconPath;
@@ -47,9 +45,19 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 return this;
             }
 
-            public VesselBookmarkButtonBuilder WithSize(int width, int height) {
-                _width = width;
-                _height = height;
+            public VesselBookmarkButtonBuilder WithLabel(string label) {
+                _label = label ?? "";
+                return this;
+            }
+
+            public VesselBookmarkButtonBuilder WithIconSize(int width, int height) {
+                _iconWidth = width;
+                _iconHeight = height;
+                return this;
+            }
+
+            public VesselBookmarkButtonBuilder WithButtonWidth(float width) {
+                _buttonWidth = width;
                 return this;
             }
 
@@ -58,128 +66,93 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             }
         }
 
-        // =============================================================================
-
-        /// <summary>
-        /// Creates a new button
-        /// </summary>
-        /// <param name="builder">The builder to use to configure the button</param>
         private VesselBookmarkButton(VesselBookmarkButtonBuilder builder) {
-            // Create an empty and transparent texture
-            EmptyIcon = new Texture2D(1, 1);
-            EmptyIcon.SetPixel(0, 0, Color.clear);
-            EmptyIcon.Apply();
-
-            if (!string.IsNullOrEmpty(builder.IconPath)) {
-                Icon = GameDatabase.Instance.GetTexture(builder.IconPath, false);
-                IconHover = GameDatabase.Instance.GetTexture(builder.IconPath + "_hover", false);
-                IconClicked = GameDatabase.Instance.GetTexture(builder.IconPath + "_clicked", false);
-                IconDisabled = GameDatabase.Instance.GetTexture(builder.IconPath + "_disabled", false);
-            } else {
-                Icon = null;
-                IconHover = null;
-                IconClicked = null;
-                IconDisabled = null;
+            if (!string.IsNullOrEmpty(builder._iconPath)) {
+                Icon = GameDatabase.Instance.GetTexture(builder._iconPath, false);
+                IconHover = GameDatabase.Instance.GetTexture(builder._iconPath + "_hover", false);
+                IconClicked = GameDatabase.Instance.GetTexture(builder._iconPath + "_clicked", false);
+                IconDisabled = GameDatabase.Instance.GetTexture(builder._iconPath + "_disabled", false);
             }
+            if (IconHover == null) IconHover = Icon;
+            if (IconClicked == null) IconClicked = Icon;
+            if (IconDisabled == null) IconDisabled = Icon;
 
-            Tooltip = string.IsNullOrEmpty(builder.Tooltip) ? null : builder.Tooltip;
-            Width = builder.Width;
-            Height = builder.Height;
+            Tooltip = string.IsNullOrEmpty(builder._tooltip) ? null : builder._tooltip;
+            Label = string.IsNullOrEmpty(builder._label) ? null : builder._label;
+            IconWidth = builder._iconWidth;
+            IconHeight = builder._iconHeight;
+            ButtonWidth = builder._buttonWidth;
         }
-        
-        /// <summary>
-        /// Draws the button
-        /// </summary>
-        /// <param name="isVisible">A function that returns true if the button should be visible, false otherwise</param>
-        /// <param name="onClick">The action to perform when the button is clicked</param>
-        /// <returns>True if the button was clicked, false otherwise</returns>
-        public bool Draw(
-            Func<bool> isVisible,
-            Action onClick
-        ) {
-            if( !isVisible() ) {
-                this.DrawHidden();
+
+        private GUIStyle ButtonStyle => HighLogic.Skin?.button ?? GUI.skin.button;
+
+        /// <summary>When no label, use zero padding so the icon fills the button.</summary>
+        private GUIStyle GetStyle() {
+            if (!string.IsNullOrEmpty(Label)) return ButtonStyle;
+            GUIStyle noPadding = new GUIStyle(ButtonStyle);
+            noPadding.padding = new RectOffset(0, 0, 0, 0);
+            return noPadding;
+        }
+
+        private float GetTotalWidth() {
+            if (ButtonWidth.HasValue) return ButtonWidth.Value;
+            bool hasIcon = Icon != null;
+            if (string.IsNullOrEmpty(Label)) return hasIcon ? IconWidth : 40f;
+            float textW = ButtonStyle.CalcSize(new GUIContent(Label)).x;
+            return (hasIcon ? IconWidth + 4 : 0) + 12 + textW;
+        }
+
+        private float GetTotalHeight() {
+            return string.IsNullOrEmpty(Label) ? IconHeight : IconHeight + 8;
+        }
+
+        private GUIContent BuildContent(Texture2D icon) {
+            string text = Label ?? "";
+            if (icon != null && text.Length > 0) text = " " + text;
+            return new GUIContent(text, icon, Tooltip);
+        }
+
+        public bool Draw(Func<bool> isVisible, Action onClick) {
+            if (!isVisible()) {
+                DrawHidden();
                 return false;
             }
-
-            if( onClick == null ) {
-                this.DrawDisabled();
+            if (onClick == null) {
+                DrawDisabled();
                 return false;
-            } else {
-                return this.DrawEnabled(onClick);
             }
+            float w = GetTotalWidth();
+            float h = GetTotalHeight();
+            Rect r = GUILayoutUtility.GetRect(w, h, GUILayout.Width(w), GUILayout.Height(h));
+            bool hover = r.Contains(Event.current.mousePosition);
+            if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && hover) _isPressed = true;
+            if (Event.current.type == EventType.MouseUp && Event.current.button == 0) _isPressed = false;
+            Texture2D icon = (_isPressed && hover) ? IconClicked : (hover ? IconHover : Icon);
+            if (icon == null) icon = Icon;
+            GUIContent content = BuildContent(icon);
+            if (GUI.Button(r, content, GetStyle())) {
+                _isPressed = false;
+                onClick();
+                return true;
+            }
+            return false;
         }
 
-        /// <summary>
-        /// Draws the button in enabled state (can be clicked)
-        /// </summary>
-        /// <param name="onClick">The action to perform when the button is clicked</param>
-        /// <returns>True if the button was clicked, false otherwise</returns>
-        private bool DrawEnabled(Action onClick) {
-            // Reserve space for button and get its rect
-            Rect iconRect = GUILayoutUtility.GetRect(Width, Height, GUILayout.Width(Width), GUILayout.Height(Height));
-            
-            bool isHovering = iconRect.Contains(Event.current.mousePosition);
-            bool isClicking = Event.current.type == EventType.MouseDown && iconRect.Contains(Event.current.mousePosition);
-            
-            // Determine which icon to use based on state (clicked > hover > normal)
-            Texture2D iconToUse = null;
-            if (isClicking && IconClicked != null) {
-                iconToUse = IconClicked;
-            } else if (isHovering && IconHover != null) {
-                iconToUse = IconHover;
-            } else if( Icon != null ) {
-                iconToUse = Icon;
-            } else {
-                iconToUse = EmptyIcon;
-            }
-
-            // Set tooltip if provided
-            if (!string.IsNullOrEmpty(Tooltip)) {
-                GUIContent iconContent = new GUIContent("", Tooltip);
-                GUI.Label(iconRect, iconContent);
-            }
-            
-            // Draw icon
-            GUI.DrawTexture(iconRect, iconToUse);
-            
-            // Handle click
-            bool wasClicked = false;
-            if (isClicking) {
-                if (onClick != null) {
-                    onClick();
-                }
-                Event.current.Use();
-                wasClicked = true;
-            }
-            
-            return wasClicked;
-        }
-        
-        /// <summary>
-        /// Draws the button in disabled state (no interactions, no tooltip, no hover)
-        /// </summary>
         public void DrawDisabled() {
-            // Use disabled icon if available, otherwise fall back to normal icon
-            Texture2D iconToUse = IconDisabled != null ? IconDisabled : Icon;
-            
-            if (iconToUse == null) {
-                return;
-            }
-            
-            // Reserve space for button and get its rect
-            Rect iconRect = GUILayoutUtility.GetRect(Width, Height, GUILayout.Width(Width), GUILayout.Height(Height));
-            
-            // Draw icon only (no tooltip, no hover, no click handling)
-            GUI.DrawTexture(iconRect, iconToUse);
+            float w = GetTotalWidth();
+            float h = GetTotalHeight();
+            Rect r = GUILayoutUtility.GetRect(w, h, GUILayout.Width(w), GUILayout.Height(h));
+            GUIContent content = BuildContent(IconDisabled ?? Icon);
+            bool wasEnabled = GUI.enabled;
+            GUI.enabled = false;
+            GUI.Button(r, content, GetStyle());
+            GUI.enabled = wasEnabled;
         }
 
-        /// <summary>
-        /// Draws the button in hidden state (no interactions, no tooltip, no hover)
-        /// </summary>
         public void DrawHidden() {
-            Rect iconRect = GUILayoutUtility.GetRect(Width, Height, GUILayout.Width(Width), GUILayout.Height(Height));
-            GUI.DrawTexture(iconRect, EmptyIcon);
+            float w = GetTotalWidth();
+            float h = GetTotalHeight();
+            GUILayoutUtility.GetRect(w, h, GUILayout.Width(w), GUILayout.Height(h));
         }
     }
 }

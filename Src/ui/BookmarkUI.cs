@@ -13,9 +13,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private static readonly int BUTTON_HEIGHT = 20;
         private static readonly int BUTTON_WIDTH = 20;
 
-        // Icon cache
-        private Dictionary<string, VesselBookmarkButton> _vesselTypeButtons = new Dictionary<string, VesselBookmarkButton>();
-        private VesselBookmarkButton _alarmIcon;
+        // Icon cache (non-clickable indicators)
+        private Dictionary<string, VesselBookmarkIcon> _vesselTypeIcons = new Dictionary<string, VesselBookmarkIcon>();
+        private VesselBookmarkIcon _alarmIcon;
+        // Action buttons (clickable)
         private VesselBookmarkButton _removeButton;
         private VesselBookmarkButton _moveUpButton;
         private VesselBookmarkButton _moveDownButton;
@@ -32,48 +33,48 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private EditCommentUIController _editCommentUIController;
 
         public BookmarkUI() {
-            // Initialize vessel type buttons
+            // Initialize vessel type icons (non-clickable)
             foreach( VesselType vesselType in Enum.GetValues(typeof(VesselType)) ) {
-                _vesselTypeButtons[vesselType.ToString()] = VesselBookmarkButton.Builder()
+                _vesselTypeIcons[vesselType.ToString()] = VesselBookmarkIcon.Builder()
                     .WithIconPath("VesselBookmarkMod/vessel_types/" + vesselType.ToString().ToLower())
                     .WithSize(BUTTON_WIDTH, BUTTON_HEIGHT)
                     .Build();
             }
             
-            // Initialize action buttons
-            _alarmIcon = VesselBookmarkButton.Builder()
+            // Initialize icons (clickable and non-clickable indicator)
+            _alarmIcon = VesselBookmarkIcon.Builder()
                 .WithIconPath("VesselBookmarkMod/buttons/alarm")
                 .WithSize(BUTTON_WIDTH, BUTTON_HEIGHT)
                 .Build();
             _removeButton = VesselBookmarkButton.Builder()
                 .WithIconPath("VesselBookmarkMod/buttons/remove")
                 .WithTooltip(ModLocalization.GetString("tooltipRemove"))
-                .WithSize(BUTTON_WIDTH, BUTTON_HEIGHT)
+                .WithIconSize(BUTTON_WIDTH, BUTTON_HEIGHT)
                 .Build();
             _moveUpButton = VesselBookmarkButton.Builder()
                 .WithIconPath("VesselBookmarkMod/buttons/up")
                 .WithTooltip(ModLocalization.GetString("tooltipMoveUp"))
-                .WithSize(BUTTON_WIDTH, BUTTON_HEIGHT)
+                .WithIconSize(BUTTON_WIDTH, BUTTON_HEIGHT)
                 .Build();
             _moveDownButton = VesselBookmarkButton.Builder()
                 .WithIconPath("VesselBookmarkMod/buttons/down")
                 .WithTooltip(ModLocalization.GetString("tooltipMoveDown"))
-                .WithSize(BUTTON_WIDTH, BUTTON_HEIGHT)
+                .WithIconSize(BUTTON_WIDTH, BUTTON_HEIGHT)
                 .Build();
             _setTargetAsButton = VesselBookmarkButton.Builder()
                 .WithIconPath("VesselBookmarkMod/buttons/target")
                 .WithTooltip(ModLocalization.GetString("tooltipSetTargetAs"))
-                .WithSize(BUTTON_WIDTH, BUTTON_HEIGHT)
+                .WithIconSize(BUTTON_WIDTH, BUTTON_HEIGHT)
                 .Build();
             _goToButton = VesselBookmarkButton.Builder()
                 .WithIconPath("VesselBookmarkMod/buttons/switch")
                 .WithTooltip(ModLocalization.GetString("tooltipGoTo"))
-                .WithSize(BUTTON_WIDTH, BUTTON_HEIGHT)
+                .WithIconSize(BUTTON_WIDTH, BUTTON_HEIGHT)
                 .Build();
             _editButton = VesselBookmarkButton.Builder()
                 .WithIconPath("VesselBookmarkMod/buttons/edit")
                 .WithTooltip(ModLocalization.GetString("tooltipEdit"))
-                .WithSize(BUTTON_WIDTH, BUTTON_HEIGHT)
+                .WithIconSize(BUTTON_WIDTH, BUTTON_HEIGHT)
                 .Build();
 
             // Background texture (slightly tinted blue-green)
@@ -129,21 +130,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             // Indentation
             GUILayout.Space(20);
             
-            // Vessel type icon
-            VesselBookmarkButton vesselTypeButton = GetVesselTypeButton(bookmark.BookmarkVesselType);
-            vesselTypeButton.Draw(
-                () => true,
-                null
-            );
+            // Vessel type icon (indicator only)
+            VesselBookmarkIcon vesselTypeIcon = GetVesselTypeIcon(bookmark.BookmarkVesselType);
+            vesselTypeIcon.Draw();
             
             // Alarm icon
             if( bookmark.HasAlarm ) {
-                _alarmIcon.Draw(
-                    () => bookmark.HasAlarm,
-                    null
-                );
+                _alarmIcon.Draw();
             }
-                
+            
             // Bookmark name: comment always stands out (red); vessel missing = secondary cue (gray or italic)
             bool hasComment = !string.IsNullOrEmpty(bookmark.Comment);
             bool vesselExists = bookmark.Vessel != null;
@@ -314,16 +309,16 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         /// <summary>
-        /// Gets icon texture for vessel type
+        /// Gets icon for vessel type
         /// </summary>
-        private VesselBookmarkButton GetVesselTypeButton(string type) {
+        private VesselBookmarkIcon GetVesselTypeIcon(string type) {
             if( string.IsNullOrEmpty(type) ) {
-                return _vesselTypeButtons[VesselType.Unknown.ToString()];
+                return _vesselTypeIcons[VesselType.Unknown.ToString()];
             }
-            if( !_vesselTypeButtons.ContainsKey(type) ) {
-                return _vesselTypeButtons[VesselType.Unknown.ToString()];
+            if( !_vesselTypeIcons.ContainsKey(type) ) {
+                return _vesselTypeIcons[VesselType.Unknown.ToString()];
             }
-            return _vesselTypeButtons[type];
+            return _vesselTypeIcons[type];
         }
 
         public void OnDestroy() {

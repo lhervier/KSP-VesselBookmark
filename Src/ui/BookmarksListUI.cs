@@ -29,12 +29,36 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public BookmarksListUIController Controller { get; private set; }
         private EditCommentUIController _editCommentUIController;
         private BookmarkUI _bookmarkUI;
+        private VesselBookmarkButton _clearFiltersButton;
+        private VesselBookmarkButton _addButton;
+        private VesselBookmarkButton _refreshButton;
+        private VesselBookmarkButton _closeButton;
 
         public EventVoid OnClosed = new EventVoid("BookmarksListUI.OnClosed");
 
         public BookmarksListUI() {
             _mainWindowID = UnityEngine.Random.Range(1000, 2000);
             Controller = new BookmarksListUIController();
+            _clearFiltersButton = VesselBookmarkButton.Builder()
+                .WithLabel(ModLocalization.GetString("buttonClear"))
+                .WithTooltip(ModLocalization.GetString("buttonClear"))
+                .WithIconSize(20, 20)
+                .Build();
+            _addButton = VesselBookmarkButton.Builder()
+                .WithLabel(ModLocalization.GetString("buttonAdd"))
+                .WithTooltip(ModLocalization.GetString("buttonAdd"))
+                .WithIconSize(20, 20)
+                .Build();
+            _refreshButton = VesselBookmarkButton.Builder()
+                .WithLabel(ModLocalization.GetString("buttonRefresh"))
+                .WithTooltip(ModLocalization.GetString("buttonRefresh"))
+                .WithIconSize(20, 20)
+                .Build();
+            _closeButton = VesselBookmarkButton.Builder()
+                .WithLabel(ModLocalization.GetString("buttonClose"))
+                .WithTooltip(ModLocalization.GetString("buttonClose"))
+                .WithIconSize(20, 20)
+                .Build();
         }
 
         public void Initialize(
@@ -91,25 +115,17 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             );
             
             // Add bookmark button (for current active vessel)
-            if (Controller.CanAddVesselBookmark()) {
-                if (GUILayout.Button(ModLocalization.GetString("buttonAdd"), _uiStyles.ButtonStyle, GUILayout.Width(80))) {
-                    Controller.AddVesselBookmark();
-                }
-            } else {
-                // Same button, but disabled
-                GUI.enabled = false;
-                GUILayout.Button(ModLocalization.GetString("buttonAdd"), _uiStyles.ButtonStyle, GUILayout.Width(80));                
-                GUI.enabled = true;
-            }
-            
-            if (GUILayout.Button(ModLocalization.GetString("buttonRefresh"), _uiStyles.ButtonStyle, GUILayout.Width(80))) {
-                BookmarkManager.RefreshBookmarks();
-            }
-            if (GUILayout.Button(ModLocalization.GetString("buttonClose"), _uiStyles.ButtonStyle, GUILayout.Width(80))) {
+            System.Action addAction = Controller.CanAddVesselBookmark() ? (System.Action)Controller.AddVesselBookmark : null;
+            _addButton.Draw(() => true, addAction);
+
+            _refreshButton.Draw(() => true, () => BookmarkManager.RefreshBookmarks());
+
+            _closeButton.Draw(() => true, () => {
                 _editCommentUIController.CancelCommentEdition();
                 Controller.MainWindowsVisible = false;
                 this.OnClosed.Fire();
-            }
+            });
+
             GUILayout.EndHorizontal();
             Rect line1Rect = GUILayoutUtility.GetLastRect();
             
@@ -218,9 +234,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             
             GUILayout.FlexibleSpace();
             
-            if (GUILayout.Button(ModLocalization.GetString("buttonClear"), _uiStyles.ButtonStyle, GUILayout.Width(60))) {
-                Controller.ClearFilters();
-            }
+            _clearFiltersButton.Draw(() => true, Controller.ClearFilters);
             
             GUILayout.EndHorizontal();
             
