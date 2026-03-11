@@ -172,6 +172,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.Space(5);
             
             if( Controller.AvailableBookmarks.Count == 0 ) {
+                if (Controller.GetHoveredBookmark() != null) {
+                    Controller.SetHovered(null);
+                }
                 GUILayout.Label(ModLocalization.GetString("labelNoBookmarks"), _uiStyles.LabelStyle);
             } else {
                 _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, false, true);
@@ -209,6 +212,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 }
 
                 GUILayout.EndScrollView();
+
+                // Si la souris sort de la zone de la liste, plus aucun bookmark ne doit rester en hover.
+                // GetLastRect() n'est fiable que pendant Repaint ; sur Layout il peut renvoyer un rect invalide et annuler le hover à tort.
+                if (Event.current.type == EventType.Repaint) {
+                    Rect scrollViewRect = GUILayoutUtility.GetLastRect();
+                    if (Controller.GetHoveredBookmark() != null && !scrollViewRect.Contains(Event.current.mousePosition)) {
+                        Controller.SetHovered(null);
+                    }
+                }
             }
 
             GUILayout.Space(5);
@@ -224,6 +236,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 () => true, 
                 editAction
             );
+
+            GUILayout.Space(5);
             
             System.Action switchToAction = null;
             if( Controller.CanSwitchToCurrentVessel() ) {
@@ -233,6 +247,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 () => true, 
                 switchToAction
             );
+
+            GUILayout.Space(5);
 
             System.Action setTargetAsAction = null;
             if( Controller.CanSetCurrentVesselAsTarget() ) {
