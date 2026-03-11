@@ -25,16 +25,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private BookmarkUI _bookmarkUI;
 
         private void Awake() {
+            // Subscribe to events
             GameEvents.onGUIApplicationLauncherReady.Add(OnLauncherReady);
             BookmarkManager.OnBookmarksUpdated.Add(OnBookmarksUpdated);
         }
         
-        private void OnBookmarksUpdated() {
-            if( this._bookmarksListUI != null ) {
-                this._bookmarksListUI.Controller.UpdateBookmarksSelection();
-            }
-        }
-
         private void OnDestroy() {
             GameEvents.onGUIApplicationLauncherReady.Remove(OnLauncherReady);
             OnLauncherUnready();
@@ -44,13 +39,41 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 this._bookmarkUI.OnDestroy();
                 this._bookmarkUI = null;
             }
-            this._editCommentUI = null;
+            if( this._editCommentUI != null ) {
+                this._editCommentUI.Controller.CancelCommentEdition();
+                this._editCommentUI = null;
+            }
             if( this._bookmarksListUI != null ) {
-                this._bookmarksListUI.OnClosed.Remove(OnBookmarksListUIClosed);
+                this._bookmarksListUI.Controller.OnClosed.Remove(OnBookmarksListUIClosed);
+                this._bookmarksListUI.OnDestroy();
                 this._bookmarksListUI = null;
             }
+            if( this._uiStyles != null ) {
+                this._uiStyles = null;
+            }
         }
+
+        // ==========================================================================
+        // EVENTS
+        // ==========================================================================
         
+        private void OnBookmarksUpdated() {
+            if( this._bookmarksListUI != null ) {
+                this._bookmarksListUI.Controller.UpdateBookmarksSelection();
+            }
+        }
+
+        private void OnBookmarksListUIClosed() {
+            _editCommentUI.Controller.CancelCommentEdition();
+            if (_toolbarButton != null) {
+                _toolbarButton.SetFalse();
+            }
+        }
+
+        // ==========================================================================
+        // TOOLBAR
+        // ==========================================================================
+
         /// <summary>
         /// Called when toolbar is ready
         /// </summary>
@@ -111,13 +134,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 this._editCommentUI.Controller.CancelCommentEdition();
             }
         }
-        
-        private void OnBookmarksListUIClosed() {
-            if (_toolbarButton != null) {
-                _toolbarButton.SetFalse();
-            }
-        }
 
+        // ==========================================================================
+        // UPDATE
+        // ==========================================================================
+        
         private void Update() {
             // Set scroll/zoom lock at start of frame so camera doesn't zoom when scrolling the bookmark list (KSP reads Input in Update, so OnGUI was too late)
             if (_bookmarksListUI == null || !_bookmarksListUI.Controller.MainWindowsVisible) {
@@ -139,28 +160,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 this._uiStyles = new UIStyles();
             }
             if( this._editCommentUI == null ) {
-                this._editCommentUI = new EditCommentUI();
+                this._editCommentUI = new EditCommentUI(this._uiStyles);
             }
             if( this._bookmarkUI == null ) {
-                this._bookmarkUI = new BookmarkUI();
+                this._bookmarkUI = new BookmarkUI(this._uiStyles);
             }
             if( this._bookmarksListUI == null ) {
-                this._bookmarksListUI = new BookmarksListUI();
-                this._bookmarksListUI.OnClosed.Add(OnBookmarksListUIClosed);
+                this._bookmarksListUI = new BookmarksListUI(this._uiStyles, this._editCommentUI, this._bookmarkUI);
+                this._bookmarksListUI.Controller.OnClosed.Add(OnBookmarksListUIClosed);
             }
-
-            // Inject dependencies
-            this._bookmarksListUI.Initialize(
-                this._uiStyles, 
-                this._editCommentUI.Controller, 
-                this._bookmarkUI
-            );
-            this._editCommentUI.Initialize(this._uiStyles);
-            this._bookmarkUI.Initialize(
-                this._uiStyles, 
-                this._bookmarksListUI.Controller, 
-                this._editCommentUI.Controller
-            );
 
             // Window style
             GUI.skin = HighLogic.Skin;

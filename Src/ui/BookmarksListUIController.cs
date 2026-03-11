@@ -15,6 +15,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private static readonly float SEARCH_DEBOUNCE_SECONDS = 0.2f;
         private static readonly string ALL_VESSEL_TYPES = "All";
 
+        public EventVoid OnClosed = new EventVoid("BookmarksListUIController.OnClosed");
+
         /// <summary>
         /// Whether the main windows are visible
         /// </summary>
@@ -109,17 +111,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         /// <summary>
-        /// À appeler chaque frame (ex. depuis OnGUI). Déclenche RefreshBookmarks 200 ms après la dernière modification de SearchText.
-        /// </summary>
-        public void ProcessSearchDebounce() {
-            if (_searchTextChangeTime < 0f) return;
-            if (Time.realtimeSinceStartup - _searchTextChangeTime < SEARCH_DEBOUNCE_SECONDS) return;
-            _searchTextChangeTime = -1f;
-            
-            this.UpdateBookmarksSelection();
-        }
-
-        /// <summary>
         /// Constructor
         /// </summary>
         public BookmarksListUIController() {
@@ -141,6 +132,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             }
         }
 
+        // ======================================================================
+        //  Update of the available bookmarks, bodies and vessel types
         // ======================================================================
 
         /// <summary>
@@ -175,8 +168,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             }
         }
 
-        // ======================================================================
-
         private void UpdateAvailableVesselTypes() {
             try {
                 LOGGER.LogDebug($"Updating available vessel types");
@@ -199,8 +190,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 LOGGER.LogError($"Error updating available vessel types: {e.Message}");
             }
         }
-
-        // ======================================================================
 
         /// <summary>
         /// Update the available bookmarks
@@ -273,6 +262,76 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             }
         }
 
+        // ======================================================================
+        //  Main window actions
+        // ======================================================================
+
+        /// <summary>
+        /// Whether to show the add vessel bookmark button
+        /// </summary>
+        /// <returns>Whether to show the add vessel bookmark button</returns>
+        public bool CanAddVesselBookmark() {
+            return FlightGlobals.ActiveVessel != null;
+        }
+
+        /// <summary>
+        /// Add a vessel bookmark
+        /// </summary>
+        public void AddVesselBookmark() {
+            if( !CanAddVesselBookmark() ) {
+                LOGGER.LogWarning("Cannot add vessel bookmark: no active vessel");
+                return;
+            }
+
+            uint vesselPersistentID = FlightGlobals.ActiveVessel.persistentId;
+            
+            BookmarkManager manager = BookmarkManager.GetInstance(BookmarkType.Vessel);
+            if (manager.HasBookmark(vesselPersistentID)) {
+                ScreenMessages.PostScreenMessage(
+                    ModLocalization.GetString("messageBookmarkAlreadyExists"),
+                    2f,
+                    ScreenMessageStyle.UPPER_CENTER
+                );
+                return;
+            }
+
+            VesselBookmark bookmark = new VesselBookmark(vesselPersistentID);
+            if (BookmarkManager.AddBookmark(bookmark)) {
+                ScreenMessages.PostScreenMessage(
+                    ModLocalization.GetString("messageBookmarkAdded"),
+                    2f,
+                    ScreenMessageStyle.UPPER_CENTER
+                );
+            }
+        }
+
+        public void RefreshBookmarks() {
+            BookmarkManager.RefreshBookmarks();
+        }
+
+        /// <summary>
+        /// Close the main windows
+        /// </summary>
+        public void CloseMainWindows() {
+            MainWindowsVisible = false;
+            this.OnClosed.Fire();
+        }
+
+        // =============================================================================
+        //  Filters
+        // =============================================================================
+
+        /// <summary>
+        /// À appeler chaque frame (ex. depuis OnGUI). Déclenche RefreshBookmarks 200 ms après la dernière modification de SearchText.
+        /// </summary>
+        public void ProcessSearchDebounce() {
+            if (_searchTextChangeTime < 0f) return;
+            if (Time.realtimeSinceStartup - _searchTextChangeTime < SEARCH_DEBOUNCE_SECONDS) return;
+            _searchTextChangeTime = -1f;
+            
+            this.UpdateBookmarksSelection();
+        }
+
         /// <summary>
         /// Clear the filters
         /// </summary>
@@ -284,6 +343,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             UpdateBookmarksSelection();
         }
 
+        // ======================================================================
+        //  Bookmark states
         // ======================================================================
 
         /// <summary>
@@ -334,43 +395,94 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             return _selectedBookmark;
         }
         
+        // ======================================================================
+        //  Bookmark actions
+        // ======================================================================
+
         /// <summary>
-        /// Whether to show the add vessel bookmark button
+        /// Set the target as the given bookmark
         /// </summary>
-        /// <returns>Whether to show the add vessel bookmark button</returns>
-        public bool CanAddVesselBookmark() {
-            return FlightGlobals.ActiveVessel != null;
+        /// <param name="bookmark"></param>
+        public void SetTargetAs(Bookmark bookmark) {
+            this.SetSelected(bookmark);
+            FlightGlobals flightGlobals = FlightGlobals.fetch;
+            if( flightGlobals == null ) {
+                LOGGER.LogWarning($"Bookmark {bookmark}: FlightGlobals not found. Cannot set target as.");
+                return;
+            }
+            flightGlobals.SetVesselTarget(bookmark.Vessel);
         }
 
         /// <summary>
-        /// Add a vessel bookmark
+        /// Switch to the given bookmark
         /// </summary>
-        public void AddVesselBookmark() {
-            if( !CanAddVesselBookmark() ) {
-                LOGGER.LogWarning("Cannot add vessel bookmark: no active vessel");
+        /// <param name="bookmark"></param>
+        public void SwitchToVessel(Bookmark bookmark) { 
+            this.SetSelected(bookmark);
+            Vessel vessel = bookmark.Vessel;
+            if( vessel == null ) {
+                LOGGER.LogWarning($"Bookmark {bookmark}: Vessel not found. Cannot switch to vessel.");
                 return;
+            }VesselNavigator.NavigateToVessel(bookmark.Vessel);
+        }
+
+        /// <summary>
+        /// Move the given bookmark up
+        /// </summary>
+        /// <param name="bookmark">The bookmark to move up</param>
+        public void MoveUp(Bookmark bookmark) {
+            this.SetSelected(bookmark);
+            List<Bookmark> bookmarks = AvailableBookmarks[bookmark.BookmarkType];
+
+            int index = bookmarks.IndexOf(bookmark);
+            Bookmark previousBookmark = bookmarks[index - 1];
+
+            while( bookmark.Order > previousBookmark.Order ) {
+                BookmarkManager.MoveBookmarkUp(bookmark, false);
+            }
+            BookmarkManager.OnBookmarksUpdated.Fire();
+        }
+
+        /// <summary>
+        /// Move the given bookmark down
+        /// </summary>
+        /// <param name="bookmark">The bookmark to move down</param>
+        public void MoveDown(Bookmark bookmark) {
+            this.SetSelected(bookmark);
+            List<Bookmark> bookmarks = AvailableBookmarks[bookmark.BookmarkType];
+            int index = bookmarks.IndexOf(bookmark);
+            Bookmark nextBookmark = bookmarks[index + 1];
+
+            while( bookmark.Order < nextBookmark.Order ) {
+                BookmarkManager.MoveBookmarkDown(bookmark, false);
+            }
+            BookmarkManager.OnBookmarksUpdated.Fire();
+        }
+
+        /// <summary>
+        /// Remove the given bookmark
+        /// </summary>
+        /// <param name="bookmark">The bookmark to remove</param>
+        public void Remove(Bookmark bookmark) {
+            if( this.IsSelected(bookmark) ) {
+                this.SetSelected(null);
             }
 
-            uint vesselPersistentID = FlightGlobals.ActiveVessel.persistentId;
+            // Close main window temporarily to ensure confirmation dialog appears on top
+            bool wasMainWindowVisible = MainWindowsVisible;
+            MainWindowsVisible = false;
             
-            BookmarkManager manager = BookmarkManager.GetInstance(BookmarkType.Vessel);
-            if (manager.HasBookmark(vesselPersistentID)) {
-                ScreenMessages.PostScreenMessage(
-                    ModLocalization.GetString("messageBookmarkAlreadyExists"),
-                    2f,
-                    ScreenMessageStyle.UPPER_CENTER
-                );
-                return;
-            }
-
-            VesselBookmark bookmark = new VesselBookmark(vesselPersistentID);
-            if (BookmarkManager.AddBookmark(bookmark)) {
-                ScreenMessages.PostScreenMessage(
-                    ModLocalization.GetString("messageBookmarkAdded"),
-                    2f,
-                    ScreenMessageStyle.UPPER_CENTER
-                );
-            }
+            string displayName = bookmark.BookmarkTitle;
+            VesselBookmarkUIDialog.ConfirmRemoval(
+                () => {
+                    BookmarkManager.RemoveBookmark(bookmark);
+                    MainWindowsVisible = wasMainWindowVisible;
+                },
+                () => {
+                    MainWindowsVisible = wasMainWindowVisible;
+                },
+                bookmarkName: displayName
+            );
         }
     }
 }

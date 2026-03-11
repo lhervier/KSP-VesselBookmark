@@ -16,6 +16,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         // Icon cache (non-clickable indicators)
         private Dictionary<string, VesselBookmarkIcon> _vesselTypeIcons = new Dictionary<string, VesselBookmarkIcon>();
         private VesselBookmarkIcon _alarmIcon;
+
         // Action buttons (clickable)
         private VesselBookmarkButton _removeButton;
         private VesselBookmarkButton _moveUpButton;
@@ -29,10 +30,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private Texture2D _activeVesselBorder;
 
         private UIStyles _uiStyles;
-        private BookmarksListUIController _bookmarksListUIController;
-        private EditCommentUIController _editCommentUIController;
+        public BookmarkUIController Controller = new BookmarkUIController();
 
-        public BookmarkUI() {
+        public BookmarkUI(UIStyles uiStyles) {
             // Initialize vessel type icons (non-clickable)
             foreach( VesselType vesselType in Enum.GetValues(typeof(VesselType)) ) {
                 _vesselTypeIcons[vesselType.ToString()] = VesselBookmarkIcon.Builder()
@@ -86,35 +86,34 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _activeVesselBorder = new Texture2D(1, 1);
             _activeVesselBorder.SetPixel(0, 0, new Color(0.2f, 0.6f, 0.8f, 1f)); // Bleu-vert clair
             _activeVesselBorder.Apply();
-        }
 
-        public void Initialize(
-            UIStyles uiStyles, 
-            BookmarksListUIController bookmarksListUIController, 
-            EditCommentUIController editCommentUIController
-        ) {
             _uiStyles = uiStyles;
-            _bookmarksListUIController = bookmarksListUIController;
-            _editCommentUIController = editCommentUIController;
         }
 
-        public void OnGUI(Bookmark bookmark, int currentIndex) {
-            BookmarkUIController bookmarkUIController = new BookmarkUIController(
-                bookmark,
-                currentIndex,
-                _bookmarksListUIController,
-                _editCommentUIController
+        public void OnGUI(
+            Bookmark bookmark, 
+            bool isHovered,
+            bool isSelected,
+            bool isFirst,
+            bool isLast
+        ) {
+            Controller.Initialize(
+                bookmark, 
+                isHovered, 
+                isSelected,
+                isFirst,
+                isLast
             );
 
             // Create custom box style with appropriate background
             GUIStyle boxStyle = new GUIStyle(GUI.skin.box);
             
-            if (bookmarkUIController.IsActiveVessel()) {
+            if (Controller.IsActiveVessel()) {
                 // Active vessel: use colored background
                 boxStyle.normal.background = _activeVesselBackground;
                 // Add border by setting border values
                 boxStyle.border = new RectOffset(2, 2, 2, 2);
-            } else if (bookmarkUIController.IsHoveredOrSelected()) {
+            } else if (Controller.IsHoveredOrSelected()) {
                 // Hovered or selected bookmark: use hover background
                 Texture2D hoverBg = new Texture2D(1, 1);
                 hoverBg.SetPixel(0, 0, new Color(0.3f, 0.3f, 0.3f, 1f));
@@ -145,7 +144,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             GUIStyle titleStyle;
             if( vesselExists ) {
-                if( bookmarkUIController.IsTarget() ) {
+                if( Controller.IsTarget() ) {
                     titleStyle = _uiStyles.LabelTitleTargetStyle;
                 } else {
                     titleStyle = _uiStyles.LabelTitleStyle;
@@ -153,7 +152,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             } else {
                 titleStyle = _uiStyles.LabelTitleNoVesselStyle;
             }
-            string title = bookmarkUIController.GetBookmarkTitle();
+            string title = bookmark.BookmarkTitle;
             if( !vesselExists ) {
                 if( bookmark.BookmarkType == BookmarkType.Vessel ) {
                     title += " (" + ModLocalization.GetString("labelVesselNotFound") + ")";
@@ -174,53 +173,53 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             
             // Edit button
             _editButton.Draw(
-                bookmarkUIController.IsHoveredOrSelected,
-                bookmarkUIController.EditComment
+                Controller.IsHoveredOrSelected,
+                () => Controller.OnBookmarkEdit.Fire(bookmark)
             );
             
             GUILayout.Space(3);
 
             // "Set target as" button
             System.Action setTargetAsAction;
-            if( bookmarkUIController.CanSetTargetAs() ) {
-                setTargetAsAction = bookmarkUIController.SetTargetAs;
+            if( Controller.CanSetTargetAs() ) {
+                setTargetAsAction = () => Controller.OnBookmarkSetTargetAs.Fire(bookmark);
             } else {
                 setTargetAsAction = null;
             }
-            _setTargetAsButton.Draw(bookmarkUIController.IsHoveredOrSelected, setTargetAsAction);
+            _setTargetAsButton.Draw(Controller.IsHoveredOrSelected, setTargetAsAction);
 
             // Go to button (disabled if this is the active vessel)
             System.Action goToAction;
-            if (bookmarkUIController.CanSwitchToVessel()) {
-                goToAction = bookmarkUIController.SwitchToVessel;
+            if (Controller.CanSwitchToVessel()) {
+                goToAction = () => Controller.OnBookmarkSwitchToVessel.Fire(bookmark);
             } else {
                 goToAction = null;
             }
-            _goToButton.Draw(bookmarkUIController.IsHoveredOrSelected, goToAction);
+            _goToButton.Draw(Controller.IsHoveredOrSelected, goToAction);
             
             GUILayout.Space(3);
 
             // Move up button
             System.Action moveUpAction;
-            if( bookmarkUIController.CanMoveUp() ) {
-                moveUpAction = bookmarkUIController.MoveUp;
+            if( Controller.CanMoveUp() ) {
+                moveUpAction = () => Controller.OnBookmarkMovedUp.Fire(bookmark);
             } else {
                 moveUpAction = null;
             }
             _moveUpButton.Draw(
-                bookmarkUIController.IsHoveredOrSelected,
+                Controller.IsHoveredOrSelected,
                 moveUpAction
             );
         
             // Move down button
             System.Action moveDownAction;
-            if( bookmarkUIController.CanMoveDown() ) {
-                moveDownAction = bookmarkUIController.MoveDown;
+            if( Controller.CanMoveDown() ) {
+                moveDownAction = () => Controller.OnBookmarkMovedDown.Fire(bookmark);
             } else {
                 moveDownAction = null;
             }
             _moveDownButton.Draw(
-                bookmarkUIController.IsHoveredOrSelected,
+                Controller.IsHoveredOrSelected,
                 moveDownAction
             );
             
@@ -228,8 +227,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             
             // Remove button
             _removeButton.Draw(
-                bookmarkUIController.IsHoveredOrSelected,
-                bookmarkUIController.Remove
+                Controller.IsHoveredOrSelected,
+                () => Controller.OnBookmarkRemoved.Fire(bookmark)
             );
             
             GUILayout.EndHorizontal();
@@ -282,7 +281,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GUILayout.EndVertical();
             
             // Draw border for active vessel bookmark
-            if (bookmarkUIController.IsActiveVessel() && Event.current.type == EventType.Repaint) {
+            if (Controller.IsActiveVessel() && Event.current.type == EventType.Repaint) {
                 // Draw border using lines
                 int borderWidth = 2;
                 
@@ -298,12 +297,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             // Detect hover and update the hovered bookmark ID
             if (bookmarkRect.Contains(Event.current.mousePosition)) {
-                _bookmarksListUIController.SetHovered(bookmark);
+                Controller.OnBookmarkHovered.Fire(bookmark);
             }
 
             // On left click on the row (when not consumed by a button), set this line as the current bookmark
             if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && bookmarkRect.Contains(Event.current.mousePosition)) {
-                _bookmarksListUIController.SetSelected(bookmark);
+                Controller.OnBookmarkSelected.Fire(bookmark);
                 Event.current.Use();
             }
         }

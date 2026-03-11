@@ -11,6 +11,7 @@ using com.github.lhervier.ksp.bookmarksmod;
 namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
     public class BookmarksListUI {
+        private static readonly ModLogger LOGGER = new ModLogger("BookmarksListUI");
         public const string SCROLL_LOCK_ID = "VesselBookmarkMod_ScrollBlock";
 
         /// <summary>Last known window rect (screen space, top-left origin). Used so Update() can set scroll lock before camera reads input.</summary>
@@ -26,19 +27,22 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private static readonly object _bodyCaller = new object();
         private static readonly object _vesselTypeCaller = new object();
 
-        public BookmarksListUIController Controller { get; private set; }
-        private EditCommentUIController _editCommentUIController;
+        private EditCommentUI _editCommentUI;
         private BookmarkUI _bookmarkUI;
+        
+        public BookmarksListUIController Controller { get; private set; } = new BookmarksListUIController();
+        
         private VesselBookmarkButton _clearFiltersButton;
         private VesselBookmarkButton _addButton;
         private VesselBookmarkButton _refreshButton;
         private VesselBookmarkButton _closeButton;
 
-        public EventVoid OnClosed = new EventVoid("BookmarksListUI.OnClosed");
-
-        public BookmarksListUI() {
+        public BookmarksListUI(
+            UIStyles uiStyles,
+            EditCommentUI editCommentUI, 
+            BookmarkUI bookmarkUI
+        ) {
             _mainWindowID = UnityEngine.Random.Range(1000, 2000);
-            Controller = new BookmarksListUIController();
             _clearFiltersButton = VesselBookmarkButton.Builder()
                 .WithLabel(ModLocalization.GetString("buttonClear"))
                 .WithTooltip(ModLocalization.GetString("buttonClear"))
@@ -59,43 +63,64 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 .WithTooltip(ModLocalization.GetString("buttonClose"))
                 .WithIconSize(20, 20)
                 .Build();
+            
+            _uiStyles = uiStyles;
+            _editCommentUI = editCommentUI;
+            _bookmarkUI = bookmarkUI;
+
+            _bookmarkUI.Controller.OnBookmarkSelected.Add(Controller.SetSelected);
+            _bookmarkUI.Controller.OnBookmarkHovered.Add(Controller.SetHovered);
+            _bookmarkUI.Controller.OnBookmarkSetTargetAs.Add(Controller.SetTargetAs);
+            _bookmarkUI.Controller.OnBookmarkSwitchToVessel.Add(Controller.SwitchToVessel);
+            _bookmarkUI.Controller.OnBookmarkMovedUp.Add(Controller.MoveUp);
+            _bookmarkUI.Controller.OnBookmarkMovedDown.Add(Controller.MoveDown);
+            _bookmarkUI.Controller.OnBookmarkRemoved.Add(Controller.Remove);
+
+            _bookmarkUI.Controller.OnBookmarkEdit.Add(OnBookmarkEdit);
         }
 
-        public void Initialize(
-            UIStyles uiStyles, 
-            EditCommentUIController editCommentUIController, 
-            BookmarkUI bookmarkUI) {
-            _uiStyles = uiStyles;
-            _editCommentUIController = editCommentUIController;
-            _bookmarkUI = bookmarkUI;
+        public void OnDestroy() {
+            _bookmarkUI.Controller.OnBookmarkEdit.Remove(OnBookmarkEdit);
+            
+            _bookmarkUI.Controller.OnBookmarkSelected.Remove(Controller.SetSelected);
+            _bookmarkUI.Controller.OnBookmarkHovered.Remove(Controller.SetHovered);
+            _bookmarkUI.Controller.OnBookmarkSetTargetAs.Remove(Controller.SetTargetAs);
+            _bookmarkUI.Controller.OnBookmarkSwitchToVessel.Remove(Controller.SwitchToVessel);
+            _bookmarkUI.Controller.OnBookmarkMovedUp.Remove(Controller.MoveUp);
+            _bookmarkUI.Controller.OnBookmarkMovedDown.Remove(Controller.MoveDown);
+            _bookmarkUI.Controller.OnBookmarkRemoved.Remove(Controller.Remove);
+        }
+
+        private void OnBookmarkEdit(Bookmark bookmark) {
+            Controller.SetSelected(bookmark);
+            _editCommentUI.Controller.EditComment(bookmark);
         }
 
         public void OnGUI() {
-            if (Controller.MainWindowsVisible) {
-                Controller.ProcessSearchDebounce();
-                _mainWindowRect = ClickThruBlocker.GUILayoutWindow(
-                    _mainWindowID,
-                    _mainWindowRect,
-                    DrawMainWindow,
-                    ModLocalization.GetString("windowTitle"),
-                    GUILayout.MinWidth(500),
-                    GUILayout.MinHeight(400)
-                );
-
-                // Prevent window from going off screen
-                _mainWindowRect.x = Mathf.Clamp(_mainWindowRect.x, 0, Screen.width - _mainWindowRect.width);
-                _mainWindowRect.y = Mathf.Clamp(_mainWindowRect.y, 0, Screen.height - _mainWindowRect.height);
-
-                ComboBox.DrawGUI(_uiStyles.ComboPopupStyle, _uiStyles.ComboGridStyle, _uiStyles.ComboGridSelectedStyle);
-
-                // Consume scroll event for IMGUI (scroll list + prevent some handlers from zooming)
-                Vector2 mousePos = Event.current.mousePosition;
-                if (Event.current.type == EventType.ScrollWheel && _mainWindowRect.Contains(mousePos)) {
-                    Event.current.Use();
-                }
-            } else {
-                InputLockManager.RemoveControlLock(SCROLL_LOCK_ID);
+            if( !Controller.MainWindowsVisible ) {
                 return;
+            }
+
+            Controller.ProcessSearchDebounce();
+            _mainWindowRect = ClickThruBlocker.GUILayoutWindow(
+                _mainWindowID,
+                _mainWindowRect,
+                DrawMainWindow,
+                ModLocalization.GetString("windowTitle"),
+                GUILayout.MinWidth(500),
+                GUILayout.MinHeight(400)
+            );
+
+            // Prevent window from going off screen
+            _mainWindowRect.x = Mathf.Clamp(_mainWindowRect.x, 0, Screen.width - _mainWindowRect.width);
+            _mainWindowRect.y = Mathf.Clamp(_mainWindowRect.y, 0, Screen.height - _mainWindowRect.height);
+
+            ComboBox.DrawGUI(_uiStyles.ComboPopupStyle, _uiStyles.ComboGridStyle, _uiStyles.ComboGridSelectedStyle);
+
+            // Consume scroll event for IMGUI (scroll list + prevent some handlers from zooming)
+            Vector2 mousePos = Event.current.mousePosition;
+            if (Event.current.type == EventType.ScrollWheel && _mainWindowRect.Contains(mousePos)) {
+                Event.current.Use();
             }
         }
 
@@ -115,15 +140,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             );
             
             // Add bookmark button (for current active vessel)
-            System.Action addAction = Controller.CanAddVesselBookmark() ? (System.Action)Controller.AddVesselBookmark : null;
+            System.Action addAction = Controller.CanAddVesselBookmark() ? (System.Action) Controller.AddVesselBookmark : null;
             _addButton.Draw(() => true, addAction);
 
-            _refreshButton.Draw(() => true, () => BookmarkManager.RefreshBookmarks());
+            _refreshButton.Draw(() => true, () => Controller.RefreshBookmarks());
 
             _closeButton.Draw(() => true, () => {
-                _editCommentUIController.CancelCommentEdition();
-                Controller.MainWindowsVisible = false;
-                this.OnClosed.Fire();
+                _editCommentUI.Controller.CancelCommentEdition();
+                Controller.CloseMainWindows();
             });
 
             GUILayout.EndHorizontal();
@@ -147,7 +171,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 if( Controller.AvailableBookmarks.ContainsKey(BookmarkType.CommandModule) ) {
                     for(int i = 0; i < Controller.AvailableBookmarks[BookmarkType.CommandModule].Count; i++) {
                         Bookmark bookmark = Controller.AvailableBookmarks[BookmarkType.CommandModule][i];
-                        this._bookmarkUI.OnGUI(bookmark, i);
+                        bool isFirst = i == 0;
+                        bool isLast = i == Controller.AvailableBookmarks[BookmarkType.CommandModule].Count - 1;
+                        this._bookmarkUI.OnGUI(
+                            bookmark, 
+                            Controller.IsHovered(bookmark),
+                            Controller.IsSelected(bookmark),
+                            isFirst,
+                            isLast
+                        );
                     }
                 }
 
@@ -155,7 +187,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 if( Controller.AvailableBookmarks.ContainsKey(BookmarkType.Vessel) ) {
                     for(int i = 0; i < Controller.AvailableBookmarks[BookmarkType.Vessel].Count; i++) {
                         Bookmark bookmark = Controller.AvailableBookmarks[BookmarkType.Vessel][i];
-                        this._bookmarkUI.OnGUI(bookmark, i);
+                        bool isFirst = i == 0;
+                        bool isLast = i == Controller.AvailableBookmarks[BookmarkType.Vessel].Count - 1;
+                        this._bookmarkUI.OnGUI(
+                            bookmark, 
+                            Controller.IsHovered(bookmark),
+                            Controller.IsSelected(bookmark),
+                            isFirst,
+                            isLast
+                        );
                     }
                 }
 

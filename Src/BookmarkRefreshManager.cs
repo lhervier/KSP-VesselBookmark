@@ -288,6 +288,9 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                         vesselBookmark.BookmarkVesselType = vesselBookmark.VesselType;
                     }
                 }
+                if( string.IsNullOrEmpty(bookmark.BookmarkTitle)) {
+                    bookmark.BookmarkTitle = ModLocalization.GetString("labelModuleNotFound");
+                }
 
                 LOGGER.LogDebug($"Bookmark {bookmark} refreshed");
                 return true;
