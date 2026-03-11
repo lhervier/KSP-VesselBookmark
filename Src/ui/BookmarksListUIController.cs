@@ -394,37 +394,74 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public Bookmark GetSelectedBookmark() {
             return _selectedBookmark;
         }
+
+        /// <summary>
+        /// Whether the selected bookmark can be edited
+        /// </summary>
+        /// <returns>Whether the selected bookmark can be edited</returns>
+        public bool CanEditCurrentVesselComment() {
+            return _selectedBookmark != null;
+        }
+
+        /// <summary>
+        /// Whether "Set target as" is available for the given bookmark (active vessel exists, bookmark has vessel, not active vessel).
+        /// </summary>
+        public bool CanSetCurrentVesselAsTarget() {
+            if (_selectedBookmark == null || FlightGlobals.ActiveVessel == null || _selectedBookmark.Vessel == null) {
+                return false;
+            }
+            return _selectedBookmark.VesselPersistentID != FlightGlobals.ActiveVessel.persistentId;
+        }
+
+        /// <summary>
+        /// Whether "Switch to vessel" is available for the given bookmark (vessel exists, not active vessel).
+        /// </summary>
+        public bool CanSwitchToCurrentVessel() {
+            if (_selectedBookmark == null || _selectedBookmark.Vessel == null) {
+                return false;
+            }
+            return _selectedBookmark.VesselPersistentID != FlightGlobals.ActiveVessel?.persistentId;
+        }
         
         // ======================================================================
-        //  Bookmark actions
+        //  Current selected bookmark actions
         // ======================================================================
 
         /// <summary>
         /// Set the target as the given bookmark
         /// </summary>
-        /// <param name="bookmark"></param>
-        public void SetTargetAs(Bookmark bookmark) {
-            this.SetSelected(bookmark);
-            FlightGlobals flightGlobals = FlightGlobals.fetch;
-            if( flightGlobals == null ) {
-                LOGGER.LogWarning($"Bookmark {bookmark}: FlightGlobals not found. Cannot set target as.");
+        public void SetCurrentVesselAsTarget() {
+            if( _selectedBookmark == null ) {
+                LOGGER.LogWarning("Cannot set current vessel as target: no selected bookmark");
                 return;
             }
-            flightGlobals.SetVesselTarget(bookmark.Vessel);
+            FlightGlobals flightGlobals = FlightGlobals.fetch;
+            if( flightGlobals == null ) {
+                LOGGER.LogWarning($"Bookmark {_selectedBookmark}: FlightGlobals not found. Cannot set target as.");
+                return;
+            }
+            flightGlobals.SetVesselTarget(_selectedBookmark.Vessel);
         }
 
         /// <summary>
         /// Switch to the given bookmark
         /// </summary>
-        /// <param name="bookmark"></param>
-        public void SwitchToVessel(Bookmark bookmark) { 
-            this.SetSelected(bookmark);
-            Vessel vessel = bookmark.Vessel;
-            if( vessel == null ) {
-                LOGGER.LogWarning($"Bookmark {bookmark}: Vessel not found. Cannot switch to vessel.");
+        public void SwitchToCurrentVessel() { 
+            if( _selectedBookmark == null ) {
+                LOGGER.LogWarning("Cannot switch to current vessel: no selected bookmark");
                 return;
-            }VesselNavigator.NavigateToVessel(bookmark.Vessel);
+            }
+            Vessel vessel = _selectedBookmark.Vessel;
+            if( vessel == null ) {
+                LOGGER.LogWarning($"Bookmark {_selectedBookmark}: Vessel not found. Cannot switch to vessel.");
+                return;
+            }
+            VesselNavigator.NavigateToVessel(_selectedBookmark.Vessel);
         }
+
+        // ======================================================================
+        //  Bookmark actions
+        // ======================================================================
 
         /// <summary>
         /// Move the given bookmark up

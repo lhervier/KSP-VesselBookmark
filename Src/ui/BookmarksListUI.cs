@@ -37,6 +37,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private VesselBookmarkButton _refreshButton;
         private VesselBookmarkButton _closeButton;
 
+        private VesselBookmarkButton _barEditButton;
+        private VesselBookmarkButton _barGoToButton;
+        private VesselBookmarkButton _barSetTargetAsButton;
+
         public BookmarksListUI(
             UIStyles uiStyles,
             EditCommentUI editCommentUI, 
@@ -63,6 +67,24 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 .WithTooltip(ModLocalization.GetString("buttonClose"))
                 .WithIconSize(20, 20)
                 .Build();
+            _barEditButton = VesselBookmarkButton.Builder()
+                .WithIconPath("VesselBookmarkMod/buttons/edit")
+                .WithLabel(ModLocalization.GetString("tooltipEdit"))
+                .WithTooltip(ModLocalization.GetString("tooltipEdit"))
+                .WithIconSize(20, 20)
+                .Build();
+            _barGoToButton = VesselBookmarkButton.Builder()
+                .WithIconPath("VesselBookmarkMod/buttons/switch")
+                .WithLabel(ModLocalization.GetString("tooltipGoTo"))
+                .WithTooltip(ModLocalization.GetString("tooltipGoTo"))
+                .WithIconSize(20, 20)
+                .Build();
+            _barSetTargetAsButton = VesselBookmarkButton.Builder()
+                .WithIconPath("VesselBookmarkMod/buttons/target")
+                .WithLabel(ModLocalization.GetString("tooltipSetTargetAs"))
+                .WithTooltip(ModLocalization.GetString("tooltipSetTargetAs"))
+                .WithIconSize(20, 20)
+                .Build();
             
             _uiStyles = uiStyles;
             _editCommentUI = editCommentUI;
@@ -70,30 +92,17 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             _bookmarkUI.Controller.OnBookmarkSelected.Add(Controller.SetSelected);
             _bookmarkUI.Controller.OnBookmarkHovered.Add(Controller.SetHovered);
-            _bookmarkUI.Controller.OnBookmarkSetTargetAs.Add(Controller.SetTargetAs);
-            _bookmarkUI.Controller.OnBookmarkSwitchToVessel.Add(Controller.SwitchToVessel);
             _bookmarkUI.Controller.OnBookmarkMovedUp.Add(Controller.MoveUp);
             _bookmarkUI.Controller.OnBookmarkMovedDown.Add(Controller.MoveDown);
             _bookmarkUI.Controller.OnBookmarkRemoved.Add(Controller.Remove);
-
-            _bookmarkUI.Controller.OnBookmarkEdit.Add(OnBookmarkEdit);
         }
 
         public void OnDestroy() {
-            _bookmarkUI.Controller.OnBookmarkEdit.Remove(OnBookmarkEdit);
-            
             _bookmarkUI.Controller.OnBookmarkSelected.Remove(Controller.SetSelected);
             _bookmarkUI.Controller.OnBookmarkHovered.Remove(Controller.SetHovered);
-            _bookmarkUI.Controller.OnBookmarkSetTargetAs.Remove(Controller.SetTargetAs);
-            _bookmarkUI.Controller.OnBookmarkSwitchToVessel.Remove(Controller.SwitchToVessel);
             _bookmarkUI.Controller.OnBookmarkMovedUp.Remove(Controller.MoveUp);
             _bookmarkUI.Controller.OnBookmarkMovedDown.Remove(Controller.MoveDown);
             _bookmarkUI.Controller.OnBookmarkRemoved.Remove(Controller.Remove);
-        }
-
-        private void OnBookmarkEdit(Bookmark bookmark) {
-            Controller.SetSelected(bookmark);
-            _editCommentUI.Controller.EditComment(bookmark);
         }
 
         public void OnGUI() {
@@ -201,6 +210,40 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
                 GUILayout.EndScrollView();
             }
+
+            GUILayout.Space(5);
+            GUILayout.BeginHorizontal("box");
+            Bookmark selected = Controller.GetSelectedBookmark();
+            bool hasSelection = selected != null;
+            
+            System.Action editAction = null;
+            if( Controller.CanEditCurrentVesselComment() ) {
+                editAction = () => _editCommentUI.Controller.EditComment(Controller.GetSelectedBookmark());
+            }
+            _barEditButton.Draw(
+                () => true, 
+                editAction
+            );
+            
+            System.Action switchToAction = null;
+            if( Controller.CanSwitchToCurrentVessel() ) {
+                switchToAction = () => Controller.SwitchToCurrentVessel();
+            }
+            _barGoToButton.Draw(
+                () => true, 
+                switchToAction
+            );
+
+            System.Action setTargetAsAction = null;
+            if( Controller.CanSetCurrentVesselAsTarget() ) {
+                setTargetAsAction = () => Controller.SetCurrentVesselAsTarget();
+            }
+            _barSetTargetAsButton.Draw(
+                () => true, 
+                setTargetAsAction
+            );
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
             
             GUILayout.EndVertical();
             

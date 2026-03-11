@@ -21,9 +21,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private VesselBookmarkButton _removeButton;
         private VesselBookmarkButton _moveUpButton;
         private VesselBookmarkButton _moveDownButton;
-        private VesselBookmarkButton _setTargetAsButton;
-        private VesselBookmarkButton _goToButton;
-        private VesselBookmarkButton _editButton;
         
         // Textures for active vessel highlighting
         private Texture2D _activeVesselBackground;
@@ -61,22 +58,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 .WithTooltip(ModLocalization.GetString("tooltipMoveDown"))
                 .WithIconSize(BUTTON_WIDTH, BUTTON_HEIGHT)
                 .Build();
-            _setTargetAsButton = VesselBookmarkButton.Builder()
-                .WithIconPath("VesselBookmarkMod/buttons/target")
-                .WithTooltip(ModLocalization.GetString("tooltipSetTargetAs"))
-                .WithIconSize(BUTTON_WIDTH, BUTTON_HEIGHT)
-                .Build();
-            _goToButton = VesselBookmarkButton.Builder()
-                .WithIconPath("VesselBookmarkMod/buttons/switch")
-                .WithTooltip(ModLocalization.GetString("tooltipGoTo"))
-                .WithIconSize(BUTTON_WIDTH, BUTTON_HEIGHT)
-                .Build();
-            _editButton = VesselBookmarkButton.Builder()
-                .WithIconPath("VesselBookmarkMod/buttons/edit")
-                .WithTooltip(ModLocalization.GetString("tooltipEdit"))
-                .WithIconSize(BUTTON_WIDTH, BUTTON_HEIGHT)
-                .Build();
-
+            
             // Background texture (slightly tinted blue-green)
             _activeVesselBackground = new Texture2D(1, 1);
             _activeVesselBackground.SetPixel(0, 0, new Color(0.15f, 0.25f, 0.3f, 0.6f)); // Bleu-vert foncé avec transparence
@@ -171,34 +153,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             // Small spacing before buttons
             GUILayout.Space(5);
             
-            // Edit button
-            _editButton.Draw(
-                Controller.IsHoveredOrSelected,
-                () => Controller.OnBookmarkEdit.Fire(bookmark)
-            );
-            
-            GUILayout.Space(3);
-
-            // "Set target as" button
-            System.Action setTargetAsAction;
-            if( Controller.CanSetTargetAs() ) {
-                setTargetAsAction = () => Controller.OnBookmarkSetTargetAs.Fire(bookmark);
-            } else {
-                setTargetAsAction = null;
-            }
-            _setTargetAsButton.Draw(Controller.IsHoveredOrSelected, setTargetAsAction);
-
-            // Go to button (disabled if this is the active vessel)
-            System.Action goToAction;
-            if (Controller.CanSwitchToVessel()) {
-                goToAction = () => Controller.OnBookmarkSwitchToVessel.Fire(bookmark);
-            } else {
-                goToAction = null;
-            }
-            _goToButton.Draw(Controller.IsHoveredOrSelected, goToAction);
-            
-            GUILayout.Space(3);
-
             // Move up button
             System.Action moveUpAction;
             if( Controller.CanMoveUp() ) {

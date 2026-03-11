@@ -17,9 +17,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public EventData<Bookmark> OnBookmarkSelected = new EventData<Bookmark>("BookmarkUI.OnBookmarkSelected");
         public EventData<Bookmark> OnBookmarkHovered = new EventData<Bookmark>("BookmarkUI.OnBookmarkHovered");
         public EventData<Bookmark> OnBookmarkRemoved = new EventData<Bookmark>("BookmarkUI.OnBookmarkRemoved");
-        public EventData<Bookmark> OnBookmarkEdit = new EventData<Bookmark>("BookmarkUI.OnBookmarkEdit");
-        public EventData<Bookmark> OnBookmarkSetTargetAs = new EventData<Bookmark>("BookmarkUI.OnBookmarkSetTargetAs");
-        public EventData<Bookmark> OnBookmarkSwitchToVessel = new EventData<Bookmark>("BookmarkUI.OnBookmarkSwitchToVessel");
         public EventData<Bookmark> OnBookmarkMovedUp = new EventData<Bookmark>("BookmarkUI.OnBookmarkMovedUp");
         public EventData<Bookmark> OnBookmarkMovedDown = new EventData<Bookmark>("BookmarkUI.OnBookmarkMovedDown");
 
@@ -70,16 +67,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         public bool CanMoveDown() {
             return !_isLast;
-        }
-
-        public bool CanSwitchToVessel() {
-            if( _currentBookmark.Vessel == null ) {
-                return false;
-            }
-            if( IsActiveVessel() ) {
-                return false;
-            }
-            return true;
         }
 
         public bool IsTarget() {
