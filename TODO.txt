@@ -1,7 +1,5 @@
 TODO :
 - Recherche plein texte : On prend la chaine saisie, et on l'éclate selon les espaces. Ca fait des mots. On selectionne tous les vaisseaux qui contiennent tous ces mots.
-- Quand on click sur une ligne, elle reste comme si elle était toujours hover
-    => On pourra alors mettre les boutons "switch to", "set as target" et "edit" en bas de la liste (comme les alarmes)
 - Ajouter une fenetre pour la config 
     - Passage en debug on/off
     - Permettre de changer le theme pour être cohérent avec le z-theme
