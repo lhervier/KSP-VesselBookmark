@@ -2,6 +2,8 @@
 
 A Kerbal Space Program mod that lets you create bookmarks on vessels (by command module or by vessel) so you can find and manage them easily.
 
+![Screenshot](doc/mod.png)
+
 **Bookmarks on a command module**: The bookmark is tied to the part, not the vessel. When you dock or undock a vessel, the bookmark does not disappear—you can even find a vessel that is currently docked to a space station.
 
 **Bookmarks on vessels**: They remain essential because some vessels have no command module (debris, discarded stages, etc.). The "Add" button in the main window lets you add a bookmark for the active vessel, whatever it is.
