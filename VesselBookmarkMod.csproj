@@ -84,6 +84,7 @@
     <Compile Include="Src/ui/ugui/sprites/*.cs" />
     <Compile Include="Src/ui/ugui/titleBar/*.cs" />
     <Compile Include="Src/ui/ugui/body/*.cs" />
+    <Compile Include="Src/ui/ugui/body/list/*.cs" />
     <Compile Include="Src/util/*.cs" />
     <Compile Include="Src/ext/*.cs" />
   </ItemGroup>

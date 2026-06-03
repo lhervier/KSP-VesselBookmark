@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
+using com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body
 {
@@ -88,19 +89,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body
             contentFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
             contentFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            // Placeholder temporaire (sera remplacé par la liste des sections/bookmarks)
-            var placeholderGo = new GameObject("Placeholder", typeof(RectTransform));
-            placeholderGo.transform.SetParent(contentGo.transform, false);
-            var placeholderElement = placeholderGo.AddComponent<LayoutElement>();
-            placeholderElement.minHeight = 60f;
-            var placeholder = placeholderGo.AddComponent<Text>();
-            placeholder.text = "(liste des signets — à venir)";
-            placeholder.font = HighLogic.UISkin.font;
-            placeholder.fontSize = VesselBookmarkPalette.SituationFontSize;
-            placeholder.color = VesselBookmarkPalette.SectionHintTextColor;
-            placeholder.alignment = TextAnchor.MiddleCenter;
-            placeholder.fontStyle = FontStyle.Italic;
-            placeholder.raycastTarget = false;
+            // La liste des sections/bookmarks (se reconstruit/rafraîchit via ses propres abonnements)
+            var list = new ListBuilder(_viewModel).Create();
+            list.transform.SetParent(contentGo.transform, false);
 
             // Scrollbar verticale à droite
             var scrollbarGo = new GameObject("Scrollbar", typeof(RectTransform));

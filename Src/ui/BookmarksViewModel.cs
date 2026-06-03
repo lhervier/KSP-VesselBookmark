@@ -61,6 +61,24 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private readonly Dictionary<BookmarkType, List<Bookmark>> _availableBookmarks = new Dictionary<BookmarkType, List<Bookmark>>();
         private bool _preventBookmarksUpdates = false;
         public readonly EventVoid OnAvailableBookmarksChanged = new EventVoid("BookmarksViewModel.OnAvailableBookmarksChanged");
+
+        /// <summary>Nombre de bookmarks affichés (après filtrage), toutes sections confondues.</summary>
+        public int AvailableBookmarksCount {
+            get {
+                int n = 0;
+                foreach( var list in _availableBookmarks.Values ) n += list.Count;
+                return n;
+            }
+        }
+
+        /// <summary>Nombre total de bookmarks (avant filtrage), toutes sections confondues.</summary>
+        public int TotalBookmarksCount {
+            get {
+                int n = 0;
+                foreach( var instance in BookmarkManager.Instances.Values ) n += instance.Bookmarks.Count;
+                return n;
+            }
+        }
         
         /// <summary>
         /// The list of available bodies
