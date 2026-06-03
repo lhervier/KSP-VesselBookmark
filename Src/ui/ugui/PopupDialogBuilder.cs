@@ -5,6 +5,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.body;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer;
+using com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
@@ -21,6 +22,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
         private readonly TitleBarBuilder _titleBarBuilder;
         private readonly BodyBuilder _bodyBuilder;
         private readonly FooterBuilder _footerBuilder;
+        private readonly FilterMenuBuilder _filterMenuBuilder;
         private readonly EditCommentOverlayBuilder _editOverlayBuilder;
         private readonly RemoveConfirmOverlayBuilder _removeOverlayBuilder;
 
@@ -30,6 +32,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
             this._titleBarBuilder = new TitleBarBuilder(viewModel);
             this._bodyBuilder = new BodyBuilder(viewModel);
             this._footerBuilder = new FooterBuilder(viewModel);
+            this._filterMenuBuilder = new FilterMenuBuilder(viewModel);
             this._editOverlayBuilder = new EditCommentOverlayBuilder(viewModel);
             this._removeOverlayBuilder = new RemoveConfirmOverlayBuilder(viewModel);
         }
@@ -120,6 +123,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
             TitleBarBuilder.TitleBarController titleBarController = this._titleBarBuilder.Create();
             titleBarController.transform.SetParent(windowGo.transform, false);
 
+            // Menu filtres (au-dessus du contenu), puis les overlays modaux (au-dessus de tout).
+            this._filterMenuBuilder.Create(windowGo.transform);
             this._editOverlayBuilder.Create(windowGo.transform);
             this._removeOverlayBuilder.Create(windowGo.transform);
 

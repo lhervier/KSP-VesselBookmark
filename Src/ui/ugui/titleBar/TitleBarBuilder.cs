@@ -15,6 +15,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
     {
         private const string AddGlyph = "+";
         private const string RefreshGlyph = "↻";   // ↻ (U+21BB) — rendu OK avec la police UISkin
+        private const string MenuGlyph = "⋯";       // ⋯ (U+22EF) — repli possible "≡" / "..." si non rendu
         private const string CloseGlyph = "✕";      // ✕ (U+2715)
 
         private readonly BookmarksViewModel _viewModel;
@@ -103,6 +104,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
                 () => _viewModel.RefreshBookmarks());
             refresh.transform.SetParent(go.transform, false);
 
+            // Bouton menu filtres « ⋯ » (toggle FilterMenuOpen) + point vert « filtre actif »
+            ButtonController menu = _buttonBuilder.Create(
+                "FilterMenu",
+                MenuGlyph,
+                () => _viewModel.FilterMenuOpen = !_viewModel.FilterMenuOpen);
+            menu.transform.SetParent(go.transform, false);
+            controller.BindFilterDot(BuildFilterDot(menu.gameObject));
+
             // Bouton de fermeture : ferme la fenêtre (l'IMGUI suit, via WindowVisible)
             ButtonController close = _buttonBuilder.Create(
                 "Close",
@@ -155,27 +164,60 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             return label;
         }
 
+        // Petit point vert dans le coin haut-droit du bouton ⋯, masqué par défaut.
+        private Image BuildFilterDot(GameObject buttonGo)
+        {
+            var dotGo = new GameObject("FilterDot", typeof(RectTransform));
+            dotGo.transform.SetParent(buttonGo.transform, false);
+            var rect = dotGo.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(1f, 1f);
+            rect.anchorMax = new Vector2(1f, 1f);
+            rect.pivot = new Vector2(1f, 1f);
+            rect.sizeDelta = new Vector2(VesselBookmarkPalette.FilterDotSize, VesselBookmarkPalette.FilterDotSize);
+            rect.anchoredPosition = new Vector2(-1f, -1f);
+            var img = dotGo.AddComponent<Image>();
+            img.sprite = Sprites.Fill;
+            img.type = Image.Type.Simple;
+            img.color = VesselBookmarkPalette.AccentColor;
+            img.raycastTarget = false;
+            img.enabled = false;
+            return img;
+        }
+
         public class TitleBarController : BaseController
         {
             private Text _countLabel;
             private ButtonController _addButton;
+            private Image _filterDot;
 
             public void BindCountLabel(Text label) => this._countLabel = label;
             public void BindAddButton(ButtonController button) => this._addButton = button;
+            public void BindFilterDot(Image dot) => this._filterDot = dot;
 
             public void Start()
             {
                 this.ViewModel.OnAvailableBookmarksChanged.Add(OnAvailableBookmarksChanged);
                 this.ViewModel.OnActiveOrTargetChanged.Add(OnActiveOrTargetChanged);
 
+                // Point « filtre actif » : se met à jour quand un filtre change
+                this.ViewModel.OnSelectedBodyChanged.Add(UpdateFilterDot);
+                this.ViewModel.OnSelectedVesselTypeChanged.Add(UpdateFilterDot);
+                this.ViewModel.OnSearchTextChanged.Add(UpdateFilterDot);
+                this.ViewModel.OnFilterHasCommentChanged.Add(UpdateFilterDot);
+
                 UpdateCount();
                 UpdateAddButton();
+                UpdateFilterDot();
             }
 
             public void OnDestroy()
             {
                 this.ViewModel?.OnAvailableBookmarksChanged.Remove(OnAvailableBookmarksChanged);
                 this.ViewModel?.OnActiveOrTargetChanged.Remove(OnActiveOrTargetChanged);
+                this.ViewModel?.OnSelectedBodyChanged.Remove(UpdateFilterDot);
+                this.ViewModel?.OnSelectedVesselTypeChanged.Remove(UpdateFilterDot);
+                this.ViewModel?.OnSearchTextChanged.Remove(UpdateFilterDot);
+                this.ViewModel?.OnFilterHasCommentChanged.Remove(UpdateFilterDot);
             }
 
             private void OnAvailableBookmarksChanged() => UpdateCount();
@@ -191,6 +233,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             {
                 if (_addButton == null) return;
                 _addButton.SetInteractable(ViewModel.CanAddVesselBookmark());
+            }
+
+            private void UpdateFilterDot()
+            {
+                if (_filterDot != null) _filterDot.enabled = ViewModel.HasActiveFilters;
             }
         }
     }

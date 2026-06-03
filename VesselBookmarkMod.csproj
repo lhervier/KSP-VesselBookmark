@@ -86,6 +86,7 @@
     <Compile Include="Src/ui/ugui/body/*.cs" />
     <Compile Include="Src/ui/ugui/body/list/*.cs" />
     <Compile Include="Src/ui/ugui/footer/*.cs" />
+    <Compile Include="Src/ui/ugui/menu/*.cs" />
     <Compile Include="Src/ui/ugui/overlays/*.cs" />
     <Compile Include="Src/util/*.cs" />
     <Compile Include="Src/ext/*.cs" />

@@ -521,6 +521,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         // =============================================================================
 
         /// <summary>
+        /// Whether any filter is currently active (différent de l'état par défaut).
+        /// </summary>
+        public bool HasActiveFilters {
+            get {
+                return SelectedBody != ModLocalization.GetString("labelAll")
+                    || SelectedVesselType != ALL_VESSEL_TYPES
+                    || !string.IsNullOrEmpty(SearchText)
+                    || FilterHasComment;
+            }
+        }
+
+        /// <summary>
         /// Clear the filters
         /// </summary>
         public void ClearFilters() {
