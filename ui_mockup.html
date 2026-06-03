@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vessel Bookmarks — Maquette UI (uGUI)</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Titillium+Web:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ===========================================================================
+   Maquette de refonte graphique du mod VesselBookmarks.
+   Style calqué sur ksp_cheatsheet_ps4.html (mod KSP-SteamInputPlugin) :
+   thème sombre, accent vert #8dbe45, polices Titillium Web + Share Tech Mono.
+   Les couleurs reprennent SteamInputPalette.cs (mapping 1:1 HTML <-> uGUI).
+   Toutes les classes sont préfixées .vb-  (vessel bookmark).
+   =========================================================================== */
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0a;display:flex;justify-content:center;align-items:flex-start;gap:40px;flex-wrap:wrap;padding:40px 20px;min-height:100vh;font-family:'Titillium Web',sans-serif}
+
+/* ---- Fenêtre ---- */
+.vb-w{font-family:'Titillium Web',sans-serif;font-size:13px;background:#141414;border:1px solid #555;border-radius:3px;color:#ccc;width:420px;position:relative}
+
+/* ---- Title bar ---- */
+.vb-tb{background:#2e2e2e;border-bottom:1px solid #444;padding:5px 8px;display:flex;align-items:center;gap:6px}
+.vb-title{font-weight:600;font-size:12px;color:#e8e8e8;letter-spacing:.04em;text-transform:uppercase;flex:1}
+.vb-count{font-size:10px;color:#8dbe45;font-weight:600;letter-spacing:.05em;border:1px solid #4a6e20;padding:1px 6px;border-radius:2px;background:rgba(141,190,69,.1)}
+.vb-tbtns{display:flex;align-items:center;gap:4px}
+.vb-btn{background:#383838;border:1px solid #555;border-bottom:2px solid #333;color:#bbb;font-size:13px;min-width:22px;height:22px;padding:0 4px;border-radius:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Share Tech Mono',monospace}
+.vb-btn:hover{background:#484848;color:#fff}
+.vb-btn.active{background:#4a6e20;border-color:#8dbe45;color:#e8e8e8}
+.vb-btn .vb-dot{position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:#8dbe45;display:none}
+.vb-btn.has-filters{position:relative}
+.vb-btn.has-filters .vb-dot{display:block}
+
+/* ---- Menu filtres (déroulant du title bar) ---- */
+.vb-menu-wrap{position:relative}
+.vb-menu{position:absolute;top:26px;right:0;background:#1e1e1e;border:1px solid #555;border-radius:3px;width:260px;z-index:100;padding:6px 0;display:none}
+.vb-menu.open{display:block}
+.vb-menu-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#555;padding:2px 10px 5px}
+.vb-menu-sep{border-top:1px solid #2a2a2a;margin:5px 0}
+.vb-menu-row{display:flex;align-items:center;gap:8px;padding:4px 10px}
+.vb-menu-lbl{font-size:11px;color:#999;min-width:46px;flex-shrink:0;text-transform:uppercase;letter-spacing:.04em}
+.vb-search{flex:1;display:flex;align-items:center;gap:6px;background:#0d0d0d;border:1px solid #2a2a2a;border-radius:2px;padding:3px 7px}
+.vb-search span{color:#555;font-size:11px}
+.vb-search input{flex:1;background:transparent;border:none;outline:none;color:#e8e8e8;font-family:'Titillium Web',sans-serif;font-size:12px}
+.vb-search input::placeholder{color:#555}
+
+/* combo (réutilisé du cheatsheet) */
+.vb-combo{position:relative;flex:1}
+.vb-combo-btn{width:100%;display:flex;align-items:center;gap:6px;background:#2a2a2a;border:1px solid #555;border-radius:2px;color:#e8e8e8;font-family:'Titillium Web',sans-serif;font-size:12px;padding:3px 8px;cursor:pointer;text-align:left}
+.vb-combo-btn:hover{background:#333}
+.vb-combo-btn .vb-combo-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vb-combo-caret{color:#888;font-size:10px;flex-shrink:0}
+.vb-combo-list{position:absolute;top:26px;left:0;right:0;background:#1e1e1e;border:1px solid #555;border-radius:3px;z-index:120;padding:3px 0;display:none;max-height:170px;overflow-y:auto}
+.vb-combo-list.open{display:block}
+.vb-combo-item{display:flex;align-items:center;gap:7px;padding:4px 9px;cursor:pointer;font-size:12px;color:#ddd}
+.vb-combo-item:hover{background:#2a2a2a}
+.vb-combo-item.sel{background:rgba(141,190,69,.08);color:#8dbe45}
+
+/* checkbox (réutilisé du cheatsheet) */
+.vb-check{display:flex;align-items:center;gap:7px;padding:4px 10px;cursor:pointer;user-select:none}
+.vb-check input[type=checkbox]{accent-color:#8dbe45;width:13px;height:13px;flex-shrink:0}
+.vb-check label{font-size:12px;color:#bbb;cursor:pointer}
+.vb-menu-action{display:flex;align-items:center;gap:7px;padding:5px 10px;cursor:pointer;user-select:none;font-size:12px;color:#bbb}
+.vb-menu-action:hover{background:#2a2a2a;color:#e8e8e8}
+.vb-menu-action .vb-ma-ico{font-size:12px;width:13px;text-align:center;color:#888}
+.vb-menu-action:hover .vb-ma-ico{color:#8dbe45}
+
+/* ---- Corps : liste ---- */
+.vb-body{max-height:430px;overflow-y:auto}
+.vb-body::-webkit-scrollbar{width:8px}
+.vb-body::-webkit-scrollbar-thumb{background:#888;border-radius:4px}
+.vb-body::-webkit-scrollbar-track{background:#141414}
+
+/* en-tête de section (= zone header du cheatsheet) */
+.vb-sec-h{display:flex;align-items:center;padding:4px 8px;background:#1a1a1a;border-bottom:1px solid #222;border-top:1px solid #222}
+.vb-sec-name{font-weight:600;font-size:11px;color:#ddd;text-transform:uppercase;letter-spacing:.05em;flex:1}
+.vb-sec-cnt{font-size:10px;color:#555;font-family:'Share Tech Mono',monospace}
+.vb-sec-hint{padding:5px 10px;color:#555;font-size:11px;font-style:italic;background:#121212;border-bottom:1px solid #1c1c1c}
+
+/* ligne de bookmark */
+.vb-bm{padding:6px 8px 6px 8px;border-bottom:1px solid #1c1c1c;cursor:pointer;position:relative;border-left:2px solid transparent}
+.vb-bm:hover{background:rgba(255,255,255,.03)}
+.vb-bm.sel{background:rgba(141,190,69,.06);border-left-color:#4a6e20}
+.vb-bm.active{background:rgba(141,190,69,.09);border-left-color:#8dbe45}
+.vb-bm-l1{display:flex;align-items:center;gap:7px}
+.vb-type{width:20px;height:20px;border:1px solid #444;border-radius:2px;background:#1f1f1f;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;filter:grayscale(.3)}
+.vb-alarm{font-size:12px;color:#a98a4a;flex-shrink:0}
+.vb-name{font-size:13px;color:#ddd;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vb-bm.active .vb-name{color:#fff;font-weight:600}
+.vb-name.target{color:#8dbe45}
+.vb-name.missing{color:#666;font-style:italic}
+.vb-chip{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:1px 5px;border-radius:2px;flex-shrink:0}
+.vb-chip.target{color:#8dbe45;border:1px solid #4a6e20;background:rgba(141,190,69,.1)}
+.vb-chip.active{color:#8dbe45;border:1px solid #4a6e20;background:rgba(141,190,69,.1)}
+.vb-chip.missing{color:#c0594f;border:1px solid #6e2a20;background:rgba(192,89,79,.1)}
+
+/* boutons d'ordre/suppression révélés au survol ou sélection */
+.vb-rowbtns{display:flex;align-items:center;gap:3px;flex-shrink:0;opacity:0;transition:opacity .08s}
+.vb-bm:hover .vb-rowbtns,.vb-bm.sel .vb-rowbtns,.vb-bm.active .vb-rowbtns{opacity:1}
+.vb-rb{background:#2a2a2a;border:1px solid #444;color:#999;font-size:11px;width:18px;height:18px;border-radius:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace}
+.vb-rb:hover:not(:disabled){background:#383838;color:#fff}
+.vb-rb.danger:hover:not(:disabled){background:#5a241d;border-color:#c0594f;color:#fff}
+.vb-rb:disabled{opacity:.25;cursor:default}
+
+.vb-bm-l2{display:flex;align-items:center;gap:6px;padding-left:27px;margin-top:2px}
+.vb-situation{font-size:11px;color:#888}
+.vb-vname{font-size:11px;color:#555}
+.vb-bm-l3{padding-left:27px;margin-top:4px}
+.vb-comment{font-size:11px;line-height:1.45;color:#a98a4a;background:rgba(176,115,24,.06);border-left:2px solid #4a3a18;border-radius:2px;padding:4px 8px}
+
+/* état vide */
+.vb-empty{padding:24px 16px;text-align:center;color:#666;font-size:12px;line-height:1.6}
+
+/* ---- Barre d'actions du bas (agit sur la sélection) ---- */
+.vb-foot{display:flex;align-items:center;gap:8px;padding:7px 9px;background:#181818;border-top:1px solid #2a2a2a}
+.vb-foot-sel{flex:1;font-size:11px;color:#777;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic}
+.vb-foot-sel b{color:#bbb;font-style:normal;font-weight:600}
+.vb-act{background:#2a2a2a;border:1px solid #555;border-bottom:2px solid #444;color:#bbb;font-size:13px;height:26px;padding:0 10px;border-radius:2px;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'Titillium Web',sans-serif}
+.vb-act .vb-act-ico{font-family:'Share Tech Mono',monospace;font-size:13px}
+.vb-act:hover:not(:disabled){background:#383838;color:#fff;border-color:#8dbe45}
+.vb-act:disabled{opacity:.25;cursor:default}
+
+/* ---- Overlay d'édition de commentaire (calque interne, PAS une PopupDialog) ---- */
+.vb-overlay{position:absolute;inset:0;background:rgba(8,8,8,.78);display:none;align-items:center;justify-content:center;z-index:200;border-radius:3px}
+.vb-overlay.open{display:flex}
+.vb-card{width:84%;background:#1a1a1a;border:1px solid #555;border-radius:3px;padding:14px;box-shadow:0 6px 24px rgba(0,0,0,.6)}
+.vb-card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#8dbe45;margin-bottom:9px}
+.vb-card-sub{font-size:11px;color:#777;margin-bottom:9px}
+.vb-card-sub b{color:#bbb}
+.vb-textarea{width:100%;height:90px;resize:none;background:#0d0d0d;border:1px solid #2a2a2a;border-radius:2px;color:#e8e8e8;font-family:'Titillium Web',sans-serif;font-size:13px;line-height:1.5;padding:8px;outline:none}
+.vb-textarea:focus{border-color:#4a6e20}
+.vb-card-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.vb-card-btn{font-family:'Titillium Web',sans-serif;font-size:12px;height:28px;padding:0 14px;border-radius:2px;cursor:pointer;border:1px solid #555;border-bottom:2px solid #333;background:#383838;color:#bbb}
+.vb-card-btn:hover{background:#484848;color:#fff}
+.vb-card-btn.ok{background:rgba(141,190,69,.12);border-color:#4a6e20;color:#8dbe45}
+.vb-card-btn.ok:hover{background:rgba(141,190,69,.22);color:#a6d65e}
+.vb-card.confirm .vb-card-title{color:#c0594f}
+.vb-card-msg{font-size:13px;color:#ccc;line-height:1.5;margin-bottom:6px}
+.vb-card-btn.danger{background:rgba(192,89,79,.12);border-color:#6e2a20;color:#c0594f}
+.vb-card-btn.danger:hover{background:rgba(192,89,79,.22);color:#d97b70}
+
+/* ---- légende sous la maquette ---- */
+.vb-legend{width:420px;color:#666;font-size:12px;line-height:1.6}
+.vb-legend h2{color:#8dbe45;font-size:13px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;font-weight:600}
+.vb-legend ul{list-style:none}
+.vb-legend li{padding:3px 0;border-bottom:1px solid #1a1a1a}
+.vb-legend b{color:#aaa;font-weight:600}
+.vb-legend kbd{font-family:'Share Tech Mono',monospace;font-size:11px;color:#8dbe45}
+</style>
+</head>
+<body>
+
+<!-- ======================= FENÊTRE PRINCIPALE ======================= -->
+<div class="vb-w">
+
+  <!-- Title bar -->
+  <div class="vb-tb">
+    <span class="vb-title">🔖 Signets</span>
+    <span class="vb-count" id="vb-count">4 / 6</span>
+    <div class="vb-tbtns">
+      <button class="vb-btn" title="Ajouter le vaisseau actif" onclick="flash(this)">＋</button>
+      <button class="vb-btn" title="Rafraîchir" onclick="flash(this)">⟳</button>
+      <div class="vb-menu-wrap">
+        <button class="vb-btn has-filters" id="vb-filter-btn" title="Filtres" onclick="toggleMenu(event)">⋯<span class="vb-dot"></span></button>
+        <div class="vb-menu" id="vb-menu">
+          <div class="vb-menu-title">Filtres &amp; recherche</div>
+          <div class="vb-menu-row">
+            <div class="vb-search">
+              <span>🔍</span>
+              <input type="text" placeholder="Rechercher…" value="" oninput="onSearch(this.value)">
+            </div>
+          </div>
+          <div class="vb-menu-row">
+            <span class="vb-menu-lbl">Corps</span>
+            <div class="vb-combo">
+              <button class="vb-combo-btn" onclick="toggleCombo(event,'body')"><span class="vb-combo-label" id="vb-body-label">Tous</span><span class="vb-combo-caret">▾</span></button>
+              <div class="vb-combo-list" id="vb-body-list"></div>
+            </div>
+          </div>
+          <div class="vb-menu-row">
+            <span class="vb-menu-lbl">Type</span>
+            <div class="vb-combo">
+              <button class="vb-combo-btn" onclick="toggleCombo(event,'type')"><span class="vb-combo-label" id="vb-type-label">Tous</span><span class="vb-combo-caret">▾</span></button>
+              <div class="vb-combo-list" id="vb-type-list"></div>
+            </div>
+          </div>
+          <label class="vb-check"><input type="checkbox" onchange="onCommentFilter(this.checked)"><label>Avec un commentaire seulement</label></label>
+          <div class="vb-menu-sep"></div>
+          <div class="vb-menu-action" onclick="clearFilters()"><span class="vb-ma-ico">✕</span><span>Réinitialiser les filtres</span></div>
+        </div>
+      </div>
+      <button class="vb-btn" title="Fermer" onclick="flash(this)">✕</button>
+    </div>
+  </div>
+
+  <!-- Corps : liste des bookmarks -->
+  <div class="vb-body" id="vb-body"></div>
+
+  <!-- Barre d'actions (sur la sélection) -->
+  <div class="vb-foot">
+    <span class="vb-foot-sel" id="vb-foot-sel">Aucune sélection</span>
+    <button class="vb-act" id="vb-act-edit" disabled onclick="openEdit()" title="Éditer le commentaire"><span class="vb-act-ico">✎</span></button>
+    <button class="vb-act" id="vb-act-goto" disabled onclick="flash(this)" title="Aller au vaisseau"><span class="vb-act-ico">➤</span></button>
+    <button class="vb-act" id="vb-act-target" disabled onclick="flash(this)" title="Définir comme cible"><span class="vb-act-ico">◎</span></button>
+  </div>
+
+  <!-- Overlay : édition du commentaire (calque interne) -->
+  <div class="vb-overlay" id="vb-edit-overlay">
+    <div class="vb-card">
+      <div class="vb-card-title">Commentaire</div>
+      <div class="vb-card-sub" id="vb-edit-sub"></div>
+      <textarea class="vb-textarea" id="vb-edit-text" placeholder="Votre note personnelle…"></textarea>
+      <div class="vb-card-foot">
+        <button class="vb-card-btn" onclick="closeEdit()">Annuler</button>
+        <button class="vb-card-btn ok" onclick="saveEdit()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay : confirmation de suppression (calque interne) -->
+  <div class="vb-overlay" id="vb-del-overlay">
+    <div class="vb-card confirm">
+      <div class="vb-card-title">Supprimer le signet</div>
+      <div class="vb-card-msg" id="vb-del-msg"></div>
+      <div class="vb-card-foot">
+        <button class="vb-card-btn" onclick="closeDel()">Annuler</button>
+        <button class="vb-card-btn danger" onclick="confirmDel()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ======================= LÉGENDE ======================= -->
+<div class="vb-legend">
+  <h2>Proposition de refonte — Vessel Bookmarks</h2>
+  <ul>
+    <li><b>Style</b> : repris du cheatsheet PS4 (uGUI / PopupDialog), accent vert <kbd>#8dbe45</kbd>.</li>
+    <li><b>Filtres dans « ⋯ »</b> : recherche, corps, type et case « commentaire » regroupés dans le menu du title bar. Le point vert sur « ⋯ » signale un filtre actif.</li>
+    <li><b>Deux sections</b> : signets par module de commande / par vaisseau, avec une aide grisée sous chaque titre.</li>
+    <li><b>Actions hybrides</b> : ▲ ▼ ✕ au survol/sélection de la ligne ; <b>Éditer / Aller / Cibler</b> dans la barre du bas, actives sur la sélection.</li>
+    <li><b>Vaisseau actif</b> : liseré + fond vert. <b>Cible</b> : titre vert + pastille. <b>Vaisseau disparu</b> : gris italique + pastille rouge.</li>
+    <li><b>Édition / suppression</b> : calque interne par-dessus le corps (pas de nouvelle fenêtre).</li>
+    <li style="color:#555;font-style:italic;border:none;padding-top:8px">Clique une ligne pour la sélectionner, survole-la pour révéler ▲▼✕, ouvre « ⋯ » et « ✎ ».</li>
+  </ul>
+</div>
+
+<script>
+/* Données d'exemple ------------------------------------------------------- */
+const TYPE_ICON = {Station:'🛰',Probe:'📡',Rover:'🚙',Ship:'🚀',Lander:'🛬',Plane:'✈',Base:'🏠',Relay:'📶',Debris:'🗑'};
+const BODIES = ['Tous','Kerbin','Mun','Minmus','Eve','Gilly'];
+const TYPES  = ['Tous','Base','Débris','Atterrisseur','Avion','Sonde','Relais','Rover','Vaisseau','Station'];
+
+/* Bookmarks réels importés depuis la sauvegarde (nœud VESSEL_BOOKMARKS).
+   - vname = nom du vaisseau, affiché entre () uniquement s'il diffère du titre (cas module de commande docké).
+   - %NEWLINE% des commentaires converti en \n. */
+let bookmarks = [
+  // --- Signets par module de commande ---
+  {id:154872978,  sec:'cmd', type:'Base',    name:'Base Mu',                     situation:'Posé sur Mun',                 vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:3222643961, sec:'cmd', type:'Base',    name:'Base Mi',                     situation:'Posé sur Minmus',              vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:974353361,  sec:'cmd', type:'Base',    name:'Base Eve',                    situation:'Posé sur Eve',                 vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:1116289897, sec:'cmd', type:'Base',    name:'Base Gi',                     situation:'Posé sur Gilly',               vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Ajouter Foreuse\nAjouter Batteries'},
+  {id:2706995273, sec:'cmd', type:'Station', name:'Station Ke',                  situation:'En orbite autour de Kerbin',   vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:801646316,  sec:'cmd', type:'Station', name:'Station Mu',                  situation:'En orbite autour de Mun',      vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:2703066388, sec:'cmd', type:'Station', name:'Station Mi',                  situation:'En orbite autour de Minmus',   vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:3130931997, sec:'cmd', type:'Station', name:'Station Eve',                 situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Valentina a bord'},
+  {id:3622827410, sec:'cmd', type:'Station', name:'Station Gi',                  situation:'En orbite autour de Gilly',    vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:907817627,  sec:'cmd', type:'Lander',  name:'Mu Att. X2',                  situation:'En orbite autour de Mun',      vname:'Station Mu',  alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:1829643223, sec:'cmd', type:'Lander',  name:'Mi Att. X2',                  situation:'En orbite autour de Minmus',   vname:'Station Mi',  alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:3107656054, sec:'cmd', type:'Lander',  name:'Station Gi Att. X2',          situation:'En orbite autour de Gilly',    vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:321153399,  sec:'cmd', type:'Ship',    name:'Taxi Mu Ke X5',               situation:'En orbite autour de Kerbin',   vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Anyl et Maxcente à bord'},
+  {id:3688059901, sec:'cmd', type:'Ship',    name:'Taxi Mi Ke X2',               situation:'En orbite autour de Kerbin',   vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:383088338,  sec:'cmd', type:'Ship',    name:'Taxi Mi Mu X8',               situation:'En orbite autour de Minmus',   vname:'Station Mi',  alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:2404109512, sec:'cmd', type:'Ship',    name:'Taxi Eve Ke X9',              situation:'En orbite autour de Kerbin',   vname:null,          alarm:true,  active:false, target:false, missing:false, comment:'Jeb a bord'},
+  {id:3422261359, sec:'cmd', type:'Ship',    name:'Taxi Gi Eve X4 v1',           situation:'En orbite autour de Gilly',    vname:'Station Gi',  alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:2812150506, sec:'cmd', type:'Lander',  name:'Base Mu Rav. ElOx',           situation:'En orbite autour de Mun',      vname:'Station Mu',  alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:3763353961, sec:'cmd', type:'Lander',  name:'Base Mi Rav. ElOx',           situation:'En orbite autour de Minmus',   vname:'Station Mi',  alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:1301123574, sec:'cmd', type:'Lander',  name:'Base Mi Rav. El',             situation:'En orbite autour de Minmus',   vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:739513132,  sec:'cmd', type:'Lander',  name:'Base Gi Rav. ElOx',           situation:'En orbite autour de Gilly',    vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:1085434066, sec:'cmd', type:'Probe',   name:'Rav. Gi Eve ElOx',            situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:557171010,  sec:'cmd', type:'Ship',    name:'Truck Mu Ke 01 36T Toutan',   situation:'En orbite autour de Kerbin',   vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:3881450700, sec:'cmd', type:'Ship',    name:'Truck Mi Ke 01 36T Camslen',  situation:'En orbite autour de Kerbin',   vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:1374075719, sec:'cmd', type:'Ship',    name:'Truck Mi Ke 02 36T Ermont',   situation:'En orbite autour de Kerbin',   vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:3730846803, sec:'cmd', type:'Ship',    name:'Eve NTruck 01 54T Tomdore',   situation:'En orbite autour d’Eve',       vname:null,          alarm:true,  active:false, target:false, missing:false, comment:''},
+  {id:3614908280, sec:'cmd', type:'Ship',    name:'Eve NTruck 02 54T Greglane',  situation:'En orbite autour d’Eve',       vname:null,          alarm:true,  active:false, target:false, missing:false, comment:''},
+  {id:1599948332, sec:'cmd', type:'Ship',    name:'Eve NTruck 03 54T Chadie',    situation:'En orbite autour de Minmus',   vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Ravitailler'},
+  {id:461941145,  sec:'cmd', type:'Ship',    name:'Eve NTruck 04 54T Datorinne', situation:'En orbite autour de Minmus',   vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Ravitailler'},
+  {id:1825741530, sec:'cmd', type:'Ship',    name:'Eve NTruck 05 54T Quenbéron', situation:'En orbite autour de Minmus',   vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Ravitailler'},
+  {id:4127605033, sec:'cmd', type:'Ship',    name:'Eve Truck 01 24T Lazbeau',    situation:'En orbite autour de Gilly',    vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Ravitailler\nA vide'},
+  {id:885268935,  sec:'cmd', type:'Ship',    name:'Eve Truck 02 24T Néhédouarde',situation:'En orbite autour de Gilly',    vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Ravitailler\nA vide'},
+  {id:1182498243, sec:'cmd', type:'Ship',    name:'Eve Truck 03 24T Stécente',   situation:'En orbite autour de Gilly',    vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Ravitailler\nA Vide'},
+  {id:2569677126, sec:'cmd', type:'Ship',    name:'Eve Truck 04 24T Delemy',     situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Attraper des atterrisseurs'},
+  {id:3985073403, sec:'cmd', type:'Ship',    name:'Eve Truck 05 24T Moïcaste',   situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Attraper des atterrisseurs'},
+  {id:3749422718, sec:'cmd', type:'Plane',   name:'Base Eve - Avion',            situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Bill et Bob à bord\nFaire atterrir sur Eve'},
+  {id:2195287730, sec:'cmd', type:'Lander',  name:'Eve Atterrisseur',            situation:'Posé sur Eve',                 vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Faire atterrir sur Eve\nStructure + Foreuse'},
+  {id:2987386554, sec:'cmd', type:'Lander',  name:'Eve Atterrisseur',            situation:'Posé sur Eve',                 vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Fait atterrir sur Eve\nEve Escape'},
+  {id:2083401543, sec:'cmd', type:'Lander',  name:'Eve Atterrisseur',            situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Jumellé'},
+  {id:2297787915, sec:'cmd', type:'Lander',  name:'Eve Atterrisseur',            situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Jumellé'},
+  {id:430471660,  sec:'cmd', type:'Lander',  name:'Eve Atterrisseur',            situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Jumellé'},
+  {id:4288136601, sec:'cmd', type:'Lander',  name:'Eve Atterrisseur',            situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Jumellé'},
+  // --- Signets par vaisseau ---
+  {id:1585884509, sec:'vessel', type:'Ship', name:'Eve Truck 04 24T Delemy',     situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Base Eve 4/5: Panneaux X3 + Escape'},
+  {id:4031407199, sec:'vessel', type:'Ship', name:'Eve Truck 05 24T Moïcaste',   situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Eve Base 5/5: Labo + Habitat X2 + Bureaux + Sciences'},
+];
+
+let selectedId = 154872978;
+let editId = null, delId = null;
+
+/* Rendu de la liste ------------------------------------------------------- */
+function render(){
+  const cmd    = bookmarks.filter(b=>b.sec==='cmd');
+  const vessel = bookmarks.filter(b=>b.sec==='vessel');
+  let html = '';
+  html += section('Signets par module de commande', 'Clic droit sur un module de commande pour ajouter / retirer un signet', cmd);
+  html += section('Signets par vaisseau', 'Bouton ＋ du title bar pour le vaisseau actif', vessel);
+  document.getElementById('vb-body').innerHTML = html;
+  renderFoot();
+}
+function section(title, hint, list){
+  let h = `<div class="vb-sec-h"><span class="vb-sec-name">${title}</span><span class="vb-sec-cnt">${list.length}</span></div>`;
+  h += `<div class="vb-sec-hint">${hint}</div>`;
+  if(!list.length){ h += `<div class="vb-empty">Aucun signet</div>`; return h; }
+  list.forEach((b,i)=>{ h += row(b, i===0, i===list.length-1); });
+  return h;
+}
+function row(b, isFirst, isLast){
+  const cls = ['vb-bm']; if(b.id===selectedId) cls.push('sel'); if(b.active) cls.push('active');
+  const nameCls = ['vb-name']; if(b.target) nameCls.push('target'); if(b.missing) nameCls.push('missing');
+  let chip='';
+  if(b.active)       chip = `<span class="vb-chip active">Actif</span>`;
+  else if(b.target)  chip = `<span class="vb-chip target">Cible</span>`;
+  if(b.missing)      chip = `<span class="vb-chip missing">Disparu</span>`;
+  const alarm = b.alarm ? `<span class="vb-alarm" title="Alarme associée">⏰</span>` : '';
+  const vname = b.vname ? `<span class="vb-vname">(${b.vname})</span>` : '';
+  const comment = b.comment ? `<div class="vb-bm-l3"><div class="vb-comment">${b.comment.replace(/\n/g,'<br>')}</div></div>` : '';
+  return `
+  <div class="${cls.join(' ')}" onclick="select(${b.id})">
+    <div class="vb-bm-l1">
+      <span class="vb-type">${TYPE_ICON[b.type]||'❔'}</span>
+      ${alarm}
+      <span class="${nameCls.join(' ')}">${b.name}</span>
+      ${chip}
+      <span class="vb-rowbtns">
+        <button class="vb-rb" ${isFirst?'disabled':''} title="Monter"   onclick="moveUp(event,${b.id})">▲</button>
+        <button class="vb-rb" ${isLast?'disabled':''}  title="Descendre" onclick="moveDown(event,${b.id})">▼</button>
+        <button class="vb-rb danger" title="Supprimer" onclick="askDel(event,${b.id})">✕</button>
+      </span>
+    </div>
+    <div class="vb-bm-l2"><span class="vb-situation">${b.situation}</span>${vname}</div>
+    ${comment}
+  </div>`;
+}
+
+/* Barre du bas ------------------------------------------------------------ */
+function renderFoot(){
+  const b = bookmarks.find(x=>x.id===selectedId);
+  const sel = document.getElementById('vb-foot-sel');
+  const edit=document.getElementById('vb-act-edit'), goto=document.getElementById('vb-act-goto'), target=document.getElementById('vb-act-target');
+  if(!b){ sel.textContent='Aucune sélection'; edit.disabled=goto.disabled=target.disabled=true; return; }
+  sel.innerHTML = `Sélection : <b>${b.name}</b>`;
+  edit.disabled   = false;           // toujours possible d'annoter
+  goto.disabled   = b.missing;       // impossible si le vaisseau n'existe plus
+  target.disabled = b.missing || b.active; // pas de cible sur soi-même
+}
+
+/* Interactions ------------------------------------------------------------ */
+function select(id){ selectedId=id; render(); }
+function moveUp(e,id){ e.stopPropagation(); reorder(id,-1); }
+function moveDown(e,id){ e.stopPropagation(); reorder(id,1); }
+function reorder(id,dir){
+  const b=bookmarks.find(x=>x.id===id);
+  const grp=bookmarks.filter(x=>x.sec===b.sec);
+  const gi=grp.indexOf(b), gj=gi+dir;
+  if(gj<0||gj>=grp.length) return;
+  const ai=bookmarks.indexOf(grp[gi]), aj=bookmarks.indexOf(grp[gj]);
+  [bookmarks[ai],bookmarks[aj]]=[bookmarks[aj],bookmarks[ai]];
+  render();
+}
+
+/* Édition commentaire (overlay) */
+function openEdit(){
+  const b=bookmarks.find(x=>x.id===selectedId); if(!b) return;
+  editId=b.id;
+  document.getElementById('vb-edit-sub').innerHTML=`Signet : <b>${b.name}</b>`;
+  document.getElementById('vb-edit-text').value=b.comment||'';
+  document.getElementById('vb-edit-overlay').classList.add('open');
+  document.getElementById('vb-edit-text').focus();
+}
+function closeEdit(){ document.getElementById('vb-edit-overlay').classList.remove('open'); editId=null; }
+function saveEdit(){
+  const b=bookmarks.find(x=>x.id===editId); if(b){ b.comment=document.getElementById('vb-edit-text').value.trim(); }
+  closeEdit(); render();
+}
+
+/* Suppression (overlay de confirmation) */
+function askDel(e,id){ e.stopPropagation(); const b=bookmarks.find(x=>x.id===id); delId=id;
+  document.getElementById('vb-del-msg').innerHTML=`Voulez-vous supprimer le signet «&nbsp;${b.name}&nbsp;» ?`;
+  document.getElementById('vb-del-overlay').classList.add('open');
+}
+function closeDel(){ document.getElementById('vb-del-overlay').classList.remove('open'); delId=null; }
+function confirmDel(){ bookmarks=bookmarks.filter(x=>x.id!==delId); if(selectedId===delId) selectedId=null; closeDel(); updateCount(); render(); }
+
+/* Menu filtres + combos */
+function toggleMenu(e){ e.stopPropagation(); document.getElementById('vb-menu').classList.toggle('open'); }
+function toggleCombo(e,which){ e.stopPropagation();
+  document.querySelectorAll('.vb-combo-list').forEach(l=>{ if(l.id!==`vb-${which}-list`) l.classList.remove('open'); });
+  document.getElementById(`vb-${which}-list`).classList.toggle('open');
+}
+function buildCombo(which, items, current){
+  const list=document.getElementById(`vb-${which}-list`);
+  list.innerHTML=items.map(it=>`<div class="vb-combo-item ${it===current?'sel':''}" onclick="pickCombo(event,'${which}','${it}')">${it}</div>`).join('');
+}
+function pickCombo(e,which,val){ e.stopPropagation();
+  document.getElementById(`vb-${which}-label`).textContent=val;
+  document.getElementById(`vb-${which}-list`).classList.remove('open');
+  buildCombo(which, which==='body'?BODIES:TYPES, val);
+  refreshFilterDot();
+}
+function onSearch(v){ refreshFilterDot(); }
+function onCommentFilter(v){ refreshFilterDot(); }
+function clearFilters(){
+  document.getElementById('vb-body-label').textContent='Tous';
+  document.getElementById('vb-type-label').textContent='Tous';
+  document.querySelectorAll('.vb-search input').forEach(i=>i.value='');
+  document.querySelectorAll('.vb-check input').forEach(c=>c.checked=false);
+  buildCombo('body',BODIES,'Tous'); buildCombo('type',TYPES,'Tous');
+  refreshFilterDot();
+}
+function refreshFilterDot(){
+  const active = document.getElementById('vb-body-label').textContent!=='Tous'
+    || document.getElementById('vb-type-label').textContent!=='Tous'
+    || [...document.querySelectorAll('.vb-search input')].some(i=>i.value.trim())
+    || [...document.querySelectorAll('.vb-check input')].some(c=>c.checked);
+  document.getElementById('vb-filter-btn').classList.toggle('has-filters', active);
+}
+
+function updateCount(){ document.getElementById('vb-count').textContent = `${bookmarks.length} / ${bookmarks.length}`; }
+function flash(el){ el.style.background='#4a6e20'; setTimeout(()=>el.style.background='',150); }
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.vb-menu-wrap')) document.getElementById('vb-menu').classList.remove('open');
+  if(!e.target.closest('.vb-combo')) document.querySelectorAll('.vb-combo-list').forEach(l=>l.classList.remove('open'));
+});
+
+/* Init */
+buildCombo('body',BODIES,'Tous');
+buildCombo('type',TYPES,'Tous');
+updateCount();
+render();
+</script>
+</body>
+</html>
