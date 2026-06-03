@@ -21,6 +21,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites
         /// <summary>Icône d'alarme.</summary>
         public static Sprite Alarm => Load("VesselBookmarkMod/buttons/alarm");
 
+        /// <summary>Icônes des actions du bas (réutilisent les PNG existants du mod).</summary>
+        public static Sprite Edit => Load("VesselBookmarkMod/buttons/edit");
+        public static Sprite GoTo => Load("VesselBookmarkMod/buttons/switch");
+        public static Sprite Target => Load("VesselBookmarkMod/buttons/target");
+
         private static Sprite Load(string url)
         {
             if (_cache.TryGetValue(url, out Sprite cached))

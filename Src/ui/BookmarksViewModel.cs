@@ -636,6 +636,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 return;
             }
             flightGlobals.SetVesselTarget(SelectedBookmark.Vessel);
+            // SetVesselTarget ne déclenche pas de façon fiable GameEvents.OnTargetObjectChanged ici :
+            // on diffuse nous-mêmes pour que les lignes réévaluent le tag "cible" immédiatement.
+            this.OnActiveOrTargetChanged.Fire();
         }
 
         /// <summary>

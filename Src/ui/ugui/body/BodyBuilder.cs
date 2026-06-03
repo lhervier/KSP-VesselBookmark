@@ -32,11 +32,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body
             var layoutElement = bodyGo.AddComponent<LayoutElement>();
             layoutElement.ignoreLayout = true;
 
-            // Remplit l'intérieur de la fenêtre, moins le chrome (1px) et la title bar en haut
+            // Remplit l'intérieur de la fenêtre, moins le chrome (1px), la title bar en haut et le footer en bas
             var rect = bodyGo.GetComponent<RectTransform>();
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
-            rect.offsetMin = new Vector2(VesselBookmarkPalette.WindowBorderThickness, VesselBookmarkPalette.WindowBorderThickness);
+            rect.offsetMin = new Vector2(
+                VesselBookmarkPalette.WindowBorderThickness,
+                VesselBookmarkPalette.WindowBorderThickness + VesselBookmarkPalette.FooterHeight);
             rect.offsetMax = new Vector2(
                 -VesselBookmarkPalette.WindowBorderThickness,
                 -(VesselBookmarkPalette.WindowBorderThickness + VesselBookmarkPalette.TitleBarHeight));

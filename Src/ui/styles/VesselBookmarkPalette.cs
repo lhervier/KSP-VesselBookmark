@@ -211,6 +211,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         public const float FooterPaddingV = 7f;
         public const float FooterSpacing = 8f;
         public const int FooterBorderThickness = 1;
+        public const float FooterHeight = 40f;   // FooterButtonHeight + 2 * FooterPaddingV
         public const int FooterSelFontSize = 11;
         public const float FooterButtonHeight = 26f;
         public const float FooterButtonPaddingH = 10f;

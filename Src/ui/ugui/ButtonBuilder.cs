@@ -8,9 +8,9 @@ using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
 {
     /// <summary>
-    /// Fabrique de boutons stylés (fond + hover + libellé centré), réutilisée partout (close, add,
-    /// refresh, actions…). L'état désactivé est rendu via un CanvasGroup (alpha 0.25 + blocage des
-    /// raycasts), comme le ".ka:disabled { opacity:.25 }" de la maquette.
+    /// Fabrique de boutons stylés (fond + hover + libellé ou icône), réutilisée partout. L'état
+    /// désactivé est rendu via un CanvasGroup (alpha 0.25 + blocage des raycasts), comme le
+    /// ".ka:disabled { opacity:.25 }" de la maquette.
     /// </summary>
     public class ButtonBuilder
     {
@@ -21,6 +21,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
             this._viewModel = viewModel;
         }
 
+        // ---- Bouton carré à libellé (glyphe / texte court) --------------------------------
+
         public ButtonController Create(
             string objectName,
             string buttonLabel,
@@ -29,15 +31,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
         )
         {
             return Create(
-                objectName,
-                buttonLabel,
-                onClick,
-                interactable,
-                VesselBookmarkPalette.ButtonBgColor,
-                VesselBookmarkPalette.ButtonHoverColor,
-                VesselBookmarkPalette.TitleButtonSize,
-                VesselBookmarkPalette.TitleButtonFontSize
-            );
+                objectName, buttonLabel, onClick, interactable,
+                VesselBookmarkPalette.ButtonBgColor, VesselBookmarkPalette.ButtonHoverColor,
+                VesselBookmarkPalette.TitleButtonSize, VesselBookmarkPalette.TitleButtonFontSize);
         }
 
         public ButtonController Create(
@@ -51,42 +47,145 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
             int fontSize
         )
         {
-            var buttonGo = new GameObject(objectName, typeof(RectTransform));
-            ButtonController controller = buttonGo.AddComponent<ButtonController>();
+            var go = new GameObject(objectName, typeof(RectTransform));
+            ButtonController controller = SetupBase(go, onClick, backgroundColor, hoverColor);
+
+            var le = go.AddComponent<LayoutElement>();
+            le.preferredWidth = le.minWidth = size;
+            le.preferredHeight = le.minHeight = size;
+
+            Text label = AddLabel(go, buttonLabel, fontSize);
+            controller.InitLabel(label);
+            AddHoverTint(go, label);
+
+            controller.SetInteractable(interactable);
+            return controller;
+        }
+
+        // ---- Bouton carré à icône (sprite PNG) --------------------------------------------
+
+        public ButtonController CreateIcon(
+            string objectName,
+            Sprite icon,
+            Action onClick,
+            bool interactable,
+            float size
+        )
+        {
+            var go = new GameObject(objectName, typeof(RectTransform));
+            ButtonController controller = SetupBase(go, onClick,
+                VesselBookmarkPalette.ButtonBgColor, VesselBookmarkPalette.ButtonHoverColor);
+
+            var le = go.AddComponent<LayoutElement>();
+            le.preferredWidth = le.minWidth = size;
+            le.preferredHeight = le.minHeight = size;
+
+            if (icon != null)
+            {
+                var iconGo = new GameObject("Icon", typeof(RectTransform));
+                iconGo.transform.SetParent(go.transform, false);
+                var iconRect = iconGo.GetComponent<RectTransform>();
+                iconRect.anchorMin = Vector2.zero;
+                iconRect.anchorMax = Vector2.one;
+                iconRect.offsetMin = new Vector2(5f, 5f);
+                iconRect.offsetMax = new Vector2(-5f, -5f);
+                var iconImg = iconGo.AddComponent<Image>();
+                iconImg.sprite = icon;
+                iconImg.type = Image.Type.Simple;
+                iconImg.preserveAspect = true;
+                iconImg.color = Color.white;
+                iconImg.raycastTarget = false;
+            }
+
+            controller.SetInteractable(interactable);
+            return controller;
+        }
+
+        // ---- Bouton texte à largeur automatique (OK / Annuler / Supprimer…) ---------------
+
+        public ButtonController CreateTextButton(
+            string objectName,
+            string buttonLabel,
+            Action onClick,
+            bool interactable,
+            Color backgroundColor,
+            Color hoverColor,
+            Color textColor,
+            float height,
+            int fontSize,
+            float paddingH
+        )
+        {
+            var go = new GameObject(objectName, typeof(RectTransform));
+            ButtonController controller = SetupBase(go, onClick, backgroundColor, hoverColor);
+
+            var le = go.AddComponent<LayoutElement>();
+            le.minHeight = le.preferredHeight = height;
+
+            var layout = go.AddComponent<HorizontalLayoutGroup>();
+            layout.padding = new RectOffset(Mathf.RoundToInt(paddingH), Mathf.RoundToInt(paddingH), 0, 0);
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+            layout.childForceExpandWidth = false;
+            layout.childForceExpandHeight = false;
+
+            var fitter = go.AddComponent<ContentSizeFitter>();
+            fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+            fitter.verticalFit = ContentSizeFitter.FitMode.Unconstrained;
+
+            var labelGo = new GameObject("Label", typeof(RectTransform));
+            labelGo.transform.SetParent(go.transform, false);
+            var label = labelGo.AddComponent<Text>();
+            label.text = buttonLabel;
+            label.font = HighLogic.UISkin.font;
+            label.fontSize = fontSize;
+            label.color = textColor;
+            label.alignment = TextAnchor.MiddleCenter;
+            label.horizontalOverflow = HorizontalWrapMode.Overflow;
+            label.verticalOverflow = VerticalWrapMode.Overflow;
+            label.raycastTarget = false;
+            controller.InitLabel(label);
+
+            controller.SetInteractable(interactable);
+            return controller;
+        }
+
+        // ---- Parties communes -------------------------------------------------------------
+
+        private ButtonController SetupBase(GameObject go, Action onClick, Color backgroundColor, Color hoverColor)
+        {
+            ButtonController controller = go.AddComponent<ButtonController>();
             controller.Initialize(_viewModel);
 
-            var layoutElement = buttonGo.AddComponent<LayoutElement>();
-            layoutElement.preferredWidth = size;
-            layoutElement.preferredHeight = size;
-            layoutElement.minWidth = size;
-            layoutElement.minHeight = size;
-
-            // Fond blanc : la teinte du Button s'applique telle quelle (pas de multiplication)
-            var image = buttonGo.AddComponent<Image>();
+            var image = go.AddComponent<Image>();
             image.sprite = Sprites.Fill;
             image.type = Image.Type.Simple;
             image.color = Color.white;
             image.raycastTarget = true;
 
-            var button = buttonGo.AddComponent<Button>();
+            var button = go.AddComponent<Button>();
             button.targetGraphic = image;
             var colors = button.colors;
             colors.normalColor = backgroundColor;
             colors.highlightedColor = hoverColor;
             colors.pressedColor = backgroundColor;
             colors.selectedColor = backgroundColor;
-            colors.disabledColor = backgroundColor;   // le fade désactivé est géré par le CanvasGroup
+            colors.disabledColor = backgroundColor;
             colors.colorMultiplier = 1f;
             colors.fadeDuration = 0.1f;
             button.colors = colors;
             button.onClick.AddListener(() => onClick());
             controller.InitButton(button);
 
-            // CanvasGroup : alpha global + blocage des raycasts quand désactivé
-            var canvasGroup = buttonGo.AddComponent<CanvasGroup>();
+            var canvasGroup = go.AddComponent<CanvasGroup>();
             controller.InitCanvasGroup(canvasGroup);
 
-            // Libellé centré
+            return controller;
+        }
+
+        private static Text AddLabel(GameObject buttonGo, string text, int fontSize)
+        {
             var labelGo = new GameObject("Label", typeof(RectTransform));
             labelGo.transform.SetParent(buttonGo.transform, false);
             var labelRect = labelGo.GetComponent<RectTransform>();
@@ -96,7 +195,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
             labelRect.offsetMax = Vector2.zero;
 
             var label = labelGo.AddComponent<Text>();
-            label.text = buttonLabel;
+            label.text = text;
             label.font = HighLogic.UISkin.font;
             label.fontSize = fontSize;
             label.color = VesselBookmarkPalette.ButtonTextColor;
@@ -104,20 +203,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
             label.horizontalOverflow = HorizontalWrapMode.Overflow;
             label.verticalOverflow = VerticalWrapMode.Overflow;
             label.raycastTarget = false;
-            controller.InitLabel(label);
+            return label;
+        }
 
-            // Libellé en blanc au survol
-            var trigger = buttonGo.AddComponent<EventTrigger>();
+        private static void AddHoverTint(GameObject go, Text label)
+        {
+            var trigger = go.AddComponent<EventTrigger>();
             var enterEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerEnter };
             enterEntry.callback.AddListener(_ => label.color = Color.white);
             trigger.triggers.Add(enterEntry);
             var exitEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerExit };
             exitEntry.callback.AddListener(_ => label.color = VesselBookmarkPalette.ButtonTextColor);
             trigger.triggers.Add(exitEntry);
-
-            controller.SetInteractable(interactable);
-
-            return controller;
         }
     }
 

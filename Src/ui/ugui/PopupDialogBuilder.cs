@@ -4,6 +4,8 @@ using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.body;
+using com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer;
+using com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
 {
@@ -18,12 +20,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
         private readonly BookmarksViewModel _viewModel;
         private readonly TitleBarBuilder _titleBarBuilder;
         private readonly BodyBuilder _bodyBuilder;
+        private readonly FooterBuilder _footerBuilder;
+        private readonly EditCommentOverlayBuilder _editOverlayBuilder;
+        private readonly RemoveConfirmOverlayBuilder _removeOverlayBuilder;
 
         public PopupDialogBuilder(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
             this._titleBarBuilder = new TitleBarBuilder(viewModel);
             this._bodyBuilder = new BodyBuilder(viewModel);
+            this._footerBuilder = new FooterBuilder(viewModel);
+            this._editOverlayBuilder = new EditCommentOverlayBuilder(viewModel);
+            this._removeOverlayBuilder = new RemoveConfirmOverlayBuilder(viewModel);
         }
 
         public PopupDialog CreatePopupDialog()
@@ -101,12 +109,19 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
                 image.color = VesselBookmarkPalette.WindowBodyColor;
             }
 
-            // Corps (scrollable) en premier dans le z-order, puis la title bar par-dessus.
+            // Corps (scrollable) en premier dans le z-order, puis footer et title bar, enfin les
+            // overlays internes par-dessus tout (ajoutés en dernier = au-dessus).
             BodyBuilder.BodyController bodyController = this._bodyBuilder.Create();
             bodyController.transform.SetParent(windowGo.transform, false);
 
+            FooterBuilder.FooterController footerController = this._footerBuilder.Create();
+            footerController.transform.SetParent(windowGo.transform, false);
+
             TitleBarBuilder.TitleBarController titleBarController = this._titleBarBuilder.Create();
             titleBarController.transform.SetParent(windowGo.transform, false);
+
+            this._editOverlayBuilder.Create(windowGo.transform);
+            this._removeOverlayBuilder.Create(windowGo.transform);
 
             return popupDialog;
         }
