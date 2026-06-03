@@ -19,10 +19,34 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         private bool _sceneLoading = false;
 
+        /// <summary>
+        /// Set when a vessel/alarm event asks for a refresh. The actual (potentially expensive) refresh
+        /// is coalesced to at most once per frame in <see cref="LateUpdate"/> : a single in-game action
+        /// (docking, staging…) often fires a burst of events in the same frame, and we only want to
+        /// rebuild the bookmark data once.
+        /// </summary>
+        private bool _refreshRequested = false;
+
         protected void Awake()
         {
             LOGGER.LogInfo("Awaked");
             DontDestroyOnLoad(this);
+        }
+
+        /// <summary>
+        /// Coalesced refresh : runs at most one RefreshBookmarks per frame, and never during a scene
+        /// change (the new scene reloads the bookmarks itself).
+        /// </summary>
+        public void LateUpdate()
+        {
+            if( !_refreshRequested ) {
+                return;
+            }
+            _refreshRequested = false;
+            if( _sceneLoading ) {
+                return;
+            }
+            BookmarkManager.RefreshBookmarks();
         }
 
         public void Start() {
@@ -116,13 +140,14 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         }
 
         /// <summary>
-        /// Refresh the bookmarks, unless a scene change is in progress (see <see cref="_sceneLoading"/>).
+        /// Request a coalesced refresh (performed at most once per frame by <see cref="LateUpdate"/>).
+        /// Ignored while a scene change is in progress (see <see cref="_sceneLoading"/>).
         /// </summary>
-        private void RefreshUnlessSceneLoading() {
+        private void RequestRefresh() {
             if( _sceneLoading ) {
                 return;
             }
-            BookmarkManager.RefreshBookmarks();
+            _refreshRequested = true;
         }
 
         /// <summary>
@@ -130,7 +155,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="vessel">The vessel that was modified</param>
         private void OnVesselWasModified(Vessel vessel) {
-            RefreshUnlessSceneLoading();
+            RequestRefresh();
         }
 
         /// <summary>
@@ -138,7 +163,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="vessel">The vessel that was destroyed</param>
         private void OnVesselDestroy(Vessel vessel) {
-            RefreshUnlessSceneLoading();
+            RequestRefresh();
         }
 
         /// <summary>
@@ -146,7 +171,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="vessel">The vessel that was renamed</param>
         private void OnVesselRename(GameEvents.HostedFromToAction<Vessel, string> action) {
-            RefreshUnlessSceneLoading();
+            RequestRefresh();
         }
 
         /// <summary>
@@ -154,7 +179,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="alarm">The alarm that was added</param>
         private void OnAlarmAdded(AlarmTypeBase alarm) {
-            RefreshUnlessSceneLoading();
+            RequestRefresh();
         }
 
         /// <summary>
@@ -162,7 +187,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="alarm">The alarm that was removed</param>
         private void OnAlarmRemoved(uint alarmID) {
-            RefreshUnlessSceneLoading();
+            RequestRefresh();
         }
 
         /// <summary>
@@ -170,7 +195,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="alarm">The alarm that was triggered</param>
         private void OnAlarmTriggered(AlarmTypeBase alarm) {
-            RefreshUnlessSceneLoading();
+            RequestRefresh();
         }
     }
 }
