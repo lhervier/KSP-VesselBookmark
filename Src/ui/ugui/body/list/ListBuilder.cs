@@ -51,11 +51,17 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             private BookmarkRowBuilder _rowBuilder;
             private readonly List<BookmarkRowBuilder.BookmarkRowController> _rows = new List<BookmarkRowBuilder.BookmarkRowController>();
 
+            // La reconstruction est coûteuse (destruction/recréation de tous les GameObjects de lignes).
+            // Quand la fenêtre est masquée (SetActive(false) sur la hiérarchie du popup → OnDisable ici),
+            // on diffère la reconstruction et on l'applique à la réouverture (OnEnable). _dirty mémorise
+            // qu'un changement de bookmarks a eu lieu pendant que la fenêtre était masquée.
+            private bool _dirty = false;
+
             public void Start()
             {
                 _rowBuilder = new BookmarkRowBuilder(ViewModel);
 
-                ViewModel.OnAvailableBookmarksChanged.Add(Rebuild);
+                ViewModel.OnAvailableBookmarksChanged.Add(OnAvailableBookmarksChanged);
                 ViewModel.OnSelectedBookmarkChanged.Add(RefreshAll);
                 ViewModel.OnHoveredBookmarkChanged.Add(RefreshAll);
                 ViewModel.OnActiveOrTargetChanged.Add(RefreshAll);
@@ -63,16 +69,43 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 Rebuild();
             }
 
+            public void OnEnable()
+            {
+                // Fenêtre ré-affichée : applique la reconstruction différée, ou réévalue au minimum le
+                // rendu des lignes (vaisseau actif / cible ont pu changer pendant qu'on était masqué).
+                if (_dirty)
+                {
+                    Rebuild();
+                }
+                else
+                {
+                    RefreshAll();
+                }
+            }
+
             public void OnDestroy()
             {
-                ViewModel?.OnAvailableBookmarksChanged.Remove(Rebuild);
+                ViewModel?.OnAvailableBookmarksChanged.Remove(OnAvailableBookmarksChanged);
                 ViewModel?.OnSelectedBookmarkChanged.Remove(RefreshAll);
                 ViewModel?.OnHoveredBookmarkChanged.Remove(RefreshAll);
                 ViewModel?.OnActiveOrTargetChanged.Remove(RefreshAll);
             }
 
+            private void OnAvailableBookmarksChanged()
+            {
+                // Fenêtre masquée : on diffère (cf. _dirty / OnEnable) pour ne pas reconstruire dans le vide.
+                if (!isActiveAndEnabled)
+                {
+                    _dirty = true;
+                    return;
+                }
+                Rebuild();
+            }
+
             private void Rebuild()
             {
+                _dirty = false;
+
                 // Vide le contenu existant
                 _rows.Clear();
                 for (int i = transform.childCount - 1; i >= 0; i--)
@@ -106,6 +139,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 
             private void RefreshAll()
             {
+                // Inutile de réévaluer le rendu d'une fenêtre masquée : OnEnable s'en charge à la réouverture.
+                if (!isActiveAndEnabled)
+                {
+                    return;
+                }
                 foreach (var row in _rows)
                 {
                     if (row != null) row.Refresh();
