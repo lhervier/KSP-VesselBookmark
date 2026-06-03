@@ -13,18 +13,29 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         
         private static readonly ModLogger LOGGER = new ModLogger("EditCommentUIController");
 
+        private readonly BookmarksViewModel _viewModel;
+
         /// <summary>
         /// Whether the edit window is visible
         /// </summary>
         private bool _editingComment = false;
-        
-        // Edit window
-        private Bookmark _editedBookmark = null;
-        public string EditedComment { get; set; } = "";
 
-        public EditCommentUIController() {
-            _editedBookmark = null;
-            EditedComment = "";
+        /// <summary>
+        /// The edited comment
+        /// </summary>
+        public string EditedComment {
+            get {
+                if( _viewModel == null ) return string.Empty;
+                return _viewModel.Comment;
+            }
+            set {
+                if( _viewModel == null ) return;
+                _viewModel.Comment = value;
+            }
+        }
+        
+        public EditCommentUIController(BookmarksViewModel viewModel) {
+            this._viewModel = viewModel;
         }
 
         /// <summary>
@@ -39,14 +50,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// This will also trigger the bookmarks updated event.
         /// </summary>
         public void SaveComment() {
-            try {
-                if (_editedBookmark != null) {
-                    _editedBookmark.Comment = EditedComment;
-                    BookmarkManager.OnBookmarksUpdated.Fire();
-                }
-            } catch (Exception e) {
-                LOGGER.LogError($"Error saving edit window: {e.Message}");
-            }
+            this._viewModel.SaveBookmarkComment();
             _editingComment = false;
         }
 
@@ -54,8 +58,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// Cancel the editition od the comment, closing the window.
         /// </summary>
         public void CancelCommentEdition() {
-            _editedBookmark = null;
-            EditedComment = "";
+            this._viewModel.CancelBookmarkCommentEdition();
             _editingComment = false;
         }
 
@@ -64,8 +67,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         /// <param name="bookmark">The bookmark to edit the comment of</param>
         public void EditComment(Bookmark bookmark) {
-            _editedBookmark = bookmark;
-            EditedComment = bookmark.Comment;
             _editingComment = true;
         }
     }

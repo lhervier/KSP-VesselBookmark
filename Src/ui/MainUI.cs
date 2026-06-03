@@ -23,17 +23,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private BookmarksListUI _bookmarksListUI;
         private EditCommentUI _editCommentUI;
         private BookmarkUI _bookmarkUI;
+        private BookmarksViewModel _viewModel;
 
-        private void Awake() {
+        private void Start() {
             // Subscribe to events
             GameEvents.onGUIApplicationLauncherReady.Add(OnLauncherReady);
-            BookmarkManager.OnBookmarksUpdated.Add(OnBookmarksUpdated);
+
+            _viewModel = this.gameObject.AddComponent<BookmarksViewModel>();
         }
         
         private void OnDestroy() {
             GameEvents.onGUIApplicationLauncherReady.Remove(OnLauncherReady);
             OnLauncherUnready();
-            BookmarkManager.OnBookmarksUpdated.Remove(OnBookmarksUpdated);
             
             if( this._bookmarkUI != null ) {
                 this._bookmarkUI.OnDestroy();
@@ -57,12 +58,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         // EVENTS
         // ==========================================================================
         
-        private void OnBookmarksUpdated() {
-            if( this._bookmarksListUI != null ) {
-                this._bookmarksListUI.Controller.UpdateBookmarksSelection();
-            }
-        }
-
         private void OnBookmarksListUIClosed() {
             _editCommentUI.Controller.CancelCommentEdition();
             if (_toolbarButton != null) {
@@ -160,13 +155,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 this._uiStyles = new UIStyles();
             }
             if( this._editCommentUI == null ) {
-                this._editCommentUI = new EditCommentUI(this._uiStyles);
+                this._editCommentUI = new EditCommentUI(this._uiStyles, this._viewModel);
             }
             if( this._bookmarkUI == null ) {
-                this._bookmarkUI = new BookmarkUI(this._uiStyles);
+                this._bookmarkUI = new BookmarkUI(this._uiStyles, this._viewModel);
             }
             if( this._bookmarksListUI == null ) {
-                this._bookmarksListUI = new BookmarksListUI(this._uiStyles, this._editCommentUI, this._bookmarkUI);
+                this._bookmarksListUI = new BookmarksListUI(
+                    this._uiStyles, 
+                    this._editCommentUI, 
+                    this._bookmarkUI,
+                    this._viewModel
+                );
                 this._bookmarksListUI.Controller.OnClosed.Add(OnBookmarksListUIClosed);
             }
 

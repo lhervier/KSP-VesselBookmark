@@ -14,6 +14,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private static readonly ModLogger LOGGER = new ModLogger("BookmarksListUI");
         public const string SCROLL_LOCK_ID = "VesselBookmarkMod_ScrollBlock";
 
+        private BookmarksViewModel _viewModel;
+
         /// <summary>Last known window rect (screen space, top-left origin). Used so Update() can set scroll lock before camera reads input.</summary>
         private Rect _mainWindowRect = new Rect(100, 100, 500, 600);
         public Rect MainWindowRect => _mainWindowRect;
@@ -30,7 +32,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private EditCommentUI _editCommentUI;
         private BookmarkUI _bookmarkUI;
         
-        public BookmarksListUIController Controller { get; private set; } = new BookmarksListUIController();
+        public BookmarksListUIController Controller => _controller;
+        private BookmarksListUIController _controller = null;
         
         private VesselBookmarkButton _clearFiltersButton;
         private VesselBookmarkButton _addButton;
@@ -44,8 +47,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public BookmarksListUI(
             UIStyles uiStyles,
             EditCommentUI editCommentUI, 
-            BookmarkUI bookmarkUI
+            BookmarkUI bookmarkUI,
+            BookmarksViewModel viewModel
         ) {
+            _viewModel = viewModel;
+            _controller = new BookmarksListUIController(viewModel);
+
             _mainWindowID = UnityEngine.Random.Range(1000, 2000);
             _clearFiltersButton = VesselBookmarkButton.Builder()
                 .WithLabel(ModLocalization.GetString("buttonClear"))
@@ -110,7 +117,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 return;
             }
 
-            Controller.ProcessSearchDebounce();
             _mainWindowRect = ClickThruBlocker.GUILayoutWindow(
                 _mainWindowID,
                 _mainWindowRect,
@@ -298,7 +304,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             // Create dropdown options for body
             Controller.SelectedBody = ComboBox.Box(
                 Controller.SelectedBody, 
-                Controller.AvailableBodies, 
+                new List<string>(Controller.AvailableBodies), 
                 _bodyCaller, 
                 _uiStyles.ButtonStyle, 
                 false
@@ -312,7 +318,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             // Create dropdown options for vessel type
             Controller.SelectedVesselType = ComboBox.Box(
                 Controller.SelectedVesselType, 
-                Controller.AvailableVesselTypes, 
+                new List<string>(Controller.AvailableVesselTypes), 
                 _vesselTypeCaller, 
                 _uiStyles.ButtonStyle, 
                 false

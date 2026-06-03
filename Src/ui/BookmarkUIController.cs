@@ -11,6 +11,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
     public class BookmarkUIController {
         private static readonly ModLogger LOGGER = new ModLogger("BookmarkUIController");
 
+        private BookmarksViewModel _viewModel;
+
         /// <summary>
         /// Events
         /// </summary>
@@ -26,6 +28,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private bool _isSelected = false;
         private bool _isFirst = false;
         private bool _isLast = false;
+
+        public BookmarkUIController(BookmarksViewModel viewModel)
+        {
+            this._viewModel = viewModel;
+        }
 
         public void Initialize(
             Bookmark currentBookmark, 
@@ -54,11 +61,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public bool IsActiveVessel() {
-            bool isActiveVessel = false;
-            if (FlightGlobals.ActiveVessel != null) {
-                isActiveVessel = _currentBookmark.VesselPersistentID == FlightGlobals.ActiveVessel.persistentId;
-            }
-            return isActiveVessel;
+            return this._viewModel.IsCurrentVessel(_currentBookmark);
         }
 
         public bool CanMoveUp() {
@@ -70,31 +73,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         public bool IsTarget() {
-            if( FlightGlobals.ActiveVessel == null ) {
-                return false;
-            }
-            ITargetable target = FlightGlobals.ActiveVessel.targetObject;
-            if( target == null ) {
-                return false;
-            }
-            Vessel targetVessel = target.GetVessel();
-            if( targetVessel == null ) {
-                return false;
-            }
-            return targetVessel.persistentId == _currentBookmark.VesselPersistentID;
-        }
-
-        public bool CanSetTargetAs() {
-            if( FlightGlobals.ActiveVessel == null ) {
-                return false;
-            }
-            if( _currentBookmark.Vessel == null ) {
-                return false;
-            }
-            if( IsActiveVessel() ) {
-                return false;
-            }
-            return true;
+            return this._viewModel.IsTarget(_currentBookmark);
         }
     }
 }

@@ -27,9 +27,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private Texture2D _activeVesselBorder;
 
         private UIStyles _uiStyles;
-        public BookmarkUIController Controller = new BookmarkUIController();
+        public BookmarkUIController Controller => _controller;
+        private BookmarkUIController _controller = null;
 
-        public BookmarkUI(UIStyles uiStyles) {
+        public BookmarkUI(UIStyles uiStyles, BookmarksViewModel viewModel) {
+            _controller = new BookmarkUIController(viewModel);
+
             // Initialize vessel type icons (non-clickable)
             foreach( VesselType vesselType in Enum.GetValues(typeof(VesselType)) ) {
                 _vesselTypeIcons[vesselType.ToString()] = VesselBookmarkIcon.Builder()

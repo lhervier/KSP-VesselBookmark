@@ -15,11 +15,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private int _editWindowID;
         private UIStyles _uiStyles;
 
-        public EditCommentUIController Controller { get; private set; } = new EditCommentUIController();
+        public EditCommentUIController Controller => _controller;
+        private EditCommentUIController _controller = null;
         private VesselBookmarkButton _saveButton;
         private VesselBookmarkButton _cancelButton;
 
-        public EditCommentUI(UIStyles uiStyles) {
+        public EditCommentUI(UIStyles uiStyles, BookmarksViewModel viewModel) {
+            this._controller = new EditCommentUIController(viewModel);
+
             _editWindowID = UnityEngine.Random.Range(1000, 2000);
             _saveButton = VesselBookmarkButton.Builder()
                 .WithIconPath("VesselBookmarkMod/buttons/save")
