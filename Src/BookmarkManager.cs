@@ -70,8 +70,8 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="bookmark">The bookmark to add</param>
         /// <param name="sendEvent">True if the OnBookmarksUpdated event should be fired, false otherwise</param>
         /// <returns>True if the bookmark was added, false otherwise</returns>
-        public static bool AddBookmark(Bookmark bookmark, bool sendEvent = true) {
-            return GetInstance(bookmark.BookmarkType)._AddBookmark(bookmark, sendEvent);
+        public static bool AddBookmark(Bookmark bookmark, bool sendEvent = true, bool refresh = true) {
+            return GetInstance(bookmark.BookmarkType)._AddBookmark(bookmark, sendEvent, refresh);
         }
 
         /// <summary>
@@ -120,8 +120,10 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="sendEvent">True if the OnBookmarksUpdated event should be fired, false otherwise</param>
         public static void RefreshBookmarks(bool sendEvent = true) {
             LOGGER.LogInfo($"Refreshing bookmarks");
+            // Build the lookup index once and share it across every instance/bookmark of this pass.
+            BookmarkRefreshManager.RefreshIndex index = BookmarkRefreshManager.RefreshIndex.Build();
             foreach( var instance in _instances ) {
-                instance.Value._RefreshBookmarks(false);
+                instance.Value._RefreshBookmarks(index, false);
             }
             if( sendEvent ) {
                 OnBookmarksUpdated.Fire();
@@ -143,12 +145,15 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 // Two bookmarks of two different types can have the same order here !
                 bookmarks.Sort((a, b) => a.Order.CompareTo(b.Order));
 
-                // Add bookmarks to the list
+                // Add bookmarks to the list (without refreshing each one : we batch a single indexed
+                // refresh below instead of rescanning the universe once per bookmark).
                 ClearBookmarks();
                 foreach (Bookmark bookmark in bookmarks) {
-                    GetInstance(bookmark.BookmarkType)._AddBookmark(bookmark, false);
+                    GetInstance(bookmark.BookmarkType)._AddBookmark(bookmark, false, false);
                 }
 
+                // Refresh every freshly-loaded bookmark in one indexed pass, then notify.
+                RefreshBookmarks(false);
                 OnBookmarksUpdated.Fire();
                 LOGGER.LogInfo($"{bookmarks.Count} bookmark(s) loaded");    
             } catch (Exception e) {
@@ -224,30 +229,31 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="bookmark">The bookmark to add</param>
         /// <param name="sendEvent">True if the OnBookmarksUpdated event should be fired, false otherwise</param>
         /// <returns>True if the bookmark was added, false otherwise</returns>
-        private bool _AddBookmark(Bookmark bookmark, bool sendEvent = true) {
+        private bool _AddBookmark(Bookmark bookmark, bool sendEvent = true, bool refresh = true) {
             try {
                 if( bookmark == null ) {
                     LOGGER.LogError("Attempted to add null bookmark");
                     return false;
                 }
                 LOGGER.LogDebug($"Adding bookmark {bookmark}");
-                
+
                 if( bookmark.BookmarkType != _bookmarkType ) {
                     LOGGER.LogError($"Attempted to add bookmark {bookmark} to bookmark manager: Bookmark type mismatch. Should be {_bookmarkType}");
                     return false;
                 }
-                
+
                 // Check if bookmark already exists
                 if (this.HasBookmark(bookmark.BookmarkID)) {
                     LOGGER.LogDebug($"Bookmark {bookmark} Already exists. Nothing to do...");
                     return false;
                 }
-                
+
                 // Bookmark will be added to the end of the list
                 bookmark.Order = _bookmarks.Count;
-                
-                // Refresh bookmark to load transient fields
-                if( !BookmarkRefreshManager.RefreshBookmark(bookmark) ) {
+
+                // Refresh bookmark to load transient fields. Skipped for bulk loads, where the caller
+                // runs a single indexed RefreshBookmarks once every bookmark has been added.
+                if( refresh && !BookmarkRefreshManager.RefreshBookmark(bookmark) ) {
                     LOGGER.LogWarning($"Bookmark {bookmark}: Failed to refresh bookmark");
                 }
 
@@ -395,12 +401,12 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// Refresh all bookmarks in the instance
         /// </summary>
         /// <param name="sendEvent">True if the OnBookmarksUpdated event should be fired, false otherwise</param>
-        private void _RefreshBookmarks(bool sendEvent = true) {
+        private void _RefreshBookmarks(BookmarkRefreshManager.RefreshIndex index, bool sendEvent = true) {
             try {
                 LOGGER.LogDebug($"Refreshing bookmarks for bookmarkType {_bookmarkType}");
 
                 foreach (Bookmark bookmark in _bookmarks) {
-                    if( !BookmarkRefreshManager.RefreshBookmark(bookmark) ) {
+                    if( !BookmarkRefreshManager.RefreshBookmark(bookmark, index) ) {
                         LOGGER.LogWarning($"Unable to refresh bookmark {bookmark}: Let's continue with next one...");
                     }
                 }
