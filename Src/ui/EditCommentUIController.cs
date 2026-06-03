@@ -16,11 +16,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private readonly BookmarksViewModel _viewModel;
 
         /// <summary>
-        /// Whether the edit window is visible
-        /// </summary>
-        private bool _editingComment = false;
-
-        /// <summary>
         /// The edited comment
         /// </summary>
         public string EditedComment {
@@ -42,7 +37,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// Whether the comment is being edited
         /// </summary>
         public bool IsEditingComment() {
-            return _editingComment;
+            return _viewModel.EditingComment;
         }
 
         /// <summary>
@@ -51,7 +46,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         public void SaveComment() {
             this._viewModel.SaveBookmarkComment();
-            _editingComment = false;
         }
 
         /// <summary>
@@ -59,7 +53,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         public void CancelCommentEdition() {
             this._viewModel.CancelBookmarkCommentEdition();
-            _editingComment = false;
         }
 
         /// <summary>
@@ -67,7 +60,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         /// <param name="bookmark">The bookmark to edit the comment of</param>
         public void EditComment(Bookmark bookmark) {
-            _editingComment = true;
+            this._viewModel.BeginCommentEdition();
         }
     }
 }

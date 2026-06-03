@@ -140,7 +140,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         // =============================================================
         // Comment edition
         // =============================================================
-        
+
         /// <summary>
         /// Temporary zone to memorize the selected bookmark comment.
         /// </summary>
@@ -155,6 +155,81 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
         private string _comment = string.Empty;
         public EventVoid OnCommentChanged = new EventVoid("BookmarksViewModel.OnCommentChanged");
+
+        // =============================================================
+        // Presentation state (drives the uGUI layer)
+        // =============================================================
+
+        /// <summary>
+        /// Whether the main window is visible (drives the PopupDialog spawn/despawn).
+        /// </summary>
+        public bool WindowVisible
+        {
+            get => _windowVisible;
+            set {
+                if( _windowVisible == value ) return;
+                _windowVisible = value;
+                OnWindowVisibleChanged.Fire();
+            }
+        }
+        private bool _windowVisible = false;
+        public readonly EventVoid OnWindowVisibleChanged = new EventVoid("BookmarksViewModel.OnWindowVisibleChanged");
+
+        /// <summary>
+        /// Whether the filters menu ("⋯") is open.
+        /// </summary>
+        public bool FilterMenuOpen
+        {
+            get => _filterMenuOpen;
+            set {
+                if( _filterMenuOpen == value ) return;
+                _filterMenuOpen = value;
+                OnFilterMenuOpenChanged.Fire();
+            }
+        }
+        private bool _filterMenuOpen = false;
+        public readonly EventVoid OnFilterMenuOpenChanged = new EventVoid("BookmarksViewModel.OnFilterMenuOpenChanged");
+
+        /// <summary>
+        /// Whether the comment edition overlay is open.
+        /// </summary>
+        public bool EditingComment
+        {
+            get => _editingComment;
+            set {
+                if( _editingComment == value ) return;
+                _editingComment = value;
+                OnEditingCommentChanged.Fire();
+            }
+        }
+        private bool _editingComment = false;
+        public readonly EventVoid OnEditingCommentChanged = new EventVoid("BookmarksViewModel.OnEditingCommentChanged");
+
+        /// <summary>
+        /// The bookmark whose removal is awaiting confirmation (drives the removal overlay). Null if none.
+        /// </summary>
+        public Bookmark PendingRemoval
+        {
+            get => _pendingRemoval;
+            set {
+                if( _pendingRemoval == value ) return;
+                _pendingRemoval = value;
+                OnPendingRemovalChanged.Fire();
+            }
+        }
+        private Bookmark _pendingRemoval = null;
+        public readonly EventVoid OnPendingRemovalChanged = new EventVoid("BookmarksViewModel.OnPendingRemovalChanged");
+
+        // =============================================================
+        // Live game state (active vessel / target highlighting)
+        // =============================================================
+
+        /// <summary>
+        /// Fired when the active vessel or the current target changes. The bookmark rows re-evaluate
+        /// their "active vessel" / "target" highlighting on this event (these depend on live game
+        /// state that changes without any bookmark event firing).
+        /// </summary>
+        public readonly EventVoid OnActiveOrTargetChanged = new EventVoid("BookmarksViewModel.OnActiveOrTargetChanged");
 
         // =============================================================
         // Lifecycle
@@ -173,7 +248,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             this.OnSelectedBookmarkChanged.Add(_onSelectedBookmarkChanged);
 
             BookmarkManager.OnBookmarksUpdated.Add(UpdateBookmarksSelection);
-            
+
+            // Live game state: active vessel / target highlighting depends on game state that changes
+            // without any bookmark event, so listen to the relevant GameEvents and re-broadcast.
+            GameEvents.onVesselChange.Add(_onActiveVesselChanged);
+            GameEvents.OnTargetObjectChanged.Add(_onTargetChanged);
+
             UpdateBookmarksSelection();
         }
 
@@ -205,11 +285,24 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             this.OnSelectedVesselTypeChanged.Remove(UpdateBookmarksSelection);
 
             this.OnSelectedBookmarkChanged.Remove(_onSelectedBookmarkChanged);
+
+            GameEvents.onVesselChange.Remove(_onActiveVesselChanged);
+            GameEvents.OnTargetObjectChanged.Remove(_onTargetChanged);
         }
 
         private void _onSelectedBookmarkChanged()
         {
             Comment = SelectedBookmark?.Comment ?? string.Empty;
+        }
+
+        private void _onActiveVesselChanged(Vessel vessel)
+        {
+            this.OnActiveOrTargetChanged.Fire();
+        }
+
+        private void _onTargetChanged(MapObject target)
+        {
+            this.OnActiveOrTargetChanged.Fire();
         }
 
         // ======================================================================
@@ -544,18 +637,32 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         /// <summary>
-        /// Update the comment of the current bookmark
+        /// Begin editing the selected bookmark's comment (opens the edition overlay).
+        /// The Comment buffer is already kept in sync with the selection (see _onSelectedBookmarkChanged).
         /// </summary>
-        /// <param name="comment"></param>
+        public void BeginCommentEdition()
+        {
+            if( SelectedBookmark == null ) return;
+            EditingComment = true;
+        }
+
+        /// <summary>
+        /// Update the comment of the current bookmark, then close the edition overlay.
+        /// </summary>
         public void SaveBookmarkComment()
         {
+            EditingComment = false;
             if( SelectedBookmark == null ) return;
             SelectedBookmark.Comment = Comment;
             BookmarkManager.OnBookmarksUpdated.Fire();
         }
 
+        /// <summary>
+        /// Discard comment edits (restore the buffer from the bookmark), then close the edition overlay.
+        /// </summary>
         public void CancelBookmarkCommentEdition()
         {
+            EditingComment = false;
             if( SelectedBookmark == null ) return;
             Comment = SelectedBookmark.Comment;
         }
@@ -606,6 +713,35 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 SelectedBookmark = null;
             }
             BookmarkManager.RemoveBookmark(bookmark);
+        }
+
+        // ======================================================================
+        //  Removal confirmation flow (drives the removal overlay)
+        // ======================================================================
+
+        /// <summary>
+        /// Ask to remove the given bookmark: opens the confirmation overlay.
+        /// </summary>
+        /// <param name="bookmark">The bookmark to remove</param>
+        public void RequestRemoval(Bookmark bookmark) {
+            PendingRemoval = bookmark;
+        }
+
+        /// <summary>
+        /// Confirm the pending removal: actually removes the bookmark and closes the overlay.
+        /// </summary>
+        public void ConfirmPendingRemoval() {
+            Bookmark bookmark = PendingRemoval;
+            PendingRemoval = null;
+            if( bookmark == null ) return;
+            Remove(bookmark);
+        }
+
+        /// <summary>
+        /// Cancel the pending removal: closes the overlay without removing anything.
+        /// </summary>
+        public void CancelPendingRemoval() {
+            PendingRemoval = null;
         }
     }
 }
