@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEngine;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.bookmarksmod.util;
+using com.github.lhervier.ksp.bookmarksmod.ui.ugui;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui {
     
@@ -25,17 +26,34 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private BookmarkUI _bookmarkUI;
         private BookmarksViewModel _viewModel;
 
+        // Fenêtre uGUI (cohabite avec l'IMGUI pendant la migration ; pilotée par ViewModel.WindowVisible)
+        private BookmarksWindow _uguiWindow;
+
         private void Start() {
             // Subscribe to events
             GameEvents.onGUIApplicationLauncherReady.Add(OnLauncherReady);
 
             _viewModel = this.gameObject.AddComponent<BookmarksViewModel>();
+
+            _uguiWindow = new BookmarksWindow();
+            _uguiWindow.Initialize(_viewModel);
+            _uguiWindow.OnClosed.Add(OnUGUIWindowClosed);
+            _viewModel.OnWindowVisibleChanged.Add(OnWindowVisibleChanged);
         }
-        
+
         private void OnDestroy() {
             GameEvents.onGUIApplicationLauncherReady.Remove(OnLauncherReady);
             OnLauncherUnready();
-            
+
+            if( this._viewModel != null ) {
+                this._viewModel.OnWindowVisibleChanged.Remove(OnWindowVisibleChanged);
+            }
+            if( this._uguiWindow != null ) {
+                this._uguiWindow.OnClosed.Remove(OnUGUIWindowClosed);
+                this._uguiWindow.Destroy();
+                this._uguiWindow = null;
+            }
+
             if( this._bookmarkUI != null ) {
                 this._bookmarkUI.OnDestroy();
                 this._bookmarkUI = null;
@@ -63,6 +81,36 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             if (_toolbarButton != null) {
                 _toolbarButton.SetFalse();
             }
+        }
+
+        /// <summary>
+        /// État de visibilité unifié : montre/cache la fenêtre uGUI et, à la fermeture, resynchronise
+        /// le toolbar et annule une éventuelle édition de commentaire. La fenêtre IMGUI suit déjà
+        /// puisqu'elle lit ViewModel.WindowVisible.
+        /// </summary>
+        private void OnWindowVisibleChanged() {
+            bool visible = _viewModel.WindowVisible;
+            if (_uguiWindow != null) {
+                if (visible) {
+                    _uguiWindow.Show();
+                } else {
+                    _uguiWindow.Hide();
+                }
+            }
+            if (!visible) {
+                _viewModel.CancelBookmarkCommentEdition();
+                if (_toolbarButton != null) {
+                    _toolbarButton.SetFalse();
+                }
+            }
+        }
+
+        /// <summary>
+        /// La fenêtre uGUI a été fermée par KSP (Échap…) : on rabat l'état partagé, ce qui ferme
+        /// aussi l'IMGUI et relâche le bouton du toolbar.
+        /// </summary>
+        private void OnUGUIWindowClosed() {
+            _viewModel.WindowVisible = false;
         }
 
         // ==========================================================================
@@ -109,25 +157,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// Toolbar button click handler (activation)
         /// </summary>
         private void OnToggleOn() {
-            if( this._bookmarksListUI != null ) {
-                this._bookmarksListUI.Controller.MainWindowsVisible = true;
-            }
-            if( this._editCommentUI != null ) {
-                this._editCommentUI.Controller.CancelCommentEdition();
-            }
+            _viewModel.WindowVisible = true;
             BookmarkManager.RefreshBookmarks();
         }
-        
+
         /// <summary>
         /// Toolbar button click handler (deactivation)
         /// </summary>
         private void OnToggleOff() {
-            if( this._bookmarksListUI != null ) {
-                this._bookmarksListUI.Controller.MainWindowsVisible = false;
-            }
-            if( this._editCommentUI != null ) {
-                this._editCommentUI.Controller.CancelCommentEdition();
-            }
+            _viewModel.WindowVisible = false;
         }
 
         // ==========================================================================

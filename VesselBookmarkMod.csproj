@@ -52,6 +52,9 @@
     <Reference Include="UnityEngine.UI">
       <HintPath>$(KSP_DATA_DIR)\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(KSP_DATA_DIR)\Managed\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
       <HintPath>$(KSP_DATA_DIR)\Managed\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
@@ -76,6 +79,11 @@
     <Compile Include="Src/*.cs" />
     <Compile Include="Src/bookmarks/*.cs" />
     <Compile Include="Src/ui/*.cs" />
+    <Compile Include="Src/ui/styles/*.cs" />
+    <Compile Include="Src/ui/ugui/*.cs" />
+    <Compile Include="Src/ui/ugui/sprites/*.cs" />
+    <Compile Include="Src/ui/ugui/titleBar/*.cs" />
+    <Compile Include="Src/ui/ugui/body/*.cs" />
     <Compile Include="Src/util/*.cs" />
     <Compile Include="Src/ext/*.cs" />
   </ItemGroup>

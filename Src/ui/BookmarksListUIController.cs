@@ -16,9 +16,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public EventVoid OnClosed = new EventVoid("BookmarksListUIController.OnClosed");
 
         /// <summary>
-        /// Whether the main windows are visible
+        /// Whether the main windows are visible.
+        /// Délègue à ViewModel.WindowVisible : état unique partagé entre la fenêtre IMGUI et la
+        /// fenêtre uGUI (les deux s'ouvrent/se ferment ensemble pendant la migration).
         /// </summary>
-        public bool MainWindowsVisible { get; set; } = false;
+        public bool MainWindowsVisible {
+            get => _viewModel.WindowVisible;
+            set => _viewModel.WindowVisible = value;
+        }
 
         // Bookmarks list to display in the UI (cached for performance)
         // Only for read access
