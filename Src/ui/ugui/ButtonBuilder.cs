@@ -208,13 +208,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
 
         private static void AddHoverTint(GameObject go, Text label)
         {
-            var trigger = go.AddComponent<EventTrigger>();
-            var enterEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerEnter };
-            enterEntry.callback.AddListener(_ => label.color = Color.white);
-            trigger.triggers.Add(enterEntry);
-            var exitEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerExit };
-            exitEntry.callback.AddListener(_ => label.color = VesselBookmarkPalette.ButtonTextColor);
-            trigger.triggers.Add(exitEntry);
+            // PointerHandler plutôt qu'EventTrigger pour ne pas bloquer la molette (cf. PointerHandler).
+            var handler = go.AddComponent<PointerHandler>();
+            handler.OnEnter = () => label.color = Color.white;
+            handler.OnExit = () => label.color = VesselBookmarkPalette.ButtonTextColor;
         }
     }
 

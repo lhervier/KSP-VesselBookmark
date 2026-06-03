@@ -216,11 +216,22 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             private GameObject _trap;
             private readonly List<GameObject> _items = new List<GameObject>();
 
-            /// <summary>Callback invoqué quand l'utilisateur choisit une option.</summary>
+            /// <summary>Callback invoqué quand l'utilisateur choisit une option (reçoit la VALEUR brute).</summary>
             public Action<string> OnSelect;
 
             /// <summary>Invoqué juste avant l'ouverture (ex. fermer les autres combos).</summary>
             public Action OnBeforeOpen;
+
+            /// <summary>
+            /// Conversion valeur → libellé affiché (ex. type de vaisseau brut → libellé traduit).
+            /// Null = identité (le libellé affiché est la valeur).
+            /// </summary>
+            public Func<string, string> LabelFor;
+
+            private string Label(string value)
+            {
+                return LabelFor != null ? LabelFor(value) : (value ?? string.Empty);
+            }
 
             public void Bind(Text value, RectTransform headerRect, GameObject dropdown, RectTransform content, GameObject trap)
             {
@@ -234,7 +245,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 
             public void SetOptions(IReadOnlyList<string> options, string current)
             {
-                if (_value != null) _value.text = current ?? string.Empty;
+                if (_value != null) _value.text = Label(current);
 
                 foreach (var item in _items) Destroy(item);
                 _items.Clear();
@@ -318,7 +329,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 var labelGo = new GameObject("Label", typeof(RectTransform));
                 labelGo.transform.SetParent(itemGo.transform, false);
                 var label = labelGo.AddComponent<Text>();
-                label.text = text;
+                label.text = Label(text);
                 label.font = HighLogic.UISkin.font;
                 label.fontSize = VesselBookmarkPalette.ComboFontSize;
                 label.color = selected ? VesselBookmarkPalette.ComboItemSelectedColor : VesselBookmarkPalette.ComboItemColor;

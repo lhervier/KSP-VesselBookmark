@@ -22,15 +22,23 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         private BookmarksViewModel _viewModel;
         private BookmarksWindow _uguiWindow;
+        private BookmarksSettings _settings;
 
         private void Start() {
             GameEvents.onGUIApplicationLauncherReady.Add(OnLauncherReady);
 
             _viewModel = this.gameObject.AddComponent<BookmarksViewModel>();
 
+            _settings = new BookmarksSettings();
+            _settings.Load();
+
             _uguiWindow = new BookmarksWindow();
             _uguiWindow.Initialize(_viewModel);
             _uguiWindow.OnClosed.Add(OnUGUIWindowClosed);
+            _uguiWindow.OnPositionCaptured = OnWindowPositionCaptured;
+            if (_settings.HasWindowPosition) {
+                _uguiWindow.SetSavedPosition(_settings.WindowPosition);
+            }
             _viewModel.OnWindowVisibleChanged.Add(OnWindowVisibleChanged);
         }
 
@@ -79,6 +87,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         private void OnUGUIWindowClosed() {
             _viewModel.WindowVisible = false;
+        }
+
+        /// <summary>
+        /// La fenêtre a été déplacée/fermée : on mémorise sa position dans les réglages globaux.
+        /// </summary>
+        private void OnWindowPositionCaptured(Vector2 position) {
+            _settings.SetWindowPosition(position);
+            _settings.Save();
         }
 
         // ==========================================================================

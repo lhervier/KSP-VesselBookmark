@@ -152,12 +152,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 BuildComment(rowGo.transform, bookmark.Comment);
             }
 
-            // Survol + clic sur la ligne (les boutons enfants consomment leurs propres clics)
-            AddTrigger(rowGo, EventTriggerType.PointerEnter, _ => _viewModel.HoveredBookmark = bookmark);
-            AddTrigger(rowGo, EventTriggerType.PointerExit, _ => {
+            // Survol + clic sur la ligne (les boutons enfants consomment leurs propres clics).
+            // PointerHandler plutôt qu'EventTrigger pour ne pas bloquer la molette (cf. PointerHandler).
+            var pointer = rowGo.AddComponent<PointerHandler>();
+            pointer.OnEnter = () => _viewModel.HoveredBookmark = bookmark;
+            pointer.OnExit = () => {
                 if (_viewModel.HoveredBookmark == bookmark) _viewModel.HoveredBookmark = null;
-            });
-            AddTrigger(rowGo, EventTriggerType.PointerClick, _ => _viewModel.SelectedBookmark = bookmark);
+            };
+            pointer.OnClick = () => _viewModel.SelectedBookmark = bookmark;
 
             controller.Bind(bookmark, bg, accentBar, name, chip, chipImage, chipText, rowButtonsGroup, vesselExists);
             return controller;
@@ -374,15 +376,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             text.horizontalOverflow = HorizontalWrapMode.Wrap;
             text.verticalOverflow = VerticalWrapMode.Overflow;
             text.raycastTarget = false;
-        }
-
-        private static void AddTrigger(GameObject go, EventTriggerType type, UnityEngine.Events.UnityAction<BaseEventData> cb)
-        {
-            var trigger = go.GetComponent<EventTrigger>();
-            if (trigger == null) trigger = go.AddComponent<EventTrigger>();
-            var entry = new EventTrigger.Entry { eventID = type };
-            entry.callback.AddListener(cb);
-            trigger.triggers.Add(entry);
         }
 
         private static string BuildTitle(Bookmark bookmark, bool vesselExists)

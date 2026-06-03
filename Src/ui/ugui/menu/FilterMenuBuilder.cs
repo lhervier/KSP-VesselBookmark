@@ -106,6 +106,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             bodyCombo.OnSelect = v => _viewModel.SelectedBody = v;
             ComboBuilder.ComboController typeCombo = _comboBuilder.Create(panelGo.transform, ModLocalization.GetString("labelType"));
             typeCombo.OnSelect = v => _viewModel.SelectedVesselType = v;
+            typeCombo.LabelFor = TranslateVesselType;   // affiche les types traduits, garde la valeur brute
             // Une seule combo ouverte à la fois : ouvrir l'une ferme l'autre.
             bodyCombo.OnBeforeOpen = () => typeCombo.Collapse();
             typeCombo.OnBeforeOpen = () => bodyCombo.Collapse();
@@ -121,6 +122,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 
             controller.BindPanelAndTrap(panelGo, trapGo);
             return controller;
+        }
+
+        // Valeur brute du type de vaisseau → libellé traduit (la valeur « All » utilise vesselTypeAll).
+        private static string TranslateVesselType(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return value;
+            string key = value == "All" ? "vesselTypeAll" : "vesselType" + value;
+            return ModLocalization.GetString(key);
         }
 
         // ---- Sous-éléments ----------------------------------------------------------------
