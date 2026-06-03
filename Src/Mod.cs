@@ -11,7 +11,15 @@ namespace com.github.lhervier.ksp.bookmarksmod {
 
         private static readonly ModLogger LOGGER = new ModLogger("Mod");
 
-        protected void Awake() 
+        /// <summary>
+        /// True while a scene change is in progress. The game destroys every vessel during scene
+        /// teardown, which fires onVesselDestroy en masse. Honoring those refreshes would rebuild the
+        /// uGUI window against a canvas that is being torn down (degenerate geometry) and hang the main
+        /// thread. Bookmarks are reloaded anyway by OnGameStatePostLoad on the new scene.
+        /// </summary>
+        private bool _sceneLoading = false;
+
+        protected void Awake()
         {
             LOGGER.LogInfo("Awaked");
             DontDestroyOnLoad(this);
@@ -20,6 +28,10 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         public void Start() {
             LOGGER.LogInfo("Plugin started");
             
+            // Subscribe to scene transition events (used to suppress refreshes during scene teardown)
+            GameEvents.onGameSceneLoadRequested.Add(OnGameSceneLoadRequested);
+            GameEvents.onLevelWasLoaded.Add(OnLevelWasLoaded);
+
             // Subscribe to save/load events
             GameEvents.onGameStateCreated.Add(OnGameStateCreated);
             GameEvents.onGameStatePostLoad.Add(OnGameStatePostLoad);
@@ -40,6 +52,10 @@ namespace com.github.lhervier.ksp.bookmarksmod {
 
         public void OnDestroy() {
             LOGGER.LogInfo("Plugin stopped");
+
+            // Unsubscribe from scene transition events
+            GameEvents.onGameSceneLoadRequested.Remove(OnGameSceneLoadRequested);
+            GameEvents.onLevelWasLoaded.Remove(OnLevelWasLoaded);
 
             // Unsubscribe from save/load events
             GameEvents.onGameStateCreated.Remove(OnGameStateCreated);
@@ -85,11 +101,36 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         }
 
         /// <summary>
+        /// A scene load has been requested: the current scene is about to be torn down (every vessel
+        /// destroyed). Suppress vessel/alarm-driven refreshes until the new scene has loaded.
+        /// </summary>
+        private void OnGameSceneLoadRequested(GameScenes scene) {
+            _sceneLoading = true;
+        }
+
+        /// <summary>
+        /// The new scene has finished loading: refreshes may resume.
+        /// </summary>
+        private void OnLevelWasLoaded(GameScenes scene) {
+            _sceneLoading = false;
+        }
+
+        /// <summary>
+        /// Refresh the bookmarks, unless a scene change is in progress (see <see cref="_sceneLoading"/>).
+        /// </summary>
+        private void RefreshUnlessSceneLoading() {
+            if( _sceneLoading ) {
+                return;
+            }
+            BookmarkManager.RefreshBookmarks();
+        }
+
+        /// <summary>
         /// Called when a vessel is modified
         /// </summary>
         /// <param name="vessel">The vessel that was modified</param>
         private void OnVesselWasModified(Vessel vessel) {
-            BookmarkManager.RefreshBookmarks();
+            RefreshUnlessSceneLoading();
         }
 
         /// <summary>
@@ -97,7 +138,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="vessel">The vessel that was destroyed</param>
         private void OnVesselDestroy(Vessel vessel) {
-            BookmarkManager.RefreshBookmarks();
+            RefreshUnlessSceneLoading();
         }
 
         /// <summary>
@@ -105,7 +146,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="vessel">The vessel that was renamed</param>
         private void OnVesselRename(GameEvents.HostedFromToAction<Vessel, string> action) {
-            BookmarkManager.RefreshBookmarks();
+            RefreshUnlessSceneLoading();
         }
 
         /// <summary>
@@ -113,7 +154,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="alarm">The alarm that was added</param>
         private void OnAlarmAdded(AlarmTypeBase alarm) {
-            BookmarkManager.RefreshBookmarks();
+            RefreshUnlessSceneLoading();
         }
 
         /// <summary>
@@ -121,7 +162,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="alarm">The alarm that was removed</param>
         private void OnAlarmRemoved(uint alarmID) {
-            BookmarkManager.RefreshBookmarks();
+            RefreshUnlessSceneLoading();
         }
 
         /// <summary>
@@ -129,7 +170,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// </summary>
         /// <param name="alarm">The alarm that was triggered</param>
         private void OnAlarmTriggered(AlarmTypeBase alarm) {
-            BookmarkManager.RefreshBookmarks();
+            RefreshUnlessSceneLoading();
         }
     }
 }
