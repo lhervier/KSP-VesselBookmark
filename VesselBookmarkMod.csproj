@@ -70,9 +70,6 @@
     <Reference Include="UnityEngine.TextRenderingModule">
       <HintPath>$(KSP_DATA_DIR)\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
-    <Reference Include="ClickThroughBlocker">
-      <HintPath>$(KSPDIR)\GameData\000_ClickThroughBlocker\Plugins\ClickThroughBlocker.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>

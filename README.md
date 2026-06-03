@@ -27,7 +27,6 @@ A Kerbal Space Program mod that lets you create bookmarks on vessels (by command
 2. Extract the `VesselBookmarkMod` folder into `KSP/GameData/`
 3. Dependencies to install in `GameData`:
    - [ModuleManager](https://github.com/sarbian/ModuleManager) (required)
-   - [Click Through Blocker](https://forum.kerbalspaceprogram.com/topic/170747-112x-click-through-blocker-new-dependency/) (stops clicks from passing through the mod’s windows)
 
 ## Usage
 
@@ -54,7 +53,6 @@ A Kerbal Space Program mod that lets you create bookmarks on vessels (by command
 
 - .NET 4.7.2 or later
 - KSP installed (for assembly references)
-- Click Through Blocker in `KSP/GameData/000_ClickThroughBlocker/` (for compilation)
 
 ### Build
 
@@ -87,7 +85,7 @@ A Kerbal Space Program mod that lets you create bookmarks on vessels (by command
 ## Compatibility
 
 - **KSP**: 1.x (tested with 1.12+)
-- **Dependencies**: ModuleManager, Click Through Blocker
+- **Dependencies**: ModuleManager
 
 ## License
 
