@@ -199,7 +199,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 VesselBookmarkPalette.TypeIconBorderThickness);
             box.type = Image.Type.Sliced;
             box.color = Color.white;
-            box.raycastTarget = false;
+            box.raycastTarget = true;   // pour recevoir le survol du tooltip
+
+            // Tooltip = type de vaisseau traduit
+            if (!string.IsNullOrEmpty(vesselType))
+            {
+                Tooltips.Attach(boxGo, ModLocalization.GetString("vesselType" + vesselType));
+            }
 
             Sprite icon = Icons.VesselType(vesselType);
             if (icon != null)
@@ -241,7 +247,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 img.color = VesselBookmarkPalette.WarmColor;
             }
             img.type = Image.Type.Simple;
-            img.raycastTarget = false;
+            img.raycastTarget = true;   // pour recevoir le survol du tooltip
+            Tooltips.Attach(go, ModLocalization.GetString("tooltipAlarm"));
         }
 
         private GameObject BuildChip(Transform parent, out Image chipImage, out Text chipText)
@@ -304,18 +311,21 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 VesselBookmarkPalette.RowButtonBgColor, VesselBookmarkPalette.RowButtonHoverColor,
                 VesselBookmarkPalette.RowButtonSize, VesselBookmarkPalette.RowButtonFontSize);
             up.transform.SetParent(groupGo.transform, false);
+            Tooltips.Attach(up.gameObject, ModLocalization.GetString("tooltipMoveUp"));
 
             ButtonController down = _buttonBuilder.Create(
                 "MoveDown", MoveDownGlyph, () => _viewModel.MoveDown(bookmark), !isLast,
                 VesselBookmarkPalette.RowButtonBgColor, VesselBookmarkPalette.RowButtonHoverColor,
                 VesselBookmarkPalette.RowButtonSize, VesselBookmarkPalette.RowButtonFontSize);
             down.transform.SetParent(groupGo.transform, false);
+            Tooltips.Attach(down.gameObject, ModLocalization.GetString("tooltipMoveDown"));
 
             ButtonController remove = _buttonBuilder.Create(
                 "Remove", RemoveGlyph, () => _viewModel.RequestRemoval(bookmark), true,
                 VesselBookmarkPalette.RowButtonBgColor, VesselBookmarkPalette.RowButtonDangerHoverColor,
                 VesselBookmarkPalette.RowButtonSize, VesselBookmarkPalette.RowButtonFontSize);
             remove.transform.SetParent(groupGo.transform, false);
+            Tooltips.Attach(remove.gameObject, ModLocalization.GetString("tooltipRemove"));
 
             return group;
         }

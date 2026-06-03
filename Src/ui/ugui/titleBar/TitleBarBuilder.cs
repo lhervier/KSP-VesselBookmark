@@ -95,6 +95,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
                 () => _viewModel.AddVesselBookmark(),
                 _viewModel.CanAddVesselBookmark());
             add.transform.SetParent(go.transform, false);
+            Tooltips.Attach(add.gameObject, ModLocalization.GetString("buttonAdd"));
             controller.BindAddButton(add);
 
             // Bouton "rafraîchir"
@@ -103,6 +104,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
                 RefreshGlyph,
                 () => _viewModel.RefreshBookmarks());
             refresh.transform.SetParent(go.transform, false);
+            Tooltips.Attach(refresh.gameObject, ModLocalization.GetString("buttonRefresh"));
 
             // Bouton menu filtres « ⋯ » (toggle FilterMenuOpen) + point vert « filtre actif »
             ButtonController menu = _buttonBuilder.Create(
@@ -110,6 +112,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
                 MenuGlyph,
                 () => _viewModel.FilterMenuOpen = !_viewModel.FilterMenuOpen);
             menu.transform.SetParent(go.transform, false);
+            Tooltips.Attach(menu.gameObject, ModLocalization.GetString("menuFiltersTitle"));
             controller.BindFilterDot(BuildFilterDot(menu.gameObject));
 
             // Bouton de fermeture : ferme la fenêtre (l'IMGUI suit, via WindowVisible)
@@ -118,6 +121,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
                 CloseGlyph,
                 () => _viewModel.WindowVisible = false);
             close.transform.SetParent(go.transform, false);
+            Tooltips.Attach(close.gameObject, ModLocalization.GetString("buttonClose"));
 
             return controller;
         }

@@ -87,18 +87,21 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
                 VesselBookmarkPalette.ButtonBgColor, VesselBookmarkPalette.ButtonHoverColor,
                 VesselBookmarkPalette.FooterButtonHeight, VesselBookmarkPalette.FooterButtonFontSize);
             edit.transform.SetParent(go.transform, false);
+            Tooltips.Attach(edit.gameObject, ModLocalization.GetString("tooltipEdit"));
 
             ButtonController goTo = _buttonBuilder.Create(
                 "GoTo", GoToGlyph, () => _viewModel.SwitchToSelectedVessel(), false,
                 VesselBookmarkPalette.ButtonBgColor, VesselBookmarkPalette.ButtonHoverColor,
                 VesselBookmarkPalette.FooterButtonHeight, VesselBookmarkPalette.FooterButtonFontSize);
             goTo.transform.SetParent(go.transform, false);
+            Tooltips.Attach(goTo.gameObject, ModLocalization.GetString("tooltipGoTo"));
 
             ButtonController target = _buttonBuilder.Create(
                 "Target", TargetGlyph, () => _viewModel.SetCurrentBookmarkVesselAsTarget(), false,
                 VesselBookmarkPalette.ButtonBgColor, VesselBookmarkPalette.ButtonHoverColor,
                 VesselBookmarkPalette.FooterButtonHeight, VesselBookmarkPalette.FooterButtonFontSize);
             target.transform.SetParent(go.transform, false);
+            Tooltips.Attach(target.gameObject, ModLocalization.GetString("tooltipSetTargetAs"));
 
             controller.BindButtons(edit, goTo, target);
             return controller;
