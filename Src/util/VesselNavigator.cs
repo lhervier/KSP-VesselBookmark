@@ -28,8 +28,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
                 return true;
             }
             
-            // If we are ont the flight scene
-            if (HighLogic.LoadedSceneIsFlight)
+            // If we are on the flight scene AND the target vessel is loaded (within physics range),
+            // we can switch to it instantly. SetActiveVessel only works for loaded vessels : once we
+            // have left a vessel and it became unloaded/packed (out of range), it silently does
+            // nothing, so we must fall through to the save-and-reload path below in that case.
+            if (HighLogic.LoadedSceneIsFlight && vessel.loaded)
             {
                 try {
                     FlightGlobals.SetActiveVessel(vessel);
@@ -39,8 +42,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.util {
                     LOGGER.LogError($"Error navigating to {vessel.vesselName}: {e.Message}");
                     return false;
                 }
-            
-            // Otherwise, we need to save and reload the game
+
+            // Otherwise (out of flight, or in flight but the vessel is unloaded/out of range),
+            // we need to save and reload the game focusing on the target vessel.
             } else {
                 // First, save the game, forcing the flight scene
                 Game currentGame;
