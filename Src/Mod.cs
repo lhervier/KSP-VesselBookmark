@@ -13,7 +13,6 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         private static readonly ModLogger LOGGER = new ModLogger("Mod");
 
         private BookmarksManager _bookmarkManager;
-        private MainUI _mainUI;
 
         protected void Awake()
         {
@@ -25,9 +24,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             LOGGER.LogInfo("Plugin started");
 
             this._bookmarkManager = this.gameObject.AddComponent<BookmarksManager>();
-            this._mainUI = this.gameObject.AddComponent<MainUI>();
-            this._mainUI.Initialize(this._bookmarkManager);
-
+            
             // Subscribe to save/load events
             GameEvents.onGameStateCreated.Add(OnGameStateCreated);
             GameEvents.onGameStatePostLoad.Add(OnGameStatePostLoad);
