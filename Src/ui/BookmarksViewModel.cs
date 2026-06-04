@@ -632,7 +632,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             if (SelectedBookmark == null || SelectedBookmark.Vessel == null) {
                 return false;
             }
-            return SelectedBookmark.VesselPersistentID != FlightGlobals.ActiveVessel?.persistentId;
+            if( FlightGlobals.ActiveVessel == null )
+            {
+                return true;
+            }
+            if( !FlightGlobals.ActiveVessel.loaded )
+            {
+                return true;
+            }
+            return SelectedBookmark.VesselPersistentID != FlightGlobals.ActiveVessel.persistentId;
         }
         
         // ======================================================================
