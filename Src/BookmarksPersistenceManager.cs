@@ -6,7 +6,7 @@ using com.github.lhervier.ksp.bookmarksmod.util;
 using System.Linq;
 
 namespace com.github.lhervier.ksp.bookmarksmod {
-    public class BookmarkPersistenceManager {
+    public class BookmarksPersistenceManager {
         private static readonly ModLogger LOGGER = new ModLogger("BookmarkPersistenceManager");
         
         /// <summary>
@@ -114,7 +114,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="node"></param>
         /// <param name="bookmark"></param>
         /// <returns>True if the bookmark was saved, false otherwise</returns>
-        public static bool SaveBookmark(ConfigNode node, Bookmark bookmark) {
+        private static bool SaveBookmark(ConfigNode node, Bookmark bookmark) {
             node.AddUintValue("bookmarkID", bookmark.BookmarkID);
             node.AddEnumValue("bookmarkType", bookmark.BookmarkType);
 

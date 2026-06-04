@@ -13,7 +13,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
     /// Point d'entrée de l'UI : bouton toolbar + fenêtre uGUI, pilotés par ViewModel.WindowVisible.
     /// (L'ancienne UI IMGUI est débranchée ; ses fichiers restent présents le temps de finir le uGUI.)
     /// </summary>
-    [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
     public class MainUI : MonoBehaviour {
 
         private static readonly ModLogger LOGGER = new ModLogger("MainUI");
@@ -23,11 +22,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private BookmarksViewModel _viewModel;
         private BookmarksWindow _uguiWindow;
         private BookmarksSettings _settings;
+        private BookmarksManager _bookmarkManager;
+
+        public void Initialize(BookmarksManager bookmarkManager)
+        {
+            this._bookmarkManager = bookmarkManager;
+        }
 
         private void Start() {
             GameEvents.onGUIApplicationLauncherReady.Add(OnLauncherReady);
 
             _viewModel = this.gameObject.AddComponent<BookmarksViewModel>();
+            _viewModel.Initialize(this._bookmarkManager);
 
             _settings = new BookmarksSettings();
             _settings.Load();
@@ -133,7 +139,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
         private void OnToggleOn() {
             _viewModel.WindowVisible = true;
-            BookmarkManager.RefreshBookmarks();
+            _viewModel.ForceReload();
         }
 
         private void OnToggleOff() {

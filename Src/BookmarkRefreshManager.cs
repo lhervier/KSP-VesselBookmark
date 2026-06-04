@@ -5,93 +5,48 @@ using UnityEngine;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 
 namespace com.github.lhervier.ksp.bookmarksmod {
-    public class BookmarkRefreshManager {
+    public class BookmarkRefreshManager : MonoBehaviour {
 
         private static readonly ModLogger LOGGER = new ModLogger("BookmarkRefreshManager");
 
-        /// <summary>
-        /// Lookup tables built once per refresh pass. Refreshing N bookmarks against the index costs
-        /// O(N + universe) instead of O(N × universe) : without it, each bookmark used to rescan every
-        /// part of every vessel (loaded and unloaded) plus every alarm. Build one (via <see cref="Build"/>)
-        /// at the start of a refresh and share it across every bookmark of that pass.
-        /// </summary>
-        public class RefreshIndex {
+        public static BookmarkRefreshManager Instance => _instance;
+        private static BookmarkRefreshManager _instance = null;
 
-            /// <summary>flightID → loaded Part</summary>
-            public readonly Dictionary<uint, Part> PartsByFlightId = new Dictionary<uint, Part>();
+        private VesselsManager _vesselsManager = null;
 
-            /// <summary>flightID → unloaded ProtoPartSnapshot</summary>
-            public readonly Dictionary<uint, ProtoPartSnapshot> ProtoPartsByFlightId = new Dictionary<uint, ProtoPartSnapshot>();
+        // ===================================================================================
+        // Life cycle
+        // ===================================================================================
 
-            /// <summary>vessel persistentId → Vessel (loaded vessels take precedence over unloaded ones)</summary>
-            public readonly Dictionary<uint, Vessel> VesselsByPersistentId = new Dictionary<uint, Vessel>();
+        public void Awake()
+        {
+            _instance = this;
+        }
 
-            /// <summary>persistentId of every vessel that currently has an alarm</summary>
-            public readonly HashSet<uint> VesselsWithAlarm = new HashSet<uint>();
+        public void Initialize(VesselsManager vesselsManager)
+        {
+            this._vesselsManager = vesselsManager;
+        }
 
-            /// <summary>
-            /// Scan the universe once and fill the lookup tables.
-            /// </summary>
-            public static RefreshIndex Build() {
-                var index = new RefreshIndex();
-                index.IndexLoadedVessels();
-                index.IndexUnloadedVessels();
-                index.IndexAlarms();
-                return index;
-            }
+        public void Start()
+        {
 
-            private void IndexLoadedVessels() {
-                if (FlightGlobals.Vessels == null) return;
-                foreach (Vessel vessel in FlightGlobals.Vessels) {
-                    if (vessel == null) continue;
-                    if (vessel.persistentId != 0 && !VesselsByPersistentId.ContainsKey(vessel.persistentId)) {
-                        VesselsByPersistentId[vessel.persistentId] = vessel;
-                    }
-                    if (vessel.parts == null) continue;
-                    foreach (Part part in vessel.parts) {
-                        if (part == null) continue;
-                        PartsByFlightId[part.flightID] = part;
-                    }
-                }
-            }
+        }
 
-            private void IndexUnloadedVessels() {
-                if (FlightGlobals.VesselsUnloaded == null) return;
-                foreach (Vessel vessel in FlightGlobals.VesselsUnloaded) {
-                    if (vessel == null) continue;
-                    if (vessel.persistentId != 0 && !VesselsByPersistentId.ContainsKey(vessel.persistentId)) {
-                        VesselsByPersistentId[vessel.persistentId] = vessel;
-                    }
-                    if (vessel.protoVessel == null || vessel.protoVessel.protoPartSnapshots == null) continue;
-                    foreach (ProtoPartSnapshot protoPart in vessel.protoVessel.protoPartSnapshots) {
-                        if (protoPart == null) continue;
-                        ProtoPartsByFlightId[protoPart.flightID] = protoPart;
-                    }
-                }
-            }
-
-            private void IndexAlarms() {
-                try {
-                    if (AlarmClockScenario.Instance == null) return;
-                    foreach (AlarmTypeBase alarm in AlarmClockScenario.Instance.alarms.Values) {
-                        if (alarm == null || alarm.Vessel == null) continue;
-                        VesselsWithAlarm.Add(alarm.Vessel.persistentId);
-                    }
-                } catch (Exception e) {
-                    LOGGER.LogError($"Error indexing alarms: {e.Message}");
-                }
-            }
+        public void OnDestroy()
+        {
+            _instance = null;
         }
 
         // ===================================================================================
-        //  Index lookups (O(1)) replacing the former linear scans
+        //  Index lookups (O(1))
         // ===================================================================================
 
         /// <summary>
         /// Get the command module part for a flightID, or null if it is not a loaded command module.
         /// </summary>
-        private static Part GetPart(uint commandModuleFlightID, RefreshIndex index) {
-            if (!index.PartsByFlightId.TryGetValue(commandModuleFlightID, out Part part) || part == null) {
+        private Part GetPart(uint commandModuleFlightID) {
+            if (!_vesselsManager.PartsByFlightId.TryGetValue(commandModuleFlightID, out Part part) || part == null) {
                 return null;
             }
             if (part.FindModuleImplementing<ModuleCommand>() == null) {
@@ -105,8 +60,8 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// Get the command module protoPartSnapshot for a flightID, or null if it is not an unloaded
         /// command module.
         /// </summary>
-        private static ProtoPartSnapshot GetProtoPartSnapshot(uint commandModuleFlightID, RefreshIndex index) {
-            if (!index.ProtoPartsByFlightId.TryGetValue(commandModuleFlightID, out ProtoPartSnapshot protoPart) || protoPart == null) {
+        private ProtoPartSnapshot GetProtoPartSnapshot(uint commandModuleFlightID) {
+            if (!_vesselsManager.ProtoPartsByFlightId.TryGetValue(commandModuleFlightID, out ProtoPartSnapshot protoPart) || protoPart == null) {
                 return null;
             }
             if (protoPart.FindModule("ModuleCommand") == null) {
@@ -119,23 +74,23 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <summary>
         /// Find the vessel for the bookmark (loaded vessels take precedence over unloaded ones).
         /// </summary>
-        private static Vessel FindVessel(Bookmark bookmark, RefreshIndex index) {
+        private Vessel FindVessel(Bookmark bookmark) {
             if (bookmark.VesselPersistentID == 0) {
                 LOGGER.LogError($"Bookmark {bookmark}: Vessel persistent ID is empty");
                 return null;
             }
-            index.VesselsByPersistentId.TryGetValue(bookmark.VesselPersistentID, out Vessel vessel);
+            _vesselsManager.VesselsByPersistentId.TryGetValue(bookmark.VesselPersistentID, out Vessel vessel);
             return vessel;
         }
 
         /// <summary>
         /// Check if a vessel has an alarm.
         /// </summary>
-        private static bool CheckHasAlarm(Vessel vessel, RefreshIndex index) {
+        private bool CheckHasAlarm(Vessel vessel) {
             if (vessel == null) {
                 return false;
             }
-            return index.VesselsWithAlarm.Contains(vessel.persistentId);
+            return _vesselsManager.VesselsWithAlarm.Contains(vessel.persistentId);
         }
 
         /// <summary>
@@ -144,7 +99,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="bodyName">The name of the body of the vessel</param>
         /// <param name="situation">The situation of the vessel</param>
         /// <returns>The label for the situation</returns>
-        private static string GetSituationLabel(string bodyName, Vessel.Situations situation) {
+        private string GetSituationLabel(string bodyName, Vessel.Situations situation) {
             try {
                 if( string.IsNullOrEmpty(bodyName) ) {
                     LOGGER.LogError($"Getting situation: Body is null");
@@ -189,7 +144,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="bookmark">The command module bookmark to refresh</param>
         /// <param name="index">The lookup tables for this refresh pass</param>
         /// <returns>True if the command module bookmark was refreshed, false otherwise</returns>
-        private static bool RefreshCommandModuleBookmark(CommandModuleBookmark bookmark, RefreshIndex index) {
+        private bool RefreshCommandModuleBookmark(CommandModuleBookmark bookmark) {
             try {
                 bookmark.CommandModuleFlightID = bookmark.BookmarkID;
 
@@ -197,7 +152,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 string cmName;
                 string cmType;
 
-                Part commandModulePart = GetPart(bookmark.CommandModuleFlightID, index);
+                Part commandModulePart = GetPart(bookmark.CommandModuleFlightID);
                 if (commandModulePart != null) {
                     vesselPersistentId = commandModulePart.vessel.persistentId;
                     if( commandModulePart.vesselNaming == null ) {
@@ -208,7 +163,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                         cmType = commandModulePart.vesselNaming.vesselType.ToString();
                     }
                 } else {
-                    ProtoPartSnapshot commandModuleProtoPartSnapshot = GetProtoPartSnapshot(bookmark.CommandModuleFlightID, index);
+                    ProtoPartSnapshot commandModuleProtoPartSnapshot = GetProtoPartSnapshot(bookmark.CommandModuleFlightID);
                     if (commandModuleProtoPartSnapshot != null) {
                         vesselPersistentId = commandModuleProtoPartSnapshot.pVesselRef.persistentId;
                         if( commandModuleProtoPartSnapshot.vesselNaming == null ) {
@@ -240,18 +195,9 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         }
 
         /// <summary>
-        /// Refresh a single bookmark, building a one-off index. Use the
-        /// <see cref="RefreshBookmark(Bookmark, RefreshIndex)"/> overload when refreshing several
-        /// bookmarks in a row to share a single index.
-        /// </summary>
-        public static bool RefreshBookmark(Bookmark bookmark) {
-            return RefreshBookmark(bookmark, RefreshIndex.Build());
-        }
-
-        /// <summary>
         /// Refresh a bookmark's transient (display) fields using a shared lookup index.
         /// </summary>
-        public static bool RefreshBookmark(Bookmark bookmark, RefreshIndex index) {
+        public bool RefreshBookmark(Bookmark bookmark) {
             try {
                 // Checking for mandatory values
                 if( bookmark.BookmarkID == 0 ) {
@@ -264,7 +210,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 }
 
                 if( bookmark is CommandModuleBookmark commandModuleBookmark ) {
-                    if( !RefreshCommandModuleBookmark(commandModuleBookmark, index) ) {
+                    if( !RefreshCommandModuleBookmark(commandModuleBookmark) ) {
                         LOGGER.LogDebug($"Bookmark {commandModuleBookmark}: Failed to refresh command module bookmark. Let's continue with next one...");
                         return false;
                     }
@@ -277,7 +223,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
 
                 Vessel vessel = null;
                 if( bookmark.VesselPersistentID != 0 ) {    // May happen if we were unable to refresh a command module bookmark.
-                    vessel = FindVessel(bookmark, index);
+                    vessel = FindVessel(bookmark);
                 }
                 if( vessel == null ) {
                     bookmark.Vessel = null;
@@ -290,7 +236,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     bookmark.VesselBodyName = vessel.mainBody?.bodyName ?? "";
                     bookmark.VesselSituationLabel = GetSituationLabel(bookmark.VesselBodyName, vessel.situation);
 
-                    bookmark.HasAlarm = CheckHasAlarm(vessel, index);
+                    bookmark.HasAlarm = CheckHasAlarm(vessel);
 
                     if( bookmark is CommandModuleBookmark ) {
                         // Nothing more

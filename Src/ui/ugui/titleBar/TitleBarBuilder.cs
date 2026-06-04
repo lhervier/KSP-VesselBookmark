@@ -102,7 +102,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             ButtonController refresh = _buttonBuilder.Create(
                 "Refresh",
                 RefreshGlyph,
-                () => _viewModel.RefreshBookmarks());
+                () => _viewModel.ForceReload());
             refresh.transform.SetParent(go.transform, false);
             Tooltips.Attach(refresh.gameObject, ModLocalization.GetString("buttonRefresh"));
 
