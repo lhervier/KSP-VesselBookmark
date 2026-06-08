@@ -56,10 +56,10 @@ echo "Création du dossier Release"
 mkdir -p Release/VesselBookmarkMod/{vessel_types,buttons,Localization}
 
 echo "Restauration des packages NuGet"
-dotnet restore VesselBookmarkMod.csproj "${MSBUILD_PROPS[@]}"
+dotnet restore VesselBookmark.sln "${MSBUILD_PROPS[@]}"
 
 echo "Compilation de la DLL du mod (.NET Framework 4.7.2)"
-dotnet build VesselBookmarkMod.csproj "${MSBUILD_PROPS[@]}" --no-restore
+dotnet build VesselBookmark.sln "${MSBUILD_PROPS[@]}" --no-restore
 
 echo "Copie de la DLL du mod"
 cp -v Output/bin/VesselBookmarkMod.dll Release/VesselBookmarkMod/

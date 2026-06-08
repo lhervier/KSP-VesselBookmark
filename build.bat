@@ -43,7 +43,7 @@ if errorlevel 1 (
 )
 
 echo Building Mod DLL
-dotnet build
+dotnet build VesselBookmark.sln
 if errorlevel 1 (
     echo ERROR: Failed to build the Mod DLL
     exit /b 1

@@ -51,6 +51,25 @@ A Kerbal Space Program mod that lets you create bookmarks on vessels (by command
 
 ## Building from source
 
+### Cloning the repository
+
+This project uses the [KSP-Shared](https://github.com/lhervier/KSP-Shared) repository as a git submodule (in the `KSP-Shared` folder). Its source files are compiled directly into `VesselBookmarkMod.dll`, so you must initialize the submodule before building.
+
+- Clone with submodules in one step:
+  ```batch
+  git clone --recurse-submodules https://github.com/lhervier/KSP-VesselBookmark.git
+  ```
+
+- Or, if you already cloned the repository without submodules:
+  ```batch
+  git submodule update --init --recursive
+  ```
+
+- To later update the submodule to the latest `main`:
+  ```batch
+  git submodule update --remote KSP-Shared
+  ```
+
 ### Prerequisites
 
 - .NET 4.7.2 or later
