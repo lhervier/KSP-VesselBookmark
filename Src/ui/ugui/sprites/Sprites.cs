@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
+using com.github.lhervier.ksp.shared.ugui;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites
 {
@@ -57,7 +58,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites
             }
 
             int size = 2 * thickness + 1;
-            var tex = VesselBookmarkTextures.MakeBorderTexture(fill, border, thickness);
+            var tex = TextureUtils.MakeBorderTexture(fill, border, thickness);
             var sprite = Sprite.Create(
                 tex,
                 new Rect(0f, 0f, size, size),
@@ -81,7 +82,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites
             }
 
             int height = 2 * thickness + 1;
-            var tex = VesselBookmarkTextures.MakeHorizontalBordersTexture(fill, border, thickness);
+            var tex = TextureUtils.MakeHorizontalBordersTexture(fill, border, thickness);
             var sprite = Sprite.Create(
                 tex,
                 new Rect(0f, 0f, 1f, height),
