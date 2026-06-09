@@ -16,7 +16,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
         private const string AddGlyph = "+";
         private const string RefreshGlyph = "↻";   // ↻ (U+21BB) — renders fine with the UISkin font
         private const string MenuGlyph = "⋯";       // ⋯ (U+22EF) — fallback to "≡" / "..." if not rendered
-        private const string CloseGlyph = "✕";      // ✕ (U+2715)
+        private const string CloseGlyph = "×";      // × (U+00D7) — matches the shared popup close button
 
         private readonly BookmarksViewModel _viewModel;
         private readonly ButtonBuilder _buttonBuilder;
@@ -60,7 +60,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             layout.padding = new RectOffset(
                 Mathf.RoundToInt(VesselBookmarkPalette.DefaultPaddingLeft),
                 Mathf.RoundToInt(VesselBookmarkPalette.DefaultPaddingRight),
-                3, 3);
+                5, 5);   // top/bottom mirror the shared popup title bar padding (DefaultPalette.Padding{Top,Bottom})
             layout.spacing = VesselBookmarkPalette.DefaultSpacing;
             layout.childAlignment = TextAnchor.MiddleLeft;
             layout.childControlWidth = true;
