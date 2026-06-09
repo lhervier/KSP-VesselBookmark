@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.bookmarksmod;
+using com.github.lhervier.ksp.shared.ugui.checkbox;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 {
@@ -113,7 +114,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             controller.BindCombos(bodyCombo, typeCombo);
 
             // Case « commentaire seulement »
-            Image checkBox = BuildCheckbox(panelGo.transform, controller);
+            CheckboxController checkBox = BuildCheckbox(panelGo.transform);
             controller.BindCheckbox(checkBox);
 
             // Séparateur + réinitialisation
@@ -227,72 +228,23 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             return text;
         }
 
-        private Image BuildCheckbox(Transform parent, FilterMenuController controller)
+        private CheckboxController BuildCheckbox(Transform parent)
         {
-            var rowGo = new GameObject("CommentFilter", typeof(RectTransform));
-            rowGo.transform.SetParent(parent, false);
-            var le = rowGo.AddComponent<LayoutElement>();
+            // Case à cocher partagée : libellé cliquable + ligne entière cliquable (Greedy).
+            CheckboxController checkbox = new CheckboxBuilder()
+                .Label(ModLocalization.GetString("menuFilterWithComment"))
+                .Greedy(true)
+                .Checked(_viewModel.FilterHasComment)
+                .Build();
+            checkbox.transform.SetParent(parent, false);
+
+            // Aligne la hauteur de la ligne sur celle des combos/recherche du menu.
+            var le = checkbox.GetComponent<LayoutElement>();
             le.minHeight = le.preferredHeight = VesselBookmarkPalette.ComboHeight;
 
-            var rowImage = rowGo.AddComponent<Image>();
-            rowImage.sprite = Sprites.Fill;
-            rowImage.type = Image.Type.Simple;
-            rowImage.color = Color.clear;
-            rowImage.raycastTarget = true;
-            var rowBtn = rowGo.AddComponent<Button>();
-            rowBtn.targetGraphic = rowImage;
-            rowBtn.transition = Selectable.Transition.None;
-            rowBtn.onClick.AddListener(() => _viewModel.FilterHasComment = !_viewModel.FilterHasComment);
-
-            var layout = rowGo.AddComponent<HorizontalLayoutGroup>();
-            layout.padding = new RectOffset(0, 0, 0, 0);
-            layout.spacing = VesselBookmarkPalette.DefaultSpacing;
-            layout.childAlignment = TextAnchor.MiddleLeft;
-            layout.childControlWidth = true;
-            layout.childControlHeight = true;
-            layout.childForceExpandWidth = false;
-            layout.childForceExpandHeight = false;
-
-            // Boîte de la case (bordure) + remplissage accent quand cochée (toggle de l'enfant)
-            var boxGo = new GameObject("Box", typeof(RectTransform));
-            boxGo.transform.SetParent(rowGo.transform, false);
-            var boxLe = boxGo.AddComponent<LayoutElement>();
-            boxLe.minWidth = boxLe.preferredWidth = VesselBookmarkPalette.CheckboxSize;
-            boxLe.minHeight = boxLe.preferredHeight = VesselBookmarkPalette.CheckboxSize;
-            var boxImage = boxGo.AddComponent<Image>();
-            boxImage.sprite = Sprites.Border(VesselBookmarkPalette.SearchBgColor, VesselBookmarkPalette.ComboBorderColor, 1);
-            boxImage.type = Image.Type.Sliced;
-            boxImage.color = Color.white;
-            boxImage.raycastTarget = false;
-
-            var checkGo = new GameObject("Check", typeof(RectTransform));
-            checkGo.transform.SetParent(boxGo.transform, false);
-            var checkRect = checkGo.GetComponent<RectTransform>();
-            checkRect.anchorMin = Vector2.zero;
-            checkRect.anchorMax = Vector2.one;
-            checkRect.offsetMin = new Vector2(2f, 2f);
-            checkRect.offsetMax = new Vector2(-2f, -2f);
-            var checkImage = checkGo.AddComponent<Image>();
-            checkImage.sprite = Sprites.Fill;
-            checkImage.type = Image.Type.Simple;
-            checkImage.color = VesselBookmarkPalette.AccentColor;
-            checkImage.raycastTarget = false;
-
-            var labelGo = new GameObject("Label", typeof(RectTransform));
-            labelGo.transform.SetParent(rowGo.transform, false);
-            var labelLe = labelGo.AddComponent<LayoutElement>();
-            labelLe.flexibleWidth = 1f;
-            var label = labelGo.AddComponent<Text>();
-            label.text = ModLocalization.GetString("menuFilterWithComment");
-            label.font = HighLogic.UISkin.font;
-            label.fontSize = VesselBookmarkPalette.MenuLabelFontSize;
-            label.color = VesselBookmarkPalette.LabelColor;
-            label.alignment = TextAnchor.MiddleLeft;
-            label.horizontalOverflow = HorizontalWrapMode.Overflow;
-            label.verticalOverflow = VerticalWrapMode.Overflow;
-            label.raycastTarget = false;
-
-            return checkImage;
+            // Le clic bascule la case ; on reporte l'état vers le ViewModel (source de vérité).
+            checkbox.OnToggled.Add(isChecked => _viewModel.FilterHasComment = isChecked);
+            return checkbox;
         }
 
         private void BuildResetAction(Transform parent, InputField search)
@@ -349,13 +301,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             private GameObject _panel;
             private GameObject _trap;
             private InputField _search;
-            private Image _checkbox;
+            private CheckboxController _checkbox;
             private ComboBuilder.ComboController _bodyCombo;
             private ComboBuilder.ComboController _typeCombo;
 
             public void BindPanelAndTrap(GameObject panel, GameObject trap) { _panel = panel; _trap = trap; }
             public void BindSearch(InputField search) => _search = search;
-            public void BindCheckbox(Image checkbox) => _checkbox = checkbox;
+            public void BindCheckbox(CheckboxController checkbox) => _checkbox = checkbox;
             public void BindCombos(ComboBuilder.ComboController body, ComboBuilder.ComboController type)
             {
                 _bodyCombo = body;
@@ -421,7 +373,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 
             private void RefreshCheckbox()
             {
-                if (_checkbox != null) _checkbox.enabled = ViewModel.FilterHasComment;
+                if (_checkbox != null) _checkbox.SetChecked(ViewModel.FilterHasComment);
             }
         }
     }
