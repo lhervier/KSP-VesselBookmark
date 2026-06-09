@@ -45,7 +45,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         // ==============================================================
         // Title bar
         // ==============================================================
-        public const float TitleBarHeight = 30f;
+        public const float TitleBarHeight = 28f;
         public const int TitleBarBorderThickness = 1;
         public const int TitleFontSize = 12;
 
