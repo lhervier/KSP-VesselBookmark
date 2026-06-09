@@ -75,7 +75,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             var titleElement = titleGo.AddComponent<LayoutElement>();
             titleElement.flexibleWidth = 1f;
             var title = titleGo.AddComponent<Text>();
-            title.text = ModLocalization.GetString("windowTitle");
+            title.text = ModLocalization.GetString("windowTitle").ToUpperInvariant();
             title.font = HighLogic.UISkin.font;
             title.fontSize = VesselBookmarkPalette.TitleFontSize;
             title.fontStyle = FontStyle.Bold;
