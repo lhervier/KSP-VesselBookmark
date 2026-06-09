@@ -7,15 +7,15 @@ using com.github.lhervier.ksp.bookmarksmod;
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
 {
     /// <summary>
-    /// Barre de titre : titre à gauche, puis badge compteur "affichés / total", boutons ＋ (ajouter le
-    /// vaisseau actif) et ↻ (rafraîchir), et le bouton de fermeture ✕. Le menu filtres « ⋯ » viendra
-    /// s'intercaler ensuite, avec son panneau déroulant.
+    /// Two-column title bar: the title on the left (flexible), and on the right a group holding first
+    /// the "shown / total" count badge, then the ＋ (add the active vessel), ↻ (refresh), ⋯ (filter
+    /// menu, with its green "active filter" dot) and ✕ (close) buttons.
     /// </summary>
     public class TitleBarBuilder
     {
         private const string AddGlyph = "+";
-        private const string RefreshGlyph = "↻";   // ↻ (U+21BB) — rendu OK avec la police UISkin
-        private const string MenuGlyph = "⋯";       // ⋯ (U+22EF) — repli possible "≡" / "..." si non rendu
+        private const string RefreshGlyph = "↻";   // ↻ (U+21BB) — renders fine with the UISkin font
+        private const string MenuGlyph = "⋯";       // ⋯ (U+22EF) — fallback to "≡" / "..." if not rendered
         private const string CloseGlyph = "✕";      // ✕ (U+2715)
 
         private readonly BookmarksViewModel _viewModel;
@@ -33,7 +33,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             TitleBarController controller = go.AddComponent<TitleBarController>();
             controller.Initialize(_viewModel);
 
-            // Échappe au VerticalLayoutGroup de la popupWindow : on s'ancre nous-mêmes en haut.
+            // Escape the popupWindow's VerticalLayoutGroup: we anchor ourselves to the top.
             var layoutElement = go.AddComponent<LayoutElement>();
             layoutElement.ignoreLayout = true;
 
@@ -46,7 +46,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
                 VesselBookmarkPalette.TitleBarHeight);
             rect.anchoredPosition = new Vector2(0f, -VesselBookmarkPalette.WindowBorderThickness);
 
-            // Fond + séparateur 1px en bas
+            // Background + 1px separator at the bottom
             var image = go.AddComponent<Image>();
             image.sprite = Sprites.HorizontalBorders(
                 VesselBookmarkPalette.TitleBarBgColor,
@@ -68,7 +68,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = false;
 
-            // Titre (prend toute la largeur disponible)
+            // Left column: the title (takes all available width and pushes the right column against
+            // the right edge).
             var titleGo = new GameObject("Title", typeof(RectTransform));
             titleGo.transform.SetParent(go.transform, false);
             var titleElement = titleGo.AddComponent<LayoutElement>();
@@ -84,50 +85,63 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             title.verticalOverflow = VerticalWrapMode.Overflow;
             title.raycastTarget = false;
 
-            // Badge compteur "affichés / total"
-            Text countLabel = BuildCountBadge(go.transform);
+            // Right column: count badge (first) then the ＋ ↻ ⋯ ✕ buttons. Width is driven by the
+            // content (no flexibleWidth), so the group stays pinned to the right.
+            var rightColumnGo = new GameObject("RightColumn", typeof(RectTransform));
+            rightColumnGo.transform.SetParent(go.transform, false);
+            var rightLayout = rightColumnGo.AddComponent<HorizontalLayoutGroup>();
+            rightLayout.spacing = VesselBookmarkPalette.DefaultSpacing;
+            rightLayout.childAlignment = TextAnchor.MiddleLeft;
+            rightLayout.childControlWidth = true;
+            rightLayout.childControlHeight = true;
+            rightLayout.childForceExpandWidth = false;
+            rightLayout.childForceExpandHeight = false;
+            Transform right = rightColumnGo.transform;
+
+            // "shown / total" count badge — first element of the right column
+            Text countLabel = BuildCountBadge(right);
             controller.BindCountLabel(countLabel);
 
-            // Bouton "ajouter le vaisseau actif"
+            // "Add the active vessel" button
             ButtonController add = _buttonBuilder.Create(
                 "Add",
                 AddGlyph,
                 () => _viewModel.AddVesselBookmark(),
                 _viewModel.CanAddVesselBookmark());
-            add.transform.SetParent(go.transform, false);
+            add.transform.SetParent(right, false);
             Tooltips.Attach(add.gameObject, ModLocalization.GetString("buttonAdd"));
             controller.BindAddButton(add);
 
-            // Bouton "rafraîchir"
+            // "Refresh" button
             ButtonController refresh = _buttonBuilder.Create(
                 "Refresh",
                 RefreshGlyph,
                 () => _viewModel.ForceReload());
-            refresh.transform.SetParent(go.transform, false);
+            refresh.transform.SetParent(right, false);
             Tooltips.Attach(refresh.gameObject, ModLocalization.GetString("buttonRefresh"));
 
-            // Bouton menu filtres « ⋯ » (toggle FilterMenuOpen) + point vert « filtre actif »
+            // Filter menu button "⋯" (toggles FilterMenuOpen) + green "active filter" dot
             ButtonController menu = _buttonBuilder.Create(
                 "FilterMenu",
                 MenuGlyph,
                 () => _viewModel.FilterMenuOpen = !_viewModel.FilterMenuOpen);
-            menu.transform.SetParent(go.transform, false);
+            menu.transform.SetParent(right, false);
             Tooltips.Attach(menu.gameObject, ModLocalization.GetString("menuFiltersTitle"));
             controller.BindFilterDot(BuildFilterDot(menu.gameObject));
 
-            // Bouton de fermeture : ferme la fenêtre (l'IMGUI suit, via WindowVisible)
+            // Close button: closes the window (IMGUI follows, via WindowVisible)
             ButtonController close = _buttonBuilder.Create(
                 "Close",
                 CloseGlyph,
                 () => _viewModel.WindowVisible = false);
-            close.transform.SetParent(go.transform, false);
+            close.transform.SetParent(right, false);
             Tooltips.Attach(close.gameObject, ModLocalization.GetString("buttonClose"));
 
             return controller;
         }
 
-        // Chip : Image bordure accent slicée + Text accent. Taille pilotée par le contenu + padding
-        // (preferredSize rapporté par le HorizontalLayoutGroup au layout parent).
+        // Chip: sliced accent-border Image + accent Text. Size driven by the content + padding
+        // (preferredSize reported by the HorizontalLayoutGroup to the parent layout).
         private Text BuildCountBadge(Transform parent)
         {
             var badgeGo = new GameObject("Count", typeof(RectTransform));
@@ -168,7 +182,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             return label;
         }
 
-        // Petit point vert dans le coin haut-droit du bouton ⋯, masqué par défaut.
+        // Small green dot in the top-right corner of the ⋯ button, hidden by default.
         private Image BuildFilterDot(GameObject buttonGo)
         {
             var dotGo = new GameObject("FilterDot", typeof(RectTransform));
@@ -203,7 +217,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
                 this.ViewModel.OnAvailableBookmarksChanged.Add(OnAvailableBookmarksChanged);
                 this.ViewModel.OnActiveOrTargetChanged.Add(OnActiveOrTargetChanged);
 
-                // Point « filtre actif » : se met à jour quand un filtre change
+                // "Active filter" dot: refreshes whenever a filter changes
                 this.ViewModel.OnSelectedBodyChanged.Add(UpdateFilterDot);
                 this.ViewModel.OnSelectedVesselTypeChanged.Add(UpdateFilterDot);
                 this.ViewModel.OnSearchTextChanged.Add(UpdateFilterDot);
