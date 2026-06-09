@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
@@ -20,12 +21,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays
         internal const string LOCK_ID = "VesselBookmarkMod_EditComment";
 
         private readonly BookmarksViewModel _viewModel;
-        private readonly ButtonBuilder _buttonBuilder;
 
         public EditCommentOverlayBuilder(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
-            this._buttonBuilder = new ButtonBuilder(viewModel);
         }
 
         public EditCommentOverlayController Create(Transform parent)
@@ -50,18 +49,29 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays
 
             GameObject foot = OverlayCard.AddFootRow(card);
 
-            ButtonController cancel = _buttonBuilder.CreateTextButton(
-                "Cancel", ModLocalization.GetString("buttonCancel"),
-                () => _viewModel.CancelBookmarkCommentEdition(), true,
-                VesselBookmarkPalette.ButtonBgColor, VesselBookmarkPalette.ButtonHoverColor, VesselBookmarkPalette.ButtonTextColor,
-                VesselBookmarkPalette.CardButtonHeight, VesselBookmarkPalette.CardButtonFontSize, VesselBookmarkPalette.CardButtonPaddingH);
+            // Cancel keeps the default button colors (VBMButtonBuilder defaults); only the auto-width
+            // text-button shape, height and font size are set here.
+            ButtonController cancel = new VBMButtonBuilder()
+                .ObjectName("Cancel")
+                .Label(ModLocalization.GetString("buttonCancel"))
+                .AutoWidth(VesselBookmarkPalette.CardButtonPaddingH)
+                .Size(VesselBookmarkPalette.CardButtonHeight)
+                .FontSize(VesselBookmarkPalette.CardButtonFontSize)
+                .Build();
+            cancel.OnClick.Add(() => _viewModel.CancelBookmarkCommentEdition());
             cancel.transform.SetParent(foot.transform, false);
 
-            ButtonController ok = _buttonBuilder.CreateTextButton(
-                "OK", ModLocalization.GetString("buttonSave"),
-                () => _viewModel.SaveBookmarkComment(), true,
-                VesselBookmarkPalette.CardButtonOkBgColor, VesselBookmarkPalette.CardButtonOkBgColor, VesselBookmarkPalette.CardButtonOkTextColor,
-                VesselBookmarkPalette.CardButtonHeight, VesselBookmarkPalette.CardButtonFontSize, VesselBookmarkPalette.CardButtonPaddingH);
+            ButtonController ok = new VBMButtonBuilder()
+                .ObjectName("OK")
+                .Label(ModLocalization.GetString("buttonSave"))
+                .AutoWidth(VesselBookmarkPalette.CardButtonPaddingH)
+                .Size(VesselBookmarkPalette.CardButtonHeight)
+                .FontSize(VesselBookmarkPalette.CardButtonFontSize)
+                .BackgroundColor(VesselBookmarkPalette.CardButtonOkBgColor)
+                .HoverColor(VesselBookmarkPalette.CardButtonOkBgColor)
+                .TextColor(VesselBookmarkPalette.CardButtonOkTextColor)
+                .Build();
+            ok.OnClick.Add(() => _viewModel.SaveBookmarkComment());
             ok.transform.SetParent(foot.transform, false);
 
             return controller;

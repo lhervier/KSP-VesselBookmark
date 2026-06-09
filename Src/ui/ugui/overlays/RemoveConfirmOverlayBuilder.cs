@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod;
@@ -13,12 +14,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays
     public class RemoveConfirmOverlayBuilder
     {
         private readonly BookmarksViewModel _viewModel;
-        private readonly ButtonBuilder _buttonBuilder;
 
         public RemoveConfirmOverlayBuilder(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
-            this._buttonBuilder = new ButtonBuilder(viewModel);
         }
 
         public RemoveConfirmOverlayController Create(Transform parent)
@@ -40,18 +39,29 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays
 
             GameObject foot = OverlayCard.AddFootRow(card);
 
-            ButtonController cancel = _buttonBuilder.CreateTextButton(
-                "Cancel", ModLocalization.GetString("dialogButtonCancel"),
-                () => _viewModel.CancelPendingRemoval(), true,
-                VesselBookmarkPalette.ButtonBgColor, VesselBookmarkPalette.ButtonHoverColor, VesselBookmarkPalette.ButtonTextColor,
-                VesselBookmarkPalette.CardButtonHeight, VesselBookmarkPalette.CardButtonFontSize, VesselBookmarkPalette.CardButtonPaddingH);
+            // Cancel keeps the default button colors (VBMButtonBuilder defaults); only the auto-width
+            // text-button shape, height and font size are set here.
+            ButtonController cancel = new VBMButtonBuilder()
+                .ObjectName("Cancel")
+                .Label(ModLocalization.GetString("dialogButtonCancel"))
+                .AutoWidth(VesselBookmarkPalette.CardButtonPaddingH)
+                .Size(VesselBookmarkPalette.CardButtonHeight)
+                .FontSize(VesselBookmarkPalette.CardButtonFontSize)
+                .Build();
+            cancel.OnClick.Add(() => _viewModel.CancelPendingRemoval());
             cancel.transform.SetParent(foot.transform, false);
 
-            ButtonController remove = _buttonBuilder.CreateTextButton(
-                "Remove", ModLocalization.GetString("dialogButtonRemove"),
-                () => _viewModel.ConfirmPendingRemoval(), true,
-                VesselBookmarkPalette.CardButtonDangerBgColor, VesselBookmarkPalette.CardButtonDangerBgColor, VesselBookmarkPalette.CardButtonDangerTextColor,
-                VesselBookmarkPalette.CardButtonHeight, VesselBookmarkPalette.CardButtonFontSize, VesselBookmarkPalette.CardButtonPaddingH);
+            ButtonController remove = new VBMButtonBuilder()
+                .ObjectName("Remove")
+                .Label(ModLocalization.GetString("dialogButtonRemove"))
+                .AutoWidth(VesselBookmarkPalette.CardButtonPaddingH)
+                .Size(VesselBookmarkPalette.CardButtonHeight)
+                .FontSize(VesselBookmarkPalette.CardButtonFontSize)
+                .BackgroundColor(VesselBookmarkPalette.CardButtonDangerBgColor)
+                .HoverColor(VesselBookmarkPalette.CardButtonDangerBgColor)
+                .TextColor(VesselBookmarkPalette.CardButtonDangerTextColor)
+                .Build();
+            remove.OnClick.Add(() => _viewModel.ConfirmPendingRemoval());
             remove.transform.SetParent(foot.transform, false);
 
             return controller;

@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
@@ -22,12 +23,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
         private const string RemoveGlyph = "✕";
 
         private readonly BookmarksViewModel _viewModel;
-        private readonly ButtonBuilder _buttonBuilder;
 
         public BookmarkRowBuilder(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
-            this._buttonBuilder = new ButtonBuilder(viewModel);
         }
 
         public BookmarkRowController Create(Bookmark bookmark, bool isFirst, bool isLast)
@@ -306,24 +305,42 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             group.blocksRaycasts = false;
             group.interactable = false;
 
-            ButtonController up = _buttonBuilder.Create(
-                "MoveUp", MoveUpGlyph, () => _viewModel.MoveUp(bookmark), !isFirst,
-                VesselBookmarkPalette.RowButtonBgColor, VesselBookmarkPalette.RowButtonHoverColor,
-                VesselBookmarkPalette.RowButtonSize, VesselBookmarkPalette.RowButtonFontSize);
+            // Row buttons use their own (smaller) size, font and colors, overriding the VBM defaults.
+            ButtonController up = new VBMButtonBuilder()
+                .ObjectName("MoveUp")
+                .Label(MoveUpGlyph)
+                .Interactable(!isFirst)
+                .Size(VesselBookmarkPalette.RowButtonSize)
+                .FontSize(VesselBookmarkPalette.RowButtonFontSize)
+                .BackgroundColor(VesselBookmarkPalette.RowButtonBgColor)
+                .HoverColor(VesselBookmarkPalette.RowButtonHoverColor)
+                .Build();
+            up.OnClick.Add(() => _viewModel.MoveUp(bookmark));
             up.transform.SetParent(groupGo.transform, false);
             Tooltips.Attach(up.gameObject, ModLocalization.GetString("tooltipMoveUp"));
 
-            ButtonController down = _buttonBuilder.Create(
-                "MoveDown", MoveDownGlyph, () => _viewModel.MoveDown(bookmark), !isLast,
-                VesselBookmarkPalette.RowButtonBgColor, VesselBookmarkPalette.RowButtonHoverColor,
-                VesselBookmarkPalette.RowButtonSize, VesselBookmarkPalette.RowButtonFontSize);
+            ButtonController down = new VBMButtonBuilder()
+                .ObjectName("MoveDown")
+                .Label(MoveDownGlyph)
+                .Interactable(!isLast)
+                .Size(VesselBookmarkPalette.RowButtonSize)
+                .FontSize(VesselBookmarkPalette.RowButtonFontSize)
+                .BackgroundColor(VesselBookmarkPalette.RowButtonBgColor)
+                .HoverColor(VesselBookmarkPalette.RowButtonHoverColor)
+                .Build();
+            down.OnClick.Add(() => _viewModel.MoveDown(bookmark));
             down.transform.SetParent(groupGo.transform, false);
             Tooltips.Attach(down.gameObject, ModLocalization.GetString("tooltipMoveDown"));
 
-            ButtonController remove = _buttonBuilder.Create(
-                "Remove", RemoveGlyph, () => _viewModel.RequestRemoval(bookmark), true,
-                VesselBookmarkPalette.RowButtonBgColor, VesselBookmarkPalette.RowButtonDangerHoverColor,
-                VesselBookmarkPalette.RowButtonSize, VesselBookmarkPalette.RowButtonFontSize);
+            ButtonController remove = new VBMButtonBuilder()
+                .ObjectName("Remove")
+                .Label(RemoveGlyph)
+                .Size(VesselBookmarkPalette.RowButtonSize)
+                .FontSize(VesselBookmarkPalette.RowButtonFontSize)
+                .BackgroundColor(VesselBookmarkPalette.RowButtonBgColor)
+                .HoverColor(VesselBookmarkPalette.RowButtonDangerHoverColor)
+                .Build();
+            remove.OnClick.Add(() => _viewModel.RequestRemoval(bookmark));
             remove.transform.SetParent(groupGo.transform, false);
             Tooltips.Attach(remove.gameObject, ModLocalization.GetString("tooltipRemove"));
 

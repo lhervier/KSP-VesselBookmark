@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.bookmarksmod;
@@ -19,12 +20,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
         private const string CloseGlyph = "×";      // × (U+00D7) — matches the shared popup close button
 
         private readonly BookmarksViewModel _viewModel;
-        private readonly ButtonBuilder _buttonBuilder;
 
         public TitleBarBuilder(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
-            this._buttonBuilder = new ButtonBuilder(viewModel);
         }
 
         public TitleBarController Create()
@@ -103,37 +102,41 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             controller.BindCountLabel(countLabel);
 
             // "Add the active vessel" button
-            ButtonController add = _buttonBuilder.Create(
-                "Add",
-                AddGlyph,
-                () => _viewModel.AddVesselBookmark(),
-                _viewModel.CanAddVesselBookmark());
+            ButtonController add = new VBMButtonBuilder()
+                .ObjectName("Add")
+                .Label(AddGlyph)
+                .Interactable(_viewModel.CanAddVesselBookmark())
+                .Build();
+            add.OnClick.Add(() => _viewModel.AddVesselBookmark());
             add.transform.SetParent(right, false);
             Tooltips.Attach(add.gameObject, ModLocalization.GetString("buttonAdd"));
             controller.BindAddButton(add);
 
             // "Refresh" button
-            ButtonController refresh = _buttonBuilder.Create(
-                "Refresh",
-                RefreshGlyph,
-                () => _viewModel.ForceReload());
+            ButtonController refresh = new VBMButtonBuilder()
+                .ObjectName("Refresh")
+                .Label(RefreshGlyph)
+                .Build();
+            refresh.OnClick.Add(() => _viewModel.ForceReload());
             refresh.transform.SetParent(right, false);
             Tooltips.Attach(refresh.gameObject, ModLocalization.GetString("buttonRefresh"));
 
             // Filter menu button "⋯" (toggles FilterMenuOpen) + green "active filter" dot
-            ButtonController menu = _buttonBuilder.Create(
-                "FilterMenu",
-                MenuGlyph,
-                () => _viewModel.FilterMenuOpen = !_viewModel.FilterMenuOpen);
+            ButtonController menu = new VBMButtonBuilder()
+                .ObjectName("FilterMenu")
+                .Label(MenuGlyph)
+                .Build();
+            menu.OnClick.Add(() => _viewModel.FilterMenuOpen = !_viewModel.FilterMenuOpen);
             menu.transform.SetParent(right, false);
             Tooltips.Attach(menu.gameObject, ModLocalization.GetString("menuFiltersTitle"));
             controller.BindFilterDot(BuildFilterDot(menu.gameObject));
 
             // Close button: closes the window (IMGUI follows, via WindowVisible)
-            ButtonController close = _buttonBuilder.Create(
-                "Close",
-                CloseGlyph,
-                () => _viewModel.WindowVisible = false);
+            ButtonController close = new VBMButtonBuilder()
+                .ObjectName("Close")
+                .Label(CloseGlyph)
+                .Build();
+            close.OnClick.Add(() => _viewModel.WindowVisible = false);
             close.transform.SetParent(right, false);
             Tooltips.Attach(close.gameObject, ModLocalization.GetString("buttonClose"));
 

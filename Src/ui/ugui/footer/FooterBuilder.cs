@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
@@ -18,12 +19,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
         private const string TargetGlyph = "◎";  // ◎ (U+25CE)
 
         private readonly BookmarksViewModel _viewModel;
-        private readonly ButtonBuilder _buttonBuilder;
 
         public FooterBuilder(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
-            this._buttonBuilder = new ButtonBuilder(viewModel);
         }
 
         public FooterController Create()
@@ -81,25 +80,39 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
             selLabel.raycastTarget = false;
             controller.BindSelectionLabel(selLabel);
 
-            // Glyphes de la maquette : ✎ éditer, ➤ aller, ◎ cibler (boutons carrés, comme la title bar).
-            ButtonController edit = _buttonBuilder.Create(
-                "Edit", EditGlyph, () => _viewModel.BeginCommentEdition(), false,
-                VesselBookmarkPalette.ButtonBgColor, VesselBookmarkPalette.ButtonHoverColor,
-                VesselBookmarkPalette.FooterButtonHeight, VesselBookmarkPalette.FooterButtonFontSize);
+            // Mockup glyphs: ✎ edit, ➤ go to, ◎ target (square buttons, like the title bar).
+            // Background/hover colors come from the VBMButtonBuilder defaults; only the footer-specific
+            // size and font size are overridden here.
+            ButtonController edit = new VBMButtonBuilder()
+                .ObjectName("Edit")
+                .Label(EditGlyph)
+                .Interactable(false)
+                .Size(VesselBookmarkPalette.FooterButtonHeight)
+                .FontSize(VesselBookmarkPalette.FooterButtonFontSize)
+                .Build();
+            edit.OnClick.Add(() => _viewModel.BeginCommentEdition());
             edit.transform.SetParent(go.transform, false);
             Tooltips.Attach(edit.gameObject, ModLocalization.GetString("tooltipEdit"));
 
-            ButtonController goTo = _buttonBuilder.Create(
-                "GoTo", GoToGlyph, () => _viewModel.SwitchToSelectedVessel(), false,
-                VesselBookmarkPalette.ButtonBgColor, VesselBookmarkPalette.ButtonHoverColor,
-                VesselBookmarkPalette.FooterButtonHeight, VesselBookmarkPalette.FooterButtonFontSize);
+            ButtonController goTo = new VBMButtonBuilder()
+                .ObjectName("GoTo")
+                .Label(GoToGlyph)
+                .Interactable(false)
+                .Size(VesselBookmarkPalette.FooterButtonHeight)
+                .FontSize(VesselBookmarkPalette.FooterButtonFontSize)
+                .Build();
+            goTo.OnClick.Add(() => _viewModel.SwitchToSelectedVessel());
             goTo.transform.SetParent(go.transform, false);
             Tooltips.Attach(goTo.gameObject, ModLocalization.GetString("tooltipGoTo"));
 
-            ButtonController target = _buttonBuilder.Create(
-                "Target", TargetGlyph, () => _viewModel.SetCurrentBookmarkVesselAsTarget(), false,
-                VesselBookmarkPalette.ButtonBgColor, VesselBookmarkPalette.ButtonHoverColor,
-                VesselBookmarkPalette.FooterButtonHeight, VesselBookmarkPalette.FooterButtonFontSize);
+            ButtonController target = new VBMButtonBuilder()
+                .ObjectName("Target")
+                .Label(TargetGlyph)
+                .Interactable(false)
+                .Size(VesselBookmarkPalette.FooterButtonHeight)
+                .FontSize(VesselBookmarkPalette.FooterButtonFontSize)
+                .Build();
+            target.OnClick.Add(() => _viewModel.SetCurrentBookmarkVesselAsTarget());
             target.transform.SetParent(go.transform, false);
             Tooltips.Attach(target.gameObject, ModLocalization.GetString("tooltipSetTargetAs"));
 
