@@ -19,14 +19,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
         private const string DIALOG_ID = "VesselBookmarksUGUI";
 
         private readonly BookmarksViewModel _viewModel;
-        private readonly FilterMenuBuilder _filterMenuBuilder;
         private readonly EditCommentOverlayBuilder _editOverlayBuilder;
         private readonly RemoveConfirmOverlayBuilder _removeOverlayBuilder;
 
         public PopupDialogBuilder(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
-            this._filterMenuBuilder = new FilterMenuBuilder(viewModel);
             this._editOverlayBuilder = new EditCommentOverlayBuilder(viewModel);
             this._removeOverlayBuilder = new RemoveConfirmOverlayBuilder(viewModel);
         }
@@ -123,7 +121,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
             titleBarController.transform.SetParent(windowGo.transform, false);
 
             // Menu filtres (au-dessus du contenu), puis les overlays modaux (au-dessus de tout).
-            this._filterMenuBuilder.Create(windowGo.transform);
+            FilterMenuController filterMenuController = new FilterMenuBuilder()
+                .ViewModel(_viewModel)
+                .Build();
+            filterMenuController.transform.SetParent(windowGo.transform, false);
+
             this._editOverlayBuilder.Create(windowGo.transform);
             this._removeOverlayBuilder.Create(windowGo.transform);
 

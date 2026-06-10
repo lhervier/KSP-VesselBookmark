@@ -5,6 +5,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared.ugui.checkbox;
 using com.github.lhervier.ksp.shared;
+using com.github.lhervier.ksp.shared.ugui;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 {
@@ -13,23 +14,27 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
     /// plein écran (ferme au clic dehors) + un panneau ancré en haut à droite contenant : recherche,
     /// combos Corps/Type, case « commentaire seulement » et réinitialisation. Piloté par FilterMenuOpen.
     /// </summary>
-    public class FilterMenuBuilder
+    public class FilterMenuBuilder : IUGUIBuilder<FilterMenuController>
     {
-        private const string SEARCH_LOCK_ID = "VesselBookmarkMod_Search";
+        // ===================================================
+        // Builder parameters
+        // ===================================================
 
-        private readonly BookmarksViewModel _viewModel;
-        private readonly ComboBuilder _comboBuilder = new ComboBuilder();
-
-        public FilterMenuBuilder(BookmarksViewModel viewModel)
+        private BookmarksViewModel _viewModel;
+        public FilterMenuBuilder ViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
+            return this;
         }
 
-        public FilterMenuController Create(Transform parent)
+        // =======================================
+        // Build
+        // =======================================
+
+        public FilterMenuController Build()
         {
             // Racine toujours active (sans graphique) pour que le controller exécute Start() et s'abonne.
             var rootGo = new GameObject("Bookmarks.FilterMenu", typeof(RectTransform));
-            rootGo.transform.SetParent(parent, false);
             var rootLe = rootGo.AddComponent<LayoutElement>();
             rootLe.ignoreLayout = true;
             var rootRect = rootGo.GetComponent<RectTransform>();
@@ -37,9 +42,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             rootRect.anchorMax = Vector2.one;
             rootRect.offsetMin = Vector2.zero;
             rootRect.offsetMax = Vector2.zero;
-
-            FilterMenuController controller = rootGo.AddComponent<FilterMenuController>();
-            controller.Initialize(_viewModel);
 
             // Piège à clic : couvre toute la fenêtre, ferme le menu au clic en dehors du panneau.
             var trapGo = new GameObject("ClickTrap", typeof(RectTransform));
@@ -99,30 +101,34 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 VesselBookmarkPalette.MenuTitleFontSize, VesselBookmarkPalette.MenuTitleColor);
 
             // Recherche
-            InputField search = BuildSearchField(panelGo.transform);
-            controller.BindSearch(search);
-
+            var (search, trigger)  = BuildSearchField(panelGo.transform);
+            
             // Combos Corps / Type
-            ComboBuilder.ComboController bodyCombo = _comboBuilder.Create(panelGo.transform, ModLocalization.GetString("labelBody"));
+            ComboBuilder.ComboController bodyCombo = new ComboBuilder()
+                .Create(panelGo.transform, ModLocalization.GetString("labelBody"));
             bodyCombo.OnSelect = v => _viewModel.SelectedBody = v;
-            ComboBuilder.ComboController typeCombo = _comboBuilder.Create(panelGo.transform, ModLocalization.GetString("labelType"));
+            ComboBuilder.ComboController typeCombo = new ComboBuilder()
+                .Create(panelGo.transform, ModLocalization.GetString("labelType"));
             typeCombo.OnSelect = v => _viewModel.SelectedVesselType = v;
             typeCombo.LabelFor = TranslateVesselType;   // affiche les types traduits, garde la valeur brute
             // Une seule combo ouverte à la fois : ouvrir l'une ferme l'autre.
             bodyCombo.OnBeforeOpen = () => typeCombo.Collapse();
             typeCombo.OnBeforeOpen = () => bodyCombo.Collapse();
-            controller.BindCombos(bodyCombo, typeCombo);
-
+            
             // Case « commentaire seulement »
             CheckboxController checkBox = BuildCheckbox(panelGo.transform);
-            controller.BindCheckbox(checkBox);
-
+            
             // Séparateur + réinitialisation
             AddSeparator(panelGo.transform);
             BuildResetAction(panelGo.transform, search);
 
-            controller.BindPanelAndTrap(panelGo, trapGo);
-            return controller;
+            return rootGo
+                .AddComponent<FilterMenuController>()
+                .ViewModel(_viewModel)
+                .Search(search, trigger)
+                .Combos(bodyCombo, typeCombo)
+                .Checkbox(checkBox)
+                .PanelAndTrap(panelGo, trapGo);
         }
 
         // Valeur brute du type de vaisseau → libellé traduit (la valeur « All » utilise vesselTypeAll).
@@ -164,7 +170,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             image.raycastTarget = false;
         }
 
-        private InputField BuildSearchField(Transform parent)
+        private (InputField, EventTrigger) BuildSearchField(Transform parent)
         {
             var inputGo = new GameObject("Search", typeof(RectTransform));
             inputGo.transform.SetParent(parent, false);
@@ -198,14 +204,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 
             // Verrou clavier au focus / déverrou au blur (comme l'overlay de commentaire)
             var trigger = inputGo.AddComponent<EventTrigger>();
-            var sel = new EventTrigger.Entry { eventID = EventTriggerType.Select };
-            sel.callback.AddListener(_ => InputLockManager.SetControlLock(ControlTypes.All, SEARCH_LOCK_ID));
-            trigger.triggers.Add(sel);
-            var desel = new EventTrigger.Entry { eventID = EventTriggerType.Deselect };
-            desel.callback.AddListener(_ => InputLockManager.RemoveControlLock(SEARCH_LOCK_ID));
-            trigger.triggers.Add(desel);
 
-            return input;
+            return (input, trigger);
         }
 
         private static Text NewFieldText(Transform parent, string objectName, int pad)
@@ -294,87 +294,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 VesselBookmarkPalette.MenuLabelFontSize, VesselBookmarkPalette.LabelColor);
             var labelLe = label.gameObject.AddComponent<LayoutElement>();
             labelLe.flexibleWidth = 1f;
-        }
-
-        public class FilterMenuController : BaseController
-        {
-            private GameObject _panel;
-            private GameObject _trap;
-            private InputField _search;
-            private CheckboxController _checkbox;
-            private ComboBuilder.ComboController _bodyCombo;
-            private ComboBuilder.ComboController _typeCombo;
-
-            public void BindPanelAndTrap(GameObject panel, GameObject trap) { _panel = panel; _trap = trap; }
-            public void BindSearch(InputField search) => _search = search;
-            public void BindCheckbox(CheckboxController checkbox) => _checkbox = checkbox;
-            public void BindCombos(ComboBuilder.ComboController body, ComboBuilder.ComboController type)
-            {
-                _bodyCombo = body;
-                _typeCombo = type;
-            }
-
-            public void Start()
-            {
-                ViewModel.OnFilterMenuOpenChanged.Add(OnFilterMenuOpenChanged);
-                ViewModel.OnAvailableBodiesChanged.Add(RefreshBodyCombo);
-                ViewModel.OnSelectedBodyChanged.Add(RefreshBodyCombo);
-                ViewModel.OnAvailableVesselTypesChanged.Add(RefreshTypeCombo);
-                ViewModel.OnSelectedVesselTypeChanged.Add(RefreshTypeCombo);
-                ViewModel.OnFilterHasCommentChanged.Add(RefreshCheckbox);
-
-                RefreshBodyCombo();
-                RefreshTypeCombo();
-                RefreshCheckbox();
-                OnFilterMenuOpenChanged();
-            }
-
-            public void OnDestroy()
-            {
-                ViewModel?.OnFilterMenuOpenChanged.Remove(OnFilterMenuOpenChanged);
-                ViewModel?.OnAvailableBodiesChanged.Remove(RefreshBodyCombo);
-                ViewModel?.OnSelectedBodyChanged.Remove(RefreshBodyCombo);
-                ViewModel?.OnAvailableVesselTypesChanged.Remove(RefreshTypeCombo);
-                ViewModel?.OnSelectedVesselTypeChanged.Remove(RefreshTypeCombo);
-                ViewModel?.OnFilterHasCommentChanged.Remove(RefreshCheckbox);
-                InputLockManager.RemoveControlLock(SEARCH_LOCK_ID);
-            }
-
-            private void OnFilterMenuOpenChanged()
-            {
-                bool open = ViewModel.FilterMenuOpen;
-                if (_panel != null) _panel.SetActive(open);
-                if (_trap != null) _trap.SetActive(open);
-
-                if (open)
-                {
-                    // Synchronise l'affichage à l'ouverture
-                    if (_search != null) _search.text = ViewModel.SearchText ?? string.Empty;
-                    RefreshBodyCombo();
-                    RefreshTypeCombo();
-                    RefreshCheckbox();
-                }
-                else
-                {
-                    _bodyCombo?.Collapse();
-                    _typeCombo?.Collapse();
-                }
-            }
-
-            private void RefreshBodyCombo()
-            {
-                _bodyCombo?.SetOptions(ViewModel.AvailableBodies, ViewModel.SelectedBody);
-            }
-
-            private void RefreshTypeCombo()
-            {
-                _typeCombo?.SetOptions(ViewModel.AvailableVesselTypes, ViewModel.SelectedVesselType);
-            }
-
-            private void RefreshCheckbox()
-            {
-                if (_checkbox != null) _checkbox.SetChecked(ViewModel.FilterHasComment);
-            }
         }
     }
 }
