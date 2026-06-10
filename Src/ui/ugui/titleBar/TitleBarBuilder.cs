@@ -39,9 +39,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
         public TitleBarController Build()
         {
             var rightColumnGo = new GameObject("Bookmarks.TitleBar.RightColumn", typeof(RectTransform));
-            TitleBarController controller = rightColumnGo.AddComponent<TitleBarController>();
-            controller.Initialize(_viewModel);
-
+            
             // Right column: count badge (first) then the ＋ ↻ ⋯ buttons. Width is driven by the content
             // (no flexibleWidth), so the group stays pinned to the right of the shared title bar.
             var rightLayout = rightColumnGo.AddComponent<HorizontalLayoutGroup>();
@@ -55,15 +53,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
 
             // "shown / total" count badge — first element of the right column
             Text countLabel = BuildCountBadge(right);
-            controller.BindCountLabel(countLabel);
-
+            
             // "Add the active vessel" button
             ButtonController add = NewButton("Add", AddGlyph, _viewModel.CanAddVesselBookmark());
             add.OnClick.Add(() => _viewModel.AddVesselBookmark());
             add.transform.SetParent(right, false);
             Tooltips.Attach(add.gameObject, ModLocalization.GetString("buttonAdd"));
-            controller.BindAddButton(add);
-
+            
             // "Refresh" button
             ButtonController refresh = NewButton("Refresh", RefreshGlyph, true);
             refresh.OnClick.Add(() => _viewModel.ForceReload());
@@ -75,9 +71,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             menu.OnClick.Add(() => _viewModel.FilterMenuOpen = !_viewModel.FilterMenuOpen);
             menu.transform.SetParent(right, false);
             Tooltips.Attach(menu.gameObject, ModLocalization.GetString("menuFiltersTitle"));
-            controller.BindFilterDot(BuildFilterDot(menu.gameObject));
-
-            return controller;
+            
+            return rightColumnGo
+                .AddComponent<TitleBarController>()
+                .ViewModel(_viewModel)
+                .CountLabel(countLabel)
+                .AddButtonController(add)
+                .FilterDot(
+                    BuildFilterDot(menu.gameObject)
+                );
         }
 
         // Square title-bar button matching the shared ✕ close button (same size and colors), so the four

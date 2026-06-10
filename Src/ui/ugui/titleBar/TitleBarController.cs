@@ -8,40 +8,66 @@ using com.github.lhervier.ksp.shared.ugui.sprites;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
 {
-    public class TitleBarController : BaseController
+    public class TitleBarController : MonoBehaviour
     {
+        private BookmarksViewModel _viewModel;
+        public TitleBarController ViewModel(BookmarksViewModel viewModel)
+        {
+            this._viewModel = viewModel;
+            return this;
+        }
+        
         private Text _countLabel;
+        public TitleBarController CountLabel(Text label)
+        {
+            this._countLabel = label;
+            return this;
+        }
+        
         private ButtonController _addButton;
+        public TitleBarController AddButtonController(ButtonController button)
+        {
+            this._addButton = button;
+            return this;
+        }
+        
         private Image _filterDot;
-
-        public void BindCountLabel(Text label) => this._countLabel = label;
-        public void BindAddButton(ButtonController button) => this._addButton = button;
-        public void BindFilterDot(Image dot) => this._filterDot = dot;
+        public TitleBarController FilterDot(Image dot)
+        {
+            this._filterDot = dot;
+            return this;
+        }
 
         public void Start()
         {
-            this.ViewModel.OnAvailableBookmarksChanged.Add(OnAvailableBookmarksChanged);
-            this.ViewModel.OnActiveOrTargetChanged.Add(OnActiveOrTargetChanged);
+            if( _viewModel != null )
+            {
+                this._viewModel.OnAvailableBookmarksChanged.Add(OnAvailableBookmarksChanged);
+                this._viewModel.OnActiveOrTargetChanged.Add(OnActiveOrTargetChanged);
 
-            // "Active filter" dot: refreshes whenever a filter changes
-            this.ViewModel.OnSelectedBodyChanged.Add(UpdateFilterDot);
-            this.ViewModel.OnSelectedVesselTypeChanged.Add(UpdateFilterDot);
-            this.ViewModel.OnSearchTextChanged.Add(UpdateFilterDot);
-            this.ViewModel.OnFilterHasCommentChanged.Add(UpdateFilterDot);
+                // "Active filter" dot: refreshes whenever a filter changes
+                this._viewModel.OnSelectedBodyChanged.Add(UpdateFilterDot);
+                this._viewModel.OnSelectedVesselTypeChanged.Add(UpdateFilterDot);
+                this._viewModel.OnSearchTextChanged.Add(UpdateFilterDot);
+                this._viewModel.OnFilterHasCommentChanged.Add(UpdateFilterDot);
 
-            UpdateCount();
-            UpdateAddButton();
-            UpdateFilterDot();
+                UpdateCount();
+                UpdateAddButton();
+                UpdateFilterDot();
+            }
         }
 
         public void OnDestroy()
         {
-            this.ViewModel?.OnAvailableBookmarksChanged.Remove(OnAvailableBookmarksChanged);
-            this.ViewModel?.OnActiveOrTargetChanged.Remove(OnActiveOrTargetChanged);
-            this.ViewModel?.OnSelectedBodyChanged.Remove(UpdateFilterDot);
-            this.ViewModel?.OnSelectedVesselTypeChanged.Remove(UpdateFilterDot);
-            this.ViewModel?.OnSearchTextChanged.Remove(UpdateFilterDot);
-            this.ViewModel?.OnFilterHasCommentChanged.Remove(UpdateFilterDot);
+            if( _viewModel != null )
+            {
+                this._viewModel.OnAvailableBookmarksChanged.Remove(OnAvailableBookmarksChanged);
+                this._viewModel.OnActiveOrTargetChanged.Remove(OnActiveOrTargetChanged);
+                this._viewModel.OnSelectedBodyChanged.Remove(UpdateFilterDot);
+                this._viewModel.OnSelectedVesselTypeChanged.Remove(UpdateFilterDot);
+                this._viewModel.OnSearchTextChanged.Remove(UpdateFilterDot);
+                this._viewModel.OnFilterHasCommentChanged.Remove(UpdateFilterDot);
+            }
         }
 
         private void OnAvailableBookmarksChanged() => UpdateCount();
@@ -50,18 +76,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
         private void UpdateCount()
         {
             if (_countLabel == null) return;
-            _countLabel.text = $"{ViewModel.AvailableBookmarksCount} / {ViewModel.TotalBookmarksCount}";
+            _countLabel.text = $"{_viewModel.AvailableBookmarksCount} / {_viewModel.TotalBookmarksCount}";
         }
 
         private void UpdateAddButton()
         {
             if (_addButton == null) return;
-            _addButton.SetInteractable(ViewModel.CanAddVesselBookmark());
+            _addButton.SetInteractable(_viewModel.CanAddVesselBookmark());
         }
 
         private void UpdateFilterDot()
         {
-            if (_filterDot != null) _filterDot.enabled = ViewModel.HasActiveFilters;
+            if (_filterDot != null) _filterDot.enabled = _viewModel.HasActiveFilters;
         }
     }
 }

@@ -10,19 +10,28 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
     public class EditCommentContentController : MonoBehaviour
     {
         private Text _sub;
-        public Text Sub => _sub;
-        public EditCommentContentController BindSub(Text sub)
+        public EditCommentContentController Sub(Text sub)
         {
             this._sub = sub;
             return this;
         }
 
         private InputField _input;
-        public InputField Input => _input;
-        public EditCommentContentController BindInput(InputField input)
+        public EditCommentContentController Input(InputField input)
         {
             this._input = input;
             return this;
         }
+
+        public Text GetSub()
+        {
+            return _sub;
+        }
+        
+        public InputField GetInput()
+        {
+            return _input;
+        }
+        
     }
 }

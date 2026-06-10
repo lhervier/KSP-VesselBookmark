@@ -50,8 +50,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
 
             return rootGo
                 .AddComponent<EditCommentFooterController>()
-                .BindCancel(cancel)
-                .BindOk(ok);
+                .CancelButtonController(cancel)
+                .OkButtonController(ok);
         }
     }
 }

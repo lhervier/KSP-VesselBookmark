@@ -10,19 +10,27 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
     public class RemoveConfirmFooterController : MonoBehaviour
     {
         private ButtonController _cancel;
-        public ButtonController Cancel => _cancel;
-        public RemoveConfirmFooterController BindCancel(ButtonController cancel)
+        public RemoveConfirmFooterController CancelButtonController(ButtonController cancel)
         {
             this._cancel = cancel;
             return this;
         }
 
         private ButtonController _remove;
-        public ButtonController Remove => _remove;
-        public RemoveConfirmFooterController BindRemove(ButtonController remove)
+        public RemoveConfirmFooterController RemoveButtonController(ButtonController remove)
         {
             this._remove = remove;
             return this;
+        }
+
+        public ButtonController GetCancelButtonController()
+        {
+            return _cancel;
+        }
+
+        public ButtonController GetRemoveButtonController()
+        {
+            return _remove;
         }
     }
 }

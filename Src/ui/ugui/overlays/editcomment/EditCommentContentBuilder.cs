@@ -33,8 +33,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
 
             return rootGo
                 .AddComponent<EditCommentContentController>()
-                .BindSub(sub)
-                .BindInput(input);
+                .Sub(sub)
+                .Input(input);
         }
 
         // Greyed subtitle showing the edited bookmark's title.

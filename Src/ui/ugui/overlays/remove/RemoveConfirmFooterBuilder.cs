@@ -51,8 +51,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
 
             return rootGo
                 .AddComponent<RemoveConfirmFooterController>()
-                .BindCancel(cancel)
-                .BindRemove(remove);
+                .CancelButtonController(cancel)
+                .RemoveButtonController(remove);
         }
     }
 }

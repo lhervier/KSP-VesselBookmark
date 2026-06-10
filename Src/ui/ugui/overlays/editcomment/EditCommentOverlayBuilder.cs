@@ -52,10 +52,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
                 .AddComponent<EditCommentOverlayController>()
                 .ViewModel(_viewModel)
                 .Popup(popup)
-                .Sub(content.Sub)
-                .Input(content.Input)
-                .CancelButtonController(footer.Cancel)
-                .OkButtonController(footer.Ok);
+                .Sub(content.GetSub())
+                .Input(content.GetInput())
+                .CancelButtonController(footer.GetCancelButtonController())
+                .OkButtonController(footer.GetOkButtonController());
         }
     }
 }

@@ -44,9 +44,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
                 .AddComponent<RemoveConfirmOverlayController>()
                 .ViewModel(_viewModel)
                 .Popup(popup)
-                .Message(content.Message)
-                .CancelButtonController(footer.Cancel)
-                .RemoveButtonController(footer.Remove);
+                .Message(content.GetMessage())
+                .CancelButtonController(footer.GetCancelButtonController())
+                .RemoveButtonController(footer.GetRemoveButtonController());
         }
     }
 }
