@@ -7,6 +7,7 @@ using com.github.lhervier.ksp.shared.ugui.checkbox;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui;
 using com.github.lhervier.ksp.shared.ugui.combo;
+using com.github.lhervier.ksp.shared.ugui.sprites;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 {
@@ -62,7 +63,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             trapRect.offsetMin = Vector2.zero;
             trapRect.offsetMax = Vector2.zero;
             var trapImage = trapGo.AddComponent<Image>();
-            trapImage.sprite = Sprites.Fill;
+            trapImage.sprite = SpritesGlobal.FillSprite;
             trapImage.type = Image.Type.Simple;
             trapImage.color = Color.clear;
             trapImage.raycastTarget = true;
@@ -84,7 +85,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 -(VesselBookmarkPalette.WindowBorderThickness + VesselBookmarkPalette.TitleBarHeight));
 
             var panelImage = panelGo.AddComponent<Image>();
-            panelImage.sprite = Sprites.Border(VesselBookmarkPalette.MenuBgColor, VesselBookmarkPalette.MenuBorderColor, VesselBookmarkPalette.MenuThickness);
+            panelImage.sprite = SpritesGlobal.Border(VesselBookmarkPalette.MenuBgColor, VesselBookmarkPalette.MenuBorderColor, VesselBookmarkPalette.MenuThickness);
             panelImage.type = Image.Type.Sliced;
             panelImage.color = Color.white;
             panelImage.raycastTarget = true;
@@ -173,7 +174,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             var le = go.AddComponent<LayoutElement>();
             le.minHeight = le.preferredHeight = 1f;
             var image = go.AddComponent<Image>();
-            image.sprite = Sprites.Fill;
+            image.sprite = SpritesGlobal.FillSprite;
             image.type = Image.Type.Simple;
             image.color = VesselBookmarkPalette.MenuSeparatorColor;
             image.raycastTarget = false;
@@ -187,7 +188,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             le.minHeight = le.preferredHeight = VesselBookmarkPalette.ComboHeight;
 
             var bg = inputGo.AddComponent<Image>();
-            bg.sprite = Sprites.Border(VesselBookmarkPalette.SearchBgColor, VesselBookmarkPalette.SearchBorderColor, 1);
+            bg.sprite = SpritesGlobal.Border(VesselBookmarkPalette.SearchBgColor, VesselBookmarkPalette.SearchBorderColor, 1);
             bg.type = Image.Type.Sliced;
             bg.color = Color.white;
             bg.raycastTarget = true;
@@ -264,7 +265,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             le.minHeight = le.preferredHeight = VesselBookmarkPalette.ComboHeight;
 
             var image = go.AddComponent<Image>();
-            image.sprite = Sprites.Fill;
+            image.sprite = SpritesGlobal.FillSprite;
             image.type = Image.Type.Simple;
             image.color = Color.white;
             image.raycastTarget = true;

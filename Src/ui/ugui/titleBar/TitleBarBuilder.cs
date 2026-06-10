@@ -4,6 +4,7 @@ using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared;
+using com.github.lhervier.ksp.shared.ugui.sprites;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
 {
@@ -48,7 +49,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
 
             // Background + 1px separator at the bottom
             var image = go.AddComponent<Image>();
-            image.sprite = Sprites.HorizontalBorders(
+            image.sprite = SpritesGlobal.HorizontalBorders(
                 VesselBookmarkPalette.TitleBarBgColor,
                 VesselBookmarkPalette.TitleBarBorderColor,
                 VesselBookmarkPalette.TitleBarBorderThickness);
@@ -152,7 +153,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             badgeGo.transform.SetParent(parent, false);
 
             var image = badgeGo.AddComponent<Image>();
-            image.sprite = Sprites.Border(
+            image.sprite = SpritesGlobal.Border(
                 VesselBookmarkPalette.AccentBgColor,
                 VesselBookmarkPalette.AccentBorderColor,
                 1);
@@ -198,7 +199,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             rect.sizeDelta = new Vector2(VesselBookmarkPalette.FilterDotSize, VesselBookmarkPalette.FilterDotSize);
             rect.anchoredPosition = new Vector2(-1f, -1f);
             var img = dotGo.AddComponent<Image>();
-            img.sprite = Sprites.Fill;
+            img.sprite = SpritesGlobal.FillSprite;
             img.type = Image.Type.Simple;
             img.color = VesselBookmarkPalette.AccentColor;
             img.raycastTarget = false;

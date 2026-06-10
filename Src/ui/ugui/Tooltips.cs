@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
+using com.github.lhervier.ksp.shared.ugui.sprites;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
 {
@@ -61,7 +62,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
             // Fond(s) : sprite chromé (fond sombre + bordure verte), teinté blanc pour montrer le sprite.
             foreach (Image img in root.GetComponentsInChildren<Image>(true))
             {
-                img.sprite = Sprites.Border(VesselBookmarkPalette.CardBgColor, VesselBookmarkPalette.AccentBorderColor, 1);
+                img.sprite = SpritesGlobal.Border(VesselBookmarkPalette.CardBgColor, VesselBookmarkPalette.AccentBorderColor, 1);
                 img.type = Image.Type.Sliced;
                 img.color = Color.white;
             }

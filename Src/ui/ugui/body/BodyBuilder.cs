@@ -4,6 +4,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list;
 using com.github.lhervier.ksp.shared.ugui;
+using com.github.lhervier.ksp.shared.ugui.sprites;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body
 {
@@ -65,7 +66,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body
             viewportRect.offsetMax = new Vector2(-VesselBookmarkPalette.ScrollbarWidth, 0f);
             viewportGo.AddComponent<RectMask2D>();
             var viewportImage = viewportGo.AddComponent<Image>();
-            viewportImage.sprite = Sprites.Fill;
+            viewportImage.sprite = SpritesGlobal.FillSprite;
             viewportImage.type = Image.Type.Simple;
             viewportImage.color = Color.clear;
             viewportImage.raycastTarget = true;
@@ -110,7 +111,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body
             scrollbarRect.sizeDelta = new Vector2(VesselBookmarkPalette.ScrollbarWidth, 0f);
 
             var scrollbarBg = scrollbarGo.AddComponent<Image>();
-            scrollbarBg.sprite = Sprites.Fill;
+            scrollbarBg.sprite = SpritesGlobal.FillSprite;
             scrollbarBg.type = Image.Type.Simple;
             scrollbarBg.color = VesselBookmarkPalette.SearchBgColor;
             scrollbarBg.raycastTarget = true;
@@ -134,7 +135,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body
             handleRect.offsetMin = Vector2.zero;
             handleRect.offsetMax = Vector2.zero;
             var handleImage = handleGo.AddComponent<Image>();
-            handleImage.sprite = Sprites.Fill;
+            handleImage.sprite = SpritesGlobal.FillSprite;
             handleImage.type = Image.Type.Simple;
             handleImage.color = Color.white;
             handleImage.raycastTarget = true;

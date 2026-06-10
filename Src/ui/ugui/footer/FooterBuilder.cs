@@ -6,6 +6,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui;
+using com.github.lhervier.ksp.shared.ugui.sprites;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
 {
@@ -50,7 +51,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
 
             // Fond + séparateur 1px en haut
             var image = go.AddComponent<Image>();
-            image.sprite = Sprites.HorizontalBorders(
+            image.sprite = SpritesGlobal.HorizontalBorders(
                 VesselBookmarkPalette.FooterBgColor,
                 VesselBookmarkPalette.FooterBorderColor,
                 VesselBookmarkPalette.FooterBorderThickness);

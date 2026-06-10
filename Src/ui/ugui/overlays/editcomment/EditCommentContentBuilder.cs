@@ -5,6 +5,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui;
+using com.github.lhervier.ksp.shared.ugui.sprites;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
 {
@@ -62,7 +63,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             le.minHeight = le.preferredHeight = VesselBookmarkPalette.TextAreaHeight;
 
             var bg = inputGo.AddComponent<Image>();
-            bg.sprite = Sprites.Border(VesselBookmarkPalette.TextAreaBgColor, VesselBookmarkPalette.TextAreaBorderColor, 1);
+            bg.sprite = SpritesGlobal.Border(VesselBookmarkPalette.TextAreaBgColor, VesselBookmarkPalette.TextAreaBorderColor, 1);
             bg.type = Image.Type.Sliced;
             bg.color = Color.white;
             bg.raycastTarget = true;

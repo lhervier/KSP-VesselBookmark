@@ -8,6 +8,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove;
+using com.github.lhervier.ksp.shared.ugui.sprites;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
 {
@@ -83,7 +84,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
             var windowImage = windowGo.GetComponent<Image>();
             if (windowImage != null)
             {
-                windowImage.sprite = Sprites.WindowChrome;
+                windowImage.sprite = SpritesGlobal.Border(
+                    VesselBookmarkPalette.WindowBodyColor,
+                    VesselBookmarkPalette.WindowBorderColor,
+                    VesselBookmarkPalette.WindowBorderThickness
+                );
                 windowImage.type = Image.Type.Sliced;
                 windowImage.color = Color.white;
                 windowImage.raycastTarget = true;   // bloque les clics vers le jeu
@@ -96,7 +101,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
                 {
                     continue;
                 }
-                image.sprite = Sprites.Fill;
+                image.sprite = SpritesGlobal.FillSprite;
                 image.type = Image.Type.Simple;
                 image.color = VesselBookmarkPalette.WindowBodyColor;
             }

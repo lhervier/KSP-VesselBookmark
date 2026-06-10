@@ -6,6 +6,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui;
+using com.github.lhervier.ksp.shared.ugui.sprites;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 {
@@ -36,7 +37,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 
             // Fond (teinté selon l'état)
             var bg = rowGo.AddComponent<Image>();
-            bg.sprite = Sprites.Fill;
+            bg.sprite = SpritesGlobal.FillSprite;
             bg.type = Image.Type.Simple;
             bg.color = Color.clear;
             bg.raycastTarget = true;   // cible des clics/survol sur les zones vides de la ligne
@@ -69,7 +70,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             accentRect.sizeDelta = new Vector2(VesselBookmarkPalette.RowAccentBarThickness, 0f);
             accentRect.anchoredPosition = Vector2.zero;
             var accentBar = accentGo.AddComponent<Image>();
-            accentBar.sprite = Sprites.Fill;
+            accentBar.sprite = SpritesGlobal.FillSprite;
             accentBar.type = Image.Type.Simple;
             accentBar.color = VesselBookmarkPalette.AccentColor;
             accentBar.raycastTarget = false;
@@ -191,7 +192,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             le.minHeight = le.preferredHeight = VesselBookmarkPalette.TypeIconSize;
 
             var box = boxGo.AddComponent<Image>();
-            box.sprite = Sprites.Border(
+            box.sprite = SpritesGlobal.Border(
                 VesselBookmarkPalette.TypeIconBgColor,
                 VesselBookmarkPalette.TypeIconBorderColor,
                 VesselBookmarkPalette.TypeIconBorderThickness);
@@ -241,7 +242,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             }
             else
             {
-                img.sprite = Sprites.Fill;
+                img.sprite = SpritesGlobal.FillSprite;
                 img.color = VesselBookmarkPalette.WarmColor;
             }
             img.type = Image.Type.Simple;
@@ -255,7 +256,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             chipGo.transform.SetParent(parent, false);
 
             chipImage = chipGo.AddComponent<Image>();
-            chipImage.sprite = Sprites.Border(VesselBookmarkPalette.AccentBgColor, VesselBookmarkPalette.AccentBorderColor, VesselBookmarkPalette.ChipBorderThickness);
+            chipImage.sprite = SpritesGlobal.Border(VesselBookmarkPalette.AccentBgColor, VesselBookmarkPalette.AccentBorderColor, VesselBookmarkPalette.ChipBorderThickness);
             chipImage.type = Image.Type.Sliced;
             chipImage.color = Color.white;
             chipImage.raycastTarget = false;
@@ -356,7 +357,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             boxLe.flexibleWidth = 1f;
 
             var boxBg = boxGo.AddComponent<Image>();
-            boxBg.sprite = Sprites.Fill;
+            boxBg.sprite = SpritesGlobal.FillSprite;
             boxBg.type = Image.Type.Simple;
             boxBg.color = VesselBookmarkPalette.CommentBgColor;
             boxBg.raycastTarget = false;
@@ -373,7 +374,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             barRect.sizeDelta = new Vector2(VesselBookmarkPalette.CommentBorderThickness, 0f);
             barRect.anchoredPosition = Vector2.zero;
             var bar = barGo.AddComponent<Image>();
-            bar.sprite = Sprites.Fill;
+            bar.sprite = SpritesGlobal.FillSprite;
             bar.type = Image.Type.Simple;
             bar.color = VesselBookmarkPalette.CommentBorderColor;
             bar.raycastTarget = false;
@@ -498,7 +499,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 _chip.SetActive(true);
                 _chipText.text = ModLocalization.GetString(locKey);
                 _chipText.color = text;
-                _chipImage.sprite = Sprites.Border(bg, border, VesselBookmarkPalette.ChipBorderThickness);
+                _chipImage.sprite = SpritesGlobal.Border(bg, border, VesselBookmarkPalette.ChipBorderThickness);
             }
         }
     }

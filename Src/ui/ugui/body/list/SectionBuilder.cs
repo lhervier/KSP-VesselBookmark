@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared;
+using com.github.lhervier.ksp.shared.ugui.sprites;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 {
@@ -22,7 +23,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             le.minHeight = le.preferredHeight = VesselBookmarkPalette.SectionHeaderHeight;
 
             var image = go.AddComponent<Image>();
-            image.sprite = Sprites.HorizontalBorders(
+            image.sprite = SpritesGlobal.HorizontalBorders(
                 VesselBookmarkPalette.SectionHeaderBgColor,
                 VesselBookmarkPalette.SectionHeaderBorderColor,
                 VesselBookmarkPalette.SectionHeaderBorderThickness);
@@ -77,7 +78,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             go.transform.SetParent(parent, false);
 
             var image = go.AddComponent<Image>();
-            image.sprite = Sprites.Fill;
+            image.sprite = SpritesGlobal.FillSprite;
             image.type = Image.Type.Simple;
             image.color = VesselBookmarkPalette.SectionHintBgColor;
             image.raycastTarget = false;
