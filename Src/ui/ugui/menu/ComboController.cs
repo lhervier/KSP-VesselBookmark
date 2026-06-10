@@ -13,11 +13,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         private readonly List<GameObject> _items = new List<GameObject>();
 
         /// <summary>Callback invoqué quand l'utilisateur choisit une option (reçoit la VALEUR brute).</summary>
-        public Action<string> OnSelect;
+        public EventData<string> OnSelect = new EventData<string>("Combobox.OnSelect");
 
-        /// <summary>Invoqué juste avant l'ouverture (ex. fermer les autres combos).</summary>
-        public Action OnBeforeOpen;
-        
         // =======================================
         // Life cycle
         // =======================================
@@ -118,7 +115,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         public void Open()
         {
             if (_dropdown == null) return;
-            OnBeforeOpen?.Invoke();
 
             // Le piège passe au premier plan, puis le dropdown par-dessus le piège.
             if (_overlayController != null) { _overlayController.gameObject.SetActive(true); _overlayController.transform.SetAsLastSibling(); }
@@ -167,7 +163,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             colors.colorMultiplier = 1f;
             colors.fadeDuration = 0.1f;
             button.colors = colors;
-            button.onClick.AddListener(() => { OnSelect?.Invoke(text); Collapse(); });
+            button.onClick.AddListener(() => { OnSelect?.Fire(text); Collapse(); });
 
             var layout = itemGo.AddComponent<HorizontalLayoutGroup>();
             layout.padding = new RectOffset(Mathf.RoundToInt(VesselBookmarkPalette.ComboPaddingH), Mathf.RoundToInt(VesselBookmarkPalette.ComboPaddingH), 0, 0);
