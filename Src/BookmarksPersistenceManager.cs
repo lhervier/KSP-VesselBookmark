@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
-using com.github.lhervier.ksp.bookmarksmod.util;
+using com.github.lhervier.ksp.shared.ext;
 using System.Linq;
 using com.github.lhervier.ksp.shared;
 
