@@ -1,11 +1,10 @@
-using KSP.Localization;
-using KSP.UI.Screens;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.bookmarksmod.util;
 using System;
+using com.github.lhervier.ksp.shared;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui {
     public class BookmarksViewModel : MonoBehaviour

@@ -3,7 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
-using com.github.lhervier.ksp.bookmarksmod.util;
+using com.github.lhervier.ksp.shared;
 
 namespace com.github.lhervier.ksp.bookmarksmod {
 

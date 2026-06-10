@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using com.github.lhervier.ksp.bookmarksmod.ui;
-using Expansions.Missions.Editor;
+using com.github.lhervier.ksp.shared;
 using UnityEngine;
 
 namespace com.github.lhervier.ksp.bookmarksmod {
@@ -22,6 +18,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
 
         public void Start() {
             LOGGER.LogInfo("Plugin started");
+            ModLogger.SetLogLevel(LogLevel.Debug);
 
             this._bookmarkManager = this.gameObject.AddComponent<BookmarksManager>();
             

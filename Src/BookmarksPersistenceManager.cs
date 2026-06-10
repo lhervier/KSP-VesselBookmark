@@ -4,6 +4,7 @@ using UnityEngine;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.bookmarksmod.util;
 using System.Linq;
+using com.github.lhervier.ksp.shared;
 
 namespace com.github.lhervier.ksp.bookmarksmod {
     public class BookmarksPersistenceManager {

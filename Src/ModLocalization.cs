@@ -1,4 +1,5 @@
 using System;
+using com.github.lhervier.ksp.shared;
 using KSP.Localization;
 
 namespace com.github.lhervier.ksp.bookmarksmod {

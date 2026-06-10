@@ -1,4 +1,4 @@
-using UnityEngine;
+using com.github.lhervier.ksp.shared;
 
 namespace com.github.lhervier.ksp.bookmarksmod.util {
     

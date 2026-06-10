@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using System;
+using com.github.lhervier.ksp.shared;
 
 namespace com.github.lhervier.ksp.bookmarksmod.util {
     public static class ConfigNodeExtension {
