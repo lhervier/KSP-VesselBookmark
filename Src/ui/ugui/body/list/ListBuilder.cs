@@ -47,6 +47,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 
         public class ListController : BaseController
         {
+            // Shared stand-in for a section that holds no bookmark. Read-only here (only its Count is
+            // read and it is never indexed into), so a single shared instance is safe.
+            private static readonly List<Bookmark> EmptySection = new List<Bookmark>();
+
             private readonly SectionBuilder _sectionBuilder = new SectionBuilder();
             private BookmarkRowBuilder _rowBuilder;
             private readonly List<BookmarkRowBuilder.BookmarkRowController> _rows = new List<BookmarkRowBuilder.BookmarkRowController>();
@@ -116,9 +120,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 var available = ViewModel.AvailableBookmarks;
                 foreach (var section in SECTIONS)
                 {
-                    if (!available.TryGetValue(section.type, out List<Bookmark> bookmarks))
+                    // Every section is always rendered (header + "how to add" hint), even when it holds
+                    // no bookmark: an absent type is treated as an empty list, so the header shows a 0
+                    // count and the hint stays visible to tell the user how to populate it.
+                    if (!available.TryGetValue(section.type, out List<Bookmark> bookmarks) || bookmarks == null)
                     {
-                        continue;
+                        bookmarks = EmptySection;
                     }
 
                     _sectionBuilder.CreateHeader(transform, section.titleKey, bookmarks.Count);
