@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
+using com.github.lhervier.ksp.shared.ugui;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 {
@@ -13,14 +14,28 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
     /// SetAsLastSibling, hauteur plafonnée + ScrollRect si la liste est longue). Combo « bête » :
     /// l'appelant fournit les options via SetOptions(...) et reçoit le choix via OnSelect.
     /// </summary>
-    public class ComboBuilder
+    public class ComboBuilder : IUGUIBuilder<ComboController>
     {
         private const string CaretGlyph = "▼";   // ▼ (U+25BC) — glyphe confirmé rendu par la police UISkin
 
-        public ComboController Create(Transform parent, string labelText)
+        private Transform _parent;
+        public ComboBuilder Parent(Transform parent)
+        {
+            this._parent = parent;
+            return this;
+        }
+
+        private string _label;
+        public ComboBuilder Label(string label)
+        {
+            _label = label;
+            return this;
+        }
+
+        public ComboController Build()
         {
             var rootGo = new GameObject("Combo", typeof(RectTransform));
-            rootGo.transform.SetParent(parent, false);
+            rootGo.transform.SetParent(_parent, false);
             ComboController controller = rootGo.AddComponent<ComboController>();
 
             var rowLayout = rootGo.AddComponent<HorizontalLayoutGroup>();
@@ -37,7 +52,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             var labelLe = labelGo.AddComponent<LayoutElement>();
             labelLe.minWidth = labelLe.preferredWidth = 46f;
             var label = labelGo.AddComponent<Text>();
-            label.text = labelText;
+            label.text = _label;
             label.font = HighLogic.UISkin.font;
             label.fontSize = VesselBookmarkPalette.MenuLabelFontSize;
             label.color = VesselBookmarkPalette.MenuLabelColor;
@@ -109,20 +124,20 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             // Dropdown flottant : enfant du MÊME parent (le panneau du menu), positionné en absolu
             // sous l'en-tête à l'ouverture. ignoreLayout pour ne pas occuper de place dans le menu.
             RectTransform content;
-            GameObject dropdown = BuildDropdown(parent, out content);
+            GameObject dropdown = BuildDropdown(out content);
 
             // Piège à clic propre au combo : referme le dropdown dès qu'on clique en dehors.
-            GameObject trap = BuildTrap(parent, controller);
+            GameObject trap = BuildTrap(controller);
 
             controller.Bind(value, headerRect, dropdown, content, trap);
             return controller;
         }
 
         // Piège à clic plein écran (transparent), placé juste sous le dropdown à l'ouverture.
-        private GameObject BuildTrap(Transform parent, ComboController controller)
+        private GameObject BuildTrap(ComboController controller)
         {
             var go = new GameObject("ComboTrap", typeof(RectTransform));
-            go.transform.SetParent(parent, false);
+            go.transform.SetParent(_parent, false);
             var le = go.AddComponent<LayoutElement>();
             le.ignoreLayout = true;
             var rect = go.GetComponent<RectTransform>();
@@ -145,10 +160,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         }
 
         // Panneau scrollable du dropdown (construit détaché et masqué ; positionné/affiché à l'ouverture).
-        private GameObject BuildDropdown(Transform parent, out RectTransform content)
+        private GameObject BuildDropdown(out RectTransform content)
         {
             var dropdownGo = new GameObject("ComboDropdown", typeof(RectTransform));
-            dropdownGo.transform.SetParent(parent, false);
+            dropdownGo.transform.SetParent(_parent, false);
 
             var le = dropdownGo.AddComponent<LayoutElement>();
             le.ignoreLayout = true;
@@ -204,142 +219,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 
             dropdownGo.SetActive(false);
             return dropdownGo;
-        }
-
-        public class ComboController : MonoBehaviour
-        {
-            private Text _value;
-            private RectTransform _headerRect;
-            private GameObject _dropdown;
-            private RectTransform _dropdownRect;
-            private RectTransform _content;
-            private GameObject _trap;
-            private readonly List<GameObject> _items = new List<GameObject>();
-
-            /// <summary>Callback invoqué quand l'utilisateur choisit une option (reçoit la VALEUR brute).</summary>
-            public Action<string> OnSelect;
-
-            /// <summary>Invoqué juste avant l'ouverture (ex. fermer les autres combos).</summary>
-            public Action OnBeforeOpen;
-
-            /// <summary>
-            /// Conversion valeur → libellé affiché (ex. type de vaisseau brut → libellé traduit).
-            /// Null = identité (le libellé affiché est la valeur).
-            /// </summary>
-            public Func<string, string> LabelFor;
-
-            private string Label(string value)
-            {
-                return LabelFor != null ? LabelFor(value) : (value ?? string.Empty);
-            }
-
-            public void Bind(Text value, RectTransform headerRect, GameObject dropdown, RectTransform content, GameObject trap)
-            {
-                this._value = value;
-                this._headerRect = headerRect;
-                this._dropdown = dropdown;
-                this._dropdownRect = dropdown.GetComponent<RectTransform>();
-                this._content = content;
-                this._trap = trap;
-            }
-
-            public void SetOptions(IReadOnlyList<string> options, string current)
-            {
-                if (_value != null) _value.text = Label(current);
-
-                foreach (var item in _items) Destroy(item);
-                _items.Clear();
-                if (options == null) return;
-
-                foreach (string opt in options)
-                {
-                    _items.Add(BuildItem(opt, opt == current));
-                }
-            }
-
-            public void Toggle()
-            {
-                if (_dropdown == null) return;
-                if (_dropdown.activeSelf) Collapse();
-                else Open();
-            }
-
-            public void Open()
-            {
-                if (_dropdown == null) return;
-                OnBeforeOpen?.Invoke();
-
-                // Le piège passe au premier plan, puis le dropdown par-dessus le piège.
-                if (_trap != null) { _trap.SetActive(true); _trap.transform.SetAsLastSibling(); }
-                _dropdown.SetActive(true);
-                _dropdown.transform.SetAsLastSibling();   // au premier plan, par-dessus le contenu du menu
-
-                // Hauteur = contenu, plafonnée (au-delà → scroll) ; largeur = celle de l'en-tête.
-                LayoutRebuilder.ForceRebuildLayoutImmediate(_content);
-                float height = Mathf.Min(LayoutUtility.GetPreferredHeight(_content), VesselBookmarkPalette.ComboDropdownMaxHeight);
-
-                var corners = new Vector3[4];
-                _headerRect.GetWorldCorners(corners);   // 0 = bas-gauche
-                _dropdownRect.anchorMin = new Vector2(0f, 1f);
-                _dropdownRect.anchorMax = new Vector2(0f, 1f);
-                _dropdownRect.pivot = new Vector2(0f, 1f);
-                _dropdownRect.sizeDelta = new Vector2(_headerRect.rect.width, height);
-                _dropdownRect.position = corners[0];
-            }
-
-            public void Collapse()
-            {
-                if (_dropdown != null) _dropdown.SetActive(false);
-                if (_trap != null) _trap.SetActive(false);
-            }
-
-            private GameObject BuildItem(string text, bool selected)
-            {
-                var itemGo = new GameObject("Item", typeof(RectTransform));
-                itemGo.transform.SetParent(_content, false);
-                var le = itemGo.AddComponent<LayoutElement>();
-                le.minHeight = le.preferredHeight = VesselBookmarkPalette.ComboHeight;
-
-                var image = itemGo.AddComponent<Image>();
-                image.sprite = Sprites.Fill;
-                image.type = Image.Type.Simple;
-                image.color = Color.white;
-                image.raycastTarget = true;
-
-                var button = itemGo.AddComponent<Button>();
-                button.targetGraphic = image;
-                var colors = button.colors;
-                colors.normalColor = selected ? VesselBookmarkPalette.ComboItemSelectedBgColor : Color.clear;
-                colors.highlightedColor = VesselBookmarkPalette.ComboItemHoverColor;
-                colors.pressedColor = VesselBookmarkPalette.ComboItemHoverColor;
-                colors.selectedColor = selected ? VesselBookmarkPalette.ComboItemSelectedBgColor : Color.clear;
-                colors.colorMultiplier = 1f;
-                colors.fadeDuration = 0.1f;
-                button.colors = colors;
-                button.onClick.AddListener(() => { OnSelect?.Invoke(text); Collapse(); });
-
-                var layout = itemGo.AddComponent<HorizontalLayoutGroup>();
-                layout.padding = new RectOffset(Mathf.RoundToInt(VesselBookmarkPalette.ComboPaddingH), Mathf.RoundToInt(VesselBookmarkPalette.ComboPaddingH), 0, 0);
-                layout.childAlignment = TextAnchor.MiddleLeft;
-                layout.childControlWidth = true;
-                layout.childControlHeight = true;
-                layout.childForceExpandWidth = true;
-                layout.childForceExpandHeight = true;
-
-                var labelGo = new GameObject("Label", typeof(RectTransform));
-                labelGo.transform.SetParent(itemGo.transform, false);
-                var label = labelGo.AddComponent<Text>();
-                label.text = Label(text);
-                label.font = HighLogic.UISkin.font;
-                label.fontSize = VesselBookmarkPalette.ComboFontSize;
-                label.color = selected ? VesselBookmarkPalette.ComboItemSelectedColor : VesselBookmarkPalette.ComboItemColor;
-                label.alignment = TextAnchor.MiddleLeft;
-                label.horizontalOverflow = HorizontalWrapMode.Overflow;
-                label.verticalOverflow = VerticalWrapMode.Overflow;
-                label.raycastTarget = false;
-
-                return itemGo;
-            }
         }
     }
 }

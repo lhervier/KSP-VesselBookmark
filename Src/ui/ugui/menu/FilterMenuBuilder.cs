@@ -104,11 +104,16 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             var (search, trigger)  = BuildSearchField(panelGo.transform);
             
             // Combos Corps / Type
-            ComboBuilder.ComboController bodyCombo = new ComboBuilder()
-                .Create(panelGo.transform, ModLocalization.GetString("labelBody"));
+            ComboController bodyCombo = new ComboBuilder()
+                .Parent(panelGo.transform)
+                .Label(ModLocalization.GetString("labelBody"))
+                .Build();
             bodyCombo.OnSelect = v => _viewModel.SelectedBody = v;
-            ComboBuilder.ComboController typeCombo = new ComboBuilder()
-                .Create(panelGo.transform, ModLocalization.GetString("labelType"));
+            
+            ComboController typeCombo = new ComboBuilder()
+                .Parent(panelGo.transform)
+                .Label(ModLocalization.GetString("labelType"))
+                .Build();
             typeCombo.OnSelect = v => _viewModel.SelectedVesselType = v;
             typeCombo.LabelFor = TranslateVesselType;   // affiche les types traduits, garde la valeur brute
             // Une seule combo ouverte à la fois : ouvrir l'une ferme l'autre.

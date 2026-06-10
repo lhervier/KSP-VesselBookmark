@@ -50,9 +50,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             return this;
         }
         
-        private ComboBuilder.ComboController _bodyCombo;
-        private ComboBuilder.ComboController _typeCombo;
-        public FilterMenuController Combos(ComboBuilder.ComboController body, ComboBuilder.ComboController type)
+        private ComboController _bodyCombo;
+        private ComboController _typeCombo;
+        public FilterMenuController Combos(ComboController body, ComboController type)
         {
             _bodyCombo = body;
             _typeCombo = type;
