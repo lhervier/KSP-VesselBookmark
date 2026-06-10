@@ -54,7 +54,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             // Rebuild whenever a scene finishes loading : the vessels of the freshly-loaded game are
             // present by then (unlike at onGameState*Load time), so bookmarks loaded with the scene
             // resolve against a populated index without needing anyone to push a refresh.
-            GameEvents.onLevelWasLoaded.Add(OnLevelWasLoaded);
+            GameEvents.onLevelWasLoaded.Add(OnSceneLoaded);
 
             // Build the index once at startup too : RefreshIndex is created lazily, so onLevelWasLoaded
             // for the current scene may already have fired before this Start ran.
@@ -74,7 +74,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             GameEvents.onAlarmTriggered.Remove(OnAlarmTriggered);
 
             // Unsubscribe from scene events
-            GameEvents.onLevelWasLoaded.Remove(OnLevelWasLoaded);
+            GameEvents.onLevelWasLoaded.Remove(OnSceneLoaded);
         }
 
         public void LateUpdate()
@@ -101,7 +101,9 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// Called when a scene has finished loading
         /// </summary>
         /// <param name="scene">The scene that was loaded</param>
-        private void OnLevelWasLoaded(GameScenes scene) {
+        // Not named OnLevelWasLoaded: that name collides with Unity's deprecated magic message, which
+        // expects an (int) parameter and logs a warning when found on a MonoBehaviour.
+        private void OnSceneLoaded(GameScenes scene) {
             _refreshRequested = true;
         }
 

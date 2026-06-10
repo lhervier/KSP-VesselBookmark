@@ -41,7 +41,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         public void Start()
         {
             GameEvents.onGameSceneLoadRequested.Add(OnGameSceneLoadRequested);
-            GameEvents.onLevelWasLoaded.Add(OnLevelWasLoaded);
+            GameEvents.onLevelWasLoaded.Add(OnSceneLoaded);
         }
 
         public void LateUpdate()
@@ -59,7 +59,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         public void OnDestroy()
         {
             GameEvents.onGameSceneLoadRequested.Remove(OnGameSceneLoadRequested);
-            GameEvents.onLevelWasLoaded.Remove(OnLevelWasLoaded);
+            GameEvents.onLevelWasLoaded.Remove(OnSceneLoaded);
         }
 
         /// <summary>
@@ -73,7 +73,9 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <summary>
         /// The new scene has finished loading: refreshes may resume.
         /// </summary>
-        private void OnLevelWasLoaded(GameScenes scene) {
+        // Not named OnLevelWasLoaded: that name collides with Unity's deprecated magic message, which
+        // expects an (int) parameter and logs a warning when found on a MonoBehaviour.
+        private void OnSceneLoaded(GameScenes scene) {
             _sceneLoading = false;
         }
 
