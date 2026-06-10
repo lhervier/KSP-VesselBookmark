@@ -16,25 +16,52 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
     /// couleur du titre, la pastille et la visibilité des boutons dépendent de l'état (sélection,
     /// survol, vaisseau actif, cible) et sont réévalués par Refresh().
     /// </summary>
-    public class BookmarkRowBuilder
+    public class BookmarkRowBuilder : IUGUIBuilder<BookmarkRowController>
     {
         private const string MoveUpGlyph = "▲";
         private const string MoveDownGlyph = "▼";
         private const string RemoveGlyph = "✕";
 
-        private readonly BookmarksViewModel _viewModel;
+        // ===========================================
+        // Builder parameters
+        // ===========================================
 
-        public BookmarkRowBuilder(BookmarksViewModel viewModel)
+        private BookmarksViewModel _viewModel;
+        public BookmarkRowBuilder ViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
+            return this;
         }
 
-        public BookmarkRowController Create(Bookmark bookmark, bool isFirst, bool isLast)
+        private Bookmark _bookmark;
+        public BookmarkRowBuilder Bookmark(Bookmark bookmark)
+        {
+            this._bookmark = bookmark;
+            return this;
+        }
+
+        private bool _first;
+        public BookmarkRowBuilder First(bool first)
+        {
+            this._first = first;
+            return this;
+        }
+
+        private bool _last;
+        public BookmarkRowBuilder Last(bool last)
+        {
+            this._last = last;
+            return this;
+        }
+
+        // ==========================================
+        // Build
+        // ==========================================
+
+        public BookmarkRowController Build()
         {
             var rowGo = new GameObject("Row", typeof(RectTransform));
-            BookmarkRowController controller = rowGo.AddComponent<BookmarkRowController>();
-            controller.Initialize(_viewModel);
-
+            
             // Fond (teinté selon l'état)
             var bg = rowGo.AddComponent<Image>();
             bg.sprite = SpritesGlobal.FillSprite;
@@ -76,7 +103,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             accentBar.raycastTarget = false;
             accentBar.enabled = false;
 
-            bool vesselExists = bookmark.Vessel != null;
+            bool vesselExists = _bookmark.Vessel != null;
 
             // ---- Ligne 1 : icône type + alarme + titre + pastille + boutons ----
             var line1 = NewHLine(rowGo.transform, "Line1", 0);
@@ -84,8 +111,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             line1Layout.spacing = VesselBookmarkPalette.RowSpacing;
             line1Layout.childAlignment = TextAnchor.MiddleLeft;
 
-            BuildTypeIcon(line1.transform, bookmark.BookmarkVesselType);
-            if (bookmark.HasAlarm)
+            BuildTypeIcon(line1.transform, _bookmark.BookmarkVesselType);
+            if (_bookmark.HasAlarm)
             {
                 BuildAlarmIcon(line1.transform);
             }
@@ -96,7 +123,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             var nameLe = nameGo.AddComponent<LayoutElement>();
             nameLe.flexibleWidth = 1f;
             var name = nameGo.AddComponent<Text>();
-            name.text = BuildTitle(bookmark, vesselExists);
+            name.text = BuildTitle(_bookmark, vesselExists);
             name.font = HighLogic.UISkin.font;
             name.fontSize = VesselBookmarkPalette.NameFontSize;
             name.fontStyle = vesselExists ? FontStyle.Normal : FontStyle.Italic;
@@ -107,12 +134,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             name.raycastTarget = false;
 
             // Pastille d'état (Actif / Cible / Disparu) — créée, affichée selon l'état dans Refresh()
-            Image chipImage;
-            Text chipText;
-            GameObject chip = BuildChip(line1.transform, out chipImage, out chipText);
+            GameObject chip = BuildChip(line1.transform, out Image chipImage, out Text chipText);
 
             // Boutons ▲ ▼ ✕ (révélés au survol / sélection)
-            CanvasGroup rowButtonsGroup = BuildRowButtons(line1.transform, bookmark, isFirst, isLast);
+            CanvasGroup rowButtonsGroup = BuildRowButtons(
+                line1.transform, 
+                _bookmark, 
+                _first, 
+                _last,
+                out ButtonController upButton,
+                out ButtonController downButton,
+                out ButtonController removeButton
+            );
 
             // ---- Ligne 2 : situation (+ nom de vaisseau) ----
             var line2 = NewHLine(rowGo.transform, "Line2", Mathf.RoundToInt(VesselBookmarkPalette.TypeIconSize + VesselBookmarkPalette.RowSpacing));
@@ -121,7 +154,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             var situationGo = new GameObject("Situation", typeof(RectTransform));
             situationGo.transform.SetParent(line2.transform, false);
             var situation = situationGo.AddComponent<Text>();
-            situation.text = bookmark.VesselSituationLabel;
+            situation.text = _bookmark.VesselSituationLabel;
             situation.font = HighLogic.UISkin.font;
             situation.fontSize = VesselBookmarkPalette.SituationFontSize;
             situation.color = VesselBookmarkPalette.SituationColor;
@@ -130,12 +163,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             situation.verticalOverflow = VerticalWrapMode.Overflow;
             situation.raycastTarget = false;
 
-            if (bookmark is CommandModuleBookmark cmb && cmb.VesselName != cmb.CommandModuleName)
+            if (_bookmark is CommandModuleBookmark cmb && cmb.VesselName != cmb.CommandModuleName)
             {
                 var vnameGo = new GameObject("VesselName", typeof(RectTransform));
                 vnameGo.transform.SetParent(line2.transform, false);
                 var vname = vnameGo.AddComponent<Text>();
-                vname.text = "(" + bookmark.VesselName + ")";
+                vname.text = "(" + _bookmark.VesselName + ")";
                 vname.font = HighLogic.UISkin.font;
                 vname.fontSize = VesselBookmarkPalette.SituationFontSize;
                 vname.color = VesselBookmarkPalette.VesselNameColor;
@@ -146,22 +179,30 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             }
 
             // ---- Ligne 3 : commentaire (si présent) ----
-            if (!string.IsNullOrEmpty(bookmark.Comment))
+            if (!string.IsNullOrEmpty(_bookmark.Comment))
             {
-                BuildComment(rowGo.transform, bookmark.Comment);
+                BuildComment(rowGo.transform, _bookmark.Comment);
             }
 
             // Survol + clic sur la ligne (les boutons enfants consomment leurs propres clics).
             // PointerHandler plutôt qu'EventTrigger pour ne pas bloquer la molette (cf. PointerHandler).
             var pointer = rowGo.AddComponent<PointerHandler>();
-            pointer.OnEnter = () => _viewModel.HoveredBookmark = bookmark;
-            pointer.OnExit = () => {
-                if (_viewModel.HoveredBookmark == bookmark) _viewModel.HoveredBookmark = null;
-            };
-            pointer.OnClick = () => _viewModel.SelectedBookmark = bookmark;
-
-            controller.Bind(bookmark, bg, accentBar, name, chip, chipImage, chipText, rowButtonsGroup, vesselExists);
-            return controller;
+            
+            return rowGo.AddComponent<BookmarkRowController>()
+                .ViewModel(_viewModel)
+                .Bookmark(_bookmark)
+                .Background(bg)
+                .AccentBar(accentBar)
+                .Name(name)
+                .Chip(chip)
+                .ChipImage(chipImage)
+                .ChipText(chipText)
+                .RowButtons(rowButtonsGroup)
+                .VesselExists(vesselExists)
+                .PointerHandler(pointer)
+                .UpButtonController(upButton)
+                .DownButtonController(downButton)
+                .RemoveButtonController(removeButton);
         }
 
         // ----------------------------------------------------------------
@@ -287,7 +328,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             return chipGo;
         }
 
-        private CanvasGroup BuildRowButtons(Transform parent, Bookmark bookmark, bool isFirst, bool isLast)
+        private CanvasGroup BuildRowButtons(
+            Transform parent, 
+            Bookmark bookmark, 
+            bool isFirst, 
+            bool isLast,
+            out ButtonController upButton,
+            out ButtonController downButton,
+            out ButtonController removeButton
+        )
         {
             var groupGo = new GameObject("RowButtons", typeof(RectTransform));
             groupGo.transform.SetParent(parent, false);
@@ -306,7 +355,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             group.interactable = false;
 
             // Row buttons use their own (smaller) size, font and colors, overriding the VBM defaults.
-            ButtonController up = new VBMButtonBuilder()
+            upButton = new VBMButtonBuilder()
                 .ObjectName("MoveUp")
                 .Label(MoveUpGlyph)
                 .Interactable(!isFirst)
@@ -315,11 +364,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 .BackgroundColor(VesselBookmarkPalette.RowButtonBgColor)
                 .HoverColor(VesselBookmarkPalette.RowButtonHoverColor)
                 .Build();
-            up.OnClick.Add(() => _viewModel.MoveUp(bookmark));
-            up.transform.SetParent(groupGo.transform, false);
-            Tooltips.Attach(up.gameObject, ModLocalization.GetString("tooltipMoveUp"));
+            upButton.transform.SetParent(groupGo.transform, false);
+            Tooltips.Attach(upButton.gameObject, ModLocalization.GetString("tooltipMoveUp"));
 
-            ButtonController down = new VBMButtonBuilder()
+            downButton = new VBMButtonBuilder()
                 .ObjectName("MoveDown")
                 .Label(MoveDownGlyph)
                 .Interactable(!isLast)
@@ -328,11 +376,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 .BackgroundColor(VesselBookmarkPalette.RowButtonBgColor)
                 .HoverColor(VesselBookmarkPalette.RowButtonHoverColor)
                 .Build();
-            down.OnClick.Add(() => _viewModel.MoveDown(bookmark));
-            down.transform.SetParent(groupGo.transform, false);
-            Tooltips.Attach(down.gameObject, ModLocalization.GetString("tooltipMoveDown"));
+            downButton.transform.SetParent(groupGo.transform, false);
+            Tooltips.Attach(downButton.gameObject, ModLocalization.GetString("tooltipMoveDown"));
 
-            ButtonController remove = new VBMButtonBuilder()
+            removeButton = new VBMButtonBuilder()
                 .ObjectName("Remove")
                 .Label(RemoveGlyph)
                 .Size(VesselBookmarkPalette.RowButtonSize)
@@ -340,9 +387,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 .BackgroundColor(VesselBookmarkPalette.RowButtonBgColor)
                 .HoverColor(VesselBookmarkPalette.RowButtonDangerHoverColor)
                 .Build();
-            remove.OnClick.Add(() => _viewModel.RequestRemoval(bookmark));
-            remove.transform.SetParent(groupGo.transform, false);
-            Tooltips.Attach(remove.gameObject, ModLocalization.GetString("tooltipRemove"));
+            removeButton.transform.SetParent(groupGo.transform, false);
+            Tooltips.Attach(removeButton.gameObject, ModLocalization.GetString("tooltipRemove"));
 
             return group;
         }
@@ -414,93 +460,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 title += " (" + ModLocalization.GetString(key) + ")";
             }
             return title;
-        }
-
-        // ================================================================
-
-        public class BookmarkRowController : BaseController
-        {
-            private Bookmark _bookmark;
-            private Image _bg;
-            private Image _accentBar;
-            private Text _name;
-            private GameObject _chip;
-            private Image _chipImage;
-            private Text _chipText;
-            private CanvasGroup _rowButtons;
-            private bool _vesselExists;
-
-            public Bookmark Bookmark => _bookmark;
-
-            public void Bind(
-                Bookmark bookmark, Image bg, Image accentBar, Text name,
-                GameObject chip, Image chipImage, Text chipText,
-                CanvasGroup rowButtons, bool vesselExists)
-            {
-                this._bookmark = bookmark;
-                this._bg = bg;
-                this._accentBar = accentBar;
-                this._name = name;
-                this._chip = chip;
-                this._chipImage = chipImage;
-                this._chipText = chipText;
-                this._rowButtons = rowButtons;
-                this._vesselExists = vesselExists;
-            }
-
-            public void Start()
-            {
-                Refresh();
-            }
-
-            /// <summary>Réévalue le rendu de la ligne à partir de l'état courant du ViewModel.</summary>
-            public void Refresh()
-            {
-                bool selected = ViewModel.IsSelected(_bookmark);
-                bool hovered = ViewModel.IsHovered(_bookmark);
-                bool active = _vesselExists && ViewModel.IsCurrentVessel(_bookmark);
-                bool target = _vesselExists && ViewModel.IsTarget(_bookmark);
-
-                // Fond
-                if (active) _bg.color = VesselBookmarkPalette.RowActiveBgColor;
-                else if (selected) _bg.color = VesselBookmarkPalette.RowSelectedBgColor;
-                else if (hovered) _bg.color = VesselBookmarkPalette.RowHoverColor;
-                else _bg.color = Color.clear;
-
-                // Liseré gauche
-                _accentBar.enabled = active || selected;
-                _accentBar.color = active ? VesselBookmarkPalette.AccentColor : VesselBookmarkPalette.AccentBorderColor;
-
-                // Couleur du titre
-                if (!_vesselExists) _name.color = VesselBookmarkPalette.NameMissingColor;
-                else if (active) _name.color = VesselBookmarkPalette.NameActiveColor;
-                else if (target) _name.color = VesselBookmarkPalette.NameTargetColor;
-                else _name.color = VesselBookmarkPalette.NameColor;
-
-                // Pastille d'état
-                if (!_vesselExists) SetChip(true, "chipMissing",
-                    VesselBookmarkPalette.ChipMissingTextColor, VesselBookmarkPalette.ChipMissingBgColor, VesselBookmarkPalette.ChipMissingBorderColor);
-                else if (active) SetChip(true, "chipActive",
-                    VesselBookmarkPalette.AccentColor, VesselBookmarkPalette.AccentBgColor, VesselBookmarkPalette.AccentBorderColor);
-                else if (target) SetChip(true, "chipTarget",
-                    VesselBookmarkPalette.AccentColor, VesselBookmarkPalette.AccentBgColor, VesselBookmarkPalette.AccentBorderColor);
-                else _chip.SetActive(false);
-
-                // Boutons d'ordre/suppression
-                bool showButtons = hovered || selected || active;
-                _rowButtons.alpha = showButtons ? 1f : 0f;
-                _rowButtons.blocksRaycasts = showButtons;
-                _rowButtons.interactable = showButtons;
-            }
-
-            private void SetChip(bool show, string locKey, Color text, Color bg, Color border)
-            {
-                if (!show) { _chip.SetActive(false); return; }
-                _chip.SetActive(true);
-                _chipText.text = ModLocalization.GetString(locKey);
-                _chipText.color = text;
-                _chipImage.sprite = SpritesGlobal.Border(bg, border, VesselBookmarkPalette.ChipBorderThickness);
-            }
         }
     }
 }

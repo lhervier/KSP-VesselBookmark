@@ -1,19 +1,15 @@
-using UnityEngine;
-using UnityEngine.UI;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
-using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list;
 using com.github.lhervier.ksp.shared.ugui;
-using com.github.lhervier.ksp.shared.ugui.sprites;
+using com.github.lhervier.ksp.shared.ugui.scrollableview;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body
 {
     /// <summary>
-    /// Corps scrollable de la fenêtre (sous la title bar). Un contenu plus grand que la zone visible
-    /// produit une scrollbar verticale à droite. Squelette pour l'instant : un placeholder dans le
-    /// contenu. La liste des sections/bookmarks viendra s'y greffer.
+    /// Corps scrollable de la fenêtre : une vue défilante (composant partagé) dont le contenu est la liste
+    /// des bookmarks. Un contenu plus grand que la zone visible produit une scrollbar verticale à droite.
     /// </summary>
-    public class BodyBuilder : IUGUIBuilder<BodyController>
+    public class BodyBuilder : IUGUIBuilder<ScrollableViewController>
     {
         // ===================================================
         // Builder parameters
@@ -30,131 +26,16 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body
         // Build
         // =========================================
 
-        public BodyController Build()
+        public ScrollableViewController Build()
         {
-            var bodyGo = new GameObject("Bookmarks.Body", typeof(RectTransform));
-            
-            // Échappe au VerticalLayoutGroup de la popupWindow
-            var layoutElement = bodyGo.AddComponent<LayoutElement>();
-            layoutElement.ignoreLayout = true;
-
-            // Remplit l'intérieur de la fenêtre, moins le chrome (1px), la title bar en haut et le footer en bas
-            var rect = bodyGo.GetComponent<RectTransform>();
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
-            rect.offsetMin = new Vector2(
-                VesselBookmarkPalette.WindowBorderThickness,
-                VesselBookmarkPalette.WindowBorderThickness + VesselBookmarkPalette.FooterHeight);
-            rect.offsetMax = new Vector2(
-                -VesselBookmarkPalette.WindowBorderThickness,
-                -(VesselBookmarkPalette.WindowBorderThickness + VesselBookmarkPalette.TitleBarHeight));
-
-            // ScrollRect : relie viewport (clip) + content (défilé) + scrollbar
-            var scrollRect = bodyGo.AddComponent<ScrollRect>();
-            scrollRect.horizontal = false;
-            scrollRect.vertical = true;
-            scrollRect.movementType = ScrollRect.MovementType.Clamped;
-            scrollRect.scrollSensitivity = 20f;
-
-            // Viewport : corps moins la colonne de scrollbar à droite. RectMask2D clippe le débordement.
-            var viewportGo = new GameObject("Viewport", typeof(RectTransform));
-            viewportGo.transform.SetParent(bodyGo.transform, false);
-            var viewportRect = viewportGo.GetComponent<RectTransform>();
-            viewportRect.anchorMin = Vector2.zero;
-            viewportRect.anchorMax = Vector2.one;
-            viewportRect.offsetMin = Vector2.zero;
-            viewportRect.offsetMax = new Vector2(-VesselBookmarkPalette.ScrollbarWidth, 0f);
-            viewportGo.AddComponent<RectMask2D>();
-            var viewportImage = viewportGo.AddComponent<Image>();
-            viewportImage.sprite = SpritesGlobal.FillSprite;
-            viewportImage.type = Image.Type.Simple;
-            viewportImage.color = Color.clear;
-            viewportImage.raycastTarget = true;
-            scrollRect.viewport = viewportRect;
-
-            // Content : enfant du viewport, ancré sur son bord haut. Hauteur auto (ContentSizeFitter).
-            var contentGo = new GameObject("Content", typeof(RectTransform));
-            contentGo.transform.SetParent(viewportGo.transform, false);
-            
-            var contentRect = contentGo.GetComponent<RectTransform>();
-            contentRect.anchorMin = new Vector2(0f, 1f);
-            contentRect.anchorMax = new Vector2(1f, 1f);
-            contentRect.pivot = new Vector2(0.5f, 1f);
-            contentRect.anchoredPosition = Vector2.zero;
-            contentRect.sizeDelta = Vector2.zero;
-            scrollRect.content = contentRect;
-
-            var contentLayout = contentGo.AddComponent<VerticalLayoutGroup>();
-            contentLayout.padding = new RectOffset(0, 0, 0, 0);
-            contentLayout.spacing = 0f;
-            contentLayout.childAlignment = TextAnchor.UpperLeft;
-            contentLayout.childControlWidth = true;
-            contentLayout.childControlHeight = true;
-            contentLayout.childForceExpandWidth = true;
-            contentLayout.childForceExpandHeight = false;
-
-            var contentFitter = contentGo.AddComponent<ContentSizeFitter>();
-            contentFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-            contentFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-            // La liste des sections/bookmarks (se reconstruit/rafraîchit via ses propres abonnements)
-            var list = new ListBuilder(_viewModel).Create();
-            list.transform.SetParent(contentGo.transform, false);
-
-            // Scrollbar verticale à droite
-            var scrollbarGo = new GameObject("Scrollbar", typeof(RectTransform));
-            scrollbarGo.transform.SetParent(bodyGo.transform, false);
-            var scrollbarRect = scrollbarGo.GetComponent<RectTransform>();
-            scrollbarRect.anchorMin = new Vector2(1f, 0f);
-            scrollbarRect.anchorMax = new Vector2(1f, 1f);
-            scrollbarRect.pivot = new Vector2(1f, 0.5f);
-            scrollbarRect.sizeDelta = new Vector2(VesselBookmarkPalette.ScrollbarWidth, 0f);
-
-            var scrollbarBg = scrollbarGo.AddComponent<Image>();
-            scrollbarBg.sprite = SpritesGlobal.FillSprite;
-            scrollbarBg.type = Image.Type.Simple;
-            scrollbarBg.color = VesselBookmarkPalette.SearchBgColor;
-            scrollbarBg.raycastTarget = true;
-
-            var scrollbar = scrollbarGo.AddComponent<Scrollbar>();
-            scrollbar.direction = Scrollbar.Direction.BottomToTop;
-
-            var slidingAreaGo = new GameObject("Sliding Area", typeof(RectTransform));
-            slidingAreaGo.transform.SetParent(scrollbarGo.transform, false);
-            var slidingAreaRect = slidingAreaGo.GetComponent<RectTransform>();
-            slidingAreaRect.anchorMin = Vector2.zero;
-            slidingAreaRect.anchorMax = Vector2.one;
-            slidingAreaRect.offsetMin = Vector2.zero;
-            slidingAreaRect.offsetMax = Vector2.zero;
-
-            var handleGo = new GameObject("Handle", typeof(RectTransform));
-            handleGo.transform.SetParent(slidingAreaGo.transform, false);
-            var handleRect = handleGo.GetComponent<RectTransform>();
-            handleRect.anchorMin = Vector2.zero;
-            handleRect.anchorMax = Vector2.one;
-            handleRect.offsetMin = Vector2.zero;
-            handleRect.offsetMax = Vector2.zero;
-            var handleImage = handleGo.AddComponent<Image>();
-            handleImage.sprite = SpritesGlobal.FillSprite;
-            handleImage.type = Image.Type.Simple;
-            handleImage.color = Color.white;
-            handleImage.raycastTarget = true;
-            scrollbar.targetGraphic = handleImage;
-            scrollbar.handleRect = handleRect;
-
-            var scrollbarColors = scrollbar.colors;
-            scrollbarColors.normalColor = VesselBookmarkPalette.WindowBorderColor;
-            scrollbarColors.highlightedColor = VesselBookmarkPalette.ScrollbarColor;
-            scrollbarColors.pressedColor = VesselBookmarkPalette.ScrollbarColor;
-            scrollbarColors.selectedColor = VesselBookmarkPalette.WindowBorderColor;
-            scrollbarColors.disabledColor = VesselBookmarkPalette.WindowBorderColor;
-            scrollbarColors.colorMultiplier = 1f;
-            scrollbarColors.fadeDuration = 0.1f;
-            scrollbar.colors = scrollbarColors;
-
-            scrollRect.verticalScrollbar = scrollbar;
-
-            return bodyGo.AddComponent<BodyController>();
+            return new ScrollableViewBuilder<ListController>()
+                .ObjectName("Bookmarks.Body")
+                .ContentBuilder(new ListBuilder().ViewModel(_viewModel))
+                .ScrollbarWidth(VesselBookmarkPalette.ScrollbarWidth)
+                .ScrollbarBackgroundColor(VesselBookmarkPalette.SearchBgColor)
+                .HandleColor(VesselBookmarkPalette.WindowBorderColor)
+                .HandleHoverColor(VesselBookmarkPalette.ScrollbarColor)
+                .Build();
         }
     }
 }

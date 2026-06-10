@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
+using com.github.lhervier.ksp.shared.ugui;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 {
@@ -11,28 +12,27 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
     /// un en-tête + une aide, puis les lignes. Reconstruit le contenu sur OnAvailableBookmarksChanged ;
     /// rafraîchit le rendu des lignes (sélection / survol / actif / cible) sur les events correspondants.
     /// </summary>
-    public class ListBuilder
+    public class ListBuilder : IUGUIBuilder<ListController>
     {
-        // Ordre d'affichage des sections + clés de localisation (titre / aide).
-        private static readonly (BookmarkType type, string titleKey, string hintKey)[] SECTIONS =
-        {
-            (BookmarkType.CommandModule, "sectionCommandModule", "labelAddCommandModuleBookmark"),
-            (BookmarkType.Vessel, "sectionVessel", "labelAddVesselBookmark"),
-        };
+        // ========================================
+        // Builder parameters
+        // ========================================
 
-        private readonly BookmarksViewModel _viewModel;
-
-        public ListBuilder(BookmarksViewModel viewModel)
+        private BookmarksViewModel _viewModel;
+        public ListBuilder ViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
+            return this;
         }
 
-        public ListController Create()
+        // ======================================
+        // Build
+        // ======================================
+
+        public ListController Build()
         {
             var go = new GameObject("Bookmarks.List", typeof(RectTransform));
-            ListController controller = go.AddComponent<ListController>();
-            controller.Initialize(_viewModel);
-
+            
             var layout = go.AddComponent<VerticalLayoutGroup>();
             layout.padding = new RectOffset(0, 0, 0, 0);
             layout.spacing = 0f;
@@ -42,120 +42,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             layout.childForceExpandWidth = true;
             layout.childForceExpandHeight = false;
 
-            return controller;
-        }
-
-        public class ListController : BaseController
-        {
-            // Shared stand-in for a section that holds no bookmark. Read-only here (only its Count is
-            // read and it is never indexed into), so a single shared instance is safe.
-            private static readonly List<Bookmark> EmptySection = new List<Bookmark>();
-
-            private readonly SectionBuilder _sectionBuilder = new SectionBuilder();
-            private BookmarkRowBuilder _rowBuilder;
-            private readonly List<BookmarkRowBuilder.BookmarkRowController> _rows = new List<BookmarkRowBuilder.BookmarkRowController>();
-
-            // La reconstruction est coûteuse (destruction/recréation de tous les GameObjects de lignes).
-            // Quand la fenêtre est masquée (SetActive(false) sur la hiérarchie du popup → OnDisable ici),
-            // on diffère la reconstruction et on l'applique à la réouverture (OnEnable). _dirty mémorise
-            // qu'un changement de bookmarks a eu lieu pendant que la fenêtre était masquée.
-            private bool _dirty = false;
-
-            public void Start()
-            {
-                _rowBuilder = new BookmarkRowBuilder(ViewModel);
-
-                ViewModel.OnAvailableBookmarksChanged.Add(OnAvailableBookmarksChanged);
-                ViewModel.OnSelectedBookmarkChanged.Add(RefreshAll);
-                ViewModel.OnHoveredBookmarkChanged.Add(RefreshAll);
-                ViewModel.OnActiveOrTargetChanged.Add(RefreshAll);
-
-                Rebuild();
-            }
-
-            public void OnEnable()
-            {
-                // Fenêtre ré-affichée : applique la reconstruction différée, ou réévalue au minimum le
-                // rendu des lignes (vaisseau actif / cible ont pu changer pendant qu'on était masqué).
-                if (_dirty)
-                {
-                    Rebuild();
-                }
-                else
-                {
-                    RefreshAll();
-                }
-            }
-
-            public void OnDestroy()
-            {
-                ViewModel?.OnAvailableBookmarksChanged.Remove(OnAvailableBookmarksChanged);
-                ViewModel?.OnSelectedBookmarkChanged.Remove(RefreshAll);
-                ViewModel?.OnHoveredBookmarkChanged.Remove(RefreshAll);
-                ViewModel?.OnActiveOrTargetChanged.Remove(RefreshAll);
-            }
-
-            private void OnAvailableBookmarksChanged()
-            {
-                // Fenêtre masquée : on diffère (cf. _dirty / OnEnable) pour ne pas reconstruire dans le vide.
-                if (!isActiveAndEnabled)
-                {
-                    _dirty = true;
-                    return;
-                }
-                Rebuild();
-            }
-
-            private void Rebuild()
-            {
-                _dirty = false;
-
-                // Vide le contenu existant
-                _rows.Clear();
-                for (int i = transform.childCount - 1; i >= 0; i--)
-                {
-                    Destroy(transform.GetChild(i).gameObject);
-                }
-
-                var available = ViewModel.AvailableBookmarks;
-                foreach (var section in SECTIONS)
-                {
-                    // Every section is always rendered (header + "how to add" hint), even when it holds
-                    // no bookmark: an absent type is treated as an empty list, so the header shows a 0
-                    // count and the hint stays visible to tell the user how to populate it.
-                    if (!available.TryGetValue(section.type, out List<Bookmark> bookmarks) || bookmarks == null)
-                    {
-                        bookmarks = EmptySection;
-                    }
-
-                    _sectionBuilder.CreateHeader(transform, section.titleKey, bookmarks.Count);
-                    _sectionBuilder.CreateHint(transform, section.hintKey);
-
-                    for (int i = 0; i < bookmarks.Count; i++)
-                    {
-                        bool isFirst = i == 0;
-                        bool isLast = i == bookmarks.Count - 1;
-                        var row = _rowBuilder.Create(bookmarks[i], isFirst, isLast);
-                        row.transform.SetParent(transform, false);
-                        _rows.Add(row);
-                    }
-                }
-
-                RefreshAll();
-            }
-
-            private void RefreshAll()
-            {
-                // Inutile de réévaluer le rendu d'une fenêtre masquée : OnEnable s'en charge à la réouverture.
-                if (!isActiveAndEnabled)
-                {
-                    return;
-                }
-                foreach (var row in _rows)
-                {
-                    if (row != null) row.Refresh();
-                }
-            }
+            return go
+                .AddComponent<ListController>()
+                .ViewModel(_viewModel);
         }
     }
 }

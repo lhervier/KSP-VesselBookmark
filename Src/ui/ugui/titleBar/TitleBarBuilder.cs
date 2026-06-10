@@ -1,104 +1,51 @@
 using UnityEngine;
 using UnityEngine.UI;
 using com.github.lhervier.ksp.shared.ugui.button;
+using com.github.lhervier.ksp.shared.ugui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared;
-using com.github.lhervier.ksp.shared.ugui.sprites;
 using com.github.lhervier.ksp.shared.ugui;
+using com.github.lhervier.ksp.shared.ugui.sprites;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
 {
     /// <summary>
-    /// Two-column title bar: the title on the left (flexible), and on the right a group holding first
-    /// the "shown / total" count badge, then the ＋ (add the active vessel), ↻ (refresh), ⋯ (filter
-    /// menu, with its green "active filter" dot) and ✕ (close) buttons.
+    /// Right-side content of the popup's title bar: the "shown / total" count badge, then the ＋ (add the
+    /// active vessel), ↻ (refresh) and ⋯ (filter menu, with its green "active filter" dot) buttons. The
+    /// title bar frame, the title on the left and the ✕ close button are provided by the shared PopupBuilder.
     /// </summary>
-    public class TitleBarBuilder
+    public class TitleBarBuilder : IUGUIBuilder<TitleBarController>
     {
         private const string AddGlyph = "+";
         private const string RefreshGlyph = "↻";   // ↻ (U+21BB) — renders fine with the UISkin font
         private const string MenuGlyph = "⋯";       // ⋯ (U+22EF) — fallback to "≡" / "..." if not rendered
-        private const string CloseGlyph = "×";      // × (U+00D7) — matches the shared popup close button
 
         // ====================================
         // Builder parameters
         // ====================================
 
-        private readonly BookmarksViewModel _viewModel;
-        public TitleBarBuilder(BookmarksViewModel viewModel)
+        private BookmarksViewModel _viewModel;
+        public TitleBarBuilder ViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
+            return this;
         }
 
         // ===================================
         // Build
         // ===================================
 
-        public TitleBarController Create()
+        public TitleBarController Build()
         {
-            var go = new GameObject("Bookmarks.TitleBar", typeof(RectTransform));
-            TitleBarController controller = go.AddComponent<TitleBarController>();
+            var rightColumnGo = new GameObject("Bookmarks.TitleBar.RightColumn", typeof(RectTransform));
+            TitleBarController controller = rightColumnGo.AddComponent<TitleBarController>();
             controller.Initialize(_viewModel);
 
-            // Escape the popupWindow's VerticalLayoutGroup: we anchor ourselves to the top.
-            var layoutElement = go.AddComponent<LayoutElement>();
-            layoutElement.ignoreLayout = true;
-
-            var rect = go.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0f, 1f);
-            rect.anchorMax = new Vector2(1f, 1f);
-            rect.pivot = new Vector2(0.5f, 1f);
-            rect.sizeDelta = new Vector2(
-                -2f * VesselBookmarkPalette.WindowBorderThickness,
-                VesselBookmarkPalette.TitleBarHeight);
-            rect.anchoredPosition = new Vector2(0f, -VesselBookmarkPalette.WindowBorderThickness);
-
-            // Background + 1px separator at the bottom
-            var image = go.AddComponent<Image>();
-            image.sprite = SpritesGlobal.HorizontalBorders(
-                VesselBookmarkPalette.TitleBarBgColor,
-                VesselBookmarkPalette.TitleBarBorderColor,
-                VesselBookmarkPalette.TitleBarBorderThickness);
-            image.type = Image.Type.Sliced;
-            image.color = Color.white;
-            image.raycastTarget = true;
-
-            var layout = go.AddComponent<HorizontalLayoutGroup>();
-            layout.padding = new RectOffset(
-                Mathf.RoundToInt(VesselBookmarkPalette.DefaultPaddingLeft),
-                Mathf.RoundToInt(VesselBookmarkPalette.DefaultPaddingRight),
-                5, 5);   // top/bottom mirror the shared popup title bar padding (DefaultPalette.Padding{Top,Bottom})
-            layout.spacing = VesselBookmarkPalette.DefaultSpacing;
-            layout.childAlignment = TextAnchor.MiddleLeft;
-            layout.childControlWidth = true;
-            layout.childControlHeight = true;
-            layout.childForceExpandWidth = false;
-            layout.childForceExpandHeight = false;
-
-            // Left column: the title (takes all available width and pushes the right column against
-            // the right edge).
-            var titleGo = new GameObject("Title", typeof(RectTransform));
-            titleGo.transform.SetParent(go.transform, false);
-            var titleElement = titleGo.AddComponent<LayoutElement>();
-            titleElement.flexibleWidth = 1f;
-            var title = titleGo.AddComponent<Text>();
-            title.text = ModLocalization.GetString("windowTitle").ToUpperInvariant();
-            title.font = HighLogic.UISkin.font;
-            title.fontSize = VesselBookmarkPalette.TitleFontSize;
-            title.fontStyle = FontStyle.Bold;
-            title.color = VesselBookmarkPalette.TitleColor;
-            title.alignment = TextAnchor.MiddleLeft;
-            title.horizontalOverflow = HorizontalWrapMode.Overflow;
-            title.verticalOverflow = VerticalWrapMode.Overflow;
-            title.raycastTarget = false;
-
-            // Right column: count badge (first) then the ＋ ↻ ⋯ ✕ buttons. Width is driven by the
-            // content (no flexibleWidth), so the group stays pinned to the right.
-            var rightColumnGo = new GameObject("RightColumn", typeof(RectTransform));
-            rightColumnGo.transform.SetParent(go.transform, false);
+            // Right column: count badge (first) then the ＋ ↻ ⋯ buttons. Width is driven by the content
+            // (no flexibleWidth), so the group stays pinned to the right of the shared title bar.
             var rightLayout = rightColumnGo.AddComponent<HorizontalLayoutGroup>();
-            rightLayout.spacing = VesselBookmarkPalette.DefaultSpacing;
+            rightLayout.spacing = DefaultPalette.Spacing;
             rightLayout.childAlignment = TextAnchor.MiddleLeft;
             rightLayout.childControlWidth = true;
             rightLayout.childControlHeight = true;
@@ -111,45 +58,39 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             controller.BindCountLabel(countLabel);
 
             // "Add the active vessel" button
-            ButtonController add = new VBMButtonBuilder()
-                .ObjectName("Add")
-                .Label(AddGlyph)
-                .Interactable(_viewModel.CanAddVesselBookmark())
-                .Build();
+            ButtonController add = NewButton("Add", AddGlyph, _viewModel.CanAddVesselBookmark());
             add.OnClick.Add(() => _viewModel.AddVesselBookmark());
             add.transform.SetParent(right, false);
             Tooltips.Attach(add.gameObject, ModLocalization.GetString("buttonAdd"));
             controller.BindAddButton(add);
 
             // "Refresh" button
-            ButtonController refresh = new VBMButtonBuilder()
-                .ObjectName("Refresh")
-                .Label(RefreshGlyph)
-                .Build();
+            ButtonController refresh = NewButton("Refresh", RefreshGlyph, true);
             refresh.OnClick.Add(() => _viewModel.ForceReload());
             refresh.transform.SetParent(right, false);
             Tooltips.Attach(refresh.gameObject, ModLocalization.GetString("buttonRefresh"));
 
             // Filter menu button "⋯" (toggles FilterMenuOpen) + green "active filter" dot
-            ButtonController menu = new VBMButtonBuilder()
-                .ObjectName("FilterMenu")
-                .Label(MenuGlyph)
-                .Build();
+            ButtonController menu = NewButton("FilterMenu", MenuGlyph, true);
             menu.OnClick.Add(() => _viewModel.FilterMenuOpen = !_viewModel.FilterMenuOpen);
             menu.transform.SetParent(right, false);
             Tooltips.Attach(menu.gameObject, ModLocalization.GetString("menuFiltersTitle"));
             controller.BindFilterDot(BuildFilterDot(menu.gameObject));
 
-            // Close button: closes the window (IMGUI follows, via WindowVisible)
-            ButtonController close = new VBMButtonBuilder()
-                .ObjectName("Close")
-                .Label(CloseGlyph)
-                .Build();
-            close.OnClick.Add(() => _viewModel.WindowVisible = false);
-            close.transform.SetParent(right, false);
-            Tooltips.Attach(close.gameObject, ModLocalization.GetString("buttonClose"));
-
             return controller;
+        }
+
+        // Square title-bar button matching the shared ✕ close button (same size and colors), so the four
+        // buttons of the title bar stay homogeneous.
+        private static ButtonController NewButton(string objectName, string glyph, bool interactable)
+        {
+            return new ButtonBuilder()
+                .ObjectName(objectName)
+                .Label(glyph)
+                .Interactable(interactable)
+                .BackgroundColor(PopupPalette.TitleBarButtonColor)
+                .HoverColor(PopupPalette.TitleBarButtonHoverColor)
+                .Build();
         }
 
         // Chip: sliced accent-border Image + accent Text. Size driven by the content + padding

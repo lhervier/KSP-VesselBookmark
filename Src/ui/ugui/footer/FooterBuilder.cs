@@ -38,16 +38,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
         public FooterController Build()
         {
             var go = new GameObject("Bookmarks.Footer", typeof(RectTransform));
-            
-            var layoutElement = go.AddComponent<LayoutElement>();
-            layoutElement.ignoreLayout = true;
 
-            var rect = go.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0f, 0f);
-            rect.anchorMax = new Vector2(1f, 0f);
-            rect.pivot = new Vector2(0.5f, 0f);
-            rect.sizeDelta = new Vector2(-2f * VesselBookmarkPalette.WindowBorderThickness, VesselBookmarkPalette.FooterHeight);
-            rect.anchoredPosition = new Vector2(0f, VesselBookmarkPalette.WindowBorderThickness);
+            // Fixed-height child of the content's vertical layout: the layout stacks it under the
+            // scrollable body and pins it at the bottom. Width is driven by the parent layout.
+            var layoutElement = go.AddComponent<LayoutElement>();
+            layoutElement.minHeight = layoutElement.preferredHeight = VesselBookmarkPalette.FooterHeight;
 
             // Fond + séparateur 1px en haut
             var image = go.AddComponent<Image>();

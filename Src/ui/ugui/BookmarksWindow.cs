@@ -1,15 +1,17 @@
 using System;
 using UnityEngine;
+using com.github.lhervier.ksp.shared.ugui.popup;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
 {
     /// <summary>
-    /// Gère le cycle de vie de la fenêtre uGUI (PopupDialog) : spawn paresseux, show/hide, mémorisation
-    /// de la position, et notification OnClosed quand KSP la ferme de lui-même (ex. Échap).
+    /// Gère le cycle de vie de la fenêtre uGUI : spawn paresseux via ModPopupBuilder, show/hide,
+    /// mémorisation de la position, et notification OnClosed. La mécanique bas niveau (PopupDialog,
+    /// position, fermeture par Échap, changement de scène) est déléguée au PopupController partagé.
     /// </summary>
     public sealed class BookmarksWindow
     {
-        private PopupDialog _popupDialog = null;
+        private PopupController _popup = null;
         private BookmarksViewModel _viewModel;
         private Vector2? _savedPosition;
 
@@ -23,63 +25,57 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
             this._viewModel = viewModel;
         }
 
-        /// <summary>Définit la position à restaurer (mémorisée entre sessions). Appliquée si la fenêtre existe.</summary>
+        /// <summary>Définit la position à restaurer (mémorisée entre sessions). Appliquée au prochain spawn.</summary>
         public void SetSavedPosition(Vector2 position)
         {
             _savedPosition = position;
-            ApplyPosition();
         }
 
         public void Show()
         {
-            if (_popupDialog == null)
+            // == null est sensible à la destruction Unity : après une fermeture par KSP (Échap), le
+            // controller détruit vaut null ici, ce qui déclenche un nouveau spawn.
+            if (_popup == null)
             {
-                _popupDialog = new PopupDialogBuilder()
-                    .ViewModel(_viewModel)
-                    .CreatePopupDialog();
-                _popupDialog?.onDestroy.AddListener(OnPopupDestroyed);
+                var builder = new ModPopupBuilder().ViewModel(_viewModel);
+                if (_savedPosition.HasValue)
+                {
+                    builder = builder.Position(_savedPosition.Value);
+                }
+                _popup = builder.Build();
+                if (_popup == null) return;   // Spawn KSP échoué
+                _popup.OnClosed.Add(OnPopupClosed);
+                _popup.OnPositionCaptured.Add(OnPopupPositionCaptured);
             }
-            _popupDialog?.gameObject.SetActive(true);
-            ApplyPosition();
+            _popup.Show();
         }
 
         public void Hide()
         {
-            CapturePosition();
-            _popupDialog?.gameObject.SetActive(false);
+            if (_popup != null)
+            {
+                _popup.Hide();
+            }
         }
 
         public void Destroy()
         {
-            CapturePosition();
-            _popupDialog?.onDestroy.RemoveListener(OnPopupDestroyed);
-            _popupDialog?.Dismiss();
-            _popupDialog = null;
+            if (_popup != null)
+            {
+                _popup.Dismiss();
+                _popup = null;
+            }
         }
 
-        private void OnPopupDestroyed()
+        private void OnPopupClosed()
         {
-            // Fermée par KSP (Échap…) sans passer par Hide() : on capture la position, on oublie la
-            // référence et on prévient le propriétaire pour qu'il resynchronise (toolbar, etc.).
-            CapturePosition();
-            _popupDialog = null;
             OnClosed.Fire();
         }
 
-        private void ApplyPosition()
+        private void OnPopupPositionCaptured(Vector2 position)
         {
-            if (!_savedPosition.HasValue) return;
-            if (_popupDialog == null || _popupDialog.RTrf == null) return;
-            Vector3 lp = _popupDialog.RTrf.localPosition;
-            _popupDialog.RTrf.localPosition = new Vector3(_savedPosition.Value.x, _savedPosition.Value.y, lp.z);
-        }
-
-        private void CapturePosition()
-        {
-            if (_popupDialog == null || _popupDialog.RTrf == null) return;
-            Vector3 lp = _popupDialog.RTrf.localPosition;
-            _savedPosition = new Vector2(lp.x, lp.y);
-            OnPositionCaptured?.Invoke(_savedPosition.Value);
+            _savedPosition = position;
+            OnPositionCaptured?.Invoke(position);
         }
     }
 }

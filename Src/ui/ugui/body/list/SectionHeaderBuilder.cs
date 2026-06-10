@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
-using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui.sprites;
+using com.github.lhervier.ksp.shared.ugui;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 {
@@ -11,13 +11,41 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
     /// En-tête de section (titre + compteur) et texte d'aide associé, ajoutés à un conteneur.
     /// Sections : signets par module de commande / par vaisseau.
     /// </summary>
-    public class SectionBuilder
+    public class SectionHeaderBuilder : IUGUIBuilder<SectionHeaderController>
     {
-        /// <summary>Ajoute au parent l'en-tête de section (titre uppercase à gauche, compteur à droite).</summary>
-        public void CreateHeader(Transform parent, string titleKey, int count)
+        // ================================================
+        // Builder parameters
+        // ================================================
+
+        private Transform _parent;
+        public SectionHeaderBuilder Parent(Transform parent)
+        {
+            this._parent = parent;
+            return this;
+        }
+
+        private string _titleKey;
+        public SectionHeaderBuilder TitleKey(string titleKey)
+        {
+            this._titleKey = titleKey;
+            return this;
+        }
+
+        private int _count;
+        public SectionHeaderBuilder Count(int count)
+        {
+            this._count = count;
+            return this;
+        }
+
+        // =====================================================
+        // Build
+        // =====================================================
+
+        public SectionHeaderController Build()
         {
             var go = new GameObject("SectionHeader", typeof(RectTransform));
-            go.transform.SetParent(parent, false);
+            go.transform.SetParent(_parent, false);
 
             var le = go.AddComponent<LayoutElement>();
             le.minHeight = le.preferredHeight = VesselBookmarkPalette.SectionHeaderHeight;
@@ -48,7 +76,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             var nameLe = nameGo.AddComponent<LayoutElement>();
             nameLe.flexibleWidth = 1f;
             var name = nameGo.AddComponent<Text>();
-            name.text = ModLocalization.GetString(titleKey).ToUpperInvariant();
+            name.text = ModLocalization.GetString(_titleKey).ToUpperInvariant();
             name.font = HighLogic.UISkin.font;
             name.fontSize = VesselBookmarkPalette.SectionNameFontSize;
             name.fontStyle = FontStyle.Bold;
@@ -61,7 +89,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             var countGo = new GameObject("Count", typeof(RectTransform));
             countGo.transform.SetParent(go.transform, false);
             var count2 = countGo.AddComponent<Text>();
-            count2.text = count.ToString();
+            count2.text = _count.ToString();
             count2.font = HighLogic.UISkin.font;
             count2.fontSize = VesselBookmarkPalette.SectionCountFontSize;
             count2.color = VesselBookmarkPalette.SectionCountColor;
@@ -69,45 +97,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             count2.horizontalOverflow = HorizontalWrapMode.Overflow;
             count2.verticalOverflow = VerticalWrapMode.Overflow;
             count2.raycastTarget = false;
-        }
 
-        /// <summary>Ajoute au parent le texte d'aide grisé sous l'en-tête.</summary>
-        public void CreateHint(Transform parent, string hintKey)
-        {
-            var go = new GameObject("SectionHint", typeof(RectTransform));
-            go.transform.SetParent(parent, false);
-
-            var image = go.AddComponent<Image>();
-            image.sprite = SpritesGlobal.FillSprite;
-            image.type = Image.Type.Simple;
-            image.color = VesselBookmarkPalette.SectionHintBgColor;
-            image.raycastTarget = false;
-
-            var layout = go.AddComponent<HorizontalLayoutGroup>();
-            layout.padding = new RectOffset(
-                Mathf.RoundToInt(VesselBookmarkPalette.SectionHintPaddingH),
-                Mathf.RoundToInt(VesselBookmarkPalette.SectionHintPaddingH),
-                Mathf.RoundToInt(VesselBookmarkPalette.SectionHintPaddingV),
-                Mathf.RoundToInt(VesselBookmarkPalette.SectionHintPaddingV));
-            layout.childControlWidth = true;
-            layout.childControlHeight = true;
-            layout.childForceExpandWidth = true;
-            layout.childForceExpandHeight = false;
-
-            var textGo = new GameObject("Text", typeof(RectTransform));
-            textGo.transform.SetParent(go.transform, false);
-            var textLe = textGo.AddComponent<LayoutElement>();
-            textLe.flexibleWidth = 1f;
-            var text = textGo.AddComponent<Text>();
-            text.text = ModLocalization.GetString(hintKey);
-            text.font = HighLogic.UISkin.font;
-            text.fontSize = VesselBookmarkPalette.SectionHintFontSize;
-            text.fontStyle = FontStyle.Italic;
-            text.color = VesselBookmarkPalette.SectionHintTextColor;
-            text.alignment = TextAnchor.MiddleLeft;
-            text.horizontalOverflow = HorizontalWrapMode.Wrap;
-            text.verticalOverflow = VerticalWrapMode.Overflow;
-            text.raycastTarget = false;
+            return go.AddComponent<SectionHeaderController>();
         }
     }
 }
