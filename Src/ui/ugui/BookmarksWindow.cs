@@ -9,7 +9,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
     /// </summary>
     public sealed class BookmarksWindow
     {
-        private PopupDialogBuilder _popupDialogBuilder;
         private PopupDialog _popupDialog = null;
         private BookmarksViewModel _viewModel;
         private Vector2? _savedPosition;
@@ -22,7 +21,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
         public void Initialize(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
-            this._popupDialogBuilder = new PopupDialogBuilder(viewModel);
         }
 
         /// <summary>Définit la position à restaurer (mémorisée entre sessions). Appliquée si la fenêtre existe.</summary>
@@ -36,7 +34,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
         {
             if (_popupDialog == null)
             {
-                _popupDialog = this._popupDialogBuilder.CreatePopupDialog();
+                _popupDialog = new PopupDialogBuilder()
+                    .ViewModel(_viewModel)
+                    .CreatePopupDialog();
                 _popupDialog?.onDestroy.AddListener(OnPopupDestroyed);
             }
             _popupDialog?.gameObject.SetActive(true);
