@@ -1,10 +1,5 @@
-using KSP.Localization;
 using KSP.UI.Screens;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using com.github.lhervier.ksp.bookmarksmod.bookmarks;
-using com.github.lhervier.ksp.bookmarksmod.util;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui {
@@ -14,7 +9,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
     /// (L'ancienne UI IMGUI est débranchée ; ses fichiers restent présents le temps de finir le uGUI.)
     /// </summary>
     [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
-    public class MainUI : MonoBehaviour {
+    public class BookmarksUI : MonoBehaviour {
 
         private static readonly ModLogger LOGGER = new ModLogger("MainUI");
 
