@@ -113,12 +113,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             ComboController typeCombo = new ComboBuilder()
                 .Parent(panelGo.transform)
                 .Label(ModLocalization.GetString("labelType"))
+                .LabelFor(TranslateVesselType)
                 .Build();
             typeCombo.OnSelect = v => _viewModel.SelectedVesselType = v;
-            typeCombo.LabelFor = TranslateVesselType;   // affiche les types traduits, garde la valeur brute
-            // Une seule combo ouverte à la fois : ouvrir l'une ferme l'autre.
-            bodyCombo.OnBeforeOpen = () => typeCombo.Collapse();
-            typeCombo.OnBeforeOpen = () => bodyCombo.Collapse();
             
             // Case « commentaire seulement »
             CheckboxController checkBox = BuildCheckbox(panelGo.transform);

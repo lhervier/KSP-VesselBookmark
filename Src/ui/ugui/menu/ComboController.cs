@@ -62,15 +62,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         }
 
         
-        /// <summary>
-        /// Conversion valeur → libellé affiché (ex. type de vaisseau brut → libellé traduit).
-        /// Null = identité (le libellé affiché est la valeur).
-        /// </summary>
-        public Func<string, string> LabelFor;
-
-        private string Label(string value)
+        private Func<string, string> _labelFor;
+        public ComboController LabelFor(Func<string, string> labelFor)
         {
-            return LabelFor != null ? LabelFor(value) : (value ?? string.Empty);
+            this._labelFor = labelFor;
+            return this;
         }
 
         public void Start()
@@ -194,6 +190,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             label.raycastTarget = false;
 
             return itemGo;
+        }
+
+        // =============================================
+        // Helpers
+        // =============================================
+
+        private string Label(string value)
+        {
+            return _labelFor != null ? _labelFor(value) : (value ?? string.Empty);
         }
     }
 }

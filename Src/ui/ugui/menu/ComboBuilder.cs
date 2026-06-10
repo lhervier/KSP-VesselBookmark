@@ -19,6 +19,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
     {
         private const string CaretGlyph = "▼";   // ▼ (U+25BC) — glyphe confirmé rendu par la police UISkin
 
+        // ====================================
+        // Builder parameters
+        // ====================================
+
         private Transform _parent;
         public ComboBuilder Parent(Transform parent)
         {
@@ -30,6 +34,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         public ComboBuilder Label(string label)
         {
             _label = label;
+            return this;
+        }
+
+        private Func<string, string> _labelFor;
+        public ComboBuilder LabelFor(Func<string, string> labelFor)
+        {
+            this._labelFor = labelFor;
             return this;
         }
 
@@ -136,7 +147,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 .HeaderRect(headerRect)
                 .DropDown(dropdown, content)
                 .Button(headerBtn)
-                .OverlayController(overlay);
+                .OverlayController(overlay)
+                .LabelFor(_labelFor);
         }
 
         // Panneau scrollable du dropdown (construit détaché et masqué ; positionné/affiché à l'ouverture).
