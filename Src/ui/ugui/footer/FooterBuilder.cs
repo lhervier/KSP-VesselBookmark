@@ -5,6 +5,7 @@ using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared;
+using com.github.lhervier.ksp.shared.ugui;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
 {
@@ -12,25 +13,31 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
     /// Barre d'actions du bas, fixée sous le corps : libellé de sélection à gauche, puis les boutons
     /// Éditer / Aller au vaisseau / Définir comme cible, actifs/grisés selon la sélection et l'état du jeu.
     /// </summary>
-    public class FooterBuilder
+    public class FooterBuilder : IUGUIBuilder<FooterController>
     {
         private const string EditGlyph = "✎";    // ✎ (U+270E)
         private const string GoToGlyph = "➤";    // ➤ (U+27A4)
         private const string TargetGlyph = "◎";  // ◎ (U+25CE)
 
-        private readonly BookmarksViewModel _viewModel;
+        // ================================================
+        // Builder parameters
+        // ================================================
 
-        public FooterBuilder(BookmarksViewModel viewModel)
+        private BookmarksViewModel _viewModel;
+        public FooterBuilder ViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
+            return this;
         }
 
-        public FooterController Create()
+        // =====================================================
+        // Build
+        // =====================================================
+
+        public FooterController Build()
         {
             var go = new GameObject("Bookmarks.Footer", typeof(RectTransform));
-            FooterController controller = go.AddComponent<FooterController>();
-            controller.Initialize(_viewModel);
-
+            
             var layoutElement = go.AddComponent<LayoutElement>();
             layoutElement.ignoreLayout = true;
 
@@ -78,8 +85,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
             selLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
             selLabel.verticalOverflow = VerticalWrapMode.Overflow;
             selLabel.raycastTarget = false;
-            controller.BindSelectionLabel(selLabel);
-
+            
             // Mockup glyphs: ✎ edit, ➤ go to, ◎ target (square buttons, like the title bar).
             // Background/hover colors come from the VBMButtonBuilder defaults; only the footer-specific
             // size and font size are overridden here.
@@ -90,7 +96,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
                 .Size(VesselBookmarkPalette.FooterButtonHeight)
                 .FontSize(VesselBookmarkPalette.FooterButtonFontSize)
                 .Build();
-            edit.OnClick.Add(() => _viewModel.BeginCommentEdition());
             edit.transform.SetParent(go.transform, false);
             Tooltips.Attach(edit.gameObject, ModLocalization.GetString("tooltipEdit"));
 
@@ -101,7 +106,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
                 .Size(VesselBookmarkPalette.FooterButtonHeight)
                 .FontSize(VesselBookmarkPalette.FooterButtonFontSize)
                 .Build();
-            goTo.OnClick.Add(() => _viewModel.SwitchToSelectedVessel());
             goTo.transform.SetParent(go.transform, false);
             Tooltips.Attach(goTo.gameObject, ModLocalization.GetString("tooltipGoTo"));
 
@@ -112,56 +116,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
                 .Size(VesselBookmarkPalette.FooterButtonHeight)
                 .FontSize(VesselBookmarkPalette.FooterButtonFontSize)
                 .Build();
-            target.OnClick.Add(() => _viewModel.SetCurrentBookmarkVesselAsTarget());
             target.transform.SetParent(go.transform, false);
             Tooltips.Attach(target.gameObject, ModLocalization.GetString("tooltipSetTargetAs"));
 
-            controller.BindButtons(edit, goTo, target);
-            return controller;
-        }
-
-        public class FooterController : BaseController
-        {
-            private Text _selLabel;
-            private ButtonController _edit;
-            private ButtonController _goTo;
-            private ButtonController _target;
-
-            public void BindSelectionLabel(Text label) => this._selLabel = label;
-
-            public void BindButtons(ButtonController edit, ButtonController goTo, ButtonController target)
-            {
-                this._edit = edit;
-                this._goTo = goTo;
-                this._target = target;
-            }
-
-            public void Start()
-            {
-                ViewModel.OnSelectedBookmarkChanged.Add(Refresh);
-                ViewModel.OnActiveOrTargetChanged.Add(Refresh);
-                Refresh();
-            }
-
-            public void OnDestroy()
-            {
-                ViewModel?.OnSelectedBookmarkChanged.Remove(Refresh);
-                ViewModel?.OnActiveOrTargetChanged.Remove(Refresh);
-            }
-
-            private void Refresh()
-            {
-                Bookmark sel = ViewModel.SelectedBookmark;
-                if (_selLabel != null)
-                {
-                    _selLabel.text = sel != null
-                        ? ModLocalization.GetString("footerSelection", sel.BookmarkTitle)
-                        : ModLocalization.GetString("footerNoSelection");
-                }
-                if (_edit != null) _edit.SetInteractable(ViewModel.CanEditCurrentVesselComment());
-                if (_goTo != null) _goTo.SetInteractable(ViewModel.CanSwitchToCurrentBookmarkVessel());
-                if (_target != null) _target.SetInteractable(ViewModel.CanSetCurrentBookmarkVesselAsTarget());
-            }
+            return go
+                .AddComponent<FooterController>()
+                .ViewModel(_viewModel)
+                .SelectionLabel(selLabel)
+                .Buttons(edit, goTo, target);
         }
     }
 }

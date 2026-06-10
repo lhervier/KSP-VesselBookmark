@@ -19,8 +19,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
         private const string MenuGlyph = "⋯";       // ⋯ (U+22EF) — fallback to "≡" / "..." if not rendered
         private const string CloseGlyph = "×";      // × (U+00D7) — matches the shared popup close button
 
-        private readonly BookmarksViewModel _viewModel;
+        
 
+        private readonly BookmarksViewModel _viewModel;
         public TitleBarBuilder(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
