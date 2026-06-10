@@ -4,17 +4,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
+using com.github.lhervier.ksp.shared.ugui.overlay;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 {
     public class ComboController : MonoBehaviour
     {
-        private Text _value;
-        private RectTransform _headerRect;
-        private GameObject _dropdown;
-        private RectTransform _dropdownRect;
-        private RectTransform _content;
-        private GameObject _trap;
         private readonly List<GameObject> _items = new List<GameObject>();
 
         /// <summary>Callback invoqué quand l'utilisateur choisit une option (reçoit la VALEUR brute).</summary>
@@ -22,7 +17,51 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 
         /// <summary>Invoqué juste avant l'ouverture (ex. fermer les autres combos).</summary>
         public Action OnBeforeOpen;
+        
+        // =======================================
+        // Life cycle
+        // =======================================
 
+        private Text _value;
+        public ComboController Value(Text value)
+        {
+            _value = value;
+            return this;
+        }
+
+        private RectTransform _headerRect;
+        public ComboController HeaderRect(RectTransform headerRect)
+        {
+            _headerRect = headerRect;
+            return this;
+        }
+
+        private GameObject _dropdown;
+        private RectTransform _dropdownRect;
+        private RectTransform _content;
+        public ComboController DropDown(GameObject dropDown, RectTransform content)
+        {
+            this._dropdown = dropDown;
+            this._dropdownRect = _dropdown.GetComponent<RectTransform>();
+            this._content = content;
+            return this;
+        }
+
+        private Button _button;
+        public ComboController Button(Button button)
+        {
+            _button = button;
+            return this;
+        }
+
+        private OverlayController _overlayController;
+        public ComboController OverlayController(OverlayController overlay)
+        {
+            _overlayController = overlay;
+            return this;
+        }
+
+        
         /// <summary>
         /// Conversion valeur → libellé affiché (ex. type de vaisseau brut → libellé traduit).
         /// Null = identité (le libellé affiché est la valeur).
@@ -34,14 +73,29 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             return LabelFor != null ? LabelFor(value) : (value ?? string.Empty);
         }
 
-        public void Bind(Text value, RectTransform headerRect, GameObject dropdown, RectTransform content, GameObject trap)
+        public void Start()
         {
-            this._value = value;
-            this._headerRect = headerRect;
-            this._dropdown = dropdown;
-            this._dropdownRect = dropdown.GetComponent<RectTransform>();
-            this._content = content;
-            this._trap = trap;
+            // A click on the overlay (anywhere outside the dropdown) collapses the combo.
+            if (_overlayController != null) {
+                _overlayController.OnClose.Add(Collapse);
+            }
+
+            if( _button != null )
+            {
+                _button.onClick.AddListener(Toggle);
+            }
+        }
+
+        public void OnDestroy()
+        {
+            
+            if( _button != null )
+            {
+                _button.onClick.RemoveListener(Toggle);
+            }
+            if (_overlayController != null) {
+                _overlayController.OnClose.Remove(Collapse);
+            }
         }
 
         public void SetOptions(IReadOnlyList<string> options, string current)
@@ -71,7 +125,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             OnBeforeOpen?.Invoke();
 
             // Le piège passe au premier plan, puis le dropdown par-dessus le piège.
-            if (_trap != null) { _trap.SetActive(true); _trap.transform.SetAsLastSibling(); }
+            if (_overlayController != null) { _overlayController.gameObject.SetActive(true); _overlayController.transform.SetAsLastSibling(); }
             _dropdown.SetActive(true);
             _dropdown.transform.SetAsLastSibling();   // au premier plan, par-dessus le contenu du menu
 
@@ -91,7 +145,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         public void Collapse()
         {
             if (_dropdown != null) _dropdown.SetActive(false);
-            if (_trap != null) _trap.SetActive(false);
+            if (_overlayController != null) _overlayController.gameObject.SetActive(false);
         }
 
         private GameObject BuildItem(string text, bool selected)

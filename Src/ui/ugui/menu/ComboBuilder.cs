@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared.ugui;
+using com.github.lhervier.ksp.shared.ugui.overlay;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 {
@@ -36,8 +37,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         {
             var rootGo = new GameObject("Combo", typeof(RectTransform));
             rootGo.transform.SetParent(_parent, false);
-            ComboController controller = rootGo.AddComponent<ComboController>();
-
+            
             var rowLayout = rootGo.AddComponent<HorizontalLayoutGroup>();
             rowLayout.padding = new RectOffset(0, 0, 0, 0);
             rowLayout.spacing = VesselBookmarkPalette.DefaultSpacing;
@@ -85,7 +85,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             hColors.colorMultiplier = 1f;
             hColors.fadeDuration = 0.1f;
             headerBtn.colors = hColors;
-            headerBtn.onClick.AddListener(() => controller.Toggle());
 
             var headerLayout = headerGo.AddComponent<HorizontalLayoutGroup>();
             headerLayout.padding = new RectOffset(Mathf.RoundToInt(VesselBookmarkPalette.ComboPaddingH), Mathf.RoundToInt(VesselBookmarkPalette.ComboPaddingH), 0, 0);
@@ -123,40 +122,21 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 
             // Dropdown flottant : enfant du MÊME parent (le panneau du menu), positionné en absolu
             // sous l'en-tête à l'ouverture. ignoreLayout pour ne pas occuper de place dans le menu.
-            RectTransform content;
-            GameObject dropdown = BuildDropdown(out content);
+            GameObject dropdown = BuildDropdown(out RectTransform content);
 
             // Piège à clic propre au combo : referme le dropdown dès qu'on clique en dehors.
-            GameObject trap = BuildTrap(controller);
+            // Composant générique partagé ; on le parente au même panneau et on le masque jusqu'à l'ouverture.
+            OverlayController overlay = new OverlayBuilder().Build();
+            overlay.transform.SetParent(_parent, false);
+            overlay.gameObject.SetActive(false);
 
-            controller.Bind(value, headerRect, dropdown, content, trap);
-            return controller;
-        }
-
-        // Piège à clic plein écran (transparent), placé juste sous le dropdown à l'ouverture.
-        private GameObject BuildTrap(ComboController controller)
-        {
-            var go = new GameObject("ComboTrap", typeof(RectTransform));
-            go.transform.SetParent(_parent, false);
-            var le = go.AddComponent<LayoutElement>();
-            le.ignoreLayout = true;
-            var rect = go.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.5f, 0.5f);
-            rect.anchorMax = new Vector2(0.5f, 0.5f);
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.sizeDelta = new Vector2(4000f, 4000f);   // couvre tout l'écran quelle que soit la position du menu
-            rect.anchoredPosition = Vector2.zero;
-            var img = go.AddComponent<Image>();
-            img.sprite = Sprites.Fill;
-            img.type = Image.Type.Simple;
-            img.color = Color.clear;
-            img.raycastTarget = true;
-            var btn = go.AddComponent<Button>();
-            btn.targetGraphic = img;
-            btn.transition = Selectable.Transition.None;
-            btn.onClick.AddListener(() => controller.Collapse());
-            go.SetActive(false);
-            return go;
+            return rootGo
+                .AddComponent<ComboController>()
+                .Value(value)
+                .HeaderRect(headerRect)
+                .DropDown(dropdown, content)
+                .Button(headerBtn)
+                .OverlayController(overlay);
         }
 
         // Panneau scrollable du dropdown (construit détaché et masqué ; positionné/affiché à l'ouverture).
