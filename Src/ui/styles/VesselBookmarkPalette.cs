@@ -18,8 +18,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         // ==============================================================
         public const float DefaultPaddingLeft = 8f;
         public const float DefaultPaddingRight = 8f;
-        public const float DefaultPaddingTop = 6f;
-        public const float DefaultPaddingBottom = 6f;
         public const float DefaultSpacing = 6f;
 
         public static readonly Color AccentColor = Rgb(141, 190, 69);          // #8dbe45
@@ -27,7 +25,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         public static readonly Color AccentBgColor = Rgba(141, 190, 69, 0.10f);
         public static readonly Color LabelColor = Rgb(187, 187, 187);          // #bbb
         public static readonly Color DangerColor = Rgb(192, 89, 79);           // #c0594f
-        public static readonly Color DangerBorderColor = Rgb(110, 42, 32);     // #6e2a20
         public static readonly Color WarmColor = Rgb(169, 138, 74);            // #a98a4a (alarme, commentaire)
 
         // ==============================================================
@@ -60,12 +57,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
 
         // Boutons du title bar (＋ ⟳ ⋯ ✕)
         public const float TitleButtonSize = 22f;
-        public const int TitleButtonFontSize = 13;
         public static readonly Color ButtonBgColor = Rgb(56, 56, 56);          // #383838
-        public static readonly Color ButtonBorderColor = Rgb(85, 85, 85);      // #555
         public static readonly Color ButtonHoverColor = Rgb(72, 72, 72);       // #484848
-        public static readonly Color ButtonTextColor = Rgb(187, 187, 187);     // #bbb
-        public static readonly Color ButtonDisabledTextColor = Rgba(187, 187, 187, 0.25f);
         // Point vert "filtre actif" sur le bouton ⋯
         public const float FilterDotSize = 6f;
 
@@ -91,31 +84,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         // Champ de recherche
         public const int SearchFontSize = 12;
         public const float SearchPaddingH = 7f;
-        public const float SearchPaddingV = 3f;
         public static readonly Color SearchBgColor = Rgb(13, 13, 13);          // #0d0d0d
         public static readonly Color SearchBorderColor = Rgb(42, 42, 42);      // #2a2a2a
         public static readonly Color SearchTextColor = Rgb(232, 232, 232);     // #e8e8e8
         public static readonly Color SearchPlaceholderColor = Rgb(85, 85, 85); // #555
 
         // Combos (corps / type)
-        public const int ComboFontSize = 12;
-        public const int ComboCaretFontSize = 10;
         public const float ComboHeight = 22f;
-        public const float ComboPaddingH = 8f;
-        public const float ComboDropdownMaxHeight = 170f;
-        public static readonly Color ComboBgColor = Rgb(42, 42, 42);           // #2a2a2a
-        public static readonly Color ComboBorderColor = Rgb(85, 85, 85);       // #555
-        public static readonly Color ComboHoverColor = Rgb(51, 51, 51);        // #333
-        public static readonly Color ComboTextColor = Rgb(232, 232, 232);      // #e8e8e8
-        public static readonly Color ComboCaretColor = Rgb(136, 136, 136);     // #888
-        public static readonly Color ComboItemColor = Rgb(221, 221, 221);      // #ddd
         public static readonly Color ComboItemHoverColor = Rgb(42, 42, 42);    // #2a2a2a
-        public static readonly Color ComboItemSelectedColor = Rgb(141, 190, 69);
-        public static readonly Color ComboItemSelectedBgColor = Rgba(141, 190, 69, 0.08f);
-
-        // Case à cocher (commentaire seulement)
-        public const float CheckboxSize = 13f;
-
+        
         // ==============================================================
         // Corps : liste scrollable
         // ==============================================================
@@ -145,10 +122,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         public const float RowPaddingH = 8f;
         public const float RowPaddingV = 6f;
         public const float RowSpacing = 7f;
-        public const int RowBorderBottomThickness = 1;
         public const float RowAccentBarThickness = 2f;        // liseré gauche (sélection / actif)
 
-        public static readonly Color RowSeparatorColor = Rgb(28, 28, 28);      // #1c1c1c
         public static readonly Color RowHoverColor = Rgba(255, 255, 255, 0.03f);
         public static readonly Color RowSelectedBgColor = Rgba(141, 190, 69, 0.06f);
         public static readonly Color RowActiveBgColor = Rgba(141, 190, 69, 0.09f);
@@ -185,8 +160,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         public const int RowButtonBorderThickness = 1;
         public const float RowButtonSpacing = 3f;
         public static readonly Color RowButtonBgColor = Rgb(42, 42, 42);       // #2a2a2a
-        public static readonly Color RowButtonBorderColor = Rgb(68, 68, 68);   // #444
-        public static readonly Color RowButtonTextColor = Rgb(153, 153, 153);  // #999
         public static readonly Color RowButtonHoverColor = Rgb(56, 56, 56);    // #383838
         public static readonly Color RowButtonDangerHoverColor = Rgb(90, 36, 29); // #5a241d
 
@@ -214,14 +187,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         public const float FooterHeight = 40f;   // FooterButtonHeight + 2 * FooterPaddingV
         public const int FooterSelFontSize = 11;
         public const float FooterButtonHeight = 26f;
-        public const float FooterButtonPaddingH = 10f;
         public const int FooterButtonFontSize = 13;
 
         public static readonly Color FooterBgColor = Rgb(24, 24, 24);          // #181818
         public static readonly Color FooterBorderColor = Rgb(42, 42, 42);      // #2a2a2a
         public static readonly Color FooterSelColor = Rgb(119, 119, 119);      // #777
-        public static readonly Color FooterSelNameColor = Rgb(187, 187, 187);  // #bbb
-
+        
         // ==============================================================
         // Overlays internes (édition commentaire + confirmation suppression)
         // ==============================================================
@@ -234,8 +205,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         public const int CardSubFontSize = 11;
         public const int CardMsgFontSize = 13;
         public const float CardFootSpacing = 8f;
-        public const float CardFootMarginTop = 12f;
-
+        
         public static readonly Color CardBgColor = Rgb(26, 26, 26);            // #1a1a1a
         public static readonly Color CardBorderColor = Rgb(85, 85, 85);        // #555
         public static readonly Color CardSubColor = Rgb(119, 119, 119);       // #777
@@ -247,7 +217,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         public const float TextAreaPadding = 8f;
         public static readonly Color TextAreaBgColor = Rgb(13, 13, 13);        // #0d0d0d
         public static readonly Color TextAreaBorderColor = Rgb(42, 42, 42);    // #2a2a2a
-        public static readonly Color TextAreaFocusBorderColor = Rgb(74, 110, 32); // #4a6e20
         public static readonly Color TextAreaTextColor = Rgb(232, 232, 232);   // #e8e8e8
 
         // Boutons des cartes (OK / Annuler / Supprimer)

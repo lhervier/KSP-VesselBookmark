@@ -5,6 +5,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared.ugui.checkbox;
 using com.github.lhervier.ksp.shared;
+using com.github.lhervier.ksp.shared.ugui.combo;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 {
