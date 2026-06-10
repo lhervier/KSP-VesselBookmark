@@ -20,7 +20,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
 
         private readonly BookmarksViewModel _viewModel;
         private readonly TitleBarBuilder _titleBarBuilder;
-        private readonly BodyBuilder _bodyBuilder;
         private readonly FooterBuilder _footerBuilder;
         private readonly FilterMenuBuilder _filterMenuBuilder;
         private readonly EditCommentOverlayBuilder _editOverlayBuilder;
@@ -30,7 +29,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
         {
             this._viewModel = viewModel;
             this._titleBarBuilder = new TitleBarBuilder(viewModel);
-            this._bodyBuilder = new BodyBuilder(viewModel);
             this._footerBuilder = new FooterBuilder(viewModel);
             this._filterMenuBuilder = new FilterMenuBuilder(viewModel);
             this._editOverlayBuilder = new EditCommentOverlayBuilder(viewModel);
@@ -114,7 +112,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
 
             // Corps (scrollable) en premier dans le z-order, puis footer et title bar, enfin les
             // overlays internes par-dessus tout (ajoutés en dernier = au-dessus).
-            BodyBuilder.BodyController bodyController = this._bodyBuilder.Create();
+            BodyController bodyController = new BodyBuilder()
+                .ViewModel(_viewModel)
+                .Build();
             bodyController.transform.SetParent(windowGo.transform, false);
 
             FooterBuilder.FooterController footerController = this._footerBuilder.Create();

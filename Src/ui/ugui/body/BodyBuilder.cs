@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list;
+using com.github.lhervier.ksp.shared.ugui;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body
 {
@@ -11,23 +12,27 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body
     /// produit une scrollbar verticale à droite. Squelette pour l'instant : un placeholder dans le
     /// contenu. La liste des sections/bookmarks viendra s'y greffer.
     /// </summary>
-    public class BodyBuilder
+    public class BodyBuilder : IUGUIBuilder<BodyController>
     {
-        public const string BODY_NAME = "Bookmarks.Body";
+        // ===================================================
+        // Builder parameters
+        // ===================================================
 
-        private readonly BookmarksViewModel _viewModel;
-
-        public BodyBuilder(BookmarksViewModel viewModel)
+        private BookmarksViewModel _viewModel;
+        public BodyBuilder ViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
+            return this;
         }
 
-        public BodyController Create()
-        {
-            var bodyGo = new GameObject(BODY_NAME, typeof(RectTransform));
-            var controller = bodyGo.AddComponent<BodyController>();
-            controller.Initialize(_viewModel);
+        // =========================================
+        // Build
+        // =========================================
 
+        public BodyController Build()
+        {
+            var bodyGo = new GameObject("Bookmarks.Body", typeof(RectTransform));
+            
             // Échappe au VerticalLayoutGroup de la popupWindow
             var layoutElement = bodyGo.AddComponent<LayoutElement>();
             layoutElement.ignoreLayout = true;
@@ -69,7 +74,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body
             // Content : enfant du viewport, ancré sur son bord haut. Hauteur auto (ContentSizeFitter).
             var contentGo = new GameObject("Content", typeof(RectTransform));
             contentGo.transform.SetParent(viewportGo.transform, false);
-            controller.BindContent(contentGo);
+            
             var contentRect = contentGo.GetComponent<RectTransform>();
             contentRect.anchorMin = new Vector2(0f, 1f);
             contentRect.anchorMax = new Vector2(1f, 1f);
@@ -148,20 +153,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body
 
             scrollRect.verticalScrollbar = scrollbar;
 
-            return controller;
-        }
-
-        public class BodyController : BaseController
-        {
-            private GameObject _content;
-
-            /// <summary>Le conteneur défilé où la liste viendra se greffer.</summary>
-            public GameObject Content => _content;
-
-            public void BindContent(GameObject content)
-            {
-                this._content = content;
-            }
+            return bodyGo.AddComponent<BodyController>();
         }
     }
 }
