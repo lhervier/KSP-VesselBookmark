@@ -125,6 +125,10 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <param name="bookmark">The bookmark to add</param>
         /// <returns>True if the bookmark was added, false otherwise</returns>
         public bool AddBookmark(Bookmark bookmark) {
+            // Resolve the bookmark's transient (display) fields against the current index before storing
+            // it, so a freshly added bookmark shows its vessel right away instead of "(vessel not found)"
+            // until the next index rebuild.
+            _bookmarkRefreshManager.RefreshBookmark(bookmark);
             return _bookmarksListManagers[bookmark.BookmarkType].AddBookmark(bookmark);
         }
 
@@ -198,16 +202,13 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 // Two bookmarks of two different types can have the same order here !
                 bookmarks.Sort((a, b) => a.Order.CompareTo(b.Order));
 
-                // Add bookmarks to the list (without refreshing each one : we batch a single indexed
-                // refresh below instead of rescanning the universe once per bookmark).
-                // Best-effort resolution against the current index (useful when reloading mid-session,
-                // where the index is already warm). On a cold load the index is still empty here, but
-                // RefreshIndex rebuilds on onLevelWasLoaded and re-resolves everything (+ notifies the
-                // UI) once the scene's vessels are present.
+                // AddBookmark resolves each bookmark against the current index: best-effort only here
+                // (useful when reloading mid-session, where the index is already warm). On a cold load
+                // the index is still empty, but RefreshIndex rebuilds on onLevelWasLoaded and re-resolves
+                // everything (+ notifies the UI) once the scene's vessels are present.
                 ClearBookmarks();
                 foreach (Bookmark bookmark in bookmarks) {
-                    _bookmarkRefreshManager.RefreshBookmark(bookmark);
-                    AddBookmark(bookmark);
+                    AddBookmark(bookmark);   // resolves each bookmark against the current index
                 }
 
                 LOGGER.LogInfo($"{bookmarks.Count} bookmark(s) loaded");
