@@ -61,12 +61,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 
         public void Start()
         {
-            _viewModel.OnFilterMenuOpenChanged.Add(OnFilterMenuOpenChanged);
-            _viewModel.OnAvailableBodiesChanged.Add(RefreshBodyCombo);
-            _viewModel.OnSelectedBodyChanged.Add(RefreshBodyCombo);
-            _viewModel.OnAvailableVesselTypesChanged.Add(RefreshTypeCombo);
-            _viewModel.OnSelectedVesselTypeChanged.Add(RefreshTypeCombo);
-            _viewModel.OnFilterHasCommentChanged.Add(RefreshCheckbox);
+            if( _viewModel != null )
+            {
+                _viewModel.OnFilterMenuOpenChanged.Add(OnFilterMenuOpenChanged);
+                _viewModel.OnAvailableBodiesChanged.Add(RefreshBodyCombo);
+                _viewModel.OnSelectedBodyChanged.Add(RefreshBodyCombo);
+                _viewModel.OnAvailableVesselTypesChanged.Add(RefreshTypeCombo);
+                _viewModel.OnSelectedVesselTypeChanged.Add(RefreshTypeCombo);
+                _viewModel.OnFilterHasCommentChanged.Add(RefreshCheckbox);
+            }
 
             // Verrou clavier au focus / déverrou au blur (comme l'overlay de commentaire)
             _searchSelectedTriggers = new EventTrigger.Entry { eventID = EventTriggerType.Select };
@@ -77,6 +80,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             _searchDeselectedTriggers.callback.AddListener(OnSearchDeselect);
             _searchTriggers.triggers.Add(_searchDeselectedTriggers);
 
+            if( _bodyCombo != null )
+            {
+                _bodyCombo.OnSelect.Add(OnBodySelected);
+            }
+            if( _typeCombo != null )
+            {
+                _typeCombo.OnSelect.Add(OnTypeSelected);
+            }
+
             RefreshBodyCombo();
             RefreshTypeCombo();
             RefreshCheckbox();
@@ -85,6 +97,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 
         public void OnDestroy()
         {
+            if( _bodyCombo != null )
+            {
+                _bodyCombo.OnSelect.Remove(OnBodySelected);
+            }
+            if( _typeCombo != null )
+            {
+                _typeCombo.OnSelect.Remove(OnTypeSelected);
+            }
             if( _searchTriggers != null )
             {
                 _searchTriggers.triggers.Remove(_searchDeselectedTriggers);
@@ -100,13 +120,26 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 _searchSelectedTriggers.callback.RemoveListener(OnSearchSelect);
             }
 
-            _viewModel?.OnFilterMenuOpenChanged.Remove(OnFilterMenuOpenChanged);
-            _viewModel?.OnAvailableBodiesChanged.Remove(RefreshBodyCombo);
-            _viewModel?.OnSelectedBodyChanged.Remove(RefreshBodyCombo);
-            _viewModel?.OnAvailableVesselTypesChanged.Remove(RefreshTypeCombo);
-            _viewModel?.OnSelectedVesselTypeChanged.Remove(RefreshTypeCombo);
-            _viewModel?.OnFilterHasCommentChanged.Remove(RefreshCheckbox);
+            if( _viewModel != null )
+            {
+                _viewModel.OnFilterMenuOpenChanged.Remove(OnFilterMenuOpenChanged);
+                _viewModel.OnAvailableBodiesChanged.Remove(RefreshBodyCombo);
+                _viewModel.OnSelectedBodyChanged.Remove(RefreshBodyCombo);
+                _viewModel.OnAvailableVesselTypesChanged.Remove(RefreshTypeCombo);
+                _viewModel.OnSelectedVesselTypeChanged.Remove(RefreshTypeCombo);
+                _viewModel.OnFilterHasCommentChanged.Remove(RefreshCheckbox);
+            }
             InputLockManager.RemoveControlLock(SEARCH_LOCK_ID);
+        }
+
+        private void OnBodySelected(string body)
+        {
+            _viewModel.SelectedBody = body;
+        }
+
+        private void OnTypeSelected(string type)
+        {
+            _viewModel.SelectedVesselType = type;
         }
 
         private void OnSearchSelect(BaseEventData _)

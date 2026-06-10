@@ -108,14 +108,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 .Parent(panelGo.transform)
                 .Label(ModLocalization.GetString("labelBody"))
                 .Build();
-            bodyCombo.OnSelect.Add(v => _viewModel.SelectedBody = v);
-            
             ComboController typeCombo = new ComboBuilder()
                 .Parent(panelGo.transform)
                 .Label(ModLocalization.GetString("labelType"))
                 .LabelFor(TranslateVesselType)
                 .Build();
-            typeCombo.OnSelect.Add(v => _viewModel.SelectedVesselType = v);
             
             // Case « commentaire seulement »
             CheckboxController checkBox = BuildCheckbox(panelGo.transform);
