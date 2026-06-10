@@ -69,6 +69,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 _viewModel.OnAvailableVesselTypesChanged.Add(RefreshTypeCombo);
                 _viewModel.OnSelectedVesselTypeChanged.Add(RefreshTypeCombo);
                 _viewModel.OnFilterHasCommentChanged.Add(RefreshCheckbox);
+                
+                RefreshBodyCombo();
+                RefreshTypeCombo();
+                RefreshCheckbox();
+                OnFilterMenuOpenChanged();
             }
 
             // Verrou clavier au focus / déverrou au blur (comme l'overlay de commentaire)
@@ -88,11 +93,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             {
                 _typeCombo.OnSelect.Add(OnTypeSelected);
             }
-
-            RefreshBodyCombo();
-            RefreshTypeCombo();
-            RefreshCheckbox();
-            OnFilterMenuOpenChanged();
         }
 
         public void OnDestroy()

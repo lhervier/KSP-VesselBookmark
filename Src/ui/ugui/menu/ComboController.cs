@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
-using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared.ugui.overlay;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 {
     public class ComboController : MonoBehaviour
     {
-        private readonly List<GameObject> _items = new List<GameObject>();
+        private readonly List<ComboItemController> _items = new List<ComboItemController>();
 
         /// <summary>Callback invoqué quand l'utilisateur choisit une option (reçoit la VALEUR brute).</summary>
         public EventData<string> OnSelect = new EventData<string>("Combobox.OnSelect");
@@ -81,7 +80,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 
         public void OnDestroy()
         {
-            
             if( _button != null )
             {
                 _button.onClick.RemoveListener(Toggle);
@@ -89,19 +87,36 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             if (_overlayController != null) {
                 _overlayController.OnClose.Remove(Collapse);
             }
+            foreach (var item in _items) {
+                item.OnClick.Remove(OnItemClicked);
+            }
         }
+
+        // =============================
+        // Public API
+        // =============================
 
         public void SetOptions(IReadOnlyList<string> options, string current)
         {
             if (_value != null) _value.text = Label(current);
 
-            foreach (var item in _items) Destroy(item);
+            foreach (var item in _items) {
+                item.OnClick.Remove(OnItemClicked);
+                Destroy(item.gameObject);
+            }
             _items.Clear();
             if (options == null) return;
 
             foreach (string opt in options)
             {
-                _items.Add(BuildItem(opt, opt == current));
+                ComboItemController ctrl = new ComboItemBuilder()
+                    .Parent(_content)
+                    .Id(opt)
+                    .Label(Label(opt))
+                    .Selected(opt == current)
+                    .Build();
+                ctrl.OnClick.Add(OnItemClicked);
+                _items.Add(ctrl);
             }
         }
 
@@ -140,52 +155,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             if (_overlayController != null) _overlayController.gameObject.SetActive(false);
         }
 
-        private GameObject BuildItem(string text, bool selected)
+        // ========================================
+        // Methods bound to events
+        // ========================================
+
+        private void OnItemClicked(string id)
         {
-            var itemGo = new GameObject("Item", typeof(RectTransform));
-            itemGo.transform.SetParent(_content, false);
-            var le = itemGo.AddComponent<LayoutElement>();
-            le.minHeight = le.preferredHeight = VesselBookmarkPalette.ComboHeight;
-
-            var image = itemGo.AddComponent<Image>();
-            image.sprite = Sprites.Fill;
-            image.type = Image.Type.Simple;
-            image.color = Color.white;
-            image.raycastTarget = true;
-
-            var button = itemGo.AddComponent<Button>();
-            button.targetGraphic = image;
-            var colors = button.colors;
-            colors.normalColor = selected ? VesselBookmarkPalette.ComboItemSelectedBgColor : Color.clear;
-            colors.highlightedColor = VesselBookmarkPalette.ComboItemHoverColor;
-            colors.pressedColor = VesselBookmarkPalette.ComboItemHoverColor;
-            colors.selectedColor = selected ? VesselBookmarkPalette.ComboItemSelectedBgColor : Color.clear;
-            colors.colorMultiplier = 1f;
-            colors.fadeDuration = 0.1f;
-            button.colors = colors;
-            button.onClick.AddListener(() => { OnSelect?.Fire(text); Collapse(); });
-
-            var layout = itemGo.AddComponent<HorizontalLayoutGroup>();
-            layout.padding = new RectOffset(Mathf.RoundToInt(VesselBookmarkPalette.ComboPaddingH), Mathf.RoundToInt(VesselBookmarkPalette.ComboPaddingH), 0, 0);
-            layout.childAlignment = TextAnchor.MiddleLeft;
-            layout.childControlWidth = true;
-            layout.childControlHeight = true;
-            layout.childForceExpandWidth = true;
-            layout.childForceExpandHeight = true;
-
-            var labelGo = new GameObject("Label", typeof(RectTransform));
-            labelGo.transform.SetParent(itemGo.transform, false);
-            var label = labelGo.AddComponent<Text>();
-            label.text = Label(text);
-            label.font = HighLogic.UISkin.font;
-            label.fontSize = VesselBookmarkPalette.ComboFontSize;
-            label.color = selected ? VesselBookmarkPalette.ComboItemSelectedColor : VesselBookmarkPalette.ComboItemColor;
-            label.alignment = TextAnchor.MiddleLeft;
-            label.horizontalOverflow = HorizontalWrapMode.Overflow;
-            label.verticalOverflow = VerticalWrapMode.Overflow;
-            label.raycastTarget = false;
-
-            return itemGo;
+            OnSelect.Fire(id); 
+            Collapse();
         }
 
         // =============================================
