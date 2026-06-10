@@ -5,6 +5,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui.sprites;
+using com.github.lhervier.ksp.shared.ugui;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
 {
