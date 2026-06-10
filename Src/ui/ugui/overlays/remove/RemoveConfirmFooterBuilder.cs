@@ -1,0 +1,58 @@
+using UnityEngine;
+using UnityEngine.UI;
+using com.github.lhervier.ksp.shared.ugui.button;
+using com.github.lhervier.ksp.bookmarksmod.ui.styles;
+using com.github.lhervier.ksp.shared;
+using com.github.lhervier.ksp.shared.ugui;
+
+namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
+{
+    /// <summary>
+    /// Builds the footer of the remove-confirmation internal popup: a right-aligned row with Cancel and
+    /// a danger-styled Remove button.
+    /// </summary>
+    public class RemoveConfirmFooterBuilder : IUGUIBuilder<RemoveConfirmFooterController>
+    {
+        public RemoveConfirmFooterController Build()
+        {
+            var rootGo = new GameObject("RemoveConfirmFooter", typeof(RectTransform));
+
+            var layout = rootGo.AddComponent<HorizontalLayoutGroup>();
+            layout.padding = new RectOffset(0, 0, 0, 0);
+            layout.spacing = VesselBookmarkPalette.CardFootSpacing;
+            layout.childAlignment = TextAnchor.MiddleRight;
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+            layout.childForceExpandWidth = false;
+            layout.childForceExpandHeight = false;
+
+            // Cancel keeps the default button colors (VBMButtonBuilder defaults); only the auto-width
+            // text-button shape, height and font size are set here.
+            ButtonController cancel = new VBMButtonBuilder()
+                .ObjectName("Cancel")
+                .Label(ModLocalization.GetString("dialogButtonCancel"))
+                .AutoWidth(VesselBookmarkPalette.CardButtonPaddingH)
+                .Size(VesselBookmarkPalette.CardButtonHeight)
+                .FontSize(VesselBookmarkPalette.CardButtonFontSize)
+                .Build();
+            cancel.transform.SetParent(rootGo.transform, false);
+
+            ButtonController remove = new VBMButtonBuilder()
+                .ObjectName("Remove")
+                .Label(ModLocalization.GetString("dialogButtonRemove"))
+                .AutoWidth(VesselBookmarkPalette.CardButtonPaddingH)
+                .Size(VesselBookmarkPalette.CardButtonHeight)
+                .FontSize(VesselBookmarkPalette.CardButtonFontSize)
+                .BackgroundColor(VesselBookmarkPalette.CardButtonDangerBgColor)
+                .HoverColor(VesselBookmarkPalette.CardButtonDangerBgColor)
+                .TextColor(VesselBookmarkPalette.CardButtonDangerTextColor)
+                .Build();
+            remove.transform.SetParent(rootGo.transform, false);
+
+            return rootGo
+                .AddComponent<RemoveConfirmFooterController>()
+                .BindCancel(cancel)
+                .BindRemove(remove);
+        }
+    }
+}

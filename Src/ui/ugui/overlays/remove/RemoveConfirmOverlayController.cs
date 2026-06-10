@@ -3,9 +3,15 @@ using UnityEngine.UI;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui.button;
+using com.github.lhervier.ksp.shared.ugui.internalpopup;
 
-namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays
+namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
 {
+    /// <summary>
+    /// Orchestrates the remove-confirmation internal popup: shows/closes it on ViewModel.PendingRemoval,
+    /// fills the message with the pending bookmark's name, and wires the footer buttons (Remove / Cancel).
+    /// Lives on the popup's always-active root so its lifecycle runs even while the popup is closed.
+    /// </summary>
     public class RemoveConfirmOverlayController : MonoBehaviour
     {
         private BookmarksViewModel _viewModel;
@@ -15,13 +21,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays
             return this;
         }
 
-        private GameObject _panel;
-        public RemoveConfirmOverlayController Panel(GameObject panel)
+        private InternalPopupController _popup;
+        public RemoveConfirmOverlayController Popup(InternalPopupController popup)
         {
-            this._panel = panel;
+            this._popup = popup;
             return this;
         }
-        
+
         private Text _message;
         public RemoveConfirmOverlayController Message(Text message)
         {
@@ -75,11 +81,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays
         private void OnPendingRemovalChanged()
         {
             Bookmark pending = _viewModel.PendingRemoval;
-            if (pending != null && _message != null)
+            if (pending != null)
             {
-                _message.text = ModLocalization.GetString("dialogRemoveMessageWithName", pending.BookmarkTitle);
+                if (_message != null)
+                {
+                    _message.text = ModLocalization.GetString("dialogRemoveMessageWithName", pending.BookmarkTitle);
+                }
+                _popup?.Show();
             }
-            if (_panel != null) _panel.SetActive(pending != null);
+            else
+            {
+                _popup?.Close();
+            }
         }
     }
 }

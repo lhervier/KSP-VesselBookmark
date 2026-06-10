@@ -87,6 +87,8 @@
     <Compile Include="Src/ui/ugui/footer/*.cs" />
     <Compile Include="Src/ui/ugui/menu/*.cs" />
     <Compile Include="Src/ui/ugui/overlays/*.cs" />
+    <Compile Include="Src/ui/ugui/overlays/editcomment/*.cs" />
+    <Compile Include="Src/ui/ugui/overlays/remove/*.cs" />
     <Compile Include="Src/util/*.cs" />
     <Compile Include="Src/ext/*.cs" />
     <!-- Classes partagees (sous-module KSP-Shared) compilees dans la meme dll -->

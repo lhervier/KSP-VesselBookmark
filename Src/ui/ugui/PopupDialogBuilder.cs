@@ -6,7 +6,8 @@ using com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.body;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu;
-using com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays;
+using com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment;
+using com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
 {
