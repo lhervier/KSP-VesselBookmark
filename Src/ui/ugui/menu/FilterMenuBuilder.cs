@@ -28,6 +28,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             return this;
         }
 
+        private Transform _parent;
+        public FilterMenuBuilder Parent(Transform parent)
+        {
+            this._parent = parent;
+            return this;
+        }
+
         // =======================================
         // Build
         // =======================================
@@ -36,6 +43,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         {
             // Racine toujours active (sans graphique) pour que le controller exécute Start() et s'abonne.
             var rootGo = new GameObject("Bookmarks.FilterMenu", typeof(RectTransform));
+            rootGo.transform.SetParent(_parent, false);
+            
             var rootLe = rootGo.AddComponent<LayoutElement>();
             rootLe.ignoreLayout = true;
             var rootRect = rootGo.GetComponent<RectTransform>();

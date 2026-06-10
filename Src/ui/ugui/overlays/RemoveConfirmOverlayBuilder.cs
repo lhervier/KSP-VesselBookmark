@@ -4,6 +4,7 @@ using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.shared;
+using com.github.lhervier.ksp.shared.ugui;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays
 {
@@ -11,32 +12,48 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays
     /// Fausse popup interne de confirmation de suppression, sur le modèle de l'overlay d'édition.
     /// Pilotée par ViewModel.PendingRemoval : visible dès qu'un bookmark est en attente de suppression.
     /// </summary>
-    public class RemoveConfirmOverlayBuilder
+    public class RemoveConfirmOverlayBuilder : IUGUIBuilder<RemoveConfirmOverlayController>
     {
-        private readonly BookmarksViewModel _viewModel;
-
-        public RemoveConfirmOverlayBuilder(BookmarksViewModel viewModel)
+        private BookmarksViewModel _viewModel;
+        public RemoveConfirmOverlayBuilder ViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
+            return this;
         }
 
-        public RemoveConfirmOverlayController Create(Transform parent)
+        private Transform _parent;
+        public RemoveConfirmOverlayBuilder Parent(Transform parent)
         {
-            GameObject panel;
-            RectTransform card;
-            GameObject root = OverlayCard.Build(parent, "Bookmarks.RemoveOverlay", out panel, out card);
-            RemoveConfirmOverlayController controller = root.AddComponent<RemoveConfirmOverlayController>();
-            controller.Initialize(_viewModel);
-            controller.BindPanel(panel);
+            this._parent = parent;
+            return this;
+        }
 
-            OverlayCard.AddText(card, "Title",
+        public RemoveConfirmOverlayController Build()
+        {
+            GameObject root = OverlayCard.Build(
+                _parent, 
+                "Bookmarks.RemoveOverlay", 
+                out GameObject panel, 
+                out RectTransform card
+            );
+            
+            OverlayCard.AddText(
+                card, 
+                "Title",
                 ModLocalization.GetString("dialogRemoveTitle"),
-                VesselBookmarkPalette.CardTitleFontSize, VesselBookmarkPalette.DangerColor, FontStyle.Bold);
+                VesselBookmarkPalette.CardTitleFontSize, 
+                VesselBookmarkPalette.DangerColor, 
+                FontStyle.Bold
+            );
 
-            Text message = OverlayCard.AddText(card, "Message", string.Empty,
-                VesselBookmarkPalette.CardMsgFontSize, VesselBookmarkPalette.CardMsgColor);
-            controller.BindMessage(message);
-
+            Text message = OverlayCard.AddText(
+                card, 
+                "Message", 
+                string.Empty,
+                VesselBookmarkPalette.CardMsgFontSize, 
+                VesselBookmarkPalette.CardMsgColor
+            );
+            
             GameObject foot = OverlayCard.AddFootRow(card);
 
             // Cancel keeps the default button colors (VBMButtonBuilder defaults); only the auto-width
@@ -48,7 +65,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays
                 .Size(VesselBookmarkPalette.CardButtonHeight)
                 .FontSize(VesselBookmarkPalette.CardButtonFontSize)
                 .Build();
-            cancel.OnClick.Add(() => _viewModel.CancelPendingRemoval());
             cancel.transform.SetParent(foot.transform, false);
 
             ButtonController remove = new VBMButtonBuilder()
@@ -61,40 +77,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays
                 .HoverColor(VesselBookmarkPalette.CardButtonDangerBgColor)
                 .TextColor(VesselBookmarkPalette.CardButtonDangerTextColor)
                 .Build();
-            remove.OnClick.Add(() => _viewModel.ConfirmPendingRemoval());
             remove.transform.SetParent(foot.transform, false);
 
-            return controller;
-        }
-
-        public class RemoveConfirmOverlayController : BaseController
-        {
-            private GameObject _panel;
-            private Text _message;
-
-            public void BindPanel(GameObject panel) => this._panel = panel;
-            public void BindMessage(Text message) => this._message = message;
-
-            public void Start()
-            {
-                ViewModel.OnPendingRemovalChanged.Add(OnPendingRemovalChanged);
-                OnPendingRemovalChanged();
-            }
-
-            public void OnDestroy()
-            {
-                ViewModel?.OnPendingRemovalChanged.Remove(OnPendingRemovalChanged);
-            }
-
-            private void OnPendingRemovalChanged()
-            {
-                Bookmark pending = ViewModel.PendingRemoval;
-                if (pending != null && _message != null)
-                {
-                    _message.text = ModLocalization.GetString("dialogRemoveMessageWithName", pending.BookmarkTitle);
-                }
-                if (_panel != null) _panel.SetActive(pending != null);
-            }
+            return root
+                .AddComponent<RemoveConfirmOverlayController>()
+                .ViewModel(_viewModel)
+                .Panel(panel)
+                .Message(message)
+                .CancelButtonController(cancel)
+                .RemoveButtonController(remove);
         }
     }
 }

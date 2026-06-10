@@ -117,17 +117,20 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
             titleBarController.transform.SetParent(windowGo.transform, false);
 
             // Menu filtres (au-dessus du contenu), puis les overlays modaux (au-dessus de tout).
-            FilterMenuController filterMenuController = new FilterMenuBuilder()
+            new FilterMenuBuilder()
                 .ViewModel(_viewModel)
+                .Parent(windowGo.transform)
                 .Build();
-            filterMenuController.transform.SetParent(windowGo.transform, false);
 
             new EditCommentOverlayBuilder()
                 .ViewModel(_viewModel)
                 .Parent(windowGo.transform)
                 .Build();
-            new RemoveConfirmOverlayBuilder(_viewModel)
-                .Create(windowGo.transform);
+                
+            new RemoveConfirmOverlayBuilder()
+                .ViewModel(_viewModel)
+                .Parent(windowGo.transform)
+                .Build();
 
             return popupDialog;
         }
