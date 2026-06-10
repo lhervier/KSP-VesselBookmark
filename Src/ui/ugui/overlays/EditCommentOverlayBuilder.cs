@@ -5,7 +5,7 @@ using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
-using com.github.lhervier.ksp.bookmarksmod;
+using com.github.lhervier.ksp.shared;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays
 {

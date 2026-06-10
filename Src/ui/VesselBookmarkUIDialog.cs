@@ -1,5 +1,5 @@
 using System;
-using KSP.UI.Screens;
+using com.github.lhervier.ksp.shared;
 using UnityEngine;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui {
