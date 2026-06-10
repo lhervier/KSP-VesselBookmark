@@ -118,7 +118,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
                 .Build();
             footerController.transform.SetParent(windowGo.transform, false);
 
-            TitleBarBuilder.TitleBarController titleBarController = new TitleBarBuilder(_viewModel)
+            TitleBarController titleBarController = new TitleBarBuilder(_viewModel)
                 .Create();
             titleBarController.transform.SetParent(windowGo.transform, false);
 
