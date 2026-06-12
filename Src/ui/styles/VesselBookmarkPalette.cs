@@ -1,4 +1,5 @@
 using UnityEngine;
+using com.github.lhervier.ksp.shared.ugui.styles;
 using static com.github.lhervier.ksp.shared.ugui.styles.Utils;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
@@ -160,8 +161,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         public const float FooterButtonHeight = 26f;
         public const int FooterButtonFontSize = 26;
 
-        public static readonly Color FooterBgColor = Rgb(24, 24, 24);          // #181818
-        public static readonly Color FooterBorderColor = Rgb(42, 42, 42);      // #2a2a2a
+        public static readonly Color FooterBgColor = PopupPalette.TitleBarBackgroundColor;     // #2e2e2e
+        public static readonly Color FooterBorderColor = PopupPalette.TitleBarSeparatorColor;  // #444
         public static readonly Color FooterSelColor = Rgb(119, 119, 119);      // #777
         
         // ==============================================================
