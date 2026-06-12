@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui.sprites;
@@ -76,28 +77,20 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             nameGo.transform.SetParent(go.transform, false);
             var nameLe = nameGo.AddComponent<LayoutElement>();
             nameLe.flexibleWidth = 1f;
-            var name = nameGo.AddComponent<Text>();
+            var name = UGUILabels.AddLabel(nameGo);
             name.text = ModLocalization.GetString(_titleKey).ToUpperInvariant();
-            name.font = HighLogic.UISkin.font;
             name.fontSize = VesselBookmarkPalette.SectionNameFontSize;
-            name.fontStyle = FontStyle.Bold;
+            name.fontStyle = FontStyles.Bold;
             name.color = VesselBookmarkPalette.SectionNameColor;
-            name.alignment = TextAnchor.MiddleLeft;
-            name.horizontalOverflow = HorizontalWrapMode.Overflow;
-            name.verticalOverflow = VerticalWrapMode.Overflow;
-            name.raycastTarget = false;
+            name.alignment = TextAlignmentOptions.Left;
 
             var countGo = new GameObject("Count", typeof(RectTransform));
             countGo.transform.SetParent(go.transform, false);
-            var count2 = countGo.AddComponent<Text>();
+            var count2 = UGUILabels.AddLabel(countGo);
             count2.text = _count.ToString();
-            count2.font = HighLogic.UISkin.font;
             count2.fontSize = VesselBookmarkPalette.SectionCountFontSize;
             count2.color = VesselBookmarkPalette.SectionCountColor;
-            count2.alignment = TextAnchor.MiddleRight;
-            count2.horizontalOverflow = HorizontalWrapMode.Overflow;
-            count2.verticalOverflow = VerticalWrapMode.Overflow;
-            count2.raycastTarget = false;
+            count2.alignment = TextAlignmentOptions.Right;
 
             return go.AddComponent<SectionHeaderController>();
         }

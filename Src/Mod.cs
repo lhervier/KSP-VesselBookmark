@@ -1,4 +1,5 @@
 using com.github.lhervier.ksp.shared;
+using com.github.lhervier.ksp.shared.ugui.sprites;
 using UnityEngine;
 
 namespace com.github.lhervier.ksp.bookmarksmod {
@@ -14,6 +15,13 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         {
             LOGGER.LogInfo("Awaked");
             DontDestroyOnLoad(this);
+
+            // Footer action icons: the game SDF font cannot render them, so labels reference them
+            // through <sprite name=...> tags resolved against these textures. The unicode codepoint is
+            // the glyph each sprite replaces, used as a fallback when a raw character slips through.
+            SpritesIcons.RegisterSprite("edit", Constants.ModName + "/Textures/edit", 0x270E);     // ✎
+            SpritesIcons.RegisterSprite("goto", Constants.ModName + "/Textures/goto", 0x27A4);     // ➤
+            SpritesIcons.RegisterSprite("target", Constants.ModName + "/Textures/target", 0x25CE); // ◎
         }
 
         public void Start() {

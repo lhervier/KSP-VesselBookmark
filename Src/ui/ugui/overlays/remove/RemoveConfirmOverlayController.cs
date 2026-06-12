@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui.button;
@@ -28,8 +28,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
             return this;
         }
 
-        private Text _message;
-        public RemoveConfirmOverlayController Message(Text message)
+        private TextMeshProUGUI _message;
+        public RemoveConfirmOverlayController Message(TextMeshProUGUI message)
         {
             this._message = message;
             return this;

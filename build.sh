@@ -53,7 +53,7 @@ echo "Suppression du dossier Release"
 rm -rf Release
 
 echo "Création du dossier Release"
-mkdir -p Release/VesselBookmarkMod/{vessel_types,buttons,Localization}
+mkdir -p Release/VesselBookmarkMod/{vessel_types,buttons,Textures,Localization}
 
 echo "Restauration des packages NuGet"
 dotnet restore VesselBookmark.sln "${MSBUILD_PROPS[@]}"
@@ -75,6 +75,18 @@ cp -v GameData/VesselBookmarkMod/vessel_types/* Release/VesselBookmarkMod/vessel
 
 echo "Copie des icônes de boutons"
 cp -v GameData/VesselBookmarkMod/buttons/* Release/VesselBookmarkMod/buttons/
+
+# Sprites TMP (rendus inline via <sprite> dans les labels) : icônes partagées (refresh_icon) +
+# icônes propres au mod (edit/goto/target). Lues à l'exécution depuis GameData/.../Textures.
+echo "Copie des textures partagées (sprites TMP)"
+cp -v KSP-Shared/GameData/Textures/* Release/VesselBookmarkMod/Textures/
+
+echo "Copie des textures du mod (sprites TMP)"
+if compgen -G "GameData/VesselBookmarkMod/Textures/*.png" > /dev/null; then
+    cp -v GameData/VesselBookmarkMod/Textures/*.png Release/VesselBookmarkMod/Textures/
+else
+    echo "  (aucune texture propre au mod pour l'instant)"
+fi
 
 echo "Copie des fichiers de localisation"
 cp -v GameData/VesselBookmarkMod/Localization/* Release/VesselBookmarkMod/Localization/

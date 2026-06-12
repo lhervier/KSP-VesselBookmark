@@ -1,11 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using TMPro;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui;
 using com.github.lhervier.ksp.shared.ugui.sprites;
+using com.github.lhervier.ksp.shared.ugui.styles;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
 {
@@ -28,8 +30,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             layout.childForceExpandWidth = true;
             layout.childForceExpandHeight = false;
 
-            Text sub = BuildSub(rootGo.transform);
-            InputField input = BuildTextArea(rootGo.transform);
+            TextMeshProUGUI sub = BuildSub(rootGo.transform);
+            TMP_InputField input = BuildTextArea(rootGo.transform);
 
             return rootGo
                 .AddComponent<EditCommentContentController>()
@@ -38,24 +40,21 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
         }
 
         // Greyed subtitle showing the edited bookmark's title.
-        private static Text BuildSub(Transform parent)
+        private static TextMeshProUGUI BuildSub(Transform parent)
         {
             var go = new GameObject("Sub", typeof(RectTransform));
             go.transform.SetParent(parent, false);
-            var label = go.AddComponent<Text>();
+            var label = UGUILabels.AddLabel(go);
             label.text = string.Empty;
-            label.font = HighLogic.UISkin.font;
             label.fontSize = VesselBookmarkPalette.CardSubFontSize;
             label.color = VesselBookmarkPalette.CardSubColor;
-            label.alignment = TextAnchor.UpperLeft;
-            label.horizontalOverflow = HorizontalWrapMode.Wrap;
-            label.verticalOverflow = VerticalWrapMode.Overflow;
-            label.raycastTarget = false;
+            label.alignment = TextAlignmentOptions.TopLeft;
+            label.enableWordWrapping = true;
             return label;
         }
 
-        // Multiline text area (InputField + clipped viewport + text + placeholder).
-        private InputField BuildTextArea(Transform parent)
+        // Multiline text area (TMP_InputField + clipped viewport + text + placeholder).
+        private TMP_InputField BuildTextArea(Transform parent)
         {
             var inputGo = new GameObject("TextArea", typeof(RectTransform));
             inputGo.transform.SetParent(parent, false);
@@ -68,25 +67,27 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             bg.color = Color.white;
             bg.raycastTarget = true;
 
-            // Montage classique (la version d'InputField livrée avec KSP n'a pas textViewport) :
-            // RectMask2D sur le champ pour clipper, Text + Placeholder enfants avec marges.
+            // RectMask2D sur le champ pour clipper ; Text + Placeholder enfants avec marges, et le champ
+            // lui-même sert de textViewport.
             inputGo.AddComponent<RectMask2D>();
 
-            var input = inputGo.AddComponent<InputField>();
-            input.lineType = InputField.LineType.MultiLineNewline;
+            var input = inputGo.AddComponent<TMP_InputField>();
+            input.lineType = TMP_InputField.LineType.MultiLineNewline;
 
             int pad = Mathf.RoundToInt(VesselBookmarkPalette.TextAreaPadding);
 
             var placeholder = NewAreaText(inputGo.transform, "Placeholder", pad);
-            placeholder.fontStyle = FontStyle.Italic;
+            placeholder.fontStyle = FontStyles.Italic;
             placeholder.color = VesselBookmarkPalette.SearchPlaceholderColor;
             placeholder.text = string.Empty;
 
             var text = NewAreaText(inputGo.transform, "Text", pad);
             text.color = VesselBookmarkPalette.TextAreaTextColor;
 
+            input.textViewport = inputGo.GetComponent<RectTransform>();
             input.textComponent = text;
             input.placeholder = placeholder;
+            input.fontAsset = DefaultPalette.Font;
 
             // Lock clavier au focus, unlock au blur (Unity envoie Select/Deselect au champ sélectionné)
             var trigger = inputGo.AddComponent<EventTrigger>();
@@ -100,7 +101,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             return input;
         }
 
-        private static Text NewAreaText(Transform parent, string objectName, int pad)
+        private static TextMeshProUGUI NewAreaText(Transform parent, string objectName, int pad)
         {
             var go = new GameObject(objectName, typeof(RectTransform));
             go.transform.SetParent(parent, false);
@@ -109,14 +110,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             rect.anchorMax = Vector2.one;
             rect.offsetMin = new Vector2(pad, pad);
             rect.offsetMax = new Vector2(-pad, -pad);
-            var text = go.AddComponent<Text>();
-            text.font = HighLogic.UISkin.font;
+            var text = UGUILabels.AddLabel(go);
             text.fontSize = VesselBookmarkPalette.TextAreaFontSize;
-            text.alignment = TextAnchor.UpperLeft;
-            text.horizontalOverflow = HorizontalWrapMode.Wrap;
-            text.verticalOverflow = VerticalWrapMode.Overflow;
-            text.supportRichText = false;
-            text.raycastTarget = false;
+            text.alignment = TextAlignmentOptions.TopLeft;
+            text.enableWordWrapping = true;
+            text.richText = false;
             return text;
         }
     }

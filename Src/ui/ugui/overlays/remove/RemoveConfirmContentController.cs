@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
 {
@@ -9,14 +9,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
     /// </summary>
     public class RemoveConfirmContentController : MonoBehaviour
     {
-        private Text _message;
-        public RemoveConfirmContentController Message(Text message)
+        private TextMeshProUGUI _message;
+        public RemoveConfirmContentController Message(TextMeshProUGUI message)
         {
             this._message = message;
             return this;
         }
 
-        public Text GetMessage()
+        public TextMeshProUGUI GetMessage()
         {
             return _message;
         }

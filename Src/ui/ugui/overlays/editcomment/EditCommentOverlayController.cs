@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui.button;
@@ -34,15 +34,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             return this;
         }
 
-        private Text _sub;
-        public EditCommentOverlayController Sub(Text sub)
+        private TextMeshProUGUI _sub;
+        public EditCommentOverlayController Sub(TextMeshProUGUI sub)
         {
             this._sub = sub;
             return this;
         }
 
-        private InputField _input;
-        public EditCommentOverlayController Input(InputField input)
+        private TMP_InputField _input;
+        public EditCommentOverlayController Input(TMP_InputField input)
         {
             this._input = input;
             return this;

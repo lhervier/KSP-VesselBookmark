@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.shared.ugui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
@@ -18,8 +19,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
     public class TitleBarBuilder : IUGUIBuilder<TitleBarController>
     {
         private const string AddGlyph = "+";
-        private const string RefreshGlyph = "↻";   // ↻ (U+21BB) — renders fine with the UISkin font
-        private const string MenuGlyph = "⋯";       // ⋯ (U+22EF) — fallback to "≡" / "..." if not rendered
 
         // ====================================
         // Builder parameters
@@ -52,22 +51,26 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             Transform right = rightColumnGo.transform;
 
             // "shown / total" count badge — first element of the right column
-            Text countLabel = BuildCountBadge(right);
-            
+            TextMeshProUGUI countLabel = BuildCountBadge(right);
+
             // "Add the active vessel" button
             ButtonController add = NewButton("Add", AddGlyph, _viewModel.CanAddVesselBookmark());
             add.OnClick.Add(() => _viewModel.AddVesselBookmark());
             add.transform.SetParent(right, false);
             Tooltips.Attach(add.gameObject, ModLocalization.GetString("buttonAdd"));
-            
-            // "Refresh" button
-            ButtonController refresh = NewButton("Refresh", RefreshGlyph, true);
+
+            // "Refresh" button. No circular-arrow glyph in the game SDF font: use the shared "refresh"
+            // sprite, falling back to a text glyph if the texture is missing.
+            string refreshLabel = SpritesIcons.HasSprite("refresh")
+                ? "<sprite name=\"refresh\" tint=1>"
+                : DefaultPalette.PickGlyph("↻", "⟳", "↺", "R");
+            ButtonController refresh = NewButton("Refresh", refreshLabel, true);
             refresh.OnClick.Add(() => _viewModel.ForceReload());
             refresh.transform.SetParent(right, false);
             Tooltips.Attach(refresh.gameObject, ModLocalization.GetString("buttonRefresh"));
 
             // Filter menu button "⋯" (toggles FilterMenuOpen) + green "active filter" dot
-            ButtonController menu = NewButton("FilterMenu", MenuGlyph, true);
+            ButtonController menu = NewButton("FilterMenu", DefaultPalette.PickGlyph("⋯", "…", "≡", "..."), true);
             menu.OnClick.Add(() => _viewModel.FilterMenuOpen = !_viewModel.FilterMenuOpen);
             menu.transform.SetParent(right, false);
             Tooltips.Attach(menu.gameObject, ModLocalization.GetString("menuFiltersTitle"));
@@ -97,7 +100,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
 
         // Chip: sliced accent-border Image + accent Text. Size driven by the content + padding
         // (preferredSize reported by the HorizontalLayoutGroup to the parent layout).
-        private Text BuildCountBadge(Transform parent)
+        private TextMeshProUGUI BuildCountBadge(Transform parent)
         {
             var badgeGo = new GameObject("Count", typeof(RectTransform));
             badgeGo.transform.SetParent(parent, false);
@@ -125,14 +128,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
 
             var labelGo = new GameObject("Label", typeof(RectTransform));
             labelGo.transform.SetParent(badgeGo.transform, false);
-            var label = labelGo.AddComponent<Text>();
-            label.font = HighLogic.UISkin.font;
+            var label = UGUILabels.AddLabel(labelGo);
             label.fontSize = VesselBookmarkPalette.CountFontSize;
             label.color = DefaultPalette.AccentColor;
-            label.alignment = TextAnchor.MiddleCenter;
-            label.horizontalOverflow = HorizontalWrapMode.Overflow;
-            label.verticalOverflow = VerticalWrapMode.Overflow;
-            label.raycastTarget = false;
+            label.alignment = TextAlignmentOptions.Center;
 
             return label;
         }

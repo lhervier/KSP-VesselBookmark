@@ -72,6 +72,9 @@
     <Reference Include="UnityEngine.TextRenderingModule">
       <HintPath>$(KSP_DATA_DIR)\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>$(KSP_DATA_DIR)\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>

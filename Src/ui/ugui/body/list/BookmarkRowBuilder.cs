@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
@@ -19,9 +20,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
     /// </summary>
     public class BookmarkRowBuilder : IUGUIBuilder<BookmarkRowController>
     {
-        private const string MoveUpGlyph = "▲";
-        private const string MoveDownGlyph = "▼";
-        private const string RemoveGlyph = "✕";
+        // Triangles/cross when the font (or a fallback) provides them, plain arrows/x otherwise.
+        private static string MoveUpLabel => DefaultPalette.PickGlyph("▲", "↑");
+        private static string MoveDownLabel => DefaultPalette.PickGlyph("▼", "↓");
+        private static string RemoveLabel => DefaultPalette.PickGlyph("✕", "✗", "×", "x");
 
         // ===========================================
         // Builder parameters
@@ -123,19 +125,16 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             nameGo.transform.SetParent(line1.transform, false);
             var nameLe = nameGo.AddComponent<LayoutElement>();
             nameLe.flexibleWidth = 1f;
-            var name = nameGo.AddComponent<Text>();
+            var name = UGUILabels.AddLabel(nameGo);
             name.text = BuildTitle(_bookmark, vesselExists);
-            name.font = HighLogic.UISkin.font;
             name.fontSize = VesselBookmarkPalette.NameFontSize;
-            name.fontStyle = vesselExists ? FontStyle.Normal : FontStyle.Italic;
+            name.fontStyle = vesselExists ? FontStyles.Normal : FontStyles.Italic;
             name.color = VesselBookmarkPalette.NameColor;
-            name.alignment = TextAnchor.MiddleLeft;
-            name.horizontalOverflow = HorizontalWrapMode.Wrap;
-            name.verticalOverflow = VerticalWrapMode.Overflow;
-            name.raycastTarget = false;
+            name.alignment = TextAlignmentOptions.Left;
+            name.enableWordWrapping = true;
 
             // Pastille d'état (Actif / Cible / Disparu) — créée, affichée selon l'état dans Refresh()
-            GameObject chip = BuildChip(line1.transform, out Image chipImage, out Text chipText);
+            GameObject chip = BuildChip(line1.transform, out Image chipImage, out TextMeshProUGUI chipText);
 
             // Boutons ▲ ▼ ✕ (révélés au survol / sélection)
             CanvasGroup rowButtonsGroup = BuildRowButtons(
@@ -154,29 +153,21 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 
             var situationGo = new GameObject("Situation", typeof(RectTransform));
             situationGo.transform.SetParent(line2.transform, false);
-            var situation = situationGo.AddComponent<Text>();
+            var situation = UGUILabels.AddLabel(situationGo);
             situation.text = _bookmark.VesselSituationLabel;
-            situation.font = HighLogic.UISkin.font;
             situation.fontSize = VesselBookmarkPalette.SituationFontSize;
             situation.color = VesselBookmarkPalette.SituationColor;
-            situation.alignment = TextAnchor.MiddleLeft;
-            situation.horizontalOverflow = HorizontalWrapMode.Overflow;
-            situation.verticalOverflow = VerticalWrapMode.Overflow;
-            situation.raycastTarget = false;
+            situation.alignment = TextAlignmentOptions.Left;
 
             if (_bookmark is CommandModuleBookmark cmb && cmb.VesselName != cmb.CommandModuleName)
             {
                 var vnameGo = new GameObject("VesselName", typeof(RectTransform));
                 vnameGo.transform.SetParent(line2.transform, false);
-                var vname = vnameGo.AddComponent<Text>();
+                var vname = UGUILabels.AddLabel(vnameGo);
                 vname.text = "(" + _bookmark.VesselName + ")";
-                vname.font = HighLogic.UISkin.font;
                 vname.fontSize = VesselBookmarkPalette.SituationFontSize;
                 vname.color = VesselBookmarkPalette.VesselNameColor;
-                vname.alignment = TextAnchor.MiddleLeft;
-                vname.horizontalOverflow = HorizontalWrapMode.Overflow;
-                vname.verticalOverflow = VerticalWrapMode.Overflow;
-                vname.raycastTarget = false;
+                vname.alignment = TextAlignmentOptions.Left;
             }
 
             // ---- Ligne 3 : commentaire (si présent) ----
@@ -292,7 +283,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             Tooltips.Attach(go, ModLocalization.GetString("tooltipAlarm"));
         }
 
-        private GameObject BuildChip(Transform parent, out Image chipImage, out Text chipText)
+        private GameObject BuildChip(Transform parent, out Image chipImage, out TextMeshProUGUI chipText)
         {
             var chipGo = new GameObject("Chip", typeof(RectTransform));
             chipGo.transform.SetParent(parent, false);
@@ -316,14 +307,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 
             var labelGo = new GameObject("Label", typeof(RectTransform));
             labelGo.transform.SetParent(chipGo.transform, false);
-            chipText = labelGo.AddComponent<Text>();
-            chipText.font = HighLogic.UISkin.font;
+            chipText = UGUILabels.AddLabel(labelGo);
             chipText.fontSize = VesselBookmarkPalette.ChipFontSize;
             chipText.color = DefaultPalette.AccentColor;
-            chipText.alignment = TextAnchor.MiddleCenter;
-            chipText.horizontalOverflow = HorizontalWrapMode.Overflow;
-            chipText.verticalOverflow = VerticalWrapMode.Overflow;
-            chipText.raycastTarget = false;
+            chipText.alignment = TextAlignmentOptions.Center;
 
             chipGo.SetActive(false);
             return chipGo;
@@ -358,7 +345,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             // Row buttons use their own (smaller) size, font and colors, overriding the VBM defaults.
             upButton = new VBMButtonBuilder()
                 .ObjectName("MoveUp")
-                .Label(MoveUpGlyph)
+                .Label(MoveUpLabel)
                 .Interactable(!isFirst)
                 .Size(VesselBookmarkPalette.RowButtonSize)
                 .FontSize(VesselBookmarkPalette.RowButtonFontSize)
@@ -370,7 +357,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 
             downButton = new VBMButtonBuilder()
                 .ObjectName("MoveDown")
-                .Label(MoveDownGlyph)
+                .Label(MoveDownLabel)
                 .Interactable(!isLast)
                 .Size(VesselBookmarkPalette.RowButtonSize)
                 .FontSize(VesselBookmarkPalette.RowButtonFontSize)
@@ -382,7 +369,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 
             removeButton = new VBMButtonBuilder()
                 .ObjectName("Remove")
-                .Label(RemoveGlyph)
+                .Label(RemoveLabel)
                 .Size(VesselBookmarkPalette.RowButtonSize)
                 .FontSize(VesselBookmarkPalette.RowButtonFontSize)
                 .BackgroundColor(VesselBookmarkPalette.RowButtonBgColor)
@@ -441,15 +428,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             textGo.transform.SetParent(boxGo.transform, false);
             var textLe = textGo.AddComponent<LayoutElement>();
             textLe.flexibleWidth = 1f;
-            var text = textGo.AddComponent<Text>();
+            var text = UGUILabels.AddLabel(textGo);
             text.text = comment;
-            text.font = HighLogic.UISkin.font;
             text.fontSize = VesselBookmarkPalette.CommentFontSize;
             text.color = VesselBookmarkPalette.CommentTextColor;
-            text.alignment = TextAnchor.UpperLeft;
-            text.horizontalOverflow = HorizontalWrapMode.Wrap;
-            text.verticalOverflow = VerticalWrapMode.Overflow;
-            text.raycastTarget = false;
+            text.alignment = TextAlignmentOptions.TopLeft;
+            text.enableWordWrapping = true;
         }
 
         private static string BuildTitle(Bookmark bookmark, bool vesselExists)

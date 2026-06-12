@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
@@ -47,8 +48,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             return this;
         }
 
-        private Text _name;
-        public BookmarkRowController Name(Text name)
+        private TextMeshProUGUI _name;
+        public BookmarkRowController Name(TextMeshProUGUI name)
         {
             this._name = name;
             return this;
@@ -68,8 +69,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             return this;
         }
 
-        private Text _chipText;
-        public BookmarkRowController ChipText(Text chipText)
+        private TextMeshProUGUI _chipText;
+        public BookmarkRowController ChipText(TextMeshProUGUI chipText)
         {
             this._chipText = chipText;
             return this;

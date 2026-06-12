@@ -1,4 +1,5 @@
 using UnityEngine.UI;
+using TMPro;
 using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.shared;
@@ -19,8 +20,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
             return this;
         }
 
-        private Text _selectionLabel;
-        public FooterController SelectionLabel(Text label)
+        private TextMeshProUGUI _selectionLabel;
+        public FooterController SelectionLabel(TextMeshProUGUI label)
         {
             this._selectionLabel = label; 
             return this;

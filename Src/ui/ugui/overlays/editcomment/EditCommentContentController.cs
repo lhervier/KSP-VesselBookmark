@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
 {
@@ -9,26 +9,26 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
     /// </summary>
     public class EditCommentContentController : MonoBehaviour
     {
-        private Text _sub;
-        public EditCommentContentController Sub(Text sub)
+        private TextMeshProUGUI _sub;
+        public EditCommentContentController Sub(TextMeshProUGUI sub)
         {
             this._sub = sub;
             return this;
         }
 
-        private InputField _input;
-        public EditCommentContentController Input(InputField input)
+        private TMP_InputField _input;
+        public EditCommentContentController Input(TMP_InputField input)
         {
             this._input = input;
             return this;
         }
 
-        public Text GetSub()
+        public TextMeshProUGUI GetSub()
         {
             return _sub;
         }
-        
-        public InputField GetInput()
+
+        public TMP_InputField GetInput()
         {
             return _input;
         }

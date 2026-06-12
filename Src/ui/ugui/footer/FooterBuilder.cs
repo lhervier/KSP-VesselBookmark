@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
@@ -7,6 +8,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui;
 using com.github.lhervier.ksp.shared.ugui.sprites;
+using com.github.lhervier.ksp.shared.ugui.styles;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
 {
@@ -16,9 +18,19 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
     /// </summary>
     public class FooterBuilder : IUGUIBuilder<FooterController>
     {
-        private const string EditGlyph = "✎";    // ✎ (U+270E)
-        private const string GoToGlyph = "➤";    // ➤ (U+27A4)
-        private const string TargetGlyph = "◎";  // ◎ (U+25CE)
+        // Action icons. The game SDF font does not render these glyphs reliably, so each prefers a
+        // dedicated sprite (registered at startup), falling back to a text glyph when the texture is
+        // missing.
+        private static string EditLabel => SpriteOrGlyph("edit", "✎", "✏", "E");
+        private static string GoToLabel => SpriteOrGlyph("goto", "➤", "►", "▶", "→", ">");
+        private static string TargetLabel => SpriteOrGlyph("target", "◎", "◉", "⊙", "○", "o");
+
+        private static string SpriteOrGlyph(string spriteName, params string[] glyphs)
+        {
+            return SpritesIcons.HasSprite(spriteName)
+                ? "<sprite name=\"" + spriteName + "\" tint=1>"
+                : DefaultPalette.PickGlyph(glyphs);
+        }
 
         // ================================================
         // Builder parameters
@@ -72,22 +84,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
             selGo.transform.SetParent(go.transform, false);
             var selLe = selGo.AddComponent<LayoutElement>();
             selLe.flexibleWidth = 1f;
-            var selLabel = selGo.AddComponent<Text>();
-            selLabel.font = HighLogic.UISkin.font;
+            var selLabel = UGUILabels.AddLabel(selGo);
             selLabel.fontSize = VesselBookmarkPalette.FooterSelFontSize;
-            selLabel.fontStyle = FontStyle.Italic;
+            selLabel.fontStyle = FontStyles.Italic;
             selLabel.color = VesselBookmarkPalette.FooterSelColor;
-            selLabel.alignment = TextAnchor.MiddleLeft;
-            selLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
-            selLabel.verticalOverflow = VerticalWrapMode.Overflow;
-            selLabel.raycastTarget = false;
+            selLabel.alignment = TextAlignmentOptions.Left;
             
             // Mockup glyphs: ✎ edit, ➤ go to, ◎ target (square buttons, like the title bar).
             // Background/hover colors come from the VBMButtonBuilder defaults; only the footer-specific
             // size and font size are overridden here.
             ButtonController edit = new VBMButtonBuilder()
                 .ObjectName("Edit")
-                .Label(EditGlyph)
+                .Label(EditLabel)
                 .Interactable(false)
                 .Size(VesselBookmarkPalette.FooterButtonHeight)
                 .FontSize(VesselBookmarkPalette.FooterButtonFontSize)
@@ -97,7 +105,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
 
             ButtonController goTo = new VBMButtonBuilder()
                 .ObjectName("GoTo")
-                .Label(GoToGlyph)
+                .Label(GoToLabel)
                 .Interactable(false)
                 .Size(VesselBookmarkPalette.FooterButtonHeight)
                 .FontSize(VesselBookmarkPalette.FooterButtonFontSize)
@@ -107,7 +115,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
 
             ButtonController target = new VBMButtonBuilder()
                 .ObjectName("Target")
-                .Label(TargetGlyph)
+                .Label(TargetLabel)
                 .Interactable(false)
                 .Size(VesselBookmarkPalette.FooterButtonHeight)
                 .FontSize(VesselBookmarkPalette.FooterButtonFontSize)

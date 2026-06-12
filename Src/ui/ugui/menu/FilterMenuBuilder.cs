@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using TMPro;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.shared.ugui.checkbox;
 using com.github.lhervier.ksp.shared;
@@ -153,19 +154,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 
         // ---- Sous-éléments ----------------------------------------------------------------
 
-        private static Text AddSimpleText(Transform parent, string objectName, string text, int fontSize, Color color)
+        private static TextMeshProUGUI AddSimpleText(Transform parent, string objectName, string text, int fontSize, Color color)
         {
             var go = new GameObject(objectName, typeof(RectTransform));
             go.transform.SetParent(parent, false);
-            var label = go.AddComponent<Text>();
+            var label = UGUILabels.AddLabel(go);
             label.text = text;
-            label.font = HighLogic.UISkin.font;
             label.fontSize = fontSize;
             label.color = color;
-            label.alignment = TextAnchor.MiddleLeft;
-            label.horizontalOverflow = HorizontalWrapMode.Overflow;
-            label.verticalOverflow = VerticalWrapMode.Overflow;
-            label.raycastTarget = false;
+            label.alignment = TextAlignmentOptions.Left;
             return label;
         }
 
@@ -182,7 +179,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             image.raycastTarget = false;
         }
 
-        private (InputField, EventTrigger) BuildSearchField(Transform parent)
+        private (TMP_InputField, EventTrigger) BuildSearchField(Transform parent)
         {
             var inputGo = new GameObject("Search", typeof(RectTransform));
             inputGo.transform.SetParent(parent, false);
@@ -197,21 +194,24 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 
             inputGo.AddComponent<RectMask2D>();
 
-            var input = inputGo.AddComponent<InputField>();
-            input.lineType = InputField.LineType.SingleLine;
+            var input = inputGo.AddComponent<TMP_InputField>();
+            input.lineType = TMP_InputField.LineType.SingleLine;
 
             int pad = Mathf.RoundToInt(VesselBookmarkPalette.SearchPaddingH);
 
             var placeholder = NewFieldText(inputGo.transform, "Placeholder", pad);
-            placeholder.fontStyle = FontStyle.Italic;
+            placeholder.fontStyle = FontStyles.Italic;
             placeholder.color = VesselBookmarkPalette.SearchPlaceholderColor;
             placeholder.text = ModLocalization.GetString("menuSearchPlaceholder");
 
             var text = NewFieldText(inputGo.transform, "Text", pad);
             text.color = VesselBookmarkPalette.SearchTextColor;
 
+            // The field itself is the viewport (RectMask2D above clips the children).
+            input.textViewport = inputGo.GetComponent<RectTransform>();
             input.textComponent = text;
             input.placeholder = placeholder;
+            input.fontAsset = DefaultPalette.Font;
             input.onValueChanged.AddListener(v => _viewModel.SearchText = v);
 
             // Verrou clavier au focus / déverrou au blur (comme l'overlay de commentaire)
@@ -220,7 +220,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             return (input, trigger);
         }
 
-        private static Text NewFieldText(Transform parent, string objectName, int pad)
+        private static TextMeshProUGUI NewFieldText(Transform parent, string objectName, int pad)
         {
             var go = new GameObject(objectName, typeof(RectTransform));
             go.transform.SetParent(parent, false);
@@ -229,14 +229,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             rect.anchorMax = Vector2.one;
             rect.offsetMin = new Vector2(pad, 0f);
             rect.offsetMax = new Vector2(-pad, 0f);
-            var text = go.AddComponent<Text>();
-            text.font = HighLogic.UISkin.font;
+            var text = UGUILabels.AddLabel(go);
             text.fontSize = VesselBookmarkPalette.SearchFontSize;
-            text.alignment = TextAnchor.MiddleLeft;
-            text.horizontalOverflow = HorizontalWrapMode.Overflow;
-            text.verticalOverflow = VerticalWrapMode.Overflow;
-            text.supportRichText = false;
-            text.raycastTarget = false;
+            text.alignment = TextAlignmentOptions.Left;
+            text.richText = false;
             return text;
         }
 
@@ -259,7 +255,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             return checkbox;
         }
 
-        private void BuildResetAction(Transform parent, InputField search)
+        private void BuildResetAction(Transform parent, TMP_InputField search)
         {
             var go = new GameObject("Reset", typeof(RectTransform));
             go.transform.SetParent(parent, false);
@@ -296,11 +292,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             layout.childForceExpandHeight = true;
 
             // Icône ✕ devant le libellé (comme la maquette)
-            var icon = AddSimpleText(go.transform, "Icon", "✕",
+            var icon = AddSimpleText(go.transform, "Icon", DefaultPalette.PickGlyph("✕", "✗", "×", "x"),
                 VesselBookmarkPalette.MenuLabelFontSize, VesselBookmarkPalette.MenuLabelColor);
             var iconLe = icon.gameObject.AddComponent<LayoutElement>();
             iconLe.minWidth = iconLe.preferredWidth = 14f;
-            icon.alignment = TextAnchor.MiddleCenter;
+            icon.alignment = TextAlignmentOptions.Center;
 
             var label = AddSimpleText(go.transform, "Label", ModLocalization.GetString("menuResetFilters"),
                 VesselBookmarkPalette.MenuLabelFontSize, DefaultPalette.LabelColor);

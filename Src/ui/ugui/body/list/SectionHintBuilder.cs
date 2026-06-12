@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared;
@@ -62,16 +63,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             textGo.transform.SetParent(go.transform, false);
             var textLe = textGo.AddComponent<LayoutElement>();
             textLe.flexibleWidth = 1f;
-            var text = textGo.AddComponent<Text>();
+            var text = UGUILabels.AddLabel(textGo);
             text.text = ModLocalization.GetString(_hintKey);
-            text.font = HighLogic.UISkin.font;
             text.fontSize = VesselBookmarkPalette.SectionHintFontSize;
-            text.fontStyle = FontStyle.Italic;
+            text.fontStyle = FontStyles.Italic;
             text.color = VesselBookmarkPalette.SectionHintTextColor;
-            text.alignment = TextAnchor.MiddleLeft;
-            text.horizontalOverflow = HorizontalWrapMode.Wrap;
-            text.verticalOverflow = VerticalWrapMode.Overflow;
-            text.raycastTarget = false;
+            text.alignment = TextAlignmentOptions.Left;
+            text.enableWordWrapping = true;
 
             return go.AddComponent<SectionHintController>();
         }

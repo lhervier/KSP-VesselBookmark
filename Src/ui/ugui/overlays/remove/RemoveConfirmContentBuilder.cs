@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.shared.ugui;
 
@@ -15,15 +15,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
         {
             var go = new GameObject("RemoveConfirmContent", typeof(RectTransform));
 
-            var message = go.AddComponent<Text>();
+            var message = UGUILabels.AddLabel(go);
             message.text = string.Empty;
-            message.font = HighLogic.UISkin.font;
             message.fontSize = VesselBookmarkPalette.CardMsgFontSize;
             message.color = VesselBookmarkPalette.CardMsgColor;
-            message.alignment = TextAnchor.UpperLeft;
-            message.horizontalOverflow = HorizontalWrapMode.Wrap;
-            message.verticalOverflow = VerticalWrapMode.Overflow;
-            message.raycastTarget = false;
+            message.alignment = TextAlignmentOptions.TopLeft;
+            message.enableWordWrapping = true;
 
             return go
                 .AddComponent<RemoveConfirmContentController>()

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using TMPro;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared.ugui.checkbox;
@@ -35,9 +36,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             return this;
         }
         
-        private InputField _search;
+        private TMP_InputField _search;
         private EventTrigger _searchTriggers;
-        public FilterMenuController Search(InputField search, EventTrigger searchTriggers)
+        public FilterMenuController Search(TMP_InputField search, EventTrigger searchTriggers)
         {
             _search = search;
             _searchTriggers = searchTriggers;

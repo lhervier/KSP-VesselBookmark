@@ -36,6 +36,12 @@ if errorlevel 1 (
     exit /b 1
 )
 
+mkdir Release\VesselBookmarkMod\Textures
+if errorlevel 1 (
+    echo ERROR: Failed to create the textures folder
+    exit /b 1
+)
+
 mkdir Release\VesselBookmarkMod\Localization
 if errorlevel 1 (
     echo ERROR: Failed to create the localization folder
@@ -82,6 +88,24 @@ copy /y "GameData\VesselBookmarkMod\buttons\*" "Release\VesselBookmarkMod\button
 if errorlevel 1 (
     echo ERROR: Failed to copy the buttons files
     exit /b 1
+)
+
+echo Copying shared TMP sprite textures
+copy /y "KSP-Shared\GameData\Textures\*" "Release\VesselBookmarkMod\Textures"
+if errorlevel 1 (
+    echo ERROR: Failed to copy the shared textures
+    exit /b 1
+)
+
+echo Copying mod TMP sprite textures
+if exist "GameData\VesselBookmarkMod\Textures\*.png" (
+    copy /y "GameData\VesselBookmarkMod\Textures\*.png" "Release\VesselBookmarkMod\Textures"
+    if errorlevel 1 (
+        echo ERROR: Failed to copy the mod textures
+        exit /b 1
+    )
+) else (
+    echo   ^(no mod-specific textures yet^)
 )
 
 echo Copying localization files

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
@@ -17,8 +18,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             return this;
         }
         
-        private Text _countLabel;
-        public TitleBarController CountLabel(Text label)
+        private TextMeshProUGUI _countLabel;
+        public TitleBarController CountLabel(TextMeshProUGUI label)
         {
             this._countLabel = label;
             return this;
