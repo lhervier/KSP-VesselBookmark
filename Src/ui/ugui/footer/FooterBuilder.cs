@@ -69,7 +69,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
             var layout = go.AddComponent<HorizontalLayoutGroup>();
             layout.padding = new RectOffset(
                 Mathf.RoundToInt(VesselBookmarkPalette.FooterPaddingH),
-                Mathf.RoundToInt(VesselBookmarkPalette.FooterPaddingH),
+                // Extra right padding = scrollbar width: the footer spans the full width while the
+                // scrollable list above reserves that strip for its scrollbar, so this keeps the
+                // footer buttons aligned with the list content instead of overhanging the scrollbar.
+                Mathf.RoundToInt(VesselBookmarkPalette.FooterPaddingH + VesselBookmarkPalette.ScrollbarWidth),
                 Mathf.RoundToInt(VesselBookmarkPalette.FooterPaddingV),
                 Mathf.RoundToInt(VesselBookmarkPalette.FooterPaddingV));
             layout.spacing = VesselBookmarkPalette.FooterSpacing;
@@ -79,16 +82,22 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = false;
 
-            // Libellé de sélection (prend la largeur disponible)
+            // Libellé de sélection : occupe l'espace restant après les boutons, sans jamais les pousser.
+            // min/preferredWidth = 0 (sinon le label TMP réclamerait la largeur de son texte, qui peut
+            // dépasser la place dispo et écraser/pousser les boutons à taille fixe) ; flexibleWidth = 1
+            // pour s'étendre dans le reste ; ellipsis pour tronquer un nom trop long au lieu de déborder.
             var selGo = new GameObject("Selection", typeof(RectTransform));
             selGo.transform.SetParent(go.transform, false);
             var selLe = selGo.AddComponent<LayoutElement>();
+            selLe.minWidth = 0f;
+            selLe.preferredWidth = 0f;
             selLe.flexibleWidth = 1f;
             var selLabel = UGUILabels.AddLabel(selGo);
             selLabel.fontSize = VesselBookmarkPalette.FooterSelFontSize;
             selLabel.fontStyle = FontStyles.Italic;
             selLabel.color = VesselBookmarkPalette.FooterSelColor;
             selLabel.alignment = TextAlignmentOptions.Left;
+            selLabel.overflowMode = TextOverflowModes.Ellipsis;
             
             // Mockup glyphs: ✎ edit, ➤ go to, ◎ target (square buttons, like the title bar).
             // Background/hover colors come from the VBMButtonBuilder defaults; only the footer-specific
