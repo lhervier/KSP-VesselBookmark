@@ -1,4 +1,5 @@
 using UnityEngine;
+using static com.github.lhervier.ksp.shared.ugui.styles.Utils;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
 {
@@ -9,47 +10,16 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
     /// </summary>
     public static class VesselBookmarkPalette
     {
-        // Petit utilitaire : couleur depuis composantes 0-255 (les valeurs de la maquette sont en hexa).
-        private static Color Rgb(int r, int g, int b) => new Color(r / 255f, g / 255f, b / 255f);
-        private static Color Rgba(int r, int g, int b, float a) => new Color(r / 255f, g / 255f, b / 255f, a);
-
-        // ==============================================================
-        // Valeurs par défaut (paddings, espacements, couleurs communes)
-        // ==============================================================
-        public const float DefaultPaddingLeft = 8f;
-        public const float DefaultPaddingRight = 8f;
-        public const float DefaultSpacing = 6f;
-
-        public static readonly Color AccentColor = Rgb(141, 190, 69);          // #8dbe45
-        public static readonly Color AccentBorderColor = Rgb(74, 110, 32);     // #4a6e20
-        public static readonly Color AccentBgColor = Rgba(141, 190, 69, 0.10f);
-        public static readonly Color LabelColor = Rgb(187, 187, 187);          // #bbb
-        public static readonly Color DangerColor = Rgb(192, 89, 79);           // #c0594f
-        public static readonly Color WarmColor = Rgb(169, 138, 74);            // #a98a4a (alarme, commentaire)
-
         // ==============================================================
         // Fenêtre principale
         // ==============================================================
-        public const float WindowInitialPositionX = 60f;   // depuis le bord gauche
-        public const float WindowInitialPositionY = 60f;    // depuis le haut
         public const float WindowWidth = 420f;
         public const float WindowHeight = 540f;
-        public const int WindowBorderThickness = 1;
-
-        public static readonly Color WindowBodyColor = Rgb(20, 20, 20);        // #141414
-        public static readonly Color WindowBorderColor = Rgb(85, 85, 85);      // #555
-
+        
         // ==============================================================
         // Title bar
         // ==============================================================
-        public const float TitleBarHeight = 28f;
-        public const int TitleBarBorderThickness = 1;
-        public const int TitleFontSize = 12;
-
-        public static readonly Color TitleBarBgColor = Rgb(46, 46, 46);        // #2e2e2e
-        public static readonly Color TitleBarBorderColor = Rgb(68, 68, 68);    // #444
-        public static readonly Color TitleColor = Rgb(232, 232, 232);          // #e8e8e8
-
+        
         // Badge compteur "X / Y"
         public const int CountFontSize = 10;
         public const float CountPaddingH = 6f;
@@ -57,7 +27,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
 
         // Boutons du title bar (＋ ⟳ ⋯ ✕)
         public const float TitleButtonSize = 22f;
-        public static readonly Color ButtonBgColor = Rgb(56, 56, 56);          // #383838
+        public static readonly Color ButtonColor = Rgb(56, 56, 56);          // #383838
         public static readonly Color ButtonHoverColor = Rgb(72, 72, 72);       // #484848
         // Point vert "filtre actif" sur le bouton ⋯
         public const float FilterDotSize = 6f;
@@ -74,6 +44,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         public const int MenuThickness = 1;
         public const int MenuTitleFontSize = 10;
         public const int MenuLabelFontSize = 11;
+        public const float MenuComboLableWidth = 46f;
 
         public static readonly Color MenuBgColor = Rgb(30, 30, 30);            // #1e1e1e
         public static readonly Color MenuBorderColor = Rgb(85, 85, 85);        // #555
@@ -196,18 +167,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         // ==============================================================
         // Overlays internes (édition commentaire + confirmation suppression)
         // ==============================================================
-        public static readonly Color OverlayDimColor = Rgba(8, 8, 8, 0.78f);
-
-        public const float CardWidthRatio = 0.84f;            // proportion de la largeur fenêtre
-        public const float CardPadding = 14f;
-        public const int CardBorderThickness = 1;
-        public const int CardTitleFontSize = 11;
+        
         public const int CardSubFontSize = 11;
         public const int CardMsgFontSize = 13;
         public const float CardFootSpacing = 8f;
         
-        public static readonly Color CardBgColor = Rgb(26, 26, 26);            // #1a1a1a
-        public static readonly Color CardBorderColor = Rgb(85, 85, 85);        // #555
         public static readonly Color CardSubColor = Rgb(119, 119, 119);       // #777
         public static readonly Color CardMsgColor = Rgb(204, 204, 204);        // #ccc
 

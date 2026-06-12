@@ -2,12 +2,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
-using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared.ugui.checkbox;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui;
 using com.github.lhervier.ksp.shared.ugui.combo;
 using com.github.lhervier.ksp.shared.ugui.sprites;
+using com.github.lhervier.ksp.shared.ugui.styles;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 {
@@ -81,8 +81,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             panelRect.pivot = new Vector2(1f, 1f);
             panelRect.sizeDelta = new Vector2(VesselBookmarkPalette.MenuWidth, 0f);
             panelRect.anchoredPosition = new Vector2(
-                -(VesselBookmarkPalette.WindowBorderThickness + VesselBookmarkPalette.DefaultPaddingRight),
-                -(VesselBookmarkPalette.WindowBorderThickness + VesselBookmarkPalette.TitleBarHeight));
+                -(PopupPalette.PopupBorderThickness + DefaultPalette.PaddingRight),
+                -(PopupPalette.PopupBorderThickness + PopupPalette.TitleBarHeight));
 
             var panelImage = panelGo.AddComponent<Image>();
             panelImage.sprite = SpritesGlobal.Border(VesselBookmarkPalette.MenuBgColor, VesselBookmarkPalette.MenuBorderColor, VesselBookmarkPalette.MenuThickness);
@@ -118,11 +118,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             ComboController bodyCombo = new ComboBuilder()
                 .Parent(panelGo.transform)
                 .Label(ModLocalization.GetString("labelBody"))
+                .PreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
                 .Build();
             ComboController typeCombo = new ComboBuilder()
                 .Parent(panelGo.transform)
                 .Label(ModLocalization.GetString("labelType"))
                 .LabelFor(TranslateVesselType)
+                .PreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
                 .Build();
             
             // Case « commentaire seulement »
@@ -286,7 +288,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 
             var layout = go.AddComponent<HorizontalLayoutGroup>();
             layout.padding = new RectOffset(Mathf.RoundToInt(VesselBookmarkPalette.MenuPaddingLeft), 0, 0, 0);
-            layout.spacing = VesselBookmarkPalette.DefaultSpacing;
+            layout.spacing = DefaultPalette.Spacing;
             layout.childAlignment = TextAnchor.MiddleLeft;
             layout.childControlWidth = true;
             layout.childControlHeight = true;
@@ -301,7 +303,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             icon.alignment = TextAnchor.MiddleCenter;
 
             var label = AddSimpleText(go.transform, "Label", ModLocalization.GetString("menuResetFilters"),
-                VesselBookmarkPalette.MenuLabelFontSize, VesselBookmarkPalette.LabelColor);
+                VesselBookmarkPalette.MenuLabelFontSize, DefaultPalette.LabelColor);
             var labelLe = label.gameObject.AddComponent<LayoutElement>();
             labelLe.flexibleWidth = 1f;
         }

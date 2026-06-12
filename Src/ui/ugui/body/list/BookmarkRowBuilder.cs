@@ -7,6 +7,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui;
 using com.github.lhervier.ksp.shared.ugui.sprites;
+using com.github.lhervier.ksp.shared.ugui.styles;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 {
@@ -99,7 +100,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             var accentBar = accentGo.AddComponent<Image>();
             accentBar.sprite = SpritesGlobal.FillSprite;
             accentBar.type = Image.Type.Simple;
-            accentBar.color = VesselBookmarkPalette.AccentColor;
+            accentBar.color = DefaultPalette.AccentColor;
             accentBar.raycastTarget = false;
             accentBar.enabled = false;
 
@@ -149,7 +150,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 
             // ---- Ligne 2 : situation (+ nom de vaisseau) ----
             var line2 = NewHLine(rowGo.transform, "Line2", Mathf.RoundToInt(VesselBookmarkPalette.TypeIconSize + VesselBookmarkPalette.RowSpacing));
-            line2.GetComponent<HorizontalLayoutGroup>().spacing = VesselBookmarkPalette.DefaultSpacing;
+            line2.GetComponent<HorizontalLayoutGroup>().spacing = DefaultPalette.Spacing;
 
             var situationGo = new GameObject("Situation", typeof(RectTransform));
             situationGo.transform.SetParent(line2.transform, false);
@@ -284,7 +285,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             else
             {
                 img.sprite = SpritesGlobal.FillSprite;
-                img.color = VesselBookmarkPalette.WarmColor;
+                img.color = DefaultPalette.WarmColor;
             }
             img.type = Image.Type.Simple;
             img.raycastTarget = true;   // pour recevoir le survol du tooltip
@@ -297,7 +298,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             chipGo.transform.SetParent(parent, false);
 
             chipImage = chipGo.AddComponent<Image>();
-            chipImage.sprite = SpritesGlobal.Border(VesselBookmarkPalette.AccentBgColor, VesselBookmarkPalette.AccentBorderColor, VesselBookmarkPalette.ChipBorderThickness);
+            chipImage.sprite = SpritesGlobal.Border(DefaultPalette.AccentBgColor, DefaultPalette.AccentBorderColor, VesselBookmarkPalette.ChipBorderThickness);
             chipImage.type = Image.Type.Sliced;
             chipImage.color = Color.white;
             chipImage.raycastTarget = false;
@@ -318,7 +319,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             chipText = labelGo.AddComponent<Text>();
             chipText.font = HighLogic.UISkin.font;
             chipText.fontSize = VesselBookmarkPalette.ChipFontSize;
-            chipText.color = VesselBookmarkPalette.AccentColor;
+            chipText.color = DefaultPalette.AccentColor;
             chipText.alignment = TextAnchor.MiddleCenter;
             chipText.horizontalOverflow = HorizontalWrapMode.Overflow;
             chipText.verticalOverflow = VerticalWrapMode.Overflow;

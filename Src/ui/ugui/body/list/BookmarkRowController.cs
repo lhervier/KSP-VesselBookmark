@@ -9,6 +9,7 @@ using com.github.lhervier.ksp.shared.ugui;
 using com.github.lhervier.ksp.shared.ugui.sprites;
 using System;
 using System.CodeDom;
+using com.github.lhervier.ksp.shared.ugui.styles;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 {
@@ -226,7 +227,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 
             // Liseré gauche
             _accentBar.enabled = active || selected;
-            _accentBar.color = active ? VesselBookmarkPalette.AccentColor : VesselBookmarkPalette.AccentBorderColor;
+            _accentBar.color = active ? DefaultPalette.AccentColor : DefaultPalette.AccentBorderColor;
 
             // Couleur du titre
             if (!_vesselExists) _name.color = VesselBookmarkPalette.NameMissingColor;
@@ -238,9 +239,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             if (!_vesselExists) SetChip(true, "chipMissing",
                 VesselBookmarkPalette.ChipMissingTextColor, VesselBookmarkPalette.ChipMissingBgColor, VesselBookmarkPalette.ChipMissingBorderColor);
             else if (active) SetChip(true, "chipActive",
-                VesselBookmarkPalette.AccentColor, VesselBookmarkPalette.AccentBgColor, VesselBookmarkPalette.AccentBorderColor);
+                DefaultPalette.AccentColor, DefaultPalette.AccentBgColor, DefaultPalette.AccentBorderColor);
             else if (target) SetChip(true, "chipTarget",
-                VesselBookmarkPalette.AccentColor, VesselBookmarkPalette.AccentBgColor, VesselBookmarkPalette.AccentBorderColor);
+                DefaultPalette.AccentColor, DefaultPalette.AccentBgColor, DefaultPalette.AccentBorderColor);
             else _chip.SetActive(false);
 
             // Boutons d'ordre/suppression

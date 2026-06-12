@@ -4,6 +4,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui.sprites;
 using com.github.lhervier.ksp.shared.ugui;
+using com.github.lhervier.ksp.shared.ugui.styles;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 {
@@ -64,7 +65,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 Mathf.RoundToInt(VesselBookmarkPalette.RowPaddingH),
                 Mathf.RoundToInt(VesselBookmarkPalette.RowPaddingH),
                 0, 0);
-            layout.spacing = VesselBookmarkPalette.DefaultSpacing;
+            layout.spacing = DefaultPalette.Spacing;
             layout.childAlignment = TextAnchor.MiddleLeft;
             layout.childControlWidth = true;
             layout.childControlHeight = true;

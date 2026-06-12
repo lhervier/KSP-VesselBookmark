@@ -2,6 +2,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list;
 using com.github.lhervier.ksp.shared.ugui;
 using com.github.lhervier.ksp.shared.ugui.scrollableview;
+using com.github.lhervier.ksp.shared.ugui.styles;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body
 {
@@ -33,7 +34,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body
                 .ContentBuilder(new ListBuilder().ViewModel(_viewModel))
                 .ScrollbarWidth(VesselBookmarkPalette.ScrollbarWidth)
                 .ScrollbarBackgroundColor(VesselBookmarkPalette.SearchBgColor)
-                .HandleColor(VesselBookmarkPalette.WindowBorderColor)
+                .HandleColor(PopupPalette.PopupBorderColor)
                 .HandleHoverColor(VesselBookmarkPalette.ScrollbarColor)
                 .Build();
         }

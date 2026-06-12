@@ -104,8 +104,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
 
             var image = badgeGo.AddComponent<Image>();
             image.sprite = SpritesGlobal.Border(
-                VesselBookmarkPalette.AccentBgColor,
-                VesselBookmarkPalette.AccentBorderColor,
+                DefaultPalette.AccentBgColor,
+                DefaultPalette.AccentBorderColor,
                 1);
             image.type = Image.Type.Sliced;
             image.color = Color.white;
@@ -128,7 +128,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             var label = labelGo.AddComponent<Text>();
             label.font = HighLogic.UISkin.font;
             label.fontSize = VesselBookmarkPalette.CountFontSize;
-            label.color = VesselBookmarkPalette.AccentColor;
+            label.color = DefaultPalette.AccentColor;
             label.alignment = TextAnchor.MiddleCenter;
             label.horizontalOverflow = HorizontalWrapMode.Overflow;
             label.verticalOverflow = VerticalWrapMode.Overflow;
@@ -151,7 +151,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             var img = dotGo.AddComponent<Image>();
             img.sprite = SpritesGlobal.FillSprite;
             img.type = Image.Type.Simple;
-            img.color = VesselBookmarkPalette.AccentColor;
+            img.color = DefaultPalette.AccentColor;
             img.raycastTarget = false;
             img.enabled = false;
             return img;

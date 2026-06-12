@@ -3,6 +3,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui;
 using com.github.lhervier.ksp.shared.ugui.internalpopup;
+using com.github.lhervier.ksp.shared.ugui.styles;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
 {
@@ -31,7 +32,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
             var popupBuilder = new InternalPopupBuilder<RemoveConfirmContentController, RemoveConfirmFooterController>()
                 .Parent(_parent)
                 .Title(ModLocalization.GetString("dialogRemoveTitle"))
-                .TitleColor(VesselBookmarkPalette.DangerColor)
+                .TitleColor(DefaultPalette.DangerColor)
                 .Content(new RemoveConfirmContentBuilder())
                 .Footer(new RemoveConfirmFooterBuilder());
 

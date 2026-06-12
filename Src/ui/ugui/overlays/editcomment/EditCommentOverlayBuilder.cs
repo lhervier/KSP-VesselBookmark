@@ -3,6 +3,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui;
 using com.github.lhervier.ksp.shared.ugui.internalpopup;
+using com.github.lhervier.ksp.shared.ugui.styles;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
 {
@@ -39,7 +40,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             var popupBuilder = new InternalPopupBuilder<EditCommentContentController, EditCommentFooterController>()
                 .Parent(_parent)
                 .Title(ModLocalization.GetString("editWindowTitle"))
-                .TitleColor(VesselBookmarkPalette.AccentColor)
+                .TitleColor(DefaultPalette.AccentColor)
                 .Content(new EditCommentContentBuilder())
                 .Footer(new EditCommentFooterBuilder());
 
