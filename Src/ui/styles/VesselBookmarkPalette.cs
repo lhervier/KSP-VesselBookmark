@@ -159,7 +159,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         public const float FooterHeight = 40f;   // FooterButtonHeight + 2 * FooterPaddingV
         public const int FooterSelFontSize = 11;
         public const float FooterButtonHeight = 26f;
-        public const int FooterButtonFontSize = 26;
+        public const int FooterButtonFontSize = 22;
 
         public static readonly Color FooterBgColor = PopupPalette.TitleBarBackgroundColor;     // #2e2e2e
         public static readonly Color FooterBorderColor = PopupPalette.TitleBarSeparatorColor;  // #444
