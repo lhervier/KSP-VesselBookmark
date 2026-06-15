@@ -1,22 +1,16 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
-using TMPro;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared.ugui.checkbox;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui.combo;
+using com.github.lhervier.ksp.shared.ugui.textfield;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 {
     public class FilterMenuController : MonoBehaviour
     {
-        private const string SEARCH_LOCK_ID = "VesselBookmarkMod_Search";
-
-        private EventTrigger.Entry _searchSelectedTriggers;
-        private EventTrigger.Entry _searchDeselectedTriggers;
-
         // ===============================================
         // Life cycle
         // ===============================================
@@ -36,12 +30,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             return this;
         }
         
-        private TMP_InputField _search;
-        private EventTrigger _searchTriggers;
-        public FilterMenuController Search(TMP_InputField search, EventTrigger searchTriggers)
+        private TextFieldController _search;
+        public FilterMenuController Search(TextFieldController search)
         {
             _search = search;
-            _searchTriggers = searchTriggers;
             return this;
         }
         
@@ -78,15 +70,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 OnFilterMenuOpenChanged();
             }
 
-            // Verrou clavier au focus / déverrou au blur (comme l'overlay de commentaire)
-            _searchSelectedTriggers = new EventTrigger.Entry { eventID = EventTriggerType.Select };
-            _searchSelectedTriggers.callback.AddListener(OnSearchSelect);
-            _searchTriggers.triggers.Add(_searchSelectedTriggers);
-            
-            _searchDeselectedTriggers = new EventTrigger.Entry { eventID = EventTriggerType.Deselect };
-            _searchDeselectedTriggers.callback.AddListener(OnSearchDeselect);
-            _searchTriggers.triggers.Add(_searchDeselectedTriggers);
-
             if( _bodyCombo != null )
             {
                 _bodyCombo.OnSelect.Add(OnBodySelected);
@@ -107,20 +90,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             {
                 _typeCombo.OnSelect.Remove(OnTypeSelected);
             }
-            if( _searchTriggers != null )
-            {
-                _searchTriggers.triggers.Remove(_searchDeselectedTriggers);
-                _searchTriggers.triggers.Remove(_searchSelectedTriggers);
-            }
-
-            if( _searchDeselectedTriggers != null )
-            {
-                _searchDeselectedTriggers.callback.RemoveListener(OnSearchDeselect);
-            }
-            if( _searchSelectedTriggers != null )
-            {
-                _searchSelectedTriggers.callback.RemoveListener(OnSearchSelect);
-            }
 
             if( _viewModel != null )
             {
@@ -131,7 +100,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 _viewModel.OnSelectedVesselTypeChanged.Remove(RefreshTypeCombo);
                 _viewModel.OnFilterHasCommentChanged.Remove(RefreshCheckbox);
             }
-            InputLockManager.RemoveControlLock(SEARCH_LOCK_ID);
         }
 
         private void OnBodySelected(string body)
@@ -144,16 +112,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             _viewModel.SelectedVesselType = type;
         }
 
-        private void OnSearchSelect(BaseEventData _)
-        {
-            InputLockManager.SetControlLock(ControlTypes.All, SEARCH_LOCK_ID);
-        }
-
-        private void OnSearchDeselect(BaseEventData _)
-        {
-            InputLockManager.RemoveControlLock(SEARCH_LOCK_ID);
-        }
-
         private void OnFilterMenuOpenChanged()
         {
             bool open = _viewModel.FilterMenuOpen;
@@ -163,7 +121,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             if (open)
             {
                 // Synchronise l'affichage à l'ouverture
-                if (_search != null) _search.text = _viewModel.SearchText ?? string.Empty;
+                if (_search != null) _search.SetText(_viewModel.SearchText ?? string.Empty);
                 RefreshBodyCombo();
                 RefreshTypeCombo();
                 RefreshCheckbox();
