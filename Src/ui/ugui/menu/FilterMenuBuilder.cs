@@ -179,7 +179,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             image.raycastTarget = false;
         }
 
-        // Champ de recherche basé sur le composant partagé TextField (verrou clavier au focus encapsulé).
+        // Search field built on the shared TextField component (keyboard lock on focus is encapsulated).
         private TextFieldController BuildSearchField(Transform parent)
         {
             TextFieldController search = new TextFieldBuilder()
