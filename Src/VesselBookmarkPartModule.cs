@@ -29,7 +29,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     string displayName = !string.IsNullOrEmpty(bookmark.BookmarkTitle)
                         ? bookmark.BookmarkTitle
                         : ModLocalization.GetString("labelModuleNotFound");
-                    VesselBookmarkUIDialog.ConfirmRemoval(() => {
+                    ConfirmRemovalDialog.ConfirmRemoval(() => {
                         bool removed = BookmarksManager.Instance.RemoveBookmark(bookmark);
                         if (removed) {
                             ScreenMessages.PostScreenMessage(

@@ -7,7 +7,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
     /// <summary>
     /// Helper for simple confirmation dialogs.
     /// </summary>
-    public static class VesselBookmarkUIDialog {
+    public static class ConfirmRemovalDialog {
         
         private const string ConfirmDialogTag = "VesselBookmarkConfirmRemove";
         
