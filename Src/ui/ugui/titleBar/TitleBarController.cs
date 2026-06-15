@@ -12,28 +12,28 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
     public class TitleBarController : MonoBehaviour
     {
         private BookmarksViewModel _viewModel;
-        public TitleBarController ViewModel(BookmarksViewModel viewModel)
+        public TitleBarController WithViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
             return this;
         }
         
         private TextMeshProUGUI _countLabel;
-        public TitleBarController CountLabel(TextMeshProUGUI label)
+        public TitleBarController WithCountLabel(TextMeshProUGUI label)
         {
             this._countLabel = label;
             return this;
         }
         
         private ButtonController _addButton;
-        public TitleBarController AddButtonController(ButtonController button)
+        public TitleBarController WithAddButtonController(ButtonController button)
         {
             this._addButton = button;
             return this;
         }
         
         private Image _filterDot;
-        public TitleBarController FilterDot(Image dot)
+        public TitleBarController WithFilterDot(Image dot)
         {
             this._filterDot = dot;
             return this;

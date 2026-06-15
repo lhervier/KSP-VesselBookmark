@@ -23,17 +23,17 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         // Builder parameters
         // ===================================================
 
-        private BookmarksViewModel _viewModel;
-        public FilterMenuBuilder ViewModel(BookmarksViewModel viewModel)
+        private Transform _parent;
+        public FilterMenuBuilder WithParent(Transform parent)
         {
-            this._viewModel = viewModel;
+            this._parent = parent;
             return this;
         }
 
-        private Transform _parent;
-        public FilterMenuBuilder Parent(Transform parent)
+        private BookmarksViewModel _viewModel;
+        public FilterMenuBuilder WithViewModel(BookmarksViewModel viewModel)
         {
-            this._parent = parent;
+            this._viewModel = viewModel;
             return this;
         }
 
@@ -117,15 +117,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             
             // Combos Corps / Type
             ComboController bodyCombo = new ComboBuilder()
-                .Parent(panelGo.transform)
-                .Label(ModLocalization.GetString("labelBody"))
-                .PreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
+                .WithParent(panelGo.transform)
+                .WithLabel(ModLocalization.GetString("labelBody"))
+                .WithPreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
                 .Build();
             ComboController typeCombo = new ComboBuilder()
-                .Parent(panelGo.transform)
-                .Label(ModLocalization.GetString("labelType"))
-                .LabelFor(TranslateVesselType)
-                .PreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
+                .WithParent(panelGo.transform)
+                .WithLabel(ModLocalization.GetString("labelType"))
+                .WithLabelFor(TranslateVesselType)
+                .WithPreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
                 .Build();
             
             // Case « commentaire seulement »
@@ -137,11 +137,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 
             return rootGo
                 .AddComponent<FilterMenuController>()
-                .ViewModel(_viewModel)
-                .Search(search)
-                .Combos(bodyCombo, typeCombo)
-                .Checkbox(checkBox)
-                .PanelAndTrap(panelGo, trapGo);
+                .WithViewModel(_viewModel)
+                .WithSearchFieldController(search)
+                .WithComboControllers(bodyCombo, typeCombo)
+                .WithCheckboxController(checkBox)
+                .WithPanelAndTrap(panelGo, trapGo);
         }
 
         // Valeur brute du type de vaisseau → libellé traduit (la valeur « All » utilise vesselTypeAll).
@@ -183,10 +183,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         private TextFieldController BuildSearchField(Transform parent)
         {
             TextFieldController search = new TextFieldBuilder()
-                .Parent(parent)
-                .Placeholder(ModLocalization.GetString("menuSearchPlaceholder"))
-                .Height(VesselBookmarkPalette.ComboHeight)
-                .FontSize(VesselBookmarkPalette.SearchFontSize)
+                .WithParent(parent)
+                .WithPlaceholder(ModLocalization.GetString("menuSearchPlaceholder"))
+                .WithHeight(VesselBookmarkPalette.ComboHeight)
+                .WithFontSize(VesselBookmarkPalette.SearchFontSize)
                 .Build();
             search.OnValueChanged.Add(v => _viewModel.SearchText = v);
             return search;
@@ -196,9 +196,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         {
             // Case à cocher partagée : libellé cliquable + ligne entière cliquable (Greedy).
             CheckboxController checkbox = new CheckboxBuilder()
-                .Label(ModLocalization.GetString("menuFilterWithComment"))
-                .Greedy(true)
-                .Checked(_viewModel.FilterHasComment)
+                .WithLabel(ModLocalization.GetString("menuFilterWithComment"))
+                .WithGreedyState(true)
+                .WithCheckedState(_viewModel.FilterHasComment)
                 .Build();
             checkbox.transform.SetParent(parent, false);
 

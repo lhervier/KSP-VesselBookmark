@@ -25,7 +25,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
         // ====================================
 
         private BookmarksViewModel _viewModel;
-        public TitleBarBuilder ViewModel(BookmarksViewModel viewModel)
+        public TitleBarBuilder WithViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
             return this;
@@ -77,10 +77,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             
             return rightColumnGo
                 .AddComponent<TitleBarController>()
-                .ViewModel(_viewModel)
-                .CountLabel(countLabel)
-                .AddButtonController(add)
-                .FilterDot(
+                .WithViewModel(_viewModel)
+                .WithCountLabel(countLabel)
+                .WithAddButtonController(add)
+                .WithFilterDot(
                     BuildFilterDot(menu.gameObject)
                 );
         }
@@ -90,11 +90,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
         private static ButtonController NewButton(string objectName, string glyph, bool interactable)
         {
             return new ButtonBuilder()
-                .ObjectName(objectName)
-                .Label(glyph)
-                .Interactable(interactable)
-                .BackgroundColor(PopupPalette.TitleBarButtonColor)
-                .HoverColor(PopupPalette.TitleBarButtonHoverColor)
+                .WithObjectName(objectName)
+                .WithLabel(glyph)
+                .WithInteractableState(interactable)
+                .WithBackgroundColor(PopupPalette.TitleBarButtonColor)
+                .WithHoverColor(PopupPalette.TitleBarButtonHoverColor)
                 .Build();
         }
 

@@ -16,7 +16,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         // ===============================================
 
         private BookmarksViewModel _viewModel;
-        public FilterMenuController ViewModel(BookmarksViewModel viewModel)
+        public FilterMenuController WithViewModel(BookmarksViewModel viewModel)
         {
             _viewModel = viewModel;
             return this;
@@ -24,21 +24,21 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 
         private GameObject _panel;
         private GameObject _trap;
-        public FilterMenuController PanelAndTrap(GameObject panel, GameObject trap) { 
+        public FilterMenuController WithPanelAndTrap(GameObject panel, GameObject trap) { 
             _panel = panel; 
             _trap = trap; 
             return this;
         }
         
         private TextFieldController _search;
-        public FilterMenuController Search(TextFieldController search)
+        public FilterMenuController WithSearchFieldController(TextFieldController search)
         {
             _search = search;
             return this;
         }
         
         private CheckboxController _checkbox;
-        public FilterMenuController Checkbox(CheckboxController checkbox) 
+        public FilterMenuController WithCheckboxController(CheckboxController checkbox) 
         {
             _checkbox = checkbox;
             return this;
@@ -46,7 +46,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         
         private ComboController _bodyCombo;
         private ComboController _typeCombo;
-        public FilterMenuController Combos(ComboController body, ComboController type)
+        public FilterMenuController WithComboControllers(ComboController body, ComboController type)
         {
             _bodyCombo = body;
             _typeCombo = type;

@@ -10,7 +10,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
     public class RemoveConfirmContentController : MonoBehaviour
     {
         private TextMeshProUGUI _message;
-        public RemoveConfirmContentController Message(TextMeshProUGUI message)
+        public RemoveConfirmContentController WithMessageComponent(TextMeshProUGUI message)
         {
             this._message = message;
             return this;

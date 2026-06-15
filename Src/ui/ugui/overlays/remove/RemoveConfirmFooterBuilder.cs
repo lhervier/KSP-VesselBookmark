@@ -29,30 +29,30 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
             // Cancel keeps the default button colors (VBMButtonBuilder defaults); only the auto-width
             // text-button shape, height and font size are set here.
             ButtonController cancel = new VBMButtonBuilder()
-                .ObjectName("Cancel")
-                .Label(ModLocalization.GetString("dialogButtonCancel"))
-                .AutoWidth(VesselBookmarkPalette.CardButtonPaddingH)
-                .Size(VesselBookmarkPalette.CardButtonHeight)
-                .FontSize(VesselBookmarkPalette.CardButtonFontSize)
+                .WithObjectName("Cancel")
+                .WithLabel(ModLocalization.GetString("dialogButtonCancel"))
+                .WithAutoWidth(VesselBookmarkPalette.CardButtonPaddingH)
+                .WithSize(VesselBookmarkPalette.CardButtonHeight)
+                .WithFontSize(VesselBookmarkPalette.CardButtonFontSize)
                 .Build();
             cancel.transform.SetParent(rootGo.transform, false);
 
             ButtonController remove = new VBMButtonBuilder()
-                .ObjectName("Remove")
-                .Label(ModLocalization.GetString("dialogButtonRemove"))
-                .AutoWidth(VesselBookmarkPalette.CardButtonPaddingH)
-                .Size(VesselBookmarkPalette.CardButtonHeight)
-                .FontSize(VesselBookmarkPalette.CardButtonFontSize)
-                .BackgroundColor(VesselBookmarkPalette.CardButtonDangerBgColor)
-                .HoverColor(VesselBookmarkPalette.CardButtonDangerBgColor)
-                .TextColor(VesselBookmarkPalette.CardButtonDangerTextColor)
+                .WithObjectName("Remove")
+                .WithLabel(ModLocalization.GetString("dialogButtonRemove"))
+                .WithAutoWidth(VesselBookmarkPalette.CardButtonPaddingH)
+                .WithSize(VesselBookmarkPalette.CardButtonHeight)
+                .WithFontSize(VesselBookmarkPalette.CardButtonFontSize)
+                .WithBackgroundColor(VesselBookmarkPalette.CardButtonDangerBgColor)
+                .WithHoverColor(VesselBookmarkPalette.CardButtonDangerBgColor)
+                .WithTextColor(VesselBookmarkPalette.CardButtonDangerTextColor)
                 .Build();
             remove.transform.SetParent(rootGo.transform, false);
 
             return rootGo
                 .AddComponent<RemoveConfirmFooterController>()
-                .CancelButtonController(cancel)
-                .RemoveButtonController(remove);
+                .WithCancelButtonController(cancel)
+                .WithRemoveButtonController(remove);
         }
     }
 }

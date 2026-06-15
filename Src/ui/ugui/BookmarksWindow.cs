@@ -37,10 +37,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
             // controller détruit vaut null ici, ce qui déclenche un nouveau spawn.
             if (_popup == null)
             {
-                var builder = new ModPopupBuilder().ViewModel(_viewModel);
+                var builder = new ModPopupBuilder().WithViewModel(_viewModel);
                 if (_savedPosition.HasValue)
                 {
-                    builder = builder.Position(_savedPosition.Value);
+                    builder = builder.WithPosition(_savedPosition.Value);
                 }
                 _popup = builder.Build();
                 if (_popup == null) return;   // Spawn KSP échoué

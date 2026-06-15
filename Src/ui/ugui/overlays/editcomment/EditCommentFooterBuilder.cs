@@ -28,30 +28,30 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             // Cancel keeps the default button colors (VBMButtonBuilder defaults); only the auto-width
             // text-button shape, height and font size are set here.
             ButtonController cancel = new VBMButtonBuilder()
-                .ObjectName("Cancel")
-                .Label(ModLocalization.GetString("buttonCancel"))
-                .AutoWidth(VesselBookmarkPalette.CardButtonPaddingH)
-                .Size(VesselBookmarkPalette.CardButtonHeight)
-                .FontSize(VesselBookmarkPalette.CardButtonFontSize)
+                .WithObjectName("Cancel")
+                .WithLabel(ModLocalization.GetString("buttonCancel"))
+                .WithAutoWidth(VesselBookmarkPalette.CardButtonPaddingH)
+                .WithSize(VesselBookmarkPalette.CardButtonHeight)
+                .WithFontSize(VesselBookmarkPalette.CardButtonFontSize)
                 .Build();
             cancel.transform.SetParent(rootGo.transform, false);
 
             ButtonController ok = new VBMButtonBuilder()
-                .ObjectName("OK")
-                .Label(ModLocalization.GetString("buttonSave"))
-                .AutoWidth(VesselBookmarkPalette.CardButtonPaddingH)
-                .Size(VesselBookmarkPalette.CardButtonHeight)
-                .FontSize(VesselBookmarkPalette.CardButtonFontSize)
-                .BackgroundColor(VesselBookmarkPalette.CardButtonOkBgColor)
-                .HoverColor(VesselBookmarkPalette.CardButtonOkBgColor)
-                .TextColor(VesselBookmarkPalette.CardButtonOkTextColor)
+                .WithObjectName("OK")
+                .WithLabel(ModLocalization.GetString("buttonSave"))
+                .WithAutoWidth(VesselBookmarkPalette.CardButtonPaddingH)
+                .WithSize(VesselBookmarkPalette.CardButtonHeight)
+                .WithFontSize(VesselBookmarkPalette.CardButtonFontSize)
+                .WithBackgroundColor(VesselBookmarkPalette.CardButtonOkBgColor)
+                .WithHoverColor(VesselBookmarkPalette.CardButtonOkBgColor)
+                .WithTextColor(VesselBookmarkPalette.CardButtonOkTextColor)
                 .Build();
             ok.transform.SetParent(rootGo.transform, false);
 
             return rootGo
                 .AddComponent<EditCommentFooterController>()
-                .CancelButtonController(cancel)
-                .OkButtonController(ok);
+                .WithCancelButtonController(cancel)
+                .WithOkButtonController(ok);
         }
     }
 }

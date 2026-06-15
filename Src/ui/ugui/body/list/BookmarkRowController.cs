@@ -21,98 +21,98 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
         // ============================================
 
         private BookmarksViewModel _viewModel;
-        public BookmarkRowController ViewModel(BookmarksViewModel viewModel)
+        public BookmarkRowController WithViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
             return this;
         }
 
         private Bookmark _bookmark;
-        public BookmarkRowController Bookmark(Bookmark bookmark)
+        public BookmarkRowController WithBookmark(Bookmark bookmark)
         {
             this._bookmark = bookmark;
             return this;
         }
 
         private Image _bg;
-        public BookmarkRowController Background(Image bg)
+        public BookmarkRowController WithBackground(Image bg)
         {
             this._bg = bg;
             return this;
         }
 
         private Image _accentBar;
-        public BookmarkRowController AccentBar(Image accentBar)
+        public BookmarkRowController WithAccentBar(Image accentBar)
         {
             this._accentBar = accentBar;
             return this;
         }
 
         private TextMeshProUGUI _name;
-        public BookmarkRowController Name(TextMeshProUGUI name)
+        public BookmarkRowController WithNameComponent(TextMeshProUGUI name)
         {
             this._name = name;
             return this;
         }
 
         private GameObject _chip;
-        public BookmarkRowController Chip(GameObject chip)
+        public BookmarkRowController WithChip(GameObject chip)
         {
             this._chip = chip;
             return this;
         }
 
         private Image _chipImage;
-        public BookmarkRowController ChipImage(Image chipImage)
+        public BookmarkRowController WithChipImage(Image chipImage)
         {
             this._chipImage = chipImage;
             return this;
         }
 
         private TextMeshProUGUI _chipText;
-        public BookmarkRowController ChipText(TextMeshProUGUI chipText)
+        public BookmarkRowController WithChipTextComponent(TextMeshProUGUI chipText)
         {
             this._chipText = chipText;
             return this;
         }
 
         private CanvasGroup _rowButtons;
-        public BookmarkRowController RowButtons(CanvasGroup rowButtons)
+        public BookmarkRowController WithRowButtons(CanvasGroup rowButtons)
         {
             this._rowButtons = rowButtons;
             return this;
         }
 
         private bool _vesselExists;
-        public BookmarkRowController VesselExists(bool vesselExists)
+        public BookmarkRowController WithVesselExists(bool vesselExists)
         {
             this._vesselExists = vesselExists;
             return this;
         }
 
         private PointerHandler _pointerHandler;
-        public BookmarkRowController PointerHandler(PointerHandler pointerHandler)
+        public BookmarkRowController WithPointerHandler(PointerHandler pointerHandler)
         {
             this._pointerHandler = pointerHandler;
             return this;
         }
 
         private ButtonController _upButtonController;
-        public BookmarkRowController UpButtonController(ButtonController upButtonController)
+        public BookmarkRowController WithUpButtonController(ButtonController upButtonController)
         {
             _upButtonController = upButtonController;
             return this;
         }
 
         private ButtonController _downButtonController;
-        public BookmarkRowController DownButtonController(ButtonController downButtonController)
+        public BookmarkRowController WithDownButtonController(ButtonController downButtonController)
         {
             _downButtonController = downButtonController;
             return this;
         }
 
         private ButtonController _removeButtonController;
-        public BookmarkRowController RemoveButtonController(ButtonController removeButtonController)
+        public BookmarkRowController WithRemoveButtonController(ButtonController removeButtonController)
         {
             _removeButtonController = removeButtonController;
             return this;

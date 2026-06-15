@@ -14,14 +14,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
     public class RemoveConfirmOverlayBuilder : IUGUIBuilder<RemoveConfirmOverlayController>
     {
         private BookmarksViewModel _viewModel;
-        public RemoveConfirmOverlayBuilder ViewModel(BookmarksViewModel viewModel)
+        public RemoveConfirmOverlayBuilder WithViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
             return this;
         }
 
         private Transform _parent;
-        public RemoveConfirmOverlayBuilder Parent(Transform parent)
+        public RemoveConfirmOverlayBuilder WithParent(Transform parent)
         {
             this._parent = parent;
             return this;
@@ -30,11 +30,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
         public RemoveConfirmOverlayController Build()
         {
             var popupBuilder = new InternalPopupBuilder<RemoveConfirmContentController, RemoveConfirmFooterController>()
-                .Parent(_parent)
-                .Title(ModLocalization.GetString("dialogRemoveTitle"))
-                .TitleColor(DefaultPalette.DangerColor)
-                .Content(new RemoveConfirmContentBuilder())
-                .Footer(new RemoveConfirmFooterBuilder());
+                .WithParent(_parent)
+                .WithTitle(ModLocalization.GetString("dialogRemoveTitle"))
+                .WithTitleColor(DefaultPalette.DangerColor)
+                .WithContentBuilder(new RemoveConfirmContentBuilder())
+                .WithFooterBuilder(new RemoveConfirmFooterBuilder());
 
             InternalPopupController popup = popupBuilder.Build();
             RemoveConfirmContentController content = popupBuilder.ContentController;
@@ -43,11 +43,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
             // The orchestrator lives on the popup's always-active root.
             return popup.gameObject
                 .AddComponent<RemoveConfirmOverlayController>()
-                .ViewModel(_viewModel)
-                .Popup(popup)
-                .Message(content.GetMessage())
-                .CancelButtonController(footer.GetCancelButtonController())
-                .RemoveButtonController(footer.GetRemoveButtonController());
+                .WithViewModel(_viewModel)
+                .WithPopupController(popup)
+                .WithMessageComponent(content.GetMessage())
+                .WithCancelButtonController(footer.GetCancelButtonController())
+                .WithRemoveButtonController(footer.GetRemoveButtonController());
         }
     }
 }

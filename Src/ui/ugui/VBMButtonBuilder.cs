@@ -12,9 +12,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
     {
         public VBMButtonBuilder()
         {
-            Size(VesselBookmarkPalette.TitleButtonSize);
-            BackgroundColor(VesselBookmarkPalette.ButtonColor);
-            HoverColor(VesselBookmarkPalette.ButtonHoverColor);
+            WithSize(VesselBookmarkPalette.TitleButtonSize);
+            WithBackgroundColor(VesselBookmarkPalette.ButtonColor);
+            WithHoverColor(VesselBookmarkPalette.ButtonHoverColor);
         }
     }
 }

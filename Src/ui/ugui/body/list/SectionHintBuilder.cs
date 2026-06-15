@@ -20,14 +20,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
         // ================================================
 
         private Transform _parent;
-        public SectionHintBuilder Parent(Transform parent)
+        public SectionHintBuilder WithParent(Transform parent)
         {
             this._parent = parent;
             return this;
         }
 
         private string _hintKey;
-        public SectionHintBuilder HintKey(string titleKey)
+        public SectionHintBuilder WithHintKey(string titleKey)
         {
             this._hintKey = titleKey;
             return this;

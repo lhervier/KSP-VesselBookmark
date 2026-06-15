@@ -17,7 +17,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body
         // ===================================================
 
         private BookmarksViewModel _viewModel;
-        public BodyBuilder ViewModel(BookmarksViewModel viewModel)
+        public BodyBuilder WithViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
             return this;
@@ -30,12 +30,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body
         public ScrollableViewController Build()
         {
             return new ScrollableViewBuilder<ListController>()
-                .ObjectName("Bookmarks.Body")
-                .ContentBuilder(new ListBuilder().ViewModel(_viewModel))
-                .ScrollbarWidth(VesselBookmarkPalette.ScrollbarWidth)
-                .ScrollbarBackgroundColor(VesselBookmarkPalette.SearchBgColor)
-                .HandleColor(PopupPalette.PopupBorderColor)
-                .HandleHoverColor(VesselBookmarkPalette.ScrollbarColor)
+                .WithObjectName("Bookmarks.Body")
+                .WithContentBuilder(new ListBuilder().WithViewModel(_viewModel))
+                .WithScrollbarWidth(VesselBookmarkPalette.ScrollbarWidth)
+                .WithScrollbarBackgroundColor(VesselBookmarkPalette.SearchBgColor)
+                .WithHandleColor(PopupPalette.PopupBorderColor)
+                .WithHandleHoverColor(VesselBookmarkPalette.ScrollbarColor)
                 .Build();
         }
     }

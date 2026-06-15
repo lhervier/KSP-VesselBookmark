@@ -10,14 +10,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
     public class EditCommentContentController : MonoBehaviour
     {
         private TextMeshProUGUI _sub;
-        public EditCommentContentController Sub(TextMeshProUGUI sub)
+        public EditCommentContentController WithSubComponent(TextMeshProUGUI sub)
         {
             this._sub = sub;
             return this;
         }
 
         private TMP_InputField _input;
-        public EditCommentContentController Input(TMP_InputField input)
+        public EditCommentContentController WithInputField(TMP_InputField input)
         {
             this._input = input;
             return this;

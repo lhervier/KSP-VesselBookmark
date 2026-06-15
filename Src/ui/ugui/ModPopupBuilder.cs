@@ -25,7 +25,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
         // =============================================
 
         private BookmarksViewModel _viewModel;
-        public ModPopupBuilder ViewModel(BookmarksViewModel viewModel)
+        public ModPopupBuilder WithViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
             return this;
@@ -33,13 +33,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
 
         private Vector2 _position;
         private bool _hasPosition;
-        public ModPopupBuilder Position(Vector2 position)
+        public ModPopupBuilder WithPosition(Vector2 position)
         {
             this._position = position;
             this._hasPosition = true;
             return this;
         }
-        public ModPopupBuilder ResetPosition()
+        public ModPopupBuilder WithoutPosition()
         {
             this._hasPosition = false;
             return this;
@@ -52,18 +52,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
         public PopupController Build()
         {
             var popupBuilder = new PopupBuilder<TitleBarController, ContentController>()
-                .PopupID(DIALOG_ID)
-                .Title(ModLocalization.GetString("windowTitle"))
-                .TitleBarBuilder(
-                    new TitleBarBuilder().ViewModel(_viewModel)
+                .WithPopupID(DIALOG_ID)
+                .WithTitle(ModLocalization.GetString("windowTitle"))
+                .WithTitleBarBuilder(
+                    new TitleBarBuilder().WithViewModel(_viewModel)
                 )
-                .ContentBuilder(
-                    new ContentBuilder().ViewModel(_viewModel)
+                .WithContentBuilder(
+                    new ContentBuilder().WithViewModel(_viewModel)
                 )
-                .Size(new Vector2(VesselBookmarkPalette.WindowWidth, VesselBookmarkPalette.WindowHeight));
+                .WithSize(new Vector2(VesselBookmarkPalette.WindowWidth, VesselBookmarkPalette.WindowHeight));
             if (this._hasPosition)
             {
-                popupBuilder = popupBuilder.Position(this._position);
+                popupBuilder = popupBuilder.WithPosition(this._position);
             }
             PopupController popupController = popupBuilder.Build();
             if (popupController == null) return null;
@@ -74,18 +74,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
             Transform windowTransform = popupController.GetGameObject().transform;
 
             new FilterMenuBuilder()
-                .ViewModel(_viewModel)
-                .Parent(windowTransform)
+                .WithViewModel(_viewModel)
+                .WithParent(windowTransform)
                 .Build();
 
             new EditCommentOverlayBuilder()
-                .ViewModel(_viewModel)
-                .Parent(windowTransform)
+                .WithViewModel(_viewModel)
+                .WithParent(windowTransform)
                 .Build();
 
             new RemoveConfirmOverlayBuilder()
-                .ViewModel(_viewModel)
-                .Parent(windowTransform)
+                .WithViewModel(_viewModel)
+                .WithParent(windowTransform)
                 .Build();
 
             return popupController;

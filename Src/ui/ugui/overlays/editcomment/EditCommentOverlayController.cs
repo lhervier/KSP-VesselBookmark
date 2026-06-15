@@ -21,42 +21,42 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
         private bool _loading;
 
         private BookmarksViewModel _viewModel;
-        public EditCommentOverlayController ViewModel(BookmarksViewModel viewModel)
+        public EditCommentOverlayController WithViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
             return this;
         }
 
         private InternalPopupController _popup;
-        public EditCommentOverlayController Popup(InternalPopupController popup)
+        public EditCommentOverlayController WithPopupController(InternalPopupController popup)
         {
             this._popup = popup;
             return this;
         }
 
         private TextMeshProUGUI _sub;
-        public EditCommentOverlayController Sub(TextMeshProUGUI sub)
+        public EditCommentOverlayController WithSubComponent(TextMeshProUGUI sub)
         {
             this._sub = sub;
             return this;
         }
 
         private TMP_InputField _input;
-        public EditCommentOverlayController Input(TMP_InputField input)
+        public EditCommentOverlayController WithInputField(TMP_InputField input)
         {
             this._input = input;
             return this;
         }
 
         private ButtonController _cancelButtonController;
-        public EditCommentOverlayController CancelButtonController(ButtonController cancelButtonController)
+        public EditCommentOverlayController WithCancelButtonController(ButtonController cancelButtonController)
         {
             this._cancelButtonController = cancelButtonController;
             return this;
         }
 
         private ButtonController _okButtonController;
-        public EditCommentOverlayController OkButtonController(ButtonController okButtonController)
+        public EditCommentOverlayController WithOkButtonController(ButtonController okButtonController)
         {
             this._okButtonController = okButtonController;
             return this;

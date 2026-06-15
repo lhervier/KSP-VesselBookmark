@@ -19,7 +19,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
         // ========================================
 
         private BookmarksViewModel _viewModel;
-        public ListBuilder ViewModel(BookmarksViewModel viewModel)
+        public ListBuilder WithViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
             return this;
@@ -44,7 +44,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 
             return go
                 .AddComponent<ListController>()
-                .ViewModel(_viewModel);
+                .WithViewModel(_viewModel);
         }
     }
 }

@@ -24,7 +24,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
 
             return go
                 .AddComponent<RemoveConfirmContentController>()
-                .Message(message);
+                .WithMessageComponent(message);
         }
     }
 }

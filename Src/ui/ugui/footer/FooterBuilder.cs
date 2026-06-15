@@ -37,7 +37,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
         // ================================================
 
         private BookmarksViewModel _viewModel;
-        public FooterBuilder ViewModel(BookmarksViewModel viewModel)
+        public FooterBuilder WithViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
             return this;
@@ -103,40 +103,40 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
             // Background/hover colors come from the VBMButtonBuilder defaults; only the footer-specific
             // size and font size are overridden here.
             ButtonController edit = new VBMButtonBuilder()
-                .ObjectName("Edit")
-                .Label(EditLabel)
-                .Interactable(false)
-                .Size(VesselBookmarkPalette.FooterButtonHeight)
-                .FontSize(VesselBookmarkPalette.FooterButtonFontSize)
+                .WithObjectName("Edit")
+                .WithLabel(EditLabel)
+                .WithInteractableState(false)
+                .WithSize(VesselBookmarkPalette.FooterButtonHeight)
+                .WithFontSize(VesselBookmarkPalette.FooterButtonFontSize)
                 .Build();
             edit.transform.SetParent(go.transform, false);
             Tooltips.Attach(edit.gameObject, ModLocalization.GetString("tooltipEdit"));
 
             ButtonController goTo = new VBMButtonBuilder()
-                .ObjectName("GoTo")
-                .Label(GoToLabel)
-                .Interactable(false)
-                .Size(VesselBookmarkPalette.FooterButtonHeight)
-                .FontSize(VesselBookmarkPalette.FooterButtonFontSize)
+                .WithObjectName("GoTo")
+                .WithLabel(GoToLabel)
+                .WithInteractableState(false)
+                .WithSize(VesselBookmarkPalette.FooterButtonHeight)
+                .WithFontSize(VesselBookmarkPalette.FooterButtonFontSize)
                 .Build();
             goTo.transform.SetParent(go.transform, false);
             Tooltips.Attach(goTo.gameObject, ModLocalization.GetString("tooltipGoTo"));
 
             ButtonController target = new VBMButtonBuilder()
-                .ObjectName("Target")
-                .Label(TargetLabel)
-                .Interactable(false)
-                .Size(VesselBookmarkPalette.FooterButtonHeight)
-                .FontSize(VesselBookmarkPalette.FooterButtonFontSize)
+                .WithObjectName("Target")
+                .WithLabel(TargetLabel)
+                .WithInteractableState(false)
+                .WithSize(VesselBookmarkPalette.FooterButtonHeight)
+                .WithFontSize(VesselBookmarkPalette.FooterButtonFontSize)
                 .Build();
             target.transform.SetParent(go.transform, false);
             Tooltips.Attach(target.gameObject, ModLocalization.GetString("tooltipSetTargetAs"));
 
             return go
                 .AddComponent<FooterController>()
-                .ViewModel(_viewModel)
-                .SelectionLabel(selLabel)
-                .Buttons(edit, goTo, target);
+                .WithViewModel(_viewModel)
+                .WithSelectionLabelComponent(selLabel)
+                .WithButtonControllers(edit, goTo, target);
         }
     }
 }

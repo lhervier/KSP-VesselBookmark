@@ -15,35 +15,35 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
     public class RemoveConfirmOverlayController : MonoBehaviour
     {
         private BookmarksViewModel _viewModel;
-        public RemoveConfirmOverlayController ViewModel(BookmarksViewModel viewModel)
+        public RemoveConfirmOverlayController WithViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
             return this;
         }
 
         private InternalPopupController _popup;
-        public RemoveConfirmOverlayController Popup(InternalPopupController popup)
+        public RemoveConfirmOverlayController WithPopupController(InternalPopupController popup)
         {
             this._popup = popup;
             return this;
         }
 
         private TextMeshProUGUI _message;
-        public RemoveConfirmOverlayController Message(TextMeshProUGUI message)
+        public RemoveConfirmOverlayController WithMessageComponent(TextMeshProUGUI message)
         {
             this._message = message;
             return this;
         }
 
         private ButtonController _cancelButtonController;
-        public RemoveConfirmOverlayController CancelButtonController(ButtonController cancelButtonController)
+        public RemoveConfirmOverlayController WithCancelButtonController(ButtonController cancelButtonController)
         {
             _cancelButtonController = cancelButtonController;
             return this;
         }
 
         private ButtonController _removeButtonController;
-        public RemoveConfirmOverlayController RemoveButtonController(ButtonController removeButtonController)
+        public RemoveConfirmOverlayController WithRemoveButtonController(ButtonController removeButtonController)
         {
             _removeButtonController = removeButtonController;
             return this;

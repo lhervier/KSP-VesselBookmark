@@ -10,14 +10,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
     public class EditCommentFooterController : MonoBehaviour
     {
         private ButtonController _cancelButtonController;
-        public EditCommentFooterController CancelButtonController(ButtonController cancel)
+        public EditCommentFooterController WithCancelButtonController(ButtonController cancel)
         {
             this._cancelButtonController = cancel;
             return this;
         }
 
         private ButtonController _okButtonController;
-        public EditCommentFooterController OkButtonController(ButtonController ok)
+        public EditCommentFooterController WithOkButtonController(ButtonController ok)
         {
             this._okButtonController = ok;
             return this;

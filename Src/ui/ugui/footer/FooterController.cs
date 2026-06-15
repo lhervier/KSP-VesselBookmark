@@ -14,14 +14,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
         // ======================================
 
         private BookmarksViewModel _viewModel;
-        public FooterController ViewModel(BookmarksViewModel viewModel)
+        public FooterController WithViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
             return this;
         }
 
         private TextMeshProUGUI _selectionLabel;
-        public FooterController SelectionLabel(TextMeshProUGUI label)
+        public FooterController WithSelectionLabelComponent(TextMeshProUGUI label)
         {
             this._selectionLabel = label; 
             return this;
@@ -30,7 +30,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
         private ButtonController _edit;
         private ButtonController _goTo;
         private ButtonController _target;
-        public FooterController Buttons(ButtonController edit, ButtonController goTo, ButtonController target)
+        public FooterController WithButtonControllers(ButtonController edit, ButtonController goTo, ButtonController target)
         {
             this._edit = edit;
             this._goTo = goTo;

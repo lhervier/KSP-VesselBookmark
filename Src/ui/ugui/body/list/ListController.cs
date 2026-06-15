@@ -23,7 +23,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
         // ========================================
 
         private BookmarksViewModel _viewModel;
-        public ListController ViewModel(BookmarksViewModel viewModel)
+        public ListController WithViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
             return this;
@@ -105,13 +105,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 }
 
                 new SectionHeaderBuilder()
-                    .Parent(transform)
-                    .TitleKey(section.titleKey)
-                    .Count(bookmarks.Count)
+                    .WithParent(transform)
+                    .WithTitleKey(section.titleKey)
+                    .WithCount(bookmarks.Count)
                     .Build();
                 new SectionHintBuilder()
-                    .Parent(transform)
-                    .HintKey(section.hintKey)
+                    .WithParent(transform)
+                    .WithHintKey(section.hintKey)
                     .Build();
 
                 for (int i = 0; i < bookmarks.Count; i++)
@@ -119,10 +119,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                     bool isFirst = i == 0;
                     bool isLast = i == bookmarks.Count - 1;
                     var row = new BookmarkRowBuilder()
-                        .ViewModel(_viewModel)
-                        .Bookmark(bookmarks[i])
-                        .First(isFirst)
-                        .Last(isLast)
+                        .WithViewModel(_viewModel)
+                        .WithBookmark(bookmarks[i])
+                        .WithFirstState(isFirst)
+                        .WithLastState(isLast)
                         .Build();
                     row.transform.SetParent(transform, false);
                     _rows.Add(row);

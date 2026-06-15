@@ -30,28 +30,28 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
         // ===========================================
 
         private BookmarksViewModel _viewModel;
-        public BookmarkRowBuilder ViewModel(BookmarksViewModel viewModel)
+        public BookmarkRowBuilder WithViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
             return this;
         }
 
         private Bookmark _bookmark;
-        public BookmarkRowBuilder Bookmark(Bookmark bookmark)
+        public BookmarkRowBuilder WithBookmark(Bookmark bookmark)
         {
             this._bookmark = bookmark;
             return this;
         }
 
         private bool _first;
-        public BookmarkRowBuilder First(bool first)
+        public BookmarkRowBuilder WithFirstState(bool first)
         {
             this._first = first;
             return this;
         }
 
         private bool _last;
-        public BookmarkRowBuilder Last(bool last)
+        public BookmarkRowBuilder WithLastState(bool last)
         {
             this._last = last;
             return this;
@@ -181,20 +181,20 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             var pointer = rowGo.AddComponent<PointerHandler>();
             
             return rowGo.AddComponent<BookmarkRowController>()
-                .ViewModel(_viewModel)
-                .Bookmark(_bookmark)
-                .Background(bg)
-                .AccentBar(accentBar)
-                .Name(name)
-                .Chip(chip)
-                .ChipImage(chipImage)
-                .ChipText(chipText)
-                .RowButtons(rowButtonsGroup)
-                .VesselExists(vesselExists)
-                .PointerHandler(pointer)
-                .UpButtonController(upButton)
-                .DownButtonController(downButton)
-                .RemoveButtonController(removeButton);
+                .WithViewModel(_viewModel)
+                .WithBookmark(_bookmark)
+                .WithBackground(bg)
+                .WithAccentBar(accentBar)
+                .WithNameComponent(name)
+                .WithChip(chip)
+                .WithChipImage(chipImage)
+                .WithChipTextComponent(chipText)
+                .WithRowButtons(rowButtonsGroup)
+                .WithVesselExists(vesselExists)
+                .WithPointerHandler(pointer)
+                .WithUpButtonController(upButton)
+                .WithDownButtonController(downButton)
+                .WithRemoveButtonController(removeButton);
         }
 
         // ----------------------------------------------------------------
@@ -344,36 +344,36 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 
             // Row buttons use their own (smaller) size, font and colors, overriding the VBM defaults.
             upButton = new VBMButtonBuilder()
-                .ObjectName("MoveUp")
-                .Label(MoveUpLabel)
-                .Interactable(!isFirst)
-                .Size(VesselBookmarkPalette.RowButtonSize)
-                .FontSize(VesselBookmarkPalette.RowButtonFontSize)
-                .BackgroundColor(VesselBookmarkPalette.RowButtonBgColor)
-                .HoverColor(VesselBookmarkPalette.RowButtonHoverColor)
+                .WithObjectName("MoveUp")
+                .WithLabel(MoveUpLabel)
+                .WithInteractableState(!isFirst)
+                .WithSize(VesselBookmarkPalette.RowButtonSize)
+                .WithFontSize(VesselBookmarkPalette.RowButtonFontSize)
+                .WithBackgroundColor(VesselBookmarkPalette.RowButtonBgColor)
+                .WithHoverColor(VesselBookmarkPalette.RowButtonHoverColor)
                 .Build();
             upButton.transform.SetParent(groupGo.transform, false);
             Tooltips.Attach(upButton.gameObject, ModLocalization.GetString("tooltipMoveUp"));
 
             downButton = new VBMButtonBuilder()
-                .ObjectName("MoveDown")
-                .Label(MoveDownLabel)
-                .Interactable(!isLast)
-                .Size(VesselBookmarkPalette.RowButtonSize)
-                .FontSize(VesselBookmarkPalette.RowButtonFontSize)
-                .BackgroundColor(VesselBookmarkPalette.RowButtonBgColor)
-                .HoverColor(VesselBookmarkPalette.RowButtonHoverColor)
+                .WithObjectName("MoveDown")
+                .WithLabel(MoveDownLabel)
+                .WithInteractableState(!isLast)
+                .WithSize(VesselBookmarkPalette.RowButtonSize)
+                .WithFontSize(VesselBookmarkPalette.RowButtonFontSize)
+                .WithBackgroundColor(VesselBookmarkPalette.RowButtonBgColor)
+                .WithHoverColor(VesselBookmarkPalette.RowButtonHoverColor)
                 .Build();
             downButton.transform.SetParent(groupGo.transform, false);
             Tooltips.Attach(downButton.gameObject, ModLocalization.GetString("tooltipMoveDown"));
 
             removeButton = new VBMButtonBuilder()
-                .ObjectName("Remove")
-                .Label(RemoveLabel)
-                .Size(VesselBookmarkPalette.RowButtonSize)
-                .FontSize(VesselBookmarkPalette.RowButtonFontSize)
-                .BackgroundColor(VesselBookmarkPalette.RowButtonBgColor)
-                .HoverColor(VesselBookmarkPalette.RowButtonDangerHoverColor)
+                .WithObjectName("Remove")
+                .WithLabel(RemoveLabel)
+                .WithSize(VesselBookmarkPalette.RowButtonSize)
+                .WithFontSize(VesselBookmarkPalette.RowButtonFontSize)
+                .WithBackgroundColor(VesselBookmarkPalette.RowButtonBgColor)
+                .WithHoverColor(VesselBookmarkPalette.RowButtonDangerHoverColor)
                 .Build();
             removeButton.transform.SetParent(groupGo.transform, false);
             Tooltips.Attach(removeButton.gameObject, ModLocalization.GetString("tooltipRemove"));

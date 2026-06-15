@@ -20,21 +20,21 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
         // ================================================
 
         private Transform _parent;
-        public SectionHeaderBuilder Parent(Transform parent)
+        public SectionHeaderBuilder WithParent(Transform parent)
         {
             this._parent = parent;
             return this;
         }
 
         private string _titleKey;
-        public SectionHeaderBuilder TitleKey(string titleKey)
+        public SectionHeaderBuilder WithTitleKey(string titleKey)
         {
             this._titleKey = titleKey;
             return this;
         }
 
         private int _count;
-        public SectionHeaderBuilder Count(int count)
+        public SectionHeaderBuilder WithCount(int count)
         {
             this._count = count;
             return this;

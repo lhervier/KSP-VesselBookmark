@@ -19,7 +19,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
         // ================================================
 
         private BookmarksViewModel _viewModel;
-        public ContentBuilder ViewModel(BookmarksViewModel viewModel)
+        public ContentBuilder WithViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
             return this;
@@ -45,7 +45,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
 
             // Scrollable body — greedy on height so it fills the host minus the footer.
             ScrollableViewController body = new BodyBuilder()
-                .ViewModel(_viewModel)
+                .WithViewModel(_viewModel)
                 .Build();
             body.transform.SetParent(go.transform, false);
             var bodyLayoutElement = body.gameObject.AddComponent<LayoutElement>();
@@ -54,7 +54,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
 
             // Footer — fixed height, pinned at the bottom by the layout (its own LayoutElement sizes it).
             FooterController footer = new FooterBuilder()
-                .ViewModel(_viewModel)
+                .WithViewModel(_viewModel)
                 .Build();
             footer.transform.SetParent(go.transform, false);
 
