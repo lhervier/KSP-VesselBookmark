@@ -53,7 +53,7 @@ echo "Suppression du dossier Release"
 rm -rf Release
 
 echo "Création du dossier Release"
-mkdir -p Release/VesselBookmarkMod/{vessel_types,buttons,Textures,Localization}
+mkdir -p Release/VesselBookmarkMod/{buttons,Textures,Localization}
 
 echo "Restauration des packages NuGet"
 dotnet restore VesselBookmark.sln "${MSBUILD_PROPS[@]}"
@@ -69,9 +69,6 @@ cp -v GameData/VesselBookmarkMod/VesselBookmarkMod.cfg Release/VesselBookmarkMod
 
 echo "Copie des icônes"
 cp -v GameData/VesselBookmarkMod/*.png Release/VesselBookmarkMod/
-
-echo "Copie des icônes de types de vaisseau"
-cp -v GameData/VesselBookmarkMod/vessel_types/* Release/VesselBookmarkMod/vessel_types/
 
 echo "Copie des icônes de boutons"
 cp -v GameData/VesselBookmarkMod/buttons/* Release/VesselBookmarkMod/buttons/

@@ -1,21 +1,26 @@
 using System.Collections.Generic;
 using UnityEngine;
+using com.github.lhervier.ksp.shared.ugui.sprites;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites
 {
     /// <summary>
-    /// Charge les PNG du mod (icônes de type de vaisseau, alarme…) en sprites uGUI, avec cache.
+    /// Charge les PNG du mod (alarme…) en sprites uGUI, avec cache.
     /// Renvoie null si la texture est introuvable (le builder gère gracieusement l'absence d'icône).
     /// </summary>
     internal static class Icons
     {
         private static readonly Dictionary<string, Sprite> _cache = new Dictionary<string, Sprite>();
 
-        /// <summary>Icône correspondant au type de vaisseau du bookmark (Base, Station, Ship…).</summary>
+        /// <summary>Icône correspondant au type de vaisseau du bookmark (Base, Station, Ship…),
+        /// ou null si l'icône stock du jeu n'a pas pu être récupérée.</summary>
         public static Sprite VesselType(string type)
         {
-            string key = string.IsNullOrEmpty(type) ? "ship" : type.ToLowerInvariant();
-            return Load("VesselBookmarkMod/vessel_types/" + key);
+            // The stock game sprite (map / tracking station icon) is used instead of any
+            // bundled PNG; it covers every VesselType value and matches the game's look.
+            Sprite sprite;
+            VesselTypeIcons.TryGet(type, out sprite);
+            return sprite;
         }
 
         /// <summary>Icône d'alarme.</summary>
