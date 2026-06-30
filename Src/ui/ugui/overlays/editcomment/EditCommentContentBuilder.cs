@@ -70,6 +70,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             var input = inputGo.AddComponent<TMP_InputField>();
             input.lineType = TMP_InputField.LineType.MultiLineNewline;
 
+            // TMP_InputField capture la position du composant texte a OnEnable (ici au build, avant tout
+            // layout, donc fausse) et la re-applique a chaque desactivation (blur ET masquage). Cela sort
+            // la valeur du champ des qu'il n'a pas le focus. Desactiver le reset garde le texte a sa
+            // position issue du layout, donc la valeur reste visible sans focus.
+            input.resetOnDeActivation = false;
+
             int pad = Mathf.RoundToInt(VesselBookmarkPalette.TextAreaPadding);
 
             // Viewport dedie encarte de la marge. TMP_InputField suppose que le composant texte remplit
@@ -93,13 +99,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             input.placeholder = placeholder;
             input.fontAsset = DefaultPalette.Font;
 
-            // Lock clavier au focus, unlock au blur (Unity envoie Select/Deselect au champ sélectionné)
+            // Lock clavier au focus, unlock au blur (Unity envoie Select/Deselect au champ sélectionné).
+            // On (dé)masque aussi le caret : avec resetOnDeActivation a false, TMP ne vide plus le mesh du
+            // caret au blur, donc on le fait nous-memes (cf. le meme reglage cote champ recherche partage).
             var trigger = inputGo.AddComponent<EventTrigger>();
             var selectEntry = new EventTrigger.Entry { eventID = EventTriggerType.Select };
-            selectEntry.callback.AddListener(_ => InputLockManager.SetControlLock(ControlTypes.All, EditCommentOverlayController.LOCK_ID));
+            selectEntry.callback.AddListener(_ => { InputLockManager.SetControlLock(ControlTypes.All, EditCommentOverlayController.LOCK_ID); SetCaretVisible(input, true); });
             trigger.triggers.Add(selectEntry);
             var deselectEntry = new EventTrigger.Entry { eventID = EventTriggerType.Deselect };
-            deselectEntry.callback.AddListener(_ => InputLockManager.RemoveControlLock(EditCommentOverlayController.LOCK_ID));
+            deselectEntry.callback.AddListener(_ => { InputLockManager.RemoveControlLock(EditCommentOverlayController.LOCK_ID); SetCaretVisible(input, false); });
             trigger.triggers.Add(deselectEntry);
 
             return input;
@@ -114,6 +122,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             text.enableWordWrapping = true;
             text.richText = false;
             return text;
+        }
+
+        // (Dé)masque le caret du champ. TMP cree le caret a la volee comme TMP_SelectionCaret sous le
+        // viewport ; basculer son Graphic.enabled montre/cache le mesh du caret.
+        private static void SetCaretVisible(TMP_InputField input, bool visible)
+        {
+            if (input == null || input.textViewport == null) return;
+            var caret = input.textViewport.GetComponentInChildren<TMP_SelectionCaret>(true);
+            if (caret != null) caret.enabled = visible;
         }
 
         // Cree un enfant etire qui remplit entierement son parent (offsets nuls).
