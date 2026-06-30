@@ -108,7 +108,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 OnSelectedBodyChanged.Fire();
             }
         }
-        private string _selectedBody = ModLocalization.GetString("VBM_labelAll");
+        private string _selectedBody = ModLocalization.GetString("labelAll");
         public readonly EventVoid OnSelectedBodyChanged = new EventVoid("BookmarksViewModel.OnSelectedBodyChanged");
         
         /// <summary>
@@ -366,7 +366,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 }
                 // Sort bodies by distance to Kerbol with moons interleaved
                 _availableBodies = CelestialBodySorter.SortBodyNames(_availableBodies);
-                _availableBodies.Insert(0, ModLocalization.GetString("VBM_labelAll"));
+                _availableBodies.Insert(0, ModLocalization.GetString("labelAll"));
                 
                 if( !_availableBodies.Contains(SelectedBody) ) {
                     SelectedBody = this.AvailableBodies[0];
@@ -406,7 +406,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 LOGGER.LogDebug($"Updating available bookmarks");
                 this._availableBookmarks.Clear();
                 
-                string all = ModLocalization.GetString("VBM_labelAll");
+                string all = ModLocalization.GetString("labelAll");
                 
                 foreach( var bookmark in _bookmarkManager.GetAllBookmarks() ) {
                     bool addBookmark;
@@ -438,7 +438,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                         string fullSearchText = bookmark.BookmarkTitle + " ";
                         fullSearchText += bookmark.VesselSituationLabel + " ";   // Situation contains celestial body name
                         fullSearchText += bookmark.VesselName + " ";
-                        fullSearchText += ModLocalization.GetString("VBM_vesselType" + bookmark.BookmarkVesselType) + " ";
+                        fullSearchText += ModLocalization.GetString("vesselType" + bookmark.BookmarkVesselType) + " ";
                         fullSearchText += bookmark.Comment + " ";
                         if( !fullSearchText.ToLower().Contains(SearchText.ToLower()) ) {
                             addBookmark = false;
@@ -496,7 +496,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             
             if (_bookmarkManager.HasBookmark(BookmarkType.Vessel, vesselPersistentID)) {
                 ScreenMessages.PostScreenMessage(
-                    ModLocalization.GetString("VBM_messageBookmarkAlreadyExists"),
+                    ModLocalization.GetString("messageBookmarkAlreadyExists"),
                     2f,
                     ScreenMessageStyle.UPPER_CENTER
                 );
@@ -506,7 +506,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             VesselBookmark bookmark = new VesselBookmark(vesselPersistentID);
             if (_bookmarkManager.AddBookmark(bookmark)) {
                 ScreenMessages.PostScreenMessage(
-                    ModLocalization.GetString("VBM_messageBookmarkAdded"),
+                    ModLocalization.GetString("messageBookmarkAdded"),
                     2f,
                     ScreenMessageStyle.UPPER_CENTER
                 );
@@ -529,7 +529,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         public bool HasActiveFilters {
             get {
-                return SelectedBody != ModLocalization.GetString("VBM_labelAll")
+                return SelectedBody != ModLocalization.GetString("labelAll")
                     || SelectedVesselType != ALL_VESSEL_TYPES
                     || !string.IsNullOrEmpty(SearchText)
                     || FilterHasComment;
@@ -541,7 +541,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         public void ClearFilters() {
             this._preventBookmarksUpdates = true;
-            SelectedBody = ModLocalization.GetString("VBM_labelAll");
+            SelectedBody = ModLocalization.GetString("labelAll");
             SelectedVesselType = ALL_VESSEL_TYPES;
             SearchText = string.Empty;
             FilterHasComment = false;

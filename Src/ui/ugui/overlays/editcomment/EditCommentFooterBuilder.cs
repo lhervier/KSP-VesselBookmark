@@ -29,7 +29,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             // text-button shape, height and font size are set here.
             ButtonController cancel = new VBMButtonBuilder()
                 .WithObjectName("Cancel")
-                .WithLabel(ModLocalization.GetString("VBM_buttonCancel"))
+                .WithLabel(ModLocalization.GetString("buttonCancel"))
                 .WithAutoWidth(VesselBookmarkPalette.CardButtonPaddingH)
                 .WithSize(VesselBookmarkPalette.CardButtonHeight)
                 .WithFontSize(VesselBookmarkPalette.CardButtonFontSize)
@@ -38,7 +38,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
 
             ButtonController ok = new VBMButtonBuilder()
                 .WithObjectName("OK")
-                .WithLabel(ModLocalization.GetString("VBM_buttonSave"))
+                .WithLabel(ModLocalization.GetString("buttonSave"))
                 .WithAutoWidth(VesselBookmarkPalette.CardButtonPaddingH)
                 .WithSize(VesselBookmarkPalette.CardButtonHeight)
                 .WithFontSize(VesselBookmarkPalette.CardButtonFontSize)

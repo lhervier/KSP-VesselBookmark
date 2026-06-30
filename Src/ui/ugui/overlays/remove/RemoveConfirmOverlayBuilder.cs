@@ -31,7 +31,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
         {
             var popupBuilder = new InternalPopupBuilder<RemoveConfirmContentController, RemoveConfirmFooterController>()
                 .WithParent(_parent)
-                .WithTitle(ModLocalization.GetString("VBM_dialogRemoveTitle"))
+                .WithTitle(ModLocalization.GetString("dialogRemoveTitle"))
                 .WithTitleColor(DefaultPalette.DangerColor)
                 .WithContentBuilder(new RemoveConfirmContentBuilder())
                 .WithFooterBuilder(new RemoveConfirmFooterBuilder());

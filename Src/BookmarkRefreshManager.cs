@@ -102,34 +102,34 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             try {
                 if( string.IsNullOrEmpty(bodyName) ) {
                     LOGGER.LogError($"Getting situation: Body is null");
-                    return ModLocalization.GetString("VBM_situationUnknown");
+                    return ModLocalization.GetString("situationUnknown");
                 }
 
                 switch (situation) {
                     case Vessel.Situations.LANDED:
-                        return ModLocalization.GetString("VBM_situationLanded", bodyName);
+                        return ModLocalization.GetString("situationLanded", bodyName);
 
                     case Vessel.Situations.SPLASHED:
-                        return ModLocalization.GetString("VBM_situationSplashed", bodyName);
+                        return ModLocalization.GetString("situationSplashed", bodyName);
 
                     case Vessel.Situations.PRELAUNCH:
-                        return ModLocalization.GetString("VBM_situationPrelaunch", bodyName);
+                        return ModLocalization.GetString("situationPrelaunch", bodyName);
 
                     case Vessel.Situations.SUB_ORBITAL:
-                        return ModLocalization.GetString("VBM_situationSuborbital", bodyName);
+                        return ModLocalization.GetString("situationSuborbital", bodyName);
 
                     case Vessel.Situations.ORBITING:
-                        return ModLocalization.GetString("VBM_situationOrbiting", bodyName);
+                        return ModLocalization.GetString("situationOrbiting", bodyName);
 
                     case Vessel.Situations.ESCAPING:
-                        return ModLocalization.GetString("VBM_situationEscaping", bodyName);
+                        return ModLocalization.GetString("situationEscaping", bodyName);
 
                     default:
-                        return ModLocalization.GetString("VBM_situationInFlight", bodyName);
+                        return ModLocalization.GetString("situationInFlight", bodyName);
                 }
             } catch (System.Exception e) {
                 LOGGER.LogError($"Error getting situation{situation} for vessel on body {bodyName}: {e.Message}");
-                return ModLocalization.GetString("VBM_situationUnknown");
+                return ModLocalization.GetString("situationUnknown");
             }
         }
 
@@ -245,7 +245,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     }
                 }
                 if( string.IsNullOrEmpty(bookmark.BookmarkTitle)) {
-                    bookmark.BookmarkTitle = ModLocalization.GetString("VBM_labelModuleNotFound");
+                    bookmark.BookmarkTitle = ModLocalization.GetString("labelModuleNotFound");
                 }
 
                 return true;

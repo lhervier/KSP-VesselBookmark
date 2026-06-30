@@ -109,7 +109,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 
             // Titre
             AddSimpleText(panelGo.transform, "Title",
-                ModLocalization.GetString("VBM_menuFiltersTitle").ToUpperInvariant(),
+                ModLocalization.GetString("menuFiltersTitle").ToUpperInvariant(),
                 VesselBookmarkPalette.MenuTitleFontSize, VesselBookmarkPalette.MenuTitleColor);
 
             // Recherche
@@ -118,12 +118,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             // Combos Corps / Type
             ComboController bodyCombo = new ComboBuilder()
                 .WithParent(panelGo.transform)
-                .WithLabel(ModLocalization.GetString("VBM_labelBody"))
+                .WithLabel(ModLocalization.GetString("labelBody"))
                 .WithPreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
                 .Build();
             ComboController typeCombo = new ComboBuilder()
                 .WithParent(panelGo.transform)
-                .WithLabel(ModLocalization.GetString("VBM_labelType"))
+                .WithLabel(ModLocalization.GetString("labelType"))
                 .WithLabelFor(TranslateVesselType)
                 .WithPreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
                 .Build();
@@ -148,7 +148,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         private static string TranslateVesselType(string value)
         {
             if (string.IsNullOrEmpty(value)) return value;
-            string key = value == "All" ? "VBM_vesselTypeAll" : "VBM_vesselType" + value;
+            string key = value == "All" ? "vesselTypeAll" : "vesselType" + value;
             return ModLocalization.GetString(key);
         }
 
@@ -184,7 +184,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         {
             TextFieldController search = new TextFieldBuilder()
                 .WithParent(parent)
-                .WithPlaceholder(ModLocalization.GetString("VBM_menuSearchPlaceholder"))
+                .WithPlaceholder(ModLocalization.GetString("menuSearchPlaceholder"))
                 .WithHeight(VesselBookmarkPalette.ComboHeight)
                 .WithFontSize(VesselBookmarkPalette.SearchFontSize)
                 .Build();
@@ -196,7 +196,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         {
             // Case à cocher partagée : libellé cliquable + ligne entière cliquable (Greedy).
             CheckboxController checkbox = new CheckboxBuilder()
-                .WithLabel(ModLocalization.GetString("VBM_menuFilterWithComment"))
+                .WithLabel(ModLocalization.GetString("menuFilterWithComment"))
                 .WithGreedyState(true)
                 .WithCheckedState(_viewModel.FilterHasComment)
                 .Build();
@@ -254,7 +254,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             iconLe.minWidth = iconLe.preferredWidth = 14f;
             icon.alignment = TextAlignmentOptions.Center;
 
-            var label = AddSimpleText(go.transform, "Label", ModLocalization.GetString("VBM_menuResetFilters"),
+            var label = AddSimpleText(go.transform, "Label", ModLocalization.GetString("menuResetFilters"),
                 VesselBookmarkPalette.MenuLabelFontSize, DefaultPalette.LabelColor);
             var labelLe = label.gameObject.AddComponent<LayoutElement>();
             labelLe.flexibleWidth = 1f;

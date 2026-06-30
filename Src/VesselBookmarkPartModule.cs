@@ -28,12 +28,12 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     LOGGER.LogDebug($"ToggleBookmarkEvent: Removing command module bookmark for part {part.flightID}");
                     string displayName = !string.IsNullOrEmpty(bookmark.BookmarkTitle)
                         ? bookmark.BookmarkTitle
-                        : ModLocalization.GetString("VBM_labelModuleNotFound");
+                        : ModLocalization.GetString("labelModuleNotFound");
                     ConfirmRemovalDialog.ConfirmRemoval(() => {
                         bool removed = BookmarksManager.Instance.RemoveBookmark(bookmark);
                         if (removed) {
                             ScreenMessages.PostScreenMessage(
-                                ModLocalization.GetString("VBM_messageBookmarkRemoved"), 
+                                ModLocalization.GetString("messageBookmarkRemoved"), 
                                 2f, 
                                 ScreenMessageStyle.UPPER_CENTER
                             );
@@ -46,14 +46,14 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     bool added = BookmarksManager.Instance.AddBookmark(newCommandModuleBookmark);
                     if (added) {
                         ScreenMessages.PostScreenMessage(
-                            ModLocalization.GetString("VBM_messageBookmarkAdded"), 
+                            ModLocalization.GetString("messageBookmarkAdded"), 
                             2f, 
                             ScreenMessageStyle.UPPER_CENTER
                         );
                     } else {
                         LOGGER.LogDebug($"ToggleBookmarkEvent: Bookmark not added for part {part.flightID}");
                         ScreenMessages.PostScreenMessage(
-                            ModLocalization.GetString("VBM_messageBookmarkAdded"), 
+                            ModLocalization.GetString("messageBookmarkAdded"), 
                             2f, 
                             ScreenMessageStyle.UPPER_CENTER
                         );
@@ -87,8 +87,8 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 if (bookmarkEvent != null) {
                     bool hasBookmark = BookmarksManager.Instance.HasBookmark(BookmarkType.CommandModule, part.flightID);
                     bookmarkEvent.guiName = hasBookmark 
-                        ? ModLocalization.GetString("VBM_contextMenuRemoveFromBookmarks")
-                        : ModLocalization.GetString("VBM_contextMenuAddToBookmarks");
+                        ? ModLocalization.GetString("contextMenuRemoveFromBookmarks")
+                        : ModLocalization.GetString("contextMenuAddToBookmarks");
                 }
             } catch (Exception e) {
                 LOGGER.LogError($"Error in UpdateEventName: {e.Message}");

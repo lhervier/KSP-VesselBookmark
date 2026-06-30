@@ -237,11 +237,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             else _name.color = VesselBookmarkPalette.NameColor;
 
             // Pastille d'état
-            if (!_vesselExists) SetChip(true, "VBM_chipMissing",
+            if (!_vesselExists) SetChip(true, "chipMissing",
                 VesselBookmarkPalette.ChipMissingTextColor, VesselBookmarkPalette.ChipMissingBgColor, VesselBookmarkPalette.ChipMissingBorderColor);
-            else if (active) SetChip(true, "VBM_chipActive",
+            else if (active) SetChip(true, "chipActive",
                 DefaultPalette.AccentColor, DefaultPalette.AccentBgColor, DefaultPalette.AccentBorderColor);
-            else if (target) SetChip(true, "VBM_chipTarget",
+            else if (target) SetChip(true, "chipTarget",
                 DefaultPalette.AccentColor, DefaultPalette.AccentBgColor, DefaultPalette.AccentBorderColor);
             else _chip.SetActive(false);
 

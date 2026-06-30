@@ -8,8 +8,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
     {
         private static readonly (BookmarkType type, string titleKey, string hintKey)[] SECTIONS =
         {
-            (BookmarkType.CommandModule, "VBM_sectionCommandModule", "VBM_labelAddCommandModuleBookmark"),
-            (BookmarkType.Vessel, "VBM_sectionVessel", "VBM_labelAddVesselBookmark"),
+            (BookmarkType.CommandModule, "sectionCommandModule", "labelAddCommandModuleBookmark"),
+            (BookmarkType.Vessel, "sectionVessel", "labelAddVesselBookmark"),
         };
 
         // Shared stand-in for a section that holds no bookmark. Read-only here (only its Count is

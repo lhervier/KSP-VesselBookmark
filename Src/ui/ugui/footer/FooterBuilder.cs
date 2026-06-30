@@ -110,7 +110,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
                 .WithFontSize(VesselBookmarkPalette.FooterButtonFontSize)
                 .Build();
             edit.transform.SetParent(go.transform, false);
-            Tooltips.Attach(edit.gameObject, ModLocalization.GetString("VBM_tooltipEdit"));
+            Tooltips.Attach(edit.gameObject, ModLocalization.GetString("tooltipEdit"));
 
             ButtonController goTo = new VBMButtonBuilder()
                 .WithObjectName("GoTo")
@@ -120,7 +120,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
                 .WithFontSize(VesselBookmarkPalette.FooterButtonFontSize)
                 .Build();
             goTo.transform.SetParent(go.transform, false);
-            Tooltips.Attach(goTo.gameObject, ModLocalization.GetString("VBM_tooltipGoTo"));
+            Tooltips.Attach(goTo.gameObject, ModLocalization.GetString("tooltipGoTo"));
 
             ButtonController target = new VBMButtonBuilder()
                 .WithObjectName("Target")
@@ -130,7 +130,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
                 .WithFontSize(VesselBookmarkPalette.FooterButtonFontSize)
                 .Build();
             target.transform.SetParent(go.transform, false);
-            Tooltips.Attach(target.gameObject, ModLocalization.GetString("VBM_tooltipSetTargetAs"));
+            Tooltips.Attach(target.gameObject, ModLocalization.GetString("tooltipSetTargetAs"));
 
             return go
                 .AddComponent<FooterController>()

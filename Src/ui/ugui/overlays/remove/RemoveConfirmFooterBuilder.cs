@@ -30,7 +30,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
             // text-button shape, height and font size are set here.
             ButtonController cancel = new VBMButtonBuilder()
                 .WithObjectName("Cancel")
-                .WithLabel(ModLocalization.GetString("VBM_dialogButtonCancel"))
+                .WithLabel(ModLocalization.GetString("dialogButtonCancel"))
                 .WithAutoWidth(VesselBookmarkPalette.CardButtonPaddingH)
                 .WithSize(VesselBookmarkPalette.CardButtonHeight)
                 .WithFontSize(VesselBookmarkPalette.CardButtonFontSize)
@@ -39,7 +39,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
 
             ButtonController remove = new VBMButtonBuilder()
                 .WithObjectName("Remove")
-                .WithLabel(ModLocalization.GetString("VBM_dialogButtonRemove"))
+                .WithLabel(ModLocalization.GetString("dialogButtonRemove"))
                 .WithAutoWidth(VesselBookmarkPalette.CardButtonPaddingH)
                 .WithSize(VesselBookmarkPalette.CardButtonHeight)
                 .WithFontSize(VesselBookmarkPalette.CardButtonFontSize)
