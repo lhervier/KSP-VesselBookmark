@@ -148,7 +148,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         private static string TranslateVesselType(string value)
         {
             if (string.IsNullOrEmpty(value)) return value;
-            string key = value == "All" ? "vesselTypeAll" : "vesselType" + value;
+            string key = value == "All" ? "VBM_vesselTypeAll" : "VBM_vesselType" + value;
             return ModLocalization.GetString(key);
         }
 

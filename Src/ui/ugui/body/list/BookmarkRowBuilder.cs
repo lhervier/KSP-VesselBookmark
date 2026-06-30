@@ -236,7 +236,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             // Tooltip = type de vaisseau traduit
             if (!string.IsNullOrEmpty(vesselType))
             {
-                Tooltips.Attach(boxGo, ModLocalization.GetString("vesselType" + vesselType));
+                Tooltips.Attach(boxGo, ModLocalization.GetString("VBM_vesselType" + vesselType));
             }
 
             Sprite icon = Icons.VesselType(vesselType);

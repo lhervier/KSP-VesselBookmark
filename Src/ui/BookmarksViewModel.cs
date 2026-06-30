@@ -438,7 +438,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                         string fullSearchText = bookmark.BookmarkTitle + " ";
                         fullSearchText += bookmark.VesselSituationLabel + " ";   // Situation contains celestial body name
                         fullSearchText += bookmark.VesselName + " ";
-                        fullSearchText += ModLocalization.GetString("vesselType" + bookmark.BookmarkVesselType) + " ";
+                        fullSearchText += ModLocalization.GetString("VBM_vesselType" + bookmark.BookmarkVesselType) + " ";
                         fullSearchText += bookmark.Comment + " ";
                         if( !fullSearchText.ToLower().Contains(SearchText.ToLower()) ) {
                             addBookmark = false;
