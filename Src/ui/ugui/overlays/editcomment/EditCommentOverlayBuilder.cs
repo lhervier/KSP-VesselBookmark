@@ -39,7 +39,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
         {
             var popupBuilder = new InternalPopupBuilder<EditCommentContentController, EditCommentFooterController>()
                 .WithParent(_parent)
-                .WithTitle(ModLocalization.GetString("editWindowTitle"))
+                .WithTitle(ModLocalization.GetString("VBM_editWindowTitle"))
                 .WithTitleColor(DefaultPalette.AccentColor)
                 .WithContentBuilder(new EditCommentContentBuilder())
                 .WithFooterBuilder(new EditCommentFooterBuilder());

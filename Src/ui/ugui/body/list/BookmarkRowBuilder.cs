@@ -280,7 +280,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             }
             img.type = Image.Type.Simple;
             img.raycastTarget = true;   // pour recevoir le survol du tooltip
-            Tooltips.Attach(go, ModLocalization.GetString("tooltipAlarm"));
+            Tooltips.Attach(go, ModLocalization.GetString("VBM_tooltipAlarm"));
         }
 
         private GameObject BuildChip(Transform parent, out Image chipImage, out TextMeshProUGUI chipText)
@@ -353,7 +353,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 .WithHoverColor(VesselBookmarkPalette.RowButtonHoverColor)
                 .Build();
             upButton.transform.SetParent(groupGo.transform, false);
-            Tooltips.Attach(upButton.gameObject, ModLocalization.GetString("tooltipMoveUp"));
+            Tooltips.Attach(upButton.gameObject, ModLocalization.GetString("VBM_tooltipMoveUp"));
 
             downButton = new VBMButtonBuilder()
                 .WithObjectName("MoveDown")
@@ -365,7 +365,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 .WithHoverColor(VesselBookmarkPalette.RowButtonHoverColor)
                 .Build();
             downButton.transform.SetParent(groupGo.transform, false);
-            Tooltips.Attach(downButton.gameObject, ModLocalization.GetString("tooltipMoveDown"));
+            Tooltips.Attach(downButton.gameObject, ModLocalization.GetString("VBM_tooltipMoveDown"));
 
             removeButton = new VBMButtonBuilder()
                 .WithObjectName("Remove")
@@ -376,7 +376,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 .WithHoverColor(VesselBookmarkPalette.RowButtonDangerHoverColor)
                 .Build();
             removeButton.transform.SetParent(groupGo.transform, false);
-            Tooltips.Attach(removeButton.gameObject, ModLocalization.GetString("tooltipRemove"));
+            Tooltips.Attach(removeButton.gameObject, ModLocalization.GetString("VBM_tooltipRemove"));
 
             return group;
         }
@@ -441,7 +441,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             string title = bookmark.BookmarkTitle;
             if (!vesselExists)
             {
-                string key = bookmark.BookmarkType == BookmarkType.Vessel ? "labelVesselNotFound" : "labelCommandModuleNotFound";
+                string key = bookmark.BookmarkType == BookmarkType.Vessel ? "VBM_labelVesselNotFound" : "VBM_labelCommandModuleNotFound";
                 title += " (" + ModLocalization.GetString(key) + ")";
             }
             return title;

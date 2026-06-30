@@ -28,7 +28,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     LOGGER.LogDebug($"ToggleBookmarkEvent: Removing command module bookmark for part {part.flightID}");
                     string displayName = !string.IsNullOrEmpty(bookmark.BookmarkTitle)
                         ? bookmark.BookmarkTitle
-                        : ModLocalization.GetString("labelModuleNotFound");
+                        : ModLocalization.GetString("VBM_labelModuleNotFound");
                     ConfirmRemovalDialog.ConfirmRemoval(() => {
                         bool removed = BookmarksManager.Instance.RemoveBookmark(bookmark);
                         if (removed) {

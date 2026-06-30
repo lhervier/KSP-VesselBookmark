@@ -245,7 +245,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     }
                 }
                 if( string.IsNullOrEmpty(bookmark.BookmarkTitle)) {
-                    bookmark.BookmarkTitle = ModLocalization.GetString("labelModuleNotFound");
+                    bookmark.BookmarkTitle = ModLocalization.GetString("VBM_labelModuleNotFound");
                 }
 
                 return true;

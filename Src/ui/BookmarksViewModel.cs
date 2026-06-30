@@ -108,7 +108,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 OnSelectedBodyChanged.Fire();
             }
         }
-        private string _selectedBody = ModLocalization.GetString("labelAll");
+        private string _selectedBody = ModLocalization.GetString("VBM_labelAll");
         public readonly EventVoid OnSelectedBodyChanged = new EventVoid("BookmarksViewModel.OnSelectedBodyChanged");
         
         /// <summary>
@@ -366,7 +366,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 }
                 // Sort bodies by distance to Kerbol with moons interleaved
                 _availableBodies = CelestialBodySorter.SortBodyNames(_availableBodies);
-                _availableBodies.Insert(0, ModLocalization.GetString("labelAll"));
+                _availableBodies.Insert(0, ModLocalization.GetString("VBM_labelAll"));
                 
                 if( !_availableBodies.Contains(SelectedBody) ) {
                     SelectedBody = this.AvailableBodies[0];
@@ -406,7 +406,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 LOGGER.LogDebug($"Updating available bookmarks");
                 this._availableBookmarks.Clear();
                 
-                string all = ModLocalization.GetString("labelAll");
+                string all = ModLocalization.GetString("VBM_labelAll");
                 
                 foreach( var bookmark in _bookmarkManager.GetAllBookmarks() ) {
                     bool addBookmark;
@@ -529,7 +529,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         public bool HasActiveFilters {
             get {
-                return SelectedBody != ModLocalization.GetString("labelAll")
+                return SelectedBody != ModLocalization.GetString("VBM_labelAll")
                     || SelectedVesselType != ALL_VESSEL_TYPES
                     || !string.IsNullOrEmpty(SearchText)
                     || FilterHasComment;
@@ -541,7 +541,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         public void ClearFilters() {
             this._preventBookmarksUpdates = true;
-            SelectedBody = ModLocalization.GetString("labelAll");
+            SelectedBody = ModLocalization.GetString("VBM_labelAll");
             SelectedVesselType = ALL_VESSEL_TYPES;
             SearchText = string.Empty;
             FilterHasComment = false;

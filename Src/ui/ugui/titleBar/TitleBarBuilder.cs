@@ -57,7 +57,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             ButtonController add = NewButton("Add", AddGlyph, _viewModel.CanAddVesselBookmark());
             add.OnClick.Add(() => _viewModel.AddVesselBookmark());
             add.transform.SetParent(right, false);
-            Tooltips.Attach(add.gameObject, ModLocalization.GetString("buttonAdd"));
+            Tooltips.Attach(add.gameObject, ModLocalization.GetString("VBM_buttonAdd"));
 
             // "Refresh" button. No circular-arrow glyph in the game SDF font: use the shared "refresh"
             // sprite, falling back to a text glyph if the texture is missing.
@@ -67,13 +67,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             ButtonController refresh = NewButton("Refresh", refreshLabel, true);
             refresh.OnClick.Add(() => _viewModel.ForceReload());
             refresh.transform.SetParent(right, false);
-            Tooltips.Attach(refresh.gameObject, ModLocalization.GetString("buttonRefresh"));
+            Tooltips.Attach(refresh.gameObject, ModLocalization.GetString("VBM_buttonRefresh"));
 
             // Filter menu button "⋯" (toggles FilterMenuOpen) + green "active filter" dot
             ButtonController menu = NewButton("FilterMenu", DefaultPalette.PickGlyph("⋯", "…", "≡", "..."), true);
             menu.OnClick.Add(() => _viewModel.FilterMenuOpen = !_viewModel.FilterMenuOpen);
             menu.transform.SetParent(right, false);
-            Tooltips.Attach(menu.gameObject, ModLocalization.GetString("menuFiltersTitle"));
+            Tooltips.Attach(menu.gameObject, ModLocalization.GetString("VBM_menuFiltersTitle"));
             
             return rightColumnGo
                 .AddComponent<TitleBarController>()

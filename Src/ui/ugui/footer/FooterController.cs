@@ -87,8 +87,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
             if (_selectionLabel != null)
             {
                 _selectionLabel.text = sel != null
-                    ? ModLocalization.GetString("footerSelection", sel.BookmarkTitle)
-                    : ModLocalization.GetString("footerNoSelection");
+                    ? ModLocalization.GetString("VBM_footerSelection", sel.BookmarkTitle)
+                    : ModLocalization.GetString("VBM_footerNoSelection");
             }
             if (_edit != null) _edit.SetInteractable(_viewModel.CanEditCurrentVesselComment());
             if (_goTo != null) _goTo.SetInteractable(_viewModel.CanSwitchToCurrentBookmarkVessel());
