@@ -67,24 +67,28 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             bg.color = Color.white;
             bg.raycastTarget = true;
 
-            // RectMask2D sur le champ pour clipper ; Text + Placeholder enfants avec marges, et le champ
-            // lui-même sert de textViewport.
-            inputGo.AddComponent<RectMask2D>();
-
             var input = inputGo.AddComponent<TMP_InputField>();
             input.lineType = TMP_InputField.LineType.MultiLineNewline;
 
             int pad = Mathf.RoundToInt(VesselBookmarkPalette.TextAreaPadding);
 
-            var placeholder = NewAreaText(inputGo.transform, "Placeholder", pad);
+            // Viewport dedie encarte de la marge. TMP_InputField suppose que le composant texte remplit
+            // exactement son viewport : le scroll qui suit le caret (borne sur le rect du viewport) et le
+            // reset de position au blur respectent alors la marge. Le RectMask2D y clippe le debordement.
+            var viewport = NewFillingChild(inputGo.transform, "Viewport");
+            viewport.offsetMin = new Vector2(pad, pad);
+            viewport.offsetMax = new Vector2(-pad, -pad);
+            viewport.gameObject.AddComponent<RectMask2D>();
+
+            var placeholder = NewAreaText(viewport, "Placeholder");
             placeholder.fontStyle = FontStyles.Italic;
             placeholder.color = VesselBookmarkPalette.SearchPlaceholderColor;
             placeholder.text = string.Empty;
 
-            var text = NewAreaText(inputGo.transform, "Text", pad);
+            var text = NewAreaText(viewport, "Text");
             text.color = VesselBookmarkPalette.TextAreaTextColor;
 
-            input.textViewport = inputGo.GetComponent<RectTransform>();
+            input.textViewport = viewport;
             input.textComponent = text;
             input.placeholder = placeholder;
             input.fontAsset = DefaultPalette.Font;
@@ -101,21 +105,28 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             return input;
         }
 
-        private static TextMeshProUGUI NewAreaText(Transform parent, string objectName, int pad)
+        private static TextMeshProUGUI NewAreaText(Transform parent, string objectName)
         {
-            var go = new GameObject(objectName, typeof(RectTransform));
-            go.transform.SetParent(parent, false);
-            var rect = go.GetComponent<RectTransform>();
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
-            rect.offsetMin = new Vector2(pad, pad);
-            rect.offsetMax = new Vector2(-pad, -pad);
+            var go = NewFillingChild(parent, objectName).gameObject;
             var text = UGUILabels.AddLabel(go);
             text.fontSize = VesselBookmarkPalette.TextAreaFontSize;
             text.alignment = TextAlignmentOptions.TopLeft;
             text.enableWordWrapping = true;
             text.richText = false;
             return text;
+        }
+
+        // Cree un enfant etire qui remplit entierement son parent (offsets nuls).
+        private static RectTransform NewFillingChild(Transform parent, string objectName)
+        {
+            var go = new GameObject(objectName, typeof(RectTransform));
+            go.transform.SetParent(parent, false);
+            var rect = go.GetComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            return rect;
         }
     }
 }
