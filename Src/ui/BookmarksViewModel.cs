@@ -496,7 +496,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             
             if (_bookmarkManager.HasBookmark(BookmarkType.Vessel, vesselPersistentID)) {
                 ScreenMessages.PostScreenMessage(
-                    ModLocalization.GetString("messageBookmarkAlreadyExists"),
+                    ModLocalization.GetString("VBM_messageBookmarkAlreadyExists"),
                     2f,
                     ScreenMessageStyle.UPPER_CENTER
                 );
@@ -506,7 +506,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             VesselBookmark bookmark = new VesselBookmark(vesselPersistentID);
             if (_bookmarkManager.AddBookmark(bookmark)) {
                 ScreenMessages.PostScreenMessage(
-                    ModLocalization.GetString("messageBookmarkAdded"),
+                    ModLocalization.GetString("VBM_messageBookmarkAdded"),
                     2f,
                     ScreenMessageStyle.UPPER_CENTER
                 );

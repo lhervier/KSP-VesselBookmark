@@ -85,7 +85,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
             {
                 if (_message != null)
                 {
-                    _message.text = ModLocalization.GetString("dialogRemoveMessageWithName", pending.BookmarkTitle);
+                    _message.text = ModLocalization.GetString("VBM_dialogRemoveMessageWithName", pending.BookmarkTitle);
                 }
                 _popup?.Show();
             }

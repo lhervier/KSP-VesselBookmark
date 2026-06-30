@@ -33,7 +33,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                         bool removed = BookmarksManager.Instance.RemoveBookmark(bookmark);
                         if (removed) {
                             ScreenMessages.PostScreenMessage(
-                                ModLocalization.GetString("messageBookmarkRemoved"), 
+                                ModLocalization.GetString("VBM_messageBookmarkRemoved"), 
                                 2f, 
                                 ScreenMessageStyle.UPPER_CENTER
                             );
@@ -46,14 +46,14 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     bool added = BookmarksManager.Instance.AddBookmark(newCommandModuleBookmark);
                     if (added) {
                         ScreenMessages.PostScreenMessage(
-                            ModLocalization.GetString("messageBookmarkAdded"), 
+                            ModLocalization.GetString("VBM_messageBookmarkAdded"), 
                             2f, 
                             ScreenMessageStyle.UPPER_CENTER
                         );
                     } else {
                         LOGGER.LogDebug($"ToggleBookmarkEvent: Bookmark not added for part {part.flightID}");
                         ScreenMessages.PostScreenMessage(
-                            ModLocalization.GetString("messageBookmarkAdded"), 
+                            ModLocalization.GetString("VBM_messageBookmarkAdded"), 
                             2f, 
                             ScreenMessageStyle.UPPER_CENTER
                         );
@@ -87,8 +87,8 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 if (bookmarkEvent != null) {
                     bool hasBookmark = BookmarksManager.Instance.HasBookmark(BookmarkType.CommandModule, part.flightID);
                     bookmarkEvent.guiName = hasBookmark 
-                        ? ModLocalization.GetString("contextMenuRemoveFromBookmarks")
-                        : ModLocalization.GetString("contextMenuAddToBookmarks");
+                        ? ModLocalization.GetString("VBM_contextMenuRemoveFromBookmarks")
+                        : ModLocalization.GetString("VBM_contextMenuAddToBookmarks");
                 }
             } catch (Exception e) {
                 LOGGER.LogError($"Error in UpdateEventName: {e.Message}");
