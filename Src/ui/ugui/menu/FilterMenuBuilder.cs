@@ -116,23 +116,34 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             // Recherche
             TextFieldController search = BuildSearchField(panelGo.transform);
             
-            // Combos Corps / Type
+            // Combos Corps / Type / Situation. Chaque combo liste TOUTES les valeurs possibles ; le
+            // content builder grise celles qui ne correspondent à aucun bookmark (prédicat IsXPopulated
+            // du ViewModel), tout en les gardant sélectionnables.
             ComboController bodyCombo = new ComboBuilder()
                 .WithParent(panelGo.transform)
                 .WithLabel(ModLocalization.GetString("labelBody"))
                 .WithLabelFor(TranslateBody)
+                .WithItemContentBuilder(new FilterComboItemContentBuilder()
+                    .WithLabelFor(TranslateBody)
+                    .WithEnabledFor(_viewModel.IsBodyPopulated))
                 .WithPreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
                 .Build();
             ComboController typeCombo = new ComboBuilder()
                 .WithParent(panelGo.transform)
                 .WithLabel(ModLocalization.GetString("labelType"))
                 .WithLabelFor(TranslateVesselType)
+                .WithItemContentBuilder(new FilterComboItemContentBuilder()
+                    .WithLabelFor(TranslateVesselType)
+                    .WithEnabledFor(_viewModel.IsVesselTypePopulated))
                 .WithPreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
                 .Build();
             ComboController situationCombo = new ComboBuilder()
                 .WithParent(panelGo.transform)
                 .WithLabel(ModLocalization.GetString("labelSituation"))
                 .WithLabelFor(TranslateSituation)
+                .WithItemContentBuilder(new FilterComboItemContentBuilder()
+                    .WithLabelFor(TranslateSituation)
+                    .WithEnabledFor(_viewModel.IsSituationPopulated))
                 .WithPreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
                 .Build();
             

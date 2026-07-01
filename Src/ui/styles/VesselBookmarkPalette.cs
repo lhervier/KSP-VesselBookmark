@@ -64,6 +64,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         // Combos (corps / type)
         public const float ComboHeight = 22f;
         public static readonly Color ComboItemHoverColor = Rgb(42, 42, 42);    // #2a2a2a
+        public static readonly Color ComboItemColor = Rgb(221, 221, 221);          // #ddd (option normale)
+        public static readonly Color ComboItemSelectedColor = Rgb(141, 190, 69);   // accent (option sélectionnée)
+        public static readonly Color ComboItemDisabledColor = Rgb(102, 102, 102);  // #666 (option sans bookmark)
         
         // ==============================================================
         // Corps : liste scrollable

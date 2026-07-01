@@ -14,6 +14,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private static readonly float SEARCH_DEBOUNCE_SECONDS = 0.2f;
         private static readonly string ALL_VESSEL_TYPES = "All";
 
+        /// <summary>
+        /// Vessel-type filter value grouping every "unknown" type — i.e. a real VesselType that the
+        /// mod does not give a dedicated label to. Its label comes from the "vesselTypeOther" key.
+        /// </summary>
+        private static readonly string OTHER_VESSEL_TYPE = "Other";
+
         private BookmarksManager _bookmarkManager;
         
         // =================================================================
@@ -126,7 +132,44 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public IReadOnlyList<string> AvailableSituations => _availableSituations;
         private List<string> _availableSituations = new List<string>();
         public readonly EventVoid OnAvailableSituationsChanged = new EventVoid("BookmarksViewModel.OnAvailableSituationsChanged");
-        
+
+        // ===============================================================
+        // "Populated" values : the subset of the exhaustive lists that is actually carried by at least
+        // one bookmark. The combos list every possible value but grey out the ones absent from these
+        // sets (a filter on such a value would return nothing). Recomputed on every bookmarks update.
+        // ===============================================================
+
+        private readonly HashSet<string> _populatedBodies = new HashSet<string>();
+        private readonly HashSet<string> _populatedVesselTypes = new HashSet<string>();
+        private readonly HashSet<string> _populatedSituations = new HashSet<string>();
+
+        /// <summary>
+        /// Whether the given body filter value matches at least one bookmark (the "all"/"current"
+        /// tokens always do). Drives the greying of the body combo.
+        /// </summary>
+        public bool IsBodyPopulated(string body) {
+            if( body == ALL_BODIES || body == CURRENT_BODY ) return true;
+            return _populatedBodies.Contains(body);
+        }
+
+        /// <summary>
+        /// Whether the given vessel-type filter value matches at least one bookmark (the "all" token
+        /// always does). Drives the greying of the type combo.
+        /// </summary>
+        public bool IsVesselTypePopulated(string vesselType) {
+            if( vesselType == ALL_VESSEL_TYPES ) return true;
+            return _populatedVesselTypes.Contains(vesselType);
+        }
+
+        /// <summary>
+        /// Whether the given situation filter value matches at least one bookmark (the "all" token
+        /// always does). Drives the greying of the situation combo.
+        /// </summary>
+        public bool IsSituationPopulated(string situation) {
+            if( situation == ALL_SITUATIONS ) return true;
+            return _populatedSituations.Contains(situation);
+        }
+
         // ===============================================================
         // Search criteria
         // ===============================================================
@@ -421,19 +464,21 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private void UpdateAvailableBodies() {
             try {
                 LOGGER.LogDebug($"Updating available bodies");
-                _availableBodies.Clear();
+
+                // "Populated" set : bodies actually carried by at least one bookmark (matched against
+                // VesselBodyName, exactly like the body filter does). Drives the greying.
+                _populatedBodies.Clear();
                 foreach (Bookmark bookmark in _bookmarkManager.GetAllBookmarks()) {
-                    Vessel vessel = bookmark.Vessel;
-                    if( vessel == null ) {
+                    if( string.IsNullOrEmpty(bookmark.VesselBodyName) ) {
                         continue;
                     }
-                    string vesselBodyName = vessel.mainBody.bodyName;
-                    if( !_availableBodies.Contains(vesselBodyName) ) {
-                        _availableBodies.Add(vesselBodyName);
-                    }
+                    _populatedBodies.Add(bookmark.VesselBodyName);
                 }
-                // Sort bodies by distance to Kerbol with moons interleaved
-                _availableBodies = CelestialBodySorter.SortBodyNames(_availableBodies);
+
+                // Exhaustive list : every body of the current system (sorted Kerbol-outward with moons
+                // interleaved), so a selected body is always a valid entry — the combo just greys the
+                // ones absent from _populatedBodies.
+                _availableBodies = CelestialBodySorter.GetSortedBodyNames();
                 _availableBodies.Insert(0, ALL_BODIES);
 
                 // Current-body shortcut, just after "All" (the default). Only available in flight
@@ -446,7 +491,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     _currentBodyName = null;
                 }
 
-                // Fall back to "All" (not the current-body shortcut) when the selection disappears.
+                // Only CURRENT_BODY can now be absent from the list (real bodies are always present) :
+                // fall back to "All" when leaving flight while it was selected.
                 if( !_availableBodies.Contains(SelectedBody) ) {
                     SelectedBody = ALL_BODIES;
                 }
@@ -459,18 +505,31 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private void UpdateAvailableVesselTypes() {
             try {
                 LOGGER.LogDebug($"Updating available vessel types");
-                _availableVesselTypes.Clear();
+
+                // "Populated" set : a known type present on a bookmark adds itself ; any exotic
+                // (non-known, non-empty) type adds the OTHER token. Empty/unresolved types are ignored
+                // (like the situation filter), so they never populate "Other". Drives the greying.
+                _populatedVesselTypes.Clear();
                 foreach (Bookmark bookmark in _bookmarkManager.GetAllBookmarks()) {
-                    if( !_availableVesselTypes.Contains(bookmark.BookmarkVesselType) ) {
-                        _availableVesselTypes.Add(bookmark.BookmarkVesselType);
+                    string vesselType = bookmark.BookmarkVesselType;
+                    if( string.IsNullOrEmpty(vesselType) ) {
+                        continue;
+                    }
+                    _populatedVesselTypes.Add(IsKnownVesselType(vesselType) ? vesselType : OTHER_VESSEL_TYPE);
+                }
+
+                // List : "All" + every known VesselType (enum order) + "Other". BookmarkVesselType is
+                // always a VesselType name ; every type without a dedicated label is grouped under
+                // "Other" rather than shown as a blank entry. Unused entries are greyed by the combo.
+                _availableVesselTypes = new List<string> { ALL_VESSEL_TYPES };
+                foreach (VesselType vesselType in Enum.GetValues(typeof(VesselType))) {
+                    string name = vesselType.ToString();
+                    if( IsKnownVesselType(name) ) {
+                        _availableVesselTypes.Add(name);
                     }
                 }
-                _availableVesselTypes.Sort();
-                _availableVesselTypes.Insert(0, ALL_VESSEL_TYPES);
+                _availableVesselTypes.Add(OTHER_VESSEL_TYPE);
 
-                if( !_availableVesselTypes.Contains(SelectedVesselType) ) {
-                    SelectedVesselType = _availableVesselTypes[0];
-                }
                 this.OnAvailableVesselTypesChanged.Fire();
             } catch (Exception e) {
                 LOGGER.LogError($"Error updating available vessel types: {e.Message}");
@@ -480,23 +539,22 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private void UpdateAvailableSituations() {
             try {
                 LOGGER.LogDebug($"Updating available situations");
-                _availableSituations.Clear();
-                foreach (Bookmark bookmark in _bookmarkManager.GetAllBookmarks()) {
-                    // Bookmarks whose vessel could not be resolved keep an empty situation : skip
-                    // them so the combo never shows a blank entry.
-                    if( string.IsNullOrEmpty(bookmark.VesselSituation) ) {
-                        continue;
-                    }
-                    if( !_availableSituations.Contains(bookmark.VesselSituation) ) {
-                        _availableSituations.Add(bookmark.VesselSituation);
-                    }
-                }
-                _availableSituations.Sort();
-                _availableSituations.Insert(0, ALL_SITUATIONS);
 
-                if( !_availableSituations.Contains(SelectedSituation) ) {
-                    SelectedSituation = _availableSituations[0];
+                // "Populated" set : situations actually carried by at least one bookmark. Drives the greying.
+                _populatedSituations.Clear();
+                foreach (Bookmark bookmark in _bookmarkManager.GetAllBookmarks()) {
+                    if( !string.IsNullOrEmpty(bookmark.VesselSituation) ) {
+                        _populatedSituations.Add(bookmark.VesselSituation);
+                    }
                 }
+
+                // Exhaustive list : every Vessel.Situations value (raw enum name). Enum declaration
+                // order (ground → space) ; unused ones are greyed by the combo.
+                _availableSituations = new List<string> { ALL_SITUATIONS };
+                foreach (Vessel.Situations situation in Enum.GetValues(typeof(Vessel.Situations))) {
+                    _availableSituations.Add(situation.ToString());
+                }
+
                 this.OnAvailableSituationsChanged.Fire();
             } catch (Exception e) {
                 LOGGER.LogError($"Error updating available situations: {e.Message}");
@@ -566,7 +624,21 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// <param name="bookmark">The bookmark to test</param>
         private bool MatchesVesselType(Bookmark bookmark) {
             if( string.Equals(SelectedVesselType, ALL_VESSEL_TYPES) ) return true;
-            return string.Equals(bookmark.BookmarkVesselType, SelectedVesselType);
+            string vesselType = bookmark.BookmarkVesselType;
+            if( string.Equals(SelectedVesselType, OTHER_VESSEL_TYPE) ) {
+                // "Other" groups every real (non-empty) type outside the known set.
+                return !string.IsNullOrEmpty(vesselType) && !IsKnownVesselType(vesselType);
+            }
+            return string.Equals(vesselType, SelectedVesselType);
+        }
+
+        /// <summary>
+        /// Whether the mod gives the given raw VesselType name a dedicated filter entry. "Known" is
+        /// defined as "has a dedicated label" : any type without one is grouped under OTHER_VESSEL_TYPE.
+        /// </summary>
+        /// <param name="vesselType">The raw VesselType name (e.g. "Ship")</param>
+        private static bool IsKnownVesselType(string vesselType) {
+            return !string.IsNullOrEmpty(ModLocalization.GetString("vesselType" + vesselType));
         }
 
         /// <summary>
