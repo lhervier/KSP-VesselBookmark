@@ -247,8 +247,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = true;
 
-            // Icône ✕ devant le libellé (comme la maquette)
-            var icon = AddSimpleText(go.transform, "Icon", DefaultPalette.PickGlyph("✕", "✗", "×", "x"),
+            // Icône ✕ devant le libellé (comme la maquette). On privilégie "×" (U+00D7, présent en dur
+            // dans la police du jeu, comme le bouton de fermeture) : les variantes "ballot X" (✕/✗) ne
+            // sont ajoutées que dynamiquement depuis un fallback et rendent un glyphe illisible à 11px.
+            var icon = AddSimpleText(go.transform, "Icon", DefaultPalette.PickGlyph("×", "✕", "✗", "x"),
                 VesselBookmarkPalette.MenuLabelFontSize, VesselBookmarkPalette.MenuLabelColor);
             var iconLe = icon.gameObject.AddComponent<LayoutElement>();
             iconLe.minWidth = iconLe.preferredWidth = 14f;
