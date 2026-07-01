@@ -119,6 +119,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             ComboController bodyCombo = new ComboBuilder()
                 .WithParent(panelGo.transform)
                 .WithLabel(ModLocalization.GetString("labelBody"))
+                .WithLabelFor(TranslateBody)
                 .WithPreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
                 .Build();
             ComboController typeCombo = new ComboBuilder()
@@ -142,6 +143,21 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 .WithComboControllers(bodyCombo, typeCombo)
                 .WithCheckboxController(checkBox)
                 .WithPanelAndTrap(panelGo, trapGo);
+        }
+
+        // Valeur brute du corps → libellé affiché. Les jetons ALL_BODIES et CURRENT_BODY deviennent
+        // « Tous » et « Courant (<corps>) » ; tout autre valeur (nom de corps réel) est affichée telle quelle.
+        private string TranslateBody(string value)
+        {
+            if( value == BookmarksViewModel.ALL_BODIES )
+            {
+                return ModLocalization.GetString("labelAll");
+            }
+            if( value == BookmarksViewModel.CURRENT_BODY )
+            {
+                return ModLocalization.GetString("labelBodyCurrent", _viewModel.CurrentBodyName);
+            }
+            return value;
         }
 
         // Valeur brute du type de vaisseau → libellé traduit (la valeur « All » utilise vesselTypeAll).

@@ -85,6 +85,26 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public IReadOnlyList<string> AvailableBodies => _availableBodies;
         private List<string> _availableBodies = new List<string>();
         public readonly EventVoid OnAvailableBodiesChanged = new EventVoid("BookmarksViewModel.OnAvailableBodiesChanged");
+
+        /// <summary>
+        /// Body-filter value standing for "any body". Kept as an opaque token : the combo turns it
+        /// into the localized "Tous" label via its LabelFor.
+        /// </summary>
+        public const string ALL_BODIES = "All";
+
+        /// <summary>
+        /// Body-filter value standing for the current main body. Kept as an opaque token : the combo
+        /// turns it into a "Courant (&lt;body&gt;)" label via its LabelFor, and filtering resolves it
+        /// to CurrentBodyName.
+        /// </summary>
+        public const string CURRENT_BODY = "CURRENT";
+
+        /// <summary>
+        /// Name of the current main body (the one CURRENT_BODY resolves to), or null when there is no
+        /// current body (not in flight) — in which case the CURRENT_BODY entry is absent from the list.
+        /// </summary>
+        public string CurrentBodyName => _currentBodyName;
+        private string _currentBodyName = null;
         
         /// <summary>
         /// The list of available vessel types
@@ -108,7 +128,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 OnSelectedBodyChanged.Fire();
             }
         }
-        private string _selectedBody = ModLocalization.GetString("labelAll");
+        private string _selectedBody = ALL_BODIES;
         public readonly EventVoid OnSelectedBodyChanged = new EventVoid("BookmarksViewModel.OnSelectedBodyChanged");
         
         /// <summary>
@@ -276,6 +296,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GameEvents.onVesselChange.Add(_onActiveVesselChanged);
             GameEvents.OnTargetObjectChanged.Add(_onTargetChanged);
 
+            // The "current body" filter follows the active vessel's main body, which moves on vessel
+            // switch and on SOI crossing — neither raises a bookmark event.
+            GameEvents.onVesselSOIChanged.Add(_onVesselSOIChanged);
+
             UpdateBookmarksSelection();
         }
 
@@ -310,6 +334,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             GameEvents.onVesselChange.Remove(_onActiveVesselChanged);
             GameEvents.OnTargetObjectChanged.Remove(_onTargetChanged);
+            GameEvents.onVesselSOIChanged.Remove(_onVesselSOIChanged);
         }
 
         private void _onSelectedBookmarkChanged()
@@ -320,11 +345,23 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private void _onActiveVesselChanged(Vessel vessel)
         {
             this.OnActiveOrTargetChanged.Fire();
+            if( string.Equals(SelectedBody, CURRENT_BODY) ) {
+                UpdateBookmarksSelection();
+            }
         }
 
         private void _onTargetChanged(MapObject target)
         {
             this.OnActiveOrTargetChanged.Fire();
+        }
+
+        private void _onVesselSOIChanged(GameEvents.HostedFromToAction<Vessel, CelestialBody> action)
+        {
+            // Only the active vessel's SOI change moves the current main body.
+            if( action.host != FlightGlobals.ActiveVessel ) return;
+            if( string.Equals(SelectedBody, CURRENT_BODY) ) {
+                UpdateBookmarksSelection();
+            }
         }
 
         // ======================================================================
@@ -366,10 +403,21 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 }
                 // Sort bodies by distance to Kerbol with moons interleaved
                 _availableBodies = CelestialBodySorter.SortBodyNames(_availableBodies);
-                _availableBodies.Insert(0, ModLocalization.GetString("labelAll"));
-                
+                _availableBodies.Insert(0, ALL_BODIES);
+
+                // Current-body shortcut, just after "All" (the default). Only available in flight
+                // (a current main body exists) ; it resolves to that body's name for filtering.
+                CelestialBody currentBody = FlightGlobals.ActiveVessel?.mainBody ?? FlightGlobals.currentMainBody;
+                if( currentBody != null ) {
+                    _currentBodyName = currentBody.bodyName;
+                    _availableBodies.Insert(1, CURRENT_BODY);
+                } else {
+                    _currentBodyName = null;
+                }
+
+                // Fall back to "All" (not the current-body shortcut) when the selection disappears.
                 if( !_availableBodies.Contains(SelectedBody) ) {
-                    SelectedBody = this.AvailableBodies[0];
+                    SelectedBody = ALL_BODIES;
                 }
                 this.OnAvailableBodiesChanged.Fire();
             } catch (Exception e) {
@@ -405,31 +453,35 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             try {
                 LOGGER.LogDebug($"Updating available bookmarks");
                 this._availableBookmarks.Clear();
-                
-                string all = ModLocalization.GetString("labelAll");
-                
+
+                // Resolve the "current body" shortcut to the actual body name it stands for.
+                string filterBody = SelectedBody;
+                if( string.Equals(SelectedBody, CURRENT_BODY) ) {
+                    filterBody = _currentBodyName;
+                }
+
                 foreach( var bookmark in _bookmarkManager.GetAllBookmarks() ) {
                     bool addBookmark;
-                    if( string.Equals(SelectedBody, all) && string.Equals(SelectedVesselType, ALL_VESSEL_TYPES) ) {
+                    if( string.Equals(filterBody, ALL_BODIES) && string.Equals(SelectedVesselType, ALL_VESSEL_TYPES) ) {
                         addBookmark = true;
-                    } else if( string.Equals(SelectedBody, all) ) {
+                    } else if( string.Equals(filterBody, ALL_BODIES) ) {
                         addBookmark = string.Equals(
-                            bookmark.BookmarkVesselType, 
+                            bookmark.BookmarkVesselType,
                             SelectedVesselType
                         );
                     } else if( string.Equals(SelectedVesselType, ALL_VESSEL_TYPES) ) {
                         addBookmark = string.Equals(
-                            bookmark.VesselBodyName, 
-                            SelectedBody
+                            bookmark.VesselBodyName,
+                            filterBody
                         );
                     } else {
                         addBookmark = string.Equals(
-                                bookmark.VesselBodyName, 
-                                SelectedBody
-                            ) 
-                            && 
+                                bookmark.VesselBodyName,
+                                filterBody
+                            )
+                            &&
                             string.Equals(
-                                bookmark.BookmarkVesselType, 
+                                bookmark.BookmarkVesselType,
                                 SelectedVesselType
                             );
                     }
@@ -529,7 +581,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         public bool HasActiveFilters {
             get {
-                return SelectedBody != ModLocalization.GetString("labelAll")
+                return SelectedBody != ALL_BODIES
                     || SelectedVesselType != ALL_VESSEL_TYPES
                     || !string.IsNullOrEmpty(SearchText)
                     || FilterHasComment;
@@ -541,7 +593,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         public void ClearFilters() {
             this._preventBookmarksUpdates = true;
-            SelectedBody = ModLocalization.GetString("labelAll");
+            SelectedBody = ALL_BODIES;
             SelectedVesselType = ALL_VESSEL_TYPES;
             SearchText = string.Empty;
             FilterHasComment = false;
