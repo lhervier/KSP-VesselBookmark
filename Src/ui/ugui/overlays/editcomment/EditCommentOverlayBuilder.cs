@@ -54,7 +54,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
                 .WithViewModel(_viewModel)
                 .WithPopupController(popup)
                 .WithSubComponent(content.GetSub())
-                .WithInputField(content.GetInput())
+                .WithTextFieldController(content.GetTextFieldController())
                 .WithCancelButtonController(footer.GetCancelButtonController())
                 .WithOkButtonController(footer.GetOkButtonController());
         }

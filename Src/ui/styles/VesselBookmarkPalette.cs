@@ -176,13 +176,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         public static readonly Color CardSubColor = Rgb(119, 119, 119);       // #777
         public static readonly Color CardMsgColor = Rgb(204, 204, 204);        // #ccc
 
-        // Zone de texte du commentaire
+        // Zone de texte du commentaire (fond/bordure/couleurs/marge fournis par le TextField partagé).
         public const float TextAreaHeight = 90f;
         public const int TextAreaFontSize = 13;
-        public const float TextAreaPadding = 8f;
-        public static readonly Color TextAreaBgColor = Rgb(13, 13, 13);        // #0d0d0d
-        public static readonly Color TextAreaBorderColor = Rgb(42, 42, 42);    // #2a2a2a
-        public static readonly Color TextAreaTextColor = Rgb(232, 232, 232);   // #e8e8e8
 
         // Boutons des cartes (OK / Annuler / Supprimer)
         public const float CardButtonHeight = 28f;

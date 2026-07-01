@@ -1,13 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using TMPro;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
-using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
-using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui;
-using com.github.lhervier.ksp.shared.ugui.sprites;
-using com.github.lhervier.ksp.shared.ugui.styles;
+using com.github.lhervier.ksp.shared.ugui.textfield;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
 {
@@ -31,12 +27,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             layout.childForceExpandHeight = false;
 
             TextMeshProUGUI sub = BuildSub(rootGo.transform);
-            TMP_InputField input = BuildTextArea(rootGo.transform);
+            TextFieldController input = BuildTextArea(rootGo.transform);
 
             return rootGo
                 .AddComponent<EditCommentContentController>()
                 .WithSubComponent(sub)
-                .WithInputField(input);
+                .WithTextFieldController(input);
         }
 
         // Greyed subtitle showing the edited bookmark's title.
@@ -53,88 +49,16 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             return label;
         }
 
-        // Multiline text area (TMP_InputField + clipped viewport + text + placeholder).
-        private TMP_InputField BuildTextArea(Transform parent)
+        // Multiline comment text area, built on the shared TextField component (bordered background,
+        // clipped viewport, keyboard lock on focus — all encapsulated by the builder/controller).
+        private TextFieldController BuildTextArea(Transform parent)
         {
-            var inputGo = new GameObject("TextArea", typeof(RectTransform));
-            inputGo.transform.SetParent(parent, false);
-            var le = inputGo.AddComponent<LayoutElement>();
-            le.minHeight = le.preferredHeight = VesselBookmarkPalette.TextAreaHeight;
-
-            var bg = inputGo.AddComponent<Image>();
-            bg.sprite = SpritesGlobal.Border(VesselBookmarkPalette.TextAreaBgColor, VesselBookmarkPalette.TextAreaBorderColor, 1);
-            bg.type = Image.Type.Sliced;
-            bg.color = Color.white;
-            bg.raycastTarget = true;
-
-            var input = inputGo.AddComponent<TMP_InputField>();
-            input.lineType = TMP_InputField.LineType.MultiLineNewline;
-
-            int pad = Mathf.RoundToInt(VesselBookmarkPalette.TextAreaPadding);
-
-            // Viewport dedie encarte de la marge. TMP_InputField suppose que le composant texte remplit
-            // exactement son viewport : le scroll qui suit le caret (borne sur le rect du viewport) et le
-            // reset de position au blur respectent alors la marge. Le RectMask2D y clippe le debordement.
-            var viewport = NewFillingChild(inputGo.transform, "Viewport");
-            viewport.offsetMin = new Vector2(pad, pad);
-            viewport.offsetMax = new Vector2(-pad, -pad);
-            viewport.gameObject.AddComponent<RectMask2D>();
-
-            var placeholder = NewAreaText(viewport, "Placeholder");
-            placeholder.fontStyle = FontStyles.Italic;
-            placeholder.color = VesselBookmarkPalette.SearchPlaceholderColor;
-            placeholder.text = string.Empty;
-
-            var text = NewAreaText(viewport, "Text");
-            text.color = VesselBookmarkPalette.TextAreaTextColor;
-
-            input.textViewport = viewport;
-            input.textComponent = text;
-            input.placeholder = placeholder;
-            input.fontAsset = DefaultPalette.Font;
-
-            // Lock clavier au focus, unlock au blur (Unity envoie Select/Deselect au champ sélectionné).
-            var trigger = inputGo.AddComponent<EventTrigger>();
-            var selectEntry = new EventTrigger.Entry { eventID = EventTriggerType.Select };
-            selectEntry.callback.AddListener(_ => InputLockManager.SetControlLock(ControlTypes.All, EditCommentOverlayController.LOCK_ID));
-            trigger.triggers.Add(selectEntry);
-            var deselectEntry = new EventTrigger.Entry { eventID = EventTriggerType.Deselect };
-            deselectEntry.callback.AddListener(_ => InputLockManager.RemoveControlLock(EditCommentOverlayController.LOCK_ID));
-            trigger.triggers.Add(deselectEntry);
-
-            return input;
-        }
-
-        private static TextMeshProUGUI NewAreaText(Transform parent, string objectName)
-        {
-            var go = new GameObject(objectName, typeof(RectTransform));
-            go.transform.SetParent(parent, false);
-            var text = UGUILabels.AddLabel(go);
-            text.fontSize = VesselBookmarkPalette.TextAreaFontSize;
-            text.alignment = TextAlignmentOptions.TopLeft;
-            text.enableWordWrapping = true;
-            text.richText = false;
-            // Fill the viewport exactly, AFTER adding the TMP component (which resets sizeDelta to ~200x50,
-            // inflating a stretch rect and pushing the text outside the field — see TextFieldBuilder).
-            var rect = go.GetComponent<RectTransform>();
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
-            rect.offsetMin = Vector2.zero;
-            rect.offsetMax = Vector2.zero;
-            return text;
-        }
-
-        // Cree un enfant etire qui remplit entierement son parent (offsets nuls).
-        private static RectTransform NewFillingChild(Transform parent, string objectName)
-        {
-            var go = new GameObject(objectName, typeof(RectTransform));
-            go.transform.SetParent(parent, false);
-            var rect = go.GetComponent<RectTransform>();
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
-            rect.offsetMin = Vector2.zero;
-            rect.offsetMax = Vector2.zero;
-            return rect;
+            return new TextFieldBuilder()
+                .WithParent(parent)
+                .WithMultilineState(true)
+                .WithHeight(VesselBookmarkPalette.TextAreaHeight)
+                .WithFontSize(VesselBookmarkPalette.TextAreaFontSize)
+                .Build();
         }
     }
 }

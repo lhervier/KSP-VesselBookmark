@@ -1,9 +1,9 @@
 using UnityEngine;
 using TMPro;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
-using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.shared.ugui.internalpopup;
+using com.github.lhervier.ksp.shared.ugui.textfield;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
 {
@@ -14,12 +14,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
     /// </summary>
     public class EditCommentOverlayController : MonoBehaviour
     {
-        // Verrou des commandes de jeu pendant que le champ a le focus : sinon KSP lit le clavier en
-        // parallèle (« c » bascule la caméra, etc.). Le champ Unity reçoit les frappes quoi qu'il arrive.
-        public const string LOCK_ID = "VesselBookmarkMod_EditComment";
-
-        private bool _loading;
-
         private BookmarksViewModel _viewModel;
         public EditCommentOverlayController WithViewModel(BookmarksViewModel viewModel)
         {
@@ -41,10 +35,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             return this;
         }
 
-        private TMP_InputField _input;
-        public EditCommentOverlayController WithInputField(TMP_InputField input)
+        private TextFieldController _textFieldController;
+        public EditCommentOverlayController WithTextFieldController(TextFieldController textFieldController)
         {
-            this._input = input;
+            this._textFieldController = textFieldController;
             return this;
         }
 
@@ -67,9 +61,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             _viewModel.OnEditingCommentChanged.Add(OnEditingCommentChanged);
             OnEditingCommentChanged();
 
-            if( _input != null )
+            if( _textFieldController != null )
             {
-                _input.onValueChanged.AddListener(OnInputChanged);
+                _textFieldController.OnValueChanged.Add(OnInputChanged);
             }
             if( _cancelButtonController != null )
             {
@@ -91,17 +85,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             {
                 _cancelButtonController.OnClick.Remove(_viewModel.CancelBookmarkCommentEdition);
             }
-            if( _input != null )
+            if( _textFieldController != null )
             {
-                _input.onValueChanged.RemoveListener(OnInputChanged);
+                _textFieldController.OnValueChanged.Remove(OnInputChanged);
             }
             _viewModel?.OnEditingCommentChanged.Remove(OnEditingCommentChanged);
-            InputLockManager.RemoveControlLock(LOCK_ID);   // sécurité si détruit en cours d'édition
         }
 
         public void OnInputChanged(string value)
         {
-            if (_loading) return;
             _viewModel.Comment = value;
         }
 
@@ -110,10 +102,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             bool editing = _viewModel.EditingComment;
 
             if (!editing) {
+                // Closing the popup deactivates the field; TextFieldController.OnDisable releases the
+                // keyboard lock even if it still held the focus (onDeselect may not fire on deactivation).
                 _popup?.Close();
-                // Sécurité : si on ferme alors que le champ avait encore le focus (le Deselect
-                // peut ne pas partir quand on désactive le panneau).
-                InputLockManager.RemoveControlLock(LOCK_ID);
                 return;
             }
 
@@ -122,11 +113,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             Bookmark sel = _viewModel.SelectedBookmark;
             if (_sub != null) _sub.text = sel != null ? sel.BookmarkTitle : string.Empty;
 
-            _loading = true;
-            if (_input != null) _input.text = _viewModel.Comment ?? string.Empty;
-            _loading = false;
+            // SetText syncs the view without firing OnValueChanged, so no re-entrancy guard is needed.
+            if (_textFieldController != null) _textFieldController.SetText(_viewModel.Comment ?? string.Empty);
 
-            if (_input != null) _input.ActivateInputField();
+            if (_textFieldController != null) _textFieldController.Activate();
         }
     }
 }

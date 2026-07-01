@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using com.github.lhervier.ksp.shared.ugui.textfield;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
 {
@@ -16,10 +17,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             return this;
         }
 
-        private TMP_InputField _input;
-        public EditCommentContentController WithInputField(TMP_InputField input)
+        private TextFieldController _textFieldController;
+        public EditCommentContentController WithTextFieldController(TextFieldController textFieldController)
         {
-            this._input = input;
+            this._textFieldController = textFieldController;
             return this;
         }
 
@@ -28,10 +29,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             return _sub;
         }
 
-        public TMP_InputField GetInput()
+        public TextFieldController GetTextFieldController()
         {
-            return _input;
+            return _textFieldController;
         }
-        
+
     }
 }
