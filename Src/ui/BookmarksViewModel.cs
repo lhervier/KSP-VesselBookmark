@@ -112,6 +112,20 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public IReadOnlyList<string> AvailableVesselTypes => _availableVesselTypes;
         private List<string> _availableVesselTypes = new List<string>();
         public readonly EventVoid OnAvailableVesselTypesChanged = new EventVoid("BookmarksViewModel.OnAvailableVesselTypesChanged");
+
+        /// <summary>
+        /// Situation-filter value standing for "any situation". Kept as an opaque token : the combo
+        /// turns it into the localized "Tous" label via its LabelFor.
+        /// </summary>
+        public const string ALL_SITUATIONS = "All";
+
+        /// <summary>
+        /// The list of available vessel situations (raw enum names, e.g. "LANDED"), plus the
+        /// ALL_SITUATIONS token in front.
+        /// </summary>
+        public IReadOnlyList<string> AvailableSituations => _availableSituations;
+        private List<string> _availableSituations = new List<string>();
+        public readonly EventVoid OnAvailableSituationsChanged = new EventVoid("BookmarksViewModel.OnAvailableSituationsChanged");
         
         // ===============================================================
         // Search criteria
@@ -144,6 +158,20 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
         private string _selectedVesselType = ALL_VESSEL_TYPES;
         public readonly EventVoid OnSelectedVesselTypeChanged = new EventVoid("BookmarksViewModel.OnSelectedVesselTypeChanged");
+
+        /// <summary>
+        /// The selected vessel situation (raw enum name, or ALL_SITUATIONS)
+        /// </summary>
+        public string SelectedSituation {
+            get => _selectedSituation;
+            set {
+                if( value == _selectedSituation ) return;
+                _selectedSituation = value;
+                OnSelectedSituationChanged.Fire();
+            }
+        }
+        private string _selectedSituation = ALL_SITUATIONS;
+        public readonly EventVoid OnSelectedSituationChanged = new EventVoid("BookmarksViewModel.OnSelectedSituationChanged");
 
         /// <summary>
         /// Filtre : n'afficher que les bookmarks qui ont un commentaire (pour usage futur).
@@ -283,6 +311,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public void Start() 
         {
             this.OnSelectedVesselTypeChanged.Add(UpdateBookmarksSelection);
+            this.OnSelectedSituationChanged.Add(UpdateBookmarksSelection);
             this.OnSelectedBodyChanged.Add(UpdateBookmarksSelection);
             this.OnSearchTextChanged.Add(UpdateBookmarksSelection);
             this.OnFilterHasCommentChanged.Add(UpdateBookmarksSelection);
@@ -328,6 +357,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             this.OnFilterHasCommentChanged.Remove(UpdateBookmarksSelection);
             this.OnSearchTextChanged.Remove(UpdateBookmarksSelection);
             this.OnSelectedBodyChanged.Remove(UpdateBookmarksSelection);
+            this.OnSelectedSituationChanged.Remove(UpdateBookmarksSelection);
             this.OnSelectedVesselTypeChanged.Remove(UpdateBookmarksSelection);
 
             this.OnSelectedBookmarkChanged.Remove(_onSelectedBookmarkChanged);
@@ -378,6 +408,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
                 this.UpdateAvailableBodies();
                 this.UpdateAvailableVesselTypes();
+                this.UpdateAvailableSituations();
                 this.UpdateAvailableBookmarks();
             } catch (Exception e) {
                 LOGGER.LogError($"Error updating bookmarks: {e.Message}");
@@ -446,6 +477,32 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             }
         }
 
+        private void UpdateAvailableSituations() {
+            try {
+                LOGGER.LogDebug($"Updating available situations");
+                _availableSituations.Clear();
+                foreach (Bookmark bookmark in _bookmarkManager.GetAllBookmarks()) {
+                    // Bookmarks whose vessel could not be resolved keep an empty situation : skip
+                    // them so the combo never shows a blank entry.
+                    if( string.IsNullOrEmpty(bookmark.VesselSituation) ) {
+                        continue;
+                    }
+                    if( !_availableSituations.Contains(bookmark.VesselSituation) ) {
+                        _availableSituations.Add(bookmark.VesselSituation);
+                    }
+                }
+                _availableSituations.Sort();
+                _availableSituations.Insert(0, ALL_SITUATIONS);
+
+                if( !_availableSituations.Contains(SelectedSituation) ) {
+                    SelectedSituation = _availableSituations[0];
+                }
+                this.OnAvailableSituationsChanged.Fire();
+            } catch (Exception e) {
+                LOGGER.LogError($"Error updating available situations: {e.Message}");
+            }
+        }
+
         /// <summary>
         /// Update the available bookmarks
         /// </summary>
@@ -466,6 +523,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     // it passes all of them.
                     if( !MatchesBody(bookmark, filterBody) ) continue;
                     if( !MatchesVesselType(bookmark) ) continue;
+                    if( !MatchesSituation(bookmark) ) continue;
                     if( !MatchesSearchText(bookmark) ) continue;
                     if( !MatchesHasComment(bookmark) ) continue;
 
@@ -509,6 +567,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private bool MatchesVesselType(Bookmark bookmark) {
             if( string.Equals(SelectedVesselType, ALL_VESSEL_TYPES) ) return true;
             return string.Equals(bookmark.BookmarkVesselType, SelectedVesselType);
+        }
+
+        /// <summary>
+        /// Whether the bookmark passes the situation filter.
+        /// </summary>
+        /// <param name="bookmark">The bookmark to test</param>
+        private bool MatchesSituation(Bookmark bookmark) {
+            if( string.Equals(SelectedSituation, ALL_SITUATIONS) ) return true;
+            return string.Equals(bookmark.VesselSituation, SelectedSituation);
         }
 
         /// <summary>
@@ -594,6 +661,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             get {
                 return SelectedBody != ALL_BODIES
                     || SelectedVesselType != ALL_VESSEL_TYPES
+                    || SelectedSituation != ALL_SITUATIONS
                     || !string.IsNullOrEmpty(SearchText)
                     || FilterHasComment;
             }
@@ -606,6 +674,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             this._preventBookmarksUpdates = true;
             SelectedBody = ALL_BODIES;
             SelectedVesselType = ALL_VESSEL_TYPES;
+            SelectedSituation = ALL_SITUATIONS;
             SearchText = string.Empty;
             FilterHasComment = false;
             this._preventBookmarksUpdates = false;

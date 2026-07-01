@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -128,6 +129,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 .WithLabelFor(TranslateVesselType)
                 .WithPreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
                 .Build();
+            ComboController situationCombo = new ComboBuilder()
+                .WithParent(panelGo.transform)
+                .WithLabel(ModLocalization.GetString("labelSituation"))
+                .WithLabelFor(TranslateSituation)
+                .WithPreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
+                .Build();
             
             // Case « commentaire seulement »
             CheckboxController checkBox = BuildCheckbox(panelGo.transform);
@@ -140,7 +147,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 .AddComponent<FilterMenuController>()
                 .WithViewModel(_viewModel)
                 .WithSearchFieldController(search)
-                .WithComboControllers(bodyCombo, typeCombo)
+                .WithComboControllers(bodyCombo, typeCombo, situationCombo)
                 .WithCheckboxController(checkBox)
                 .WithPanelAndTrap(panelGo, trapGo);
         }
@@ -166,6 +173,23 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             if (string.IsNullOrEmpty(value)) return value;
             string key = value == "All" ? "vesselTypeAll" : "vesselType" + value;
             return ModLocalization.GetString(key);
+        }
+
+        // Valeur brute de la situation → libellé affiché. Le jeton ALL_SITUATIONS devient « Tous » ;
+        // toute autre valeur est un nom d'enum Vessel.Situations traduit par le natif KSP
+        // (Vessel.GetSituationString, sans nom de corps — le corps est un filtre à part).
+        private static string TranslateSituation(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return value;
+            if (value == BookmarksViewModel.ALL_SITUATIONS)
+            {
+                return ModLocalization.GetString("labelAll");
+            }
+            if (Enum.TryParse(value, out Vessel.Situations situation))
+            {
+                return Vessel.GetSituationString(situation);
+            }
+            return value;
         }
 
         // ---- Sous-éléments ----------------------------------------------------------------

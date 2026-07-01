@@ -46,10 +46,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         
         private ComboController _bodyCombo;
         private ComboController _typeCombo;
-        public FilterMenuController WithComboControllers(ComboController body, ComboController type)
+        private ComboController _situationCombo;
+        public FilterMenuController WithComboControllers(ComboController body, ComboController type, ComboController situation)
         {
             _bodyCombo = body;
             _typeCombo = type;
+            _situationCombo = situation;
             return this;
         }
 
@@ -62,10 +64,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 _viewModel.OnSelectedBodyChanged.Add(RefreshBodyCombo);
                 _viewModel.OnAvailableVesselTypesChanged.Add(RefreshTypeCombo);
                 _viewModel.OnSelectedVesselTypeChanged.Add(RefreshTypeCombo);
+                _viewModel.OnAvailableSituationsChanged.Add(RefreshSituationCombo);
+                _viewModel.OnSelectedSituationChanged.Add(RefreshSituationCombo);
                 _viewModel.OnFilterHasCommentChanged.Add(RefreshCheckbox);
-                
+
                 RefreshBodyCombo();
                 RefreshTypeCombo();
+                RefreshSituationCombo();
                 RefreshCheckbox();
                 OnFilterMenuOpenChanged();
             }
@@ -77,6 +82,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             if( _typeCombo != null )
             {
                 _typeCombo.OnSelect.Add(OnTypeSelected);
+            }
+            if( _situationCombo != null )
+            {
+                _situationCombo.OnSelect.Add(OnSituationSelected);
             }
         }
 
@@ -90,6 +99,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             {
                 _typeCombo.OnSelect.Remove(OnTypeSelected);
             }
+            if( _situationCombo != null )
+            {
+                _situationCombo.OnSelect.Remove(OnSituationSelected);
+            }
 
             if( _viewModel != null )
             {
@@ -98,6 +111,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 _viewModel.OnSelectedBodyChanged.Remove(RefreshBodyCombo);
                 _viewModel.OnAvailableVesselTypesChanged.Remove(RefreshTypeCombo);
                 _viewModel.OnSelectedVesselTypeChanged.Remove(RefreshTypeCombo);
+                _viewModel.OnAvailableSituationsChanged.Remove(RefreshSituationCombo);
+                _viewModel.OnSelectedSituationChanged.Remove(RefreshSituationCombo);
                 _viewModel.OnFilterHasCommentChanged.Remove(RefreshCheckbox);
             }
         }
@@ -112,6 +127,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             _viewModel.SelectedVesselType = type;
         }
 
+        private void OnSituationSelected(string situation)
+        {
+            _viewModel.SelectedSituation = situation;
+        }
+
         private void OnFilterMenuOpenChanged()
         {
             bool open = _viewModel.FilterMenuOpen;
@@ -124,12 +144,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 if (_search != null) _search.SetText(_viewModel.SearchText ?? string.Empty);
                 RefreshBodyCombo();
                 RefreshTypeCombo();
+                RefreshSituationCombo();
                 RefreshCheckbox();
             }
             else
             {
                 _bodyCombo?.Collapse();
                 _typeCombo?.Collapse();
+                _situationCombo?.Collapse();
             }
         }
 
@@ -141,6 +163,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         private void RefreshTypeCombo()
         {
             _typeCombo?.SetOptions(_viewModel.AvailableVesselTypes, _viewModel.SelectedVesselType);
+        }
+
+        private void RefreshSituationCombo()
+        {
+            _situationCombo?.SetOptions(_viewModel.AvailableSituations, _viewModel.SelectedSituation);
         }
 
         private void RefreshCheckbox()
