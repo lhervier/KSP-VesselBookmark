@@ -26,6 +26,15 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             HasWindowPosition = true;
         }
 
+        /// <summary>Memorized open/closed state of the window, if it has already been captured.</summary>
+        public bool HasWindowVisible { get; private set; }
+        public bool WindowVisible { get; private set; }
+
+        public void SetWindowVisible(bool visible) {
+            WindowVisible = visible;
+            HasWindowVisible = true;
+        }
+
         /// <summary>
         /// Memorized search criteria, if they have already been captured. Values are kept verbatim
         /// (including the "All"/"CURRENT" tokens) : the settings do not know their semantics, they
@@ -74,6 +83,12 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     HasWindowPosition = true;
                 }
 
+                if (node.HasValue("windowVisible")
+                    && bool.TryParse(node.GetValue("windowVisible"), out bool windowVisible)) {
+                    WindowVisible = windowVisible;
+                    HasWindowVisible = true;
+                }
+
                 // "selectedBody" acts as the presence marker for the whole criteria group : the five
                 // values are always written together, so its presence means the group was saved.
                 if (node.HasValue("selectedBody")) {
@@ -97,6 +112,9 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 if (HasWindowPosition) {
                     node.AddValue("windowX", WindowPosition.x.ToString(CultureInfo.InvariantCulture));
                     node.AddValue("windowY", WindowPosition.y.ToString(CultureInfo.InvariantCulture));
+                }
+                if (HasWindowVisible) {
+                    node.AddValue("windowVisible", WindowVisible.ToString());
                 }
                 if (HasCriteria) {
                     node.AddValue("selectedBody", SelectedBody ?? string.Empty);

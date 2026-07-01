@@ -52,6 +52,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 _uguiWindow.SetSavedPosition(_settings.WindowPosition);
             }
             _viewModel.OnWindowVisibleChanged.Add(OnWindowVisibleChanged);
+            _viewModel.OnWindowVisibleChanged.Add(OnWindowVisibleChangedPersist);
+
+            // Restore the persisted open/closed state : setting WindowVisible replays through
+            // OnWindowVisibleChanged, spawning the window if it was open when KSP last quit.
+            if (_settings.HasWindowVisible && _settings.WindowVisible) {
+                _viewModel.WindowVisible = true;
+                _viewModel.ForceReload();
+            }
         }
 
         private void OnDestroy() {
@@ -60,6 +68,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             if( this._viewModel != null ) {
                 this._viewModel.OnWindowVisibleChanged.Remove(OnWindowVisibleChanged);
+                this._viewModel.OnWindowVisibleChanged.Remove(OnWindowVisibleChangedPersist);
                 this._viewModel.OnSelectedBodyChanged.Remove(OnCriteriaChanged);
                 this._viewModel.OnSelectedVesselTypeChanged.Remove(OnCriteriaChanged);
                 this._viewModel.OnSelectedSituationChanged.Remove(OnCriteriaChanged);
@@ -90,12 +99,27 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     _uguiWindow.Hide();
                 }
             }
-            if (!visible) {
-                _viewModel.CancelBookmarkCommentEdition();
-                if (_toolbarButton != null) {
-                    _toolbarButton.SetFalse();
+            // Keep the toolbar button pressed state in sync, notably when visibility is driven
+            // programmatically (restore at scene load) rather than by a click on the button.
+            // SetTrue/SetFalse(false) : do not re-fire the toggle callbacks.
+            if (_toolbarButton != null) {
+                if (visible) {
+                    _toolbarButton.SetTrue(false);
+                } else {
+                    _toolbarButton.SetFalse(false);
                 }
             }
+            if (!visible) {
+                _viewModel.CancelBookmarkCommentEdition();
+            }
+        }
+
+        /// <summary>
+        /// La visibilité a changé : on mémorise l'état d'ouverture dans les réglages globaux.
+        /// </summary>
+        private void OnWindowVisibleChangedPersist() {
+            _settings.SetWindowVisible(_viewModel.WindowVisible);
+            _settings.Save();
         }
 
         /// <summary>
@@ -146,6 +170,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     );
                 } catch (System.Exception e) {
                     LOGGER.LogError($"Error creating Toolbar button: {e.Message}");
+                }
+                // The launcher may become ready after the window state was restored at scene load :
+                // press the button now to reflect an already-open window (false : no callback).
+                if (_toolbarButton != null && _viewModel != null && _viewModel.WindowVisible) {
+                    _toolbarButton.SetTrue(false);
                 }
             }
         }
