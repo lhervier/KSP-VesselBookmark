@@ -63,6 +63,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
 
         // Combos (corps / type)
         public const float ComboHeight = 22f;
+        public const float ComboItemIndentStep = 12f;   // décalage par niveau de satellite (combo corps)
         public static readonly Color ComboItemHoverColor = Rgb(42, 42, 42);    // #2a2a2a
         public static readonly Color ComboItemColor = Rgb(221, 221, 221);          // #ddd (option normale)
         public static readonly Color ComboItemSelectedColor = Rgb(141, 190, 69);   // accent (option sélectionnée)

@@ -33,6 +33,17 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             return this;
         }
 
+        // Raw option value -> nesting depth (0 = no indent). Left margin = depth * indent step.
+        // Injected dependency, read at Build. Null → no indentation.
+        private Func<string, int> _indentFor;
+        private float _indentStep;
+        public FilterComboItemContentBuilder WithIndentFor(Func<string, int> indentFor, float indentStep)
+        {
+            this._indentFor = indentFor;
+            this._indentStep = indentStep;
+            return this;
+        }
+
         public override ComboItemContentController Build()
         {
             string id = GetId();
@@ -43,6 +54,17 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             tmp.text = _labelFor != null ? _labelFor(id) : id;
             tmp.fontSize = ComboPalette.ComboFontSize;
             tmp.alignment = TextAlignmentOptions.Left;
+
+            // Indent satellites under their parent : a left TMP margin shifts the text within its
+            // rect, without touching the row height or the layout (unlike padding/leading spaces).
+            if( _indentFor != null )
+            {
+                float indent = _indentFor(id) * _indentStep;
+                if( indent > 0f )
+                {
+                    tmp.margin = new Vector4(indent, 0f, 0f, 0f);
+                }
+            }
 
             // The content carries the combo's standard single-line row height.
             var le = labelGo.AddComponent<LayoutElement>();

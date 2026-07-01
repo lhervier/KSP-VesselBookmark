@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
+using com.github.lhervier.ksp.bookmarksmod.util;
 using com.github.lhervier.ksp.shared.ugui.checkbox;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui;
@@ -125,7 +126,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 .WithLabelFor(TranslateBody)
                 .WithItemContentBuilder(new FilterComboItemContentBuilder()
                     .WithLabelFor(TranslateBody)
-                    .WithEnabledFor(_viewModel.IsBodyPopulated))
+                    .WithEnabledFor(_viewModel.IsBodyPopulated)
+                    .WithIndentFor(CelestialBodySorter.GetIndentLevel, VesselBookmarkPalette.ComboItemIndentStep))
                 .WithPreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
                 .Build();
             ComboController typeCombo = new ComboBuilder()
