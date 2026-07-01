@@ -166,7 +166,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         }
 
         // Valeur brute du corps → libellé affiché. Les jetons ALL_BODIES et CURRENT_BODY deviennent
-        // « Tous » et « Courant (<corps>) » ; tout autre valeur (nom de corps réel) est affichée telle quelle.
+        // « Tous » et « Courant (<corps>) » ; tout autre valeur (nom de corps interne) est traduite
+        // vers le nom localisé du jeu. La valeur brute reste la clé d'identité/filtre, jamais affichée.
         private string TranslateBody(string value)
         {
             if( value == BookmarksViewModel.ALL_BODIES )
@@ -175,9 +176,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             }
             if( value == BookmarksViewModel.CURRENT_BODY )
             {
-                return ModLocalization.GetString("labelBodyCurrent", _viewModel.CurrentBodyName);
+                return ModLocalization.GetString("labelBodyCurrent", CelestialBodyLabels.GetDisplayName(_viewModel.CurrentBodyName));
             }
-            return value;
+            return CelestialBodyLabels.GetDisplayName(value);
         }
 
         // Valeur brute du type de vaisseau → libellé traduit (la valeur « All » utilise vesselTypeAll).
