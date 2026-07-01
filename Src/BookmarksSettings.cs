@@ -26,6 +26,27 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             HasWindowPosition = true;
         }
 
+        /// <summary>
+        /// Memorized search criteria, if they have already been captured. Values are kept verbatim
+        /// (including the "All"/"CURRENT" tokens) : the settings do not know their semantics, they
+        /// only persist whatever the view model hands them.
+        /// </summary>
+        public bool HasCriteria { get; private set; }
+        public string SelectedBody { get; private set; }
+        public string SelectedVesselType { get; private set; }
+        public string SelectedSituation { get; private set; }
+        public string SearchText { get; private set; }
+        public bool FilterHasComment { get; private set; }
+
+        public void SetCriteria(string selectedBody, string selectedVesselType, string selectedSituation, string searchText, bool filterHasComment) {
+            SelectedBody = selectedBody;
+            SelectedVesselType = selectedVesselType;
+            SelectedSituation = selectedSituation;
+            SearchText = searchText;
+            FilterHasComment = filterHasComment;
+            HasCriteria = true;
+        }
+
         private static string SettingsPath {
             get {
                 string dir = Path.Combine(
@@ -52,6 +73,18 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     WindowPosition = new Vector2(x, y);
                     HasWindowPosition = true;
                 }
+
+                // "selectedBody" acts as the presence marker for the whole criteria group : the five
+                // values are always written together, so its presence means the group was saved.
+                if (node.HasValue("selectedBody")) {
+                    SelectedBody = node.GetValue("selectedBody") ?? string.Empty;
+                    SelectedVesselType = node.GetValue("selectedVesselType") ?? string.Empty;
+                    SelectedSituation = node.GetValue("selectedSituation") ?? string.Empty;
+                    SearchText = node.GetValue("searchText") ?? string.Empty;
+                    bool.TryParse(node.GetValue("filterHasComment"), out bool filterHasComment);
+                    FilterHasComment = filterHasComment;
+                    HasCriteria = true;
+                }
             } catch (Exception e) {
                 LOGGER.LogError($"Error loading settings: {e.Message}");
             }
@@ -64,6 +97,13 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 if (HasWindowPosition) {
                     node.AddValue("windowX", WindowPosition.x.ToString(CultureInfo.InvariantCulture));
                     node.AddValue("windowY", WindowPosition.y.ToString(CultureInfo.InvariantCulture));
+                }
+                if (HasCriteria) {
+                    node.AddValue("selectedBody", SelectedBody ?? string.Empty);
+                    node.AddValue("selectedVesselType", SelectedVesselType ?? string.Empty);
+                    node.AddValue("selectedSituation", SelectedSituation ?? string.Empty);
+                    node.AddValue("searchText", SearchText ?? string.Empty);
+                    node.AddValue("filterHasComment", FilterHasComment.ToString());
                 }
                 string path = SettingsPath;
                 Directory.CreateDirectory(Path.GetDirectoryName(path));

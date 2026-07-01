@@ -29,6 +29,21 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _settings = new BookmarksSettings();
             _settings.Load();
 
+            // Restore the persisted search criteria into the view model before wiring the save
+            // handler, so replaying the restored values does not trigger a save.
+            if (_settings.HasCriteria) {
+                _viewModel.SelectedBody = _settings.SelectedBody;
+                _viewModel.SelectedVesselType = _settings.SelectedVesselType;
+                _viewModel.SelectedSituation = _settings.SelectedSituation;
+                _viewModel.SearchText = _settings.SearchText;
+                _viewModel.FilterHasComment = _settings.FilterHasComment;
+            }
+            _viewModel.OnSelectedBodyChanged.Add(OnCriteriaChanged);
+            _viewModel.OnSelectedVesselTypeChanged.Add(OnCriteriaChanged);
+            _viewModel.OnSelectedSituationChanged.Add(OnCriteriaChanged);
+            _viewModel.OnSearchTextChanged.Add(OnCriteriaChanged);
+            _viewModel.OnFilterHasCommentChanged.Add(OnCriteriaChanged);
+
             _uguiWindow = new BookmarksWindow();
             _uguiWindow.Initialize(_viewModel);
             _uguiWindow.OnClosed.Add(OnUGUIWindowClosed);
@@ -45,6 +60,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             if( this._viewModel != null ) {
                 this._viewModel.OnWindowVisibleChanged.Remove(OnWindowVisibleChanged);
+                this._viewModel.OnSelectedBodyChanged.Remove(OnCriteriaChanged);
+                this._viewModel.OnSelectedVesselTypeChanged.Remove(OnCriteriaChanged);
+                this._viewModel.OnSelectedSituationChanged.Remove(OnCriteriaChanged);
+                this._viewModel.OnSearchTextChanged.Remove(OnCriteriaChanged);
+                this._viewModel.OnFilterHasCommentChanged.Remove(OnCriteriaChanged);
             }
             if( this._uguiWindow != null ) {
                 this._uguiWindow.OnClosed.Remove(OnUGUIWindowClosed);
@@ -91,6 +111,19 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         private void OnWindowPositionCaptured(Vector2 position) {
             _settings.SetWindowPosition(position);
+            _settings.Save();
+        }
+
+        /// <summary>
+        /// A search criterion changed : memorize the whole current criteria set into the global settings.
+        /// </summary>
+        private void OnCriteriaChanged() {
+            _settings.SetCriteria(
+                _viewModel.SelectedBody,
+                _viewModel.SelectedVesselType,
+                _viewModel.SelectedSituation,
+                _viewModel.SearchText,
+                _viewModel.FilterHasComment);
             _settings.Save();
         }
 
