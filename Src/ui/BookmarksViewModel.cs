@@ -461,56 +461,20 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 }
 
                 foreach( var bookmark in _bookmarkManager.GetAllBookmarks() ) {
-                    bool addBookmark;
-                    if( string.Equals(filterBody, ALL_BODIES) && string.Equals(SelectedVesselType, ALL_VESSEL_TYPES) ) {
-                        addBookmark = true;
-                    } else if( string.Equals(filterBody, ALL_BODIES) ) {
-                        addBookmark = string.Equals(
-                            bookmark.BookmarkVesselType,
-                            SelectedVesselType
-                        );
-                    } else if( string.Equals(SelectedVesselType, ALL_VESSEL_TYPES) ) {
-                        addBookmark = string.Equals(
-                            bookmark.VesselBodyName,
-                            filterBody
-                        );
-                    } else {
-                        addBookmark = string.Equals(
-                                bookmark.VesselBodyName,
-                                filterBody
-                            )
-                            &&
-                            string.Equals(
-                                bookmark.BookmarkVesselType,
-                                SelectedVesselType
-                            );
-                    }
+                    // Each criterion is an independent AND filter. A criterion left at its "all"
+                    // (or empty) value lets every bookmark through, so a bookmark is kept only when
+                    // it passes all of them.
+                    if( !MatchesBody(bookmark, filterBody) ) continue;
+                    if( !MatchesVesselType(bookmark) ) continue;
+                    if( !MatchesSearchText(bookmark) ) continue;
+                    if( !MatchesHasComment(bookmark) ) continue;
 
-                    if( addBookmark && !string.IsNullOrEmpty(SearchText) ) {
-                        string fullSearchText = bookmark.BookmarkTitle + " ";
-                        fullSearchText += bookmark.VesselSituationLabel + " ";   // Situation contains celestial body name
-                        fullSearchText += bookmark.VesselName + " ";
-                        fullSearchText += ModLocalization.GetString("vesselType" + bookmark.BookmarkVesselType) + " ";
-                        fullSearchText += bookmark.Comment + " ";
-                        if( !fullSearchText.ToLower().Contains(SearchText.ToLower()) ) {
-                            addBookmark = false;
-                        }
+                    if( !_availableBookmarks.TryGetValue(bookmark.BookmarkType, out List<Bookmark> b) )
+                    {
+                        b = new List<Bookmark>();
+                        _availableBookmarks[bookmark.BookmarkType] = b;
                     }
-
-                    if( addBookmark && FilterHasComment ) {
-                        if( string.IsNullOrEmpty(bookmark.Comment) ) {
-                            addBookmark = false;
-                        }
-                    }
-
-                    if( addBookmark ) {
-                        if( !_availableBookmarks.TryGetValue(bookmark.BookmarkType, out List<Bookmark> b) )
-                        {
-                            b = new List<Bookmark>();
-                            _availableBookmarks[bookmark.BookmarkType] = b;
-                        }
-                        b.Add(bookmark);
-                    }
+                    b.Add(bookmark);
                 }
                 
                 // Clear selection if the selected bookmark is no longer in the filtered list
@@ -521,6 +485,53 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             } catch (Exception e) {
                 LOGGER.LogError($"Error updating available bookmarks: {e.Message}");
             }
+        }
+
+        // ----------------------------------------------------------------------
+        //  Per-criterion filters (each returns true when the bookmark passes the
+        //  criterion, including when the criterion is inactive / set to "all").
+        // ----------------------------------------------------------------------
+
+        /// <summary>
+        /// Whether the bookmark passes the body filter.
+        /// </summary>
+        /// <param name="bookmark">The bookmark to test</param>
+        /// <param name="filterBody">The body to match, already resolved from the CURRENT_BODY shortcut</param>
+        private bool MatchesBody(Bookmark bookmark, string filterBody) {
+            if( string.Equals(filterBody, ALL_BODIES) ) return true;
+            return string.Equals(bookmark.VesselBodyName, filterBody);
+        }
+
+        /// <summary>
+        /// Whether the bookmark passes the vessel-type filter.
+        /// </summary>
+        /// <param name="bookmark">The bookmark to test</param>
+        private bool MatchesVesselType(Bookmark bookmark) {
+            if( string.Equals(SelectedVesselType, ALL_VESSEL_TYPES) ) return true;
+            return string.Equals(bookmark.BookmarkVesselType, SelectedVesselType);
+        }
+
+        /// <summary>
+        /// Whether the bookmark passes the free-text search filter.
+        /// </summary>
+        /// <param name="bookmark">The bookmark to test</param>
+        private bool MatchesSearchText(Bookmark bookmark) {
+            if( string.IsNullOrEmpty(SearchText) ) return true;
+            string fullSearchText = bookmark.BookmarkTitle + " ";
+            fullSearchText += bookmark.VesselSituationLabel + " ";   // Situation contains celestial body name
+            fullSearchText += bookmark.VesselName + " ";
+            fullSearchText += ModLocalization.GetString("vesselType" + bookmark.BookmarkVesselType) + " ";
+            fullSearchText += bookmark.Comment + " ";
+            return fullSearchText.ToLower().Contains(SearchText.ToLower());
+        }
+
+        /// <summary>
+        /// Whether the bookmark passes the "has comment" filter.
+        /// </summary>
+        /// <param name="bookmark">The bookmark to test</param>
+        private bool MatchesHasComment(Bookmark bookmark) {
+            if( !FilterHasComment ) return true;
+            return !string.IsNullOrEmpty(bookmark.Comment);
         }
 
         // ======================================================================
