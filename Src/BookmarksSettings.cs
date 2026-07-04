@@ -15,14 +15,8 @@ namespace com.github.lhervier.ksp.bookmarksmod {
 
         private const string ROOT_NODE = "VESSEL_BOOKMARKS_SETTINGS";
 
-        /// <summary>Memorized open/closed state of the window, if it has already been captured.</summary>
-        public bool HasWindowVisible { get; private set; }
-        public bool WindowVisible { get; private set; }
-
-        public void SetWindowVisible(bool visible) {
-            WindowVisible = visible;
-            HasWindowVisible = true;
-        }
+        // The window's open/closed state is no longer stored here: it now lives alongside the window
+        // position in the shared PopupSettings (PluginData/[popupID].cfg), owned by the PopupController.
 
         /// <summary>
         /// Memorized search criteria, if they have already been captured. Values are kept verbatim
@@ -65,12 +59,6 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 if (node == null) {
                     return;
                 }
-                if (node.HasValue("windowVisible")
-                    && bool.TryParse(node.GetValue("windowVisible"), out bool windowVisible)) {
-                    WindowVisible = windowVisible;
-                    HasWindowVisible = true;
-                }
-
                 // "selectedBody" acts as the presence marker for the whole criteria group : the five
                 // values are always written together, so its presence means the group was saved.
                 if (node.HasValue("selectedBody")) {
@@ -91,9 +79,6 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             try {
                 var root = new ConfigNode();
                 ConfigNode node = root.AddNode(ROOT_NODE);
-                if (HasWindowVisible) {
-                    node.AddValue("windowVisible", WindowVisible.ToString());
-                }
                 if (HasCriteria) {
                     node.AddValue("selectedBody", SelectedBody ?? string.Empty);
                     node.AddValue("selectedVesselType", SelectedVesselType ?? string.Empty);

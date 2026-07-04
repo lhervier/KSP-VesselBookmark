@@ -269,21 +269,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         // =============================================================
 
         /// <summary>
-        /// Whether the main window is visible (drives the PopupDialog spawn/despawn).
-        /// </summary>
-        public bool WindowVisible
-        {
-            get => _windowVisible;
-            set {
-                if( _windowVisible == value ) return;
-                _windowVisible = value;
-                OnWindowVisibleChanged.Fire();
-            }
-        }
-        private bool _windowVisible = false;
-        public readonly EventVoid OnWindowVisibleChanged = new EventVoid("BookmarksViewModel.OnWindowVisibleChanged");
-
-        /// <summary>
         /// Whether the filters menu ("⋯") is open.
         /// </summary>
         public bool FilterMenuOpen

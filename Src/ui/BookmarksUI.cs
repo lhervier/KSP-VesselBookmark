@@ -1,25 +1,32 @@
 using KSP.UI.Screens;
 using UnityEngine;
-using com.github.lhervier.ksp.bookmarksmod.ui.ugui;
 using com.github.lhervier.ksp.shared;
+using com.github.lhervier.ksp.shared.ugui.popup;
+using com.github.lhervier.ksp.bookmarksmod.ui.ugui;
+using com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar;
+using com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays;
+using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
     /// <summary>
-    /// Point d'entrée de l'UI : bouton toolbar + fenêtre uGUI, pilotés par ViewModel.WindowVisible.
-    /// (L'ancienne UI IMGUI est débranchée ; ses fichiers restent présents le temps de finir le uGUI.)
+    /// UI entry point: toolbar button + uGUI window. The window is driven by a (shared) PopupController
+    /// that handles its own lazy spawn, position, and open state; we only open/close it and react to
+    /// OnOpenChanged to sync the button and the business side effects (reloading the list, cancelling
+    /// an edit).
     /// </summary>
     [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
     public class BookmarksUI : MonoBehaviour {
 
         private static readonly ModLogger LOGGER = new ModLogger("MainUI");
+        private const string DIALOG_ID = "VesselBookmarksUGUI";
 
         private ApplicationLauncherButton _toolbarButton;
 
         private BookmarksViewModel _viewModel;
-        private BookmarksWindow _uguiWindow;
+        private PopupController _popupController;
         private BookmarksSettings _settings;
-        
+
         private void Start() {
             GameEvents.onGUIApplicationLauncherReady.Add(OnLauncherReady);
 
@@ -44,17 +51,21 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _viewModel.OnSearchTextChanged.Add(OnCriteriaChanged);
             _viewModel.OnFilterHasCommentChanged.Add(OnCriteriaChanged);
 
-            _uguiWindow = new BookmarksWindow().WithViewModel(_viewModel);
-            _uguiWindow.OnClosed.Add(OnUGUIWindowClosed);
-            
-            _viewModel.OnWindowVisibleChanged.Add(OnWindowVisibleChanged);
-            _viewModel.OnWindowVisibleChanged.Add(OnWindowVisibleChangedPersist);
-
-            // Restore the persisted open/closed state : setting WindowVisible replays through
-            // OnWindowVisibleChanged, spawning the window if it was open when KSP last quit.
-            if (_settings.HasWindowVisible && _settings.WindowVisible) {
-                _viewModel.WindowVisible = true;
-                _viewModel.ForceReload();
+            // The popup controller is a component on THIS GameObject: it survives KSP destroying the
+            // window (Escape) and persists its own open state, so we no longer track visibility ourselves.
+            _popupController = new PopupBuilder<TitleBarController, ContentController, BookmarksOverlaysController>()
+                .WithHost(this.gameObject)
+                .WithPopupID(DIALOG_ID)
+                .WithTitle(ModLocalization.GetString("windowTitle"))
+                .WithTitleBarBuilder(new TitleBarBuilder().WithViewModel(_viewModel))
+                .WithContentBuilder(new ContentBuilder().WithViewModel(_viewModel))
+                .WithOverlayBuilder(new BookmarksOverlaysBuilder().WithViewModel(_viewModel))
+                .WithSize(new Vector2(VesselBookmarkPalette.WindowWidth, VesselBookmarkPalette.WindowHeight))
+                .Build();
+            // The controller restores its own open state (in its Start, after this method returns), so we
+            // only subscribe: a restored-open window then syncs the toolbar and reloads through this handler.
+            if (_popupController != null) {
+                _popupController.OnOpenChanged.Add(OnPopupOpenChanged);
             }
         }
 
@@ -62,19 +73,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             GameEvents.onGUIApplicationLauncherReady.Remove(OnLauncherReady);
             OnLauncherUnready();
 
-            if( this._viewModel != null ) {
-                this._viewModel.OnWindowVisibleChanged.Remove(OnWindowVisibleChanged);
-                this._viewModel.OnWindowVisibleChanged.Remove(OnWindowVisibleChangedPersist);
-                this._viewModel.OnSelectedBodyChanged.Remove(OnCriteriaChanged);
-                this._viewModel.OnSelectedVesselTypeChanged.Remove(OnCriteriaChanged);
-                this._viewModel.OnSelectedSituationChanged.Remove(OnCriteriaChanged);
-                this._viewModel.OnSearchTextChanged.Remove(OnCriteriaChanged);
-                this._viewModel.OnFilterHasCommentChanged.Remove(OnCriteriaChanged);
+            if (_viewModel != null) {
+                _viewModel.OnSelectedBodyChanged.Remove(OnCriteriaChanged);
+                _viewModel.OnSelectedVesselTypeChanged.Remove(OnCriteriaChanged);
+                _viewModel.OnSelectedSituationChanged.Remove(OnCriteriaChanged);
+                _viewModel.OnSearchTextChanged.Remove(OnCriteriaChanged);
+                _viewModel.OnFilterHasCommentChanged.Remove(OnCriteriaChanged);
             }
-            if( this._uguiWindow != null ) {
-                this._uguiWindow.OnClosed.Remove(OnUGUIWindowClosed);
-                this._uguiWindow.Destroy();
-                this._uguiWindow = null;
+            // _popup is a component on this GO: Unity destroys it with us, and it dismisses a still-open
+            // window in its own OnDestroy. We only drop our reference and unsubscribe.
+            if (_popupController != null) {
+                _popupController.OnOpenChanged.Remove(OnPopupOpenChanged);
+                _popupController = null;
             }
         }
 
@@ -83,47 +93,26 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         // ==========================================================================
 
         /// <summary>
-        /// Montre/cache la fenêtre uGUI et, à la fermeture, resynchronise le toolbar et annule une
-        /// éventuelle édition de commentaire.
+        /// The window's open state changed (button, ×, Escape, or restore-at-load): sync the toolbar
+        /// button, reload the list on open, and cancel any comment edit on close.
         /// </summary>
-        private void OnWindowVisibleChanged() {
-            bool visible = _viewModel.WindowVisible;
-            if (_uguiWindow != null) {
-                if (visible) {
-                    _uguiWindow.Show();
-                } else {
-                    _uguiWindow.Hide();
-                }
-            }
-            // Keep the toolbar button pressed state in sync, notably when visibility is driven
-            // programmatically (restore at scene load) rather than by a click on the button.
-            // SetTrue/SetFalse(false) : do not re-fire the toggle callbacks.
+        private void OnPopupOpenChanged() {
+            bool open = _popupController != null && _popupController.IsOpen;
+            // Keep the toolbar button pressed state in sync, notably when the change is driven by KSP
+            // (Escape) or by restore-at-load rather than by a click. SetTrue/SetFalse(false): do not
+            // re-fire the toggle callbacks.
             if (_toolbarButton != null) {
-                if (visible) {
+                if (open) {
                     _toolbarButton.SetTrue(false);
                 } else {
                     _toolbarButton.SetFalse(false);
                 }
             }
-            if (!visible) {
+            if (open) {
+                _viewModel.ForceReload();
+            } else {
                 _viewModel.CancelBookmarkCommentEdition();
             }
-        }
-
-        /// <summary>
-        /// La visibilité a changé : on mémorise l'état d'ouverture dans les réglages globaux.
-        /// </summary>
-        private void OnWindowVisibleChangedPersist() {
-            _settings.SetWindowVisible(_viewModel.WindowVisible);
-            _settings.Save();
-        }
-
-        /// <summary>
-        /// La fenêtre uGUI a été fermée par KSP (Échap…) : on rabat l'état partagé, ce qui relâche
-        /// le bouton du toolbar.
-        /// </summary>
-        private void OnUGUIWindowClosed() {
-            _viewModel.WindowVisible = false;
         }
 
         /// <summary>
@@ -161,7 +150,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 }
                 // The launcher may become ready after the window state was restored at scene load :
                 // press the button now to reflect an already-open window (false : no callback).
-                if (_toolbarButton != null && _viewModel != null && _viewModel.WindowVisible) {
+                if (_toolbarButton != null && _popupController != null && _popupController.IsOpen) {
                     _toolbarButton.SetTrue(false);
                 }
             }
@@ -179,12 +168,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         private void OnToggleOn() {
-            _viewModel.WindowVisible = true;
-            _viewModel.ForceReload();
+            if (_popupController != null) _popupController.Show();
         }
 
         private void OnToggleOff() {
-            _viewModel.WindowVisible = false;
+            if (_popupController != null) _popupController.Hide();
         }
     }
 }
