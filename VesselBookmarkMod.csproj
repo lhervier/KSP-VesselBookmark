@@ -78,23 +78,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Src/*.cs" />
-    <Compile Include="Src/bookmarks/*.cs" />
-    <Compile Include="Src/ui/*.cs" />
-    <Compile Include="Src/ui/styles/*.cs" />
-    <Compile Include="Src/ui/ugui/*.cs" />
-    <Compile Include="Src/ui/ugui/sprites/*.cs" />
-    <Compile Include="Src/ui/ugui/titleBar/*.cs" />
-    <Compile Include="Src/ui/ugui/body/*.cs" />
-    <Compile Include="Src/ui/ugui/body/list/*.cs" />
-    <Compile Include="Src/ui/ugui/footer/*.cs" />
-    <Compile Include="Src/ui/ugui/menu/*.cs" />
-    <Compile Include="Src/ui/ugui/overlays/*.cs" />
-    <Compile Include="Src/ui/ugui/overlays/editcomment/*.cs" />
-    <Compile Include="Src/ui/ugui/overlays/remove/*.cs" />
-    <Compile Include="Src/util/*.cs" />
-    <Compile Include="Src/ext/*.cs" />
-    <!-- Classes partagees (sous-module KSP-Shared) compilees dans la meme dll -->
+    <Compile Include="Src/**/*.cs" />
     <Compile Include="KSP-Shared/Src/**/*.cs" />
   </ItemGroup>
 

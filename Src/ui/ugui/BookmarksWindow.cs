@@ -20,12 +20,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
         private ModLogger LOGGER = new ModLogger("BookmarksWindow");
         private const string DIALOG_ID = "VesselBookmarksUGUI";
         
-        private PopupController _popup = null;
+        private PopupController _popupController = null;
         
         public EventVoid OnClosed = new EventVoid("Bookmarks.Window.OnClosed");
-
-        /// <summary>Émis avec la position (localPosition) de la fenêtre quand elle est capturée.</summary>
-        public EventData<Vector2> OnPositionCaptured = new EventData<Vector2>("Bookmarks.Window.OnPositionCaptured");
 
         private BookmarksViewModel _viewModel;
         public BookmarksWindow WithViewModel(BookmarksViewModel viewModel)
@@ -34,26 +31,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
             return this;
         }
 
-        /// <summary>Définit la position à restaurer (mémorisée entre sessions). Appliquée au prochain spawn.</summary>
-        private bool _hasPosition = false;
-        private Vector2 _position;
-        public BookmarksWindow WithPosition(Vector2 position)
-        {
-            _position = position;
-            _hasPosition = true;
-            return this;
-        }
-        public BookmarksWindow WithoutPosition()
-        {
-            _hasPosition = false;
-            return this;
-        }
-        
         public void Show()
         {
             // == null est sensible à la destruction Unity : après une fermeture par KSP (Échap), le
             // controller détruit vaut null ici, ce qui déclenche un nouveau spawn.
-            if (_popup == null)
+            if (_popupController == null)
             {
                 var popupBuilder = new PopupBuilder<TitleBarController, ContentController>()
                 .WithPopupID(DIALOG_ID)
@@ -65,12 +47,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
                     new ContentBuilder().WithViewModel(_viewModel)
                 )
                 .WithSize(new Vector2(VesselBookmarkPalette.WindowWidth, VesselBookmarkPalette.WindowHeight));
-                if (this._hasPosition)
-                {
-                    popupBuilder = popupBuilder.WithPosition(this._position);
-                }
-                _popup = popupBuilder.Build();
-                if (_popup == null)  {
+                _popupController = popupBuilder.Build();
+                if (_popupController == null)  {
                     LOGGER.LogError("Unable to create the main popup window");
                     return;
                 }
@@ -78,7 +56,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
                 // Filter menu + internal overlays, grafted on the window above the content and title bar. They
                 // self-manage their visibility through the ViewModel (FilterMenuOpen / EditingComment /
                 // PendingRemoval), so nothing else needs wiring here.
-                Transform windowTransform = _popup.GetGameObject().transform;
+                Transform windowTransform = _popupController.GetGameObject().transform;
 
                 new FilterMenuBuilder()
                     .WithViewModel(_viewModel)
@@ -95,39 +73,31 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
                     .WithParent(windowTransform)
                     .Build();
                     
-                _popup.OnClosed.Add(OnPopupClosed);
-                _popup.OnPositionCaptured.Add(OnPopupPositionCaptured);
+                _popupController.OnClosed.Add(OnPopupClosed);
             }
-            _popup.Show();
+            _popupController.Show();
         }
 
         public void Hide()
         {
-            if (_popup != null)
+            if (_popupController != null)
             {
-                _popup.Hide();
+                _popupController.Hide();
             }
         }
 
         public void Destroy()
         {
-            if (_popup != null)
+            if (_popupController != null)
             {
-                _popup.Dismiss();
-                _popup = null;
+                _popupController.Dismiss();
+                _popupController = null;
             }
         }
 
         private void OnPopupClosed()
         {
             OnClosed.Fire();
-        }
-
-        private void OnPopupPositionCaptured(Vector2 position)
-        {
-            _position = position;
-            _hasPosition = true;
-            OnPositionCaptured.Fire(position);
         }
     }
 }

@@ -1,8 +1,6 @@
 using System;
-using System.Globalization;
 using System.IO;
 using System.Reflection;
-using UnityEngine;
 using com.github.lhervier.ksp.shared;
 
 namespace com.github.lhervier.ksp.bookmarksmod {
@@ -16,15 +14,6 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         private static readonly ModLogger LOGGER = new ModLogger("BookmarksSettings");
 
         private const string ROOT_NODE = "VESSEL_BOOKMARKS_SETTINGS";
-
-        /// <summary>Position (localPosition) mémorisée de la fenêtre, si elle a déjà été capturée.</summary>
-        public bool HasWindowPosition { get; private set; }
-        public Vector2 WindowPosition { get; private set; }
-
-        public void SetWindowPosition(Vector2 position) {
-            WindowPosition = position;
-            HasWindowPosition = true;
-        }
 
         /// <summary>Memorized open/closed state of the window, if it has already been captured.</summary>
         public bool HasWindowVisible { get; private set; }
@@ -76,13 +65,6 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 if (node == null) {
                     return;
                 }
-                if (node.HasValue("windowX") && node.HasValue("windowY")
-                    && float.TryParse(node.GetValue("windowX"), NumberStyles.Float, CultureInfo.InvariantCulture, out float x)
-                    && float.TryParse(node.GetValue("windowY"), NumberStyles.Float, CultureInfo.InvariantCulture, out float y)) {
-                    WindowPosition = new Vector2(x, y);
-                    HasWindowPosition = true;
-                }
-
                 if (node.HasValue("windowVisible")
                     && bool.TryParse(node.GetValue("windowVisible"), out bool windowVisible)) {
                     WindowVisible = windowVisible;
@@ -109,10 +91,6 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             try {
                 var root = new ConfigNode();
                 ConfigNode node = root.AddNode(ROOT_NODE);
-                if (HasWindowPosition) {
-                    node.AddValue("windowX", WindowPosition.x.ToString(CultureInfo.InvariantCulture));
-                    node.AddValue("windowY", WindowPosition.y.ToString(CultureInfo.InvariantCulture));
-                }
                 if (HasWindowVisible) {
                     node.AddValue("windowVisible", WindowVisible.ToString());
                 }

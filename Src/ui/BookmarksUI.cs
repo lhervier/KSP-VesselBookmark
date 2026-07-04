@@ -45,15 +45,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _viewModel.OnFilterHasCommentChanged.Add(OnCriteriaChanged);
 
             _uguiWindow = new BookmarksWindow().WithViewModel(_viewModel);
-            if (_settings.HasWindowPosition) {
-                _uguiWindow.WithPosition(_settings.WindowPosition);
-            } 
-            else
-            {
-                _uguiWindow.WithoutPosition();
-            }
             _uguiWindow.OnClosed.Add(OnUGUIWindowClosed);
-            _uguiWindow.OnPositionCaptured.Add(OnWindowPositionCaptured);
             
             _viewModel.OnWindowVisibleChanged.Add(OnWindowVisibleChanged);
             _viewModel.OnWindowVisibleChanged.Add(OnWindowVisibleChangedPersist);
@@ -80,7 +72,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 this._viewModel.OnFilterHasCommentChanged.Remove(OnCriteriaChanged);
             }
             if( this._uguiWindow != null ) {
-                this._uguiWindow.OnPositionCaptured.Remove(OnWindowPositionCaptured);
                 this._uguiWindow.OnClosed.Remove(OnUGUIWindowClosed);
                 this._uguiWindow.Destroy();
                 this._uguiWindow = null;
@@ -133,14 +124,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         /// </summary>
         private void OnUGUIWindowClosed() {
             _viewModel.WindowVisible = false;
-        }
-
-        /// <summary>
-        /// La fenêtre a été déplacée/fermée : on mémorise sa position dans les réglages globaux.
-        /// </summary>
-        private void OnWindowPositionCaptured(Vector2 position) {
-            _settings.SetWindowPosition(position);
-            _settings.Save();
         }
 
         /// <summary>
