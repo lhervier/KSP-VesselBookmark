@@ -1,24 +1,34 @@
 using System;
 using UnityEngine;
 using com.github.lhervier.ksp.shared.ugui.popup;
+using com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar;
+using com.github.lhervier.ksp.shared;
+using com.github.lhervier.ksp.bookmarksmod.ui.styles;
+using com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu;
+using com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment;
+using com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
 {
     /// <summary>
-    /// Gère le cycle de vie de la fenêtre uGUI : spawn paresseux via ModPopupBuilder, show/hide,
+    /// Gère le cycle de vie de la fenêtre uGUI : spawn paresseux, show/hide,
     /// mémorisation de la position, et notification OnClosed. La mécanique bas niveau (PopupDialog,
     /// position, fermeture par Échap, changement de scène) est déléguée au PopupController partagé.
     /// </summary>
     public sealed class BookmarksWindow
     {
+        private ModLogger LOGGER = new ModLogger("BookmarksWindow");
+        private const string DIALOG_ID = "VesselBookmarksUGUI";
+        
         private PopupController _popup = null;
         private BookmarksViewModel _viewModel;
-        private Vector2? _savedPosition;
-
+        private bool _hasPosition = false;
+        private Vector2 _savedPosition;
+        
         public EventVoid OnClosed = new EventVoid("Bookmarks.Window.OnClosed");
 
         /// <summary>Émis avec la position (localPosition) de la fenêtre quand elle est capturée.</summary>
-        public Action<Vector2> OnPositionCaptured;
+        public EventData<Vector2> OnPositionCaptured = new EventData<Vector2>("Bookmarks.Window.OnPositionCaptured");
 
         public void Initialize(BookmarksViewModel viewModel)
         {
@@ -29,6 +39,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
         public void SetSavedPosition(Vector2 position)
         {
             _savedPosition = position;
+            _hasPosition = true;
         }
 
         public void Show()
@@ -37,13 +48,46 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
             // controller détruit vaut null ici, ce qui déclenche un nouveau spawn.
             if (_popup == null)
             {
-                var builder = new ModPopupBuilder().WithViewModel(_viewModel);
-                if (_savedPosition.HasValue)
+                var popupBuilder = new PopupBuilder<TitleBarController, ContentController>()
+                .WithPopupID(DIALOG_ID)
+                .WithTitle(ModLocalization.GetString("windowTitle"))
+                .WithTitleBarBuilder(
+                    new TitleBarBuilder().WithViewModel(_viewModel)
+                )
+                .WithContentBuilder(
+                    new ContentBuilder().WithViewModel(_viewModel)
+                )
+                .WithSize(new Vector2(VesselBookmarkPalette.WindowWidth, VesselBookmarkPalette.WindowHeight));
+                if (this._hasPosition)
                 {
-                    builder = builder.WithPosition(_savedPosition.Value);
+                    popupBuilder = popupBuilder.WithPosition(this._savedPosition);
                 }
-                _popup = builder.Build();
-                if (_popup == null) return;   // Spawn KSP échoué
+                _popup = popupBuilder.Build();
+                if (_popup == null)  {
+                    LOGGER.LogError("Unable to create the main popup window");
+                    return;
+                }
+
+                // Filter menu + internal overlays, grafted on the window above the content and title bar. They
+                // self-manage their visibility through the ViewModel (FilterMenuOpen / EditingComment /
+                // PendingRemoval), so nothing else needs wiring here.
+                Transform windowTransform = _popup.GetGameObject().transform;
+
+                new FilterMenuBuilder()
+                    .WithViewModel(_viewModel)
+                    .WithParent(windowTransform)
+                    .Build();
+
+                new EditCommentOverlayBuilder()
+                    .WithViewModel(_viewModel)
+                    .WithParent(windowTransform)
+                    .Build();
+
+                new RemoveConfirmOverlayBuilder()
+                    .WithViewModel(_viewModel)
+                    .WithParent(windowTransform)
+                    .Build();
+                    
                 _popup.OnClosed.Add(OnPopupClosed);
                 _popup.OnPositionCaptured.Add(OnPopupPositionCaptured);
             }
@@ -75,7 +119,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
         private void OnPopupPositionCaptured(Vector2 position)
         {
             _savedPosition = position;
-            OnPositionCaptured?.Invoke(position);
+            _hasPosition = true;
+            OnPositionCaptured.Fire(position);
         }
     }
 }

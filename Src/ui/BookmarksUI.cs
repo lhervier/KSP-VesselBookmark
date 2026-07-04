@@ -47,7 +47,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _uguiWindow = new BookmarksWindow();
             _uguiWindow.Initialize(_viewModel);
             _uguiWindow.OnClosed.Add(OnUGUIWindowClosed);
-            _uguiWindow.OnPositionCaptured = OnWindowPositionCaptured;
+            _uguiWindow.OnPositionCaptured.Add(OnWindowPositionCaptured);
             if (_settings.HasWindowPosition) {
                 _uguiWindow.SetSavedPosition(_settings.WindowPosition);
             }
@@ -76,6 +76,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 this._viewModel.OnFilterHasCommentChanged.Remove(OnCriteriaChanged);
             }
             if( this._uguiWindow != null ) {
+                this._uguiWindow.OnPositionCaptured.Remove(OnWindowPositionCaptured);
                 this._uguiWindow.OnClosed.Remove(OnUGUIWindowClosed);
                 this._uguiWindow.Destroy();
                 this._uguiWindow = null;
