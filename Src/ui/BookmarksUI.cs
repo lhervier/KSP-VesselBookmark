@@ -44,13 +44,17 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             _viewModel.OnSearchTextChanged.Add(OnCriteriaChanged);
             _viewModel.OnFilterHasCommentChanged.Add(OnCriteriaChanged);
 
-            _uguiWindow = new BookmarksWindow();
-            _uguiWindow.Initialize(_viewModel);
+            _uguiWindow = new BookmarksWindow().WithViewModel(_viewModel);
+            if (_settings.HasWindowPosition) {
+                _uguiWindow.WithPosition(_settings.WindowPosition);
+            } 
+            else
+            {
+                _uguiWindow.WithoutPosition();
+            }
             _uguiWindow.OnClosed.Add(OnUGUIWindowClosed);
             _uguiWindow.OnPositionCaptured.Add(OnWindowPositionCaptured);
-            if (_settings.HasWindowPosition) {
-                _uguiWindow.SetSavedPosition(_settings.WindowPosition);
-            }
+            
             _viewModel.OnWindowVisibleChanged.Add(OnWindowVisibleChanged);
             _viewModel.OnWindowVisibleChanged.Add(OnWindowVisibleChangedPersist);
 

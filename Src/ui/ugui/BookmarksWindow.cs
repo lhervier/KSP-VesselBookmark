@@ -21,27 +21,34 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
         private const string DIALOG_ID = "VesselBookmarksUGUI";
         
         private PopupController _popup = null;
-        private BookmarksViewModel _viewModel;
-        private bool _hasPosition = false;
-        private Vector2 _savedPosition;
         
         public EventVoid OnClosed = new EventVoid("Bookmarks.Window.OnClosed");
 
         /// <summary>Émis avec la position (localPosition) de la fenêtre quand elle est capturée.</summary>
         public EventData<Vector2> OnPositionCaptured = new EventData<Vector2>("Bookmarks.Window.OnPositionCaptured");
 
-        public void Initialize(BookmarksViewModel viewModel)
+        private BookmarksViewModel _viewModel;
+        public BookmarksWindow WithViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
+            return this;
         }
 
         /// <summary>Définit la position à restaurer (mémorisée entre sessions). Appliquée au prochain spawn.</summary>
-        public void SetSavedPosition(Vector2 position)
+        private bool _hasPosition = false;
+        private Vector2 _position;
+        public BookmarksWindow WithPosition(Vector2 position)
         {
-            _savedPosition = position;
+            _position = position;
             _hasPosition = true;
+            return this;
         }
-
+        public BookmarksWindow WithoutPosition()
+        {
+            _hasPosition = false;
+            return this;
+        }
+        
         public void Show()
         {
             // == null est sensible à la destruction Unity : après une fermeture par KSP (Échap), le
@@ -60,7 +67,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
                 .WithSize(new Vector2(VesselBookmarkPalette.WindowWidth, VesselBookmarkPalette.WindowHeight));
                 if (this._hasPosition)
                 {
-                    popupBuilder = popupBuilder.WithPosition(this._savedPosition);
+                    popupBuilder = popupBuilder.WithPosition(this._position);
                 }
                 _popup = popupBuilder.Build();
                 if (_popup == null)  {
@@ -118,7 +125,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
 
         private void OnPopupPositionCaptured(Vector2 position)
         {
-            _savedPosition = position;
+            _position = position;
             _hasPosition = true;
             OnPositionCaptured.Fire(position);
         }
