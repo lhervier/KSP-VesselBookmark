@@ -4,9 +4,7 @@ using com.github.lhervier.ksp.shared.ugui.popup;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
-using com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu;
-using com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment;
-using com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove;
+using com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
 {
@@ -37,7 +35,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
             // controller détruit vaut null ici, ce qui déclenche un nouveau spawn.
             if (_popupController == null)
             {
-                var popupBuilder = new PopupBuilder<TitleBarController, ContentController>()
+                var popupBuilder = new PopupBuilder<TitleBarController, ContentController, BookmarksOverlaysController>()
                 .WithPopupID(DIALOG_ID)
                 .WithTitle(ModLocalization.GetString("windowTitle"))
                 .WithTitleBarBuilder(
@@ -46,6 +44,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
                 .WithContentBuilder(
                     new ContentBuilder().WithViewModel(_viewModel)
                 )
+                .WithOverlayBuilder(
+                    new BookmarksOverlaysBuilder().WithViewModel(_viewModel)
+                )
                 .WithSize(new Vector2(VesselBookmarkPalette.WindowWidth, VesselBookmarkPalette.WindowHeight));
                 _popupController = popupBuilder.Build();
                 if (_popupController == null)  {
@@ -53,26 +54,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
                     return;
                 }
 
-                // Filter menu + internal overlays, grafted on the window above the content and title bar. They
-                // self-manage their visibility through the ViewModel (FilterMenuOpen / EditingComment /
-                // PendingRemoval), so nothing else needs wiring here.
-                Transform windowTransform = _popupController.GetGameObject().transform;
-
-                new FilterMenuBuilder()
-                    .WithViewModel(_viewModel)
-                    .WithParent(windowTransform)
-                    .Build();
-
-                new EditCommentOverlayBuilder()
-                    .WithViewModel(_viewModel)
-                    .WithParent(windowTransform)
-                    .Build();
-
-                new RemoveConfirmOverlayBuilder()
-                    .WithViewModel(_viewModel)
-                    .WithParent(windowTransform)
-                    .Build();
-                    
                 _popupController.OnClosed.Add(OnPopupClosed);
             }
             _popupController.Show();
