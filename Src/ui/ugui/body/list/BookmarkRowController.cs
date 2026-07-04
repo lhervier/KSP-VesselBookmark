@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using com.github.lhervier.ksp.shared.ugui.badge;
 using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
@@ -55,24 +56,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             return this;
         }
 
-        private GameObject _chip;
-        public BookmarkRowController WithChip(GameObject chip)
+        private BadgeController _chip;
+        public BookmarkRowController WithChip(BadgeController chip)
         {
             this._chip = chip;
-            return this;
-        }
-
-        private Image _chipImage;
-        public BookmarkRowController WithChipImage(Image chipImage)
-        {
-            this._chipImage = chipImage;
-            return this;
-        }
-
-        private TextMeshProUGUI _chipText;
-        public BookmarkRowController WithChipTextComponent(TextMeshProUGUI chipText)
-        {
-            this._chipText = chipText;
             return this;
         }
 
@@ -243,7 +230,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 DefaultPalette.AccentColor, DefaultPalette.AccentBgColor, DefaultPalette.AccentBorderColor);
             else if (target) SetChip(true, "chipTarget",
                 DefaultPalette.AccentColor, DefaultPalette.AccentBgColor, DefaultPalette.AccentBorderColor);
-            else _chip.SetActive(false);
+            else _chip.SetVisible(false);
 
             // Boutons d'ordre/suppression
             bool showButtons = hovered || selected || active;
@@ -254,11 +241,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 
         private void SetChip(bool show, string locKey, Color text, Color bg, Color border)
         {
-            if (!show) { _chip.SetActive(false); return; }
-            _chip.SetActive(true);
-            _chipText.text = ModLocalization.GetString(locKey);
-            _chipText.color = text;
-            _chipImage.sprite = SpritesGlobal.Border(bg, border, VesselBookmarkPalette.ChipBorderThickness);
+            if (!show) { _chip.SetVisible(false); return; }
+            _chip.SetVisible(true);
+            _chip.SetState(ModLocalization.GetString(locKey), text, bg, border);
         }
     }
 }

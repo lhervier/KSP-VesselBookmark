@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
+using com.github.lhervier.ksp.shared.ugui.badge;
 using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.shared.ugui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
@@ -51,7 +51,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             Transform right = rightColumnGo.transform;
 
             // "shown / total" count badge — first element of the right column
-            TextMeshProUGUI countLabel = BuildCountBadge(right);
+            BadgeController countBadge = BuildCountBadge(right);
 
             // "Add the active vessel" button
             ButtonController add = NewButton("Add", AddGlyph, _viewModel.CanAddVesselBookmark());
@@ -78,7 +78,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             return rightColumnGo
                 .AddComponent<TitleBarController>()
                 .WithViewModel(_viewModel)
-                .WithCountLabel(countLabel)
+                .WithCountBadge(countBadge)
                 .WithAddButtonController(add)
                 .WithFilterDot(
                     BuildFilterDot(menu.gameObject)
@@ -98,42 +98,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
                 .Build();
         }
 
-        // Chip: sliced accent-border Image + accent Text. Size driven by the content + padding
-        // (preferredSize reported by the HorizontalLayoutGroup to the parent layout).
-        private TextMeshProUGUI BuildCountBadge(Transform parent)
+        // "shown / total" accent count badge. Returns the badge so the controller keeps its text updated.
+        private BadgeController BuildCountBadge(Transform parent)
         {
-            var badgeGo = new GameObject("Count", typeof(RectTransform));
-            badgeGo.transform.SetParent(parent, false);
-
-            var image = badgeGo.AddComponent<Image>();
-            image.sprite = SpritesGlobal.Border(
-                DefaultPalette.AccentBgColor,
-                DefaultPalette.AccentBorderColor,
-                1);
-            image.type = Image.Type.Sliced;
-            image.color = Color.white;
-            image.raycastTarget = false;
-
-            var layout = badgeGo.AddComponent<HorizontalLayoutGroup>();
-            layout.padding = new RectOffset(
-                Mathf.RoundToInt(VesselBookmarkPalette.CountPaddingH),
-                Mathf.RoundToInt(VesselBookmarkPalette.CountPaddingH),
-                2, 2);
-            layout.spacing = 0f;
-            layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.childControlWidth = true;
-            layout.childControlHeight = true;
-            layout.childForceExpandWidth = false;
-            layout.childForceExpandHeight = false;
-
-            var labelGo = new GameObject("Label", typeof(RectTransform));
-            labelGo.transform.SetParent(badgeGo.transform, false);
-            var label = UGUILabels.AddLabel(labelGo);
-            label.fontSize = VesselBookmarkPalette.CountFontSize;
-            label.color = DefaultPalette.AccentColor;
-            label.alignment = TextAlignmentOptions.Center;
-
-            return label;
+            return new BadgeBuilder()
+                .WithParent(parent)
+                .WithObjectName("Count")
+                .WithFontSize(VesselBookmarkPalette.CountFontSize)
+                .WithPadding(VesselBookmarkPalette.CountPaddingH, 2)
+                .Build();
         }
 
         // Small green dot in the top-right corner of the ⋯ button, hidden by default.

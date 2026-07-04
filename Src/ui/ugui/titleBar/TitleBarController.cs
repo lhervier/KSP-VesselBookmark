@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
+using com.github.lhervier.ksp.shared.ugui.badge;
 using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
@@ -18,10 +18,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             return this;
         }
         
-        private TextMeshProUGUI _countLabel;
-        public TitleBarController WithCountLabel(TextMeshProUGUI label)
+        private BadgeController _countBadge;
+        public TitleBarController WithCountBadge(BadgeController badge)
         {
-            this._countLabel = label;
+            this._countBadge = badge;
             return this;
         }
         
@@ -76,8 +76,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
 
         private void UpdateCount()
         {
-            if (_countLabel == null) return;
-            _countLabel.text = $"{_viewModel.AvailableBookmarksCount} / {_viewModel.TotalBookmarksCount}";
+            if (_countBadge == null) return;
+            _countBadge.SetText($"{_viewModel.AvailableBookmarksCount} / {_viewModel.TotalBookmarksCount}");
         }
 
         private void UpdateAddButton()

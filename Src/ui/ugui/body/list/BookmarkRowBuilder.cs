@@ -7,6 +7,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui;
+using com.github.lhervier.ksp.shared.ugui.badge;
 using com.github.lhervier.ksp.shared.ugui.sprites;
 using com.github.lhervier.ksp.shared.ugui.styles;
 
@@ -134,7 +135,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             name.enableWordWrapping = true;
 
             // Pastille d'état (Actif / Cible / Disparu) — créée, affichée selon l'état dans Refresh()
-            GameObject chip = BuildChip(line1.transform, out Image chipImage, out TextMeshProUGUI chipText);
+            BadgeController chip = BuildChip(line1.transform);
 
             // Boutons ▲ ▼ ✕ (révélés au survol / sélection)
             CanvasGroup rowButtonsGroup = BuildRowButtons(
@@ -187,8 +188,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 .WithAccentBar(accentBar)
                 .WithNameComponent(name)
                 .WithChip(chip)
-                .WithChipImage(chipImage)
-                .WithChipTextComponent(chipText)
                 .WithRowButtons(rowButtonsGroup)
                 .WithVesselExists(vesselExists)
                 .WithPointerHandler(pointer)
@@ -283,37 +282,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             Tooltips.Attach(go, ModLocalization.GetString("tooltipAlarm"));
         }
 
-        private GameObject BuildChip(Transform parent, out Image chipImage, out TextMeshProUGUI chipText)
+        // Status chip, hidden by default. Refresh() shows it and sets its state
+        // (Active / Target / Missing) through the BadgeController.
+        private BadgeController BuildChip(Transform parent)
         {
-            var chipGo = new GameObject("Chip", typeof(RectTransform));
-            chipGo.transform.SetParent(parent, false);
-
-            chipImage = chipGo.AddComponent<Image>();
-            chipImage.sprite = SpritesGlobal.Border(DefaultPalette.AccentBgColor, DefaultPalette.AccentBorderColor, VesselBookmarkPalette.ChipBorderThickness);
-            chipImage.type = Image.Type.Sliced;
-            chipImage.color = Color.white;
-            chipImage.raycastTarget = false;
-
-            var layout = chipGo.AddComponent<HorizontalLayoutGroup>();
-            layout.padding = new RectOffset(
-                Mathf.RoundToInt(VesselBookmarkPalette.ChipPaddingH),
-                Mathf.RoundToInt(VesselBookmarkPalette.ChipPaddingH),
-                1, 1);
-            layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.childControlWidth = true;
-            layout.childControlHeight = true;
-            layout.childForceExpandWidth = false;
-            layout.childForceExpandHeight = false;
-
-            var labelGo = new GameObject("Label", typeof(RectTransform));
-            labelGo.transform.SetParent(chipGo.transform, false);
-            chipText = UGUILabels.AddLabel(labelGo);
-            chipText.fontSize = VesselBookmarkPalette.ChipFontSize;
-            chipText.color = DefaultPalette.AccentColor;
-            chipText.alignment = TextAlignmentOptions.Center;
-
-            chipGo.SetActive(false);
-            return chipGo;
+            return new BadgeBuilder()
+                .WithParent(parent)
+                .WithObjectName("Chip")
+                .WithFontSize(VesselBookmarkPalette.ChipFontSize)
+                .WithBorderThickness(VesselBookmarkPalette.ChipBorderThickness)
+                .WithPadding(VesselBookmarkPalette.ChipPaddingH, 1)
+                .WithVisible(false)
+                .Build();
         }
 
         private CanvasGroup BuildRowButtons(
