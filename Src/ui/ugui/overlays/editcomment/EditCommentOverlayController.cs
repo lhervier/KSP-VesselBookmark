@@ -2,7 +2,7 @@ using UnityEngine;
 using TMPro;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.shared.ugui.button;
-using com.github.lhervier.ksp.shared.ugui.internalpopup;
+using com.github.lhervier.ksp.shared.ugui.popin;
 using com.github.lhervier.ksp.shared.ugui.textfield;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
@@ -21,8 +21,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             return this;
         }
 
-        private InternalPopupController _popup;
-        public EditCommentOverlayController WithPopupController(InternalPopupController popup)
+        private PopinController _popup;
+        public EditCommentOverlayController WithPopupController(PopinController popup)
         {
             this._popup = popup;
             return this;

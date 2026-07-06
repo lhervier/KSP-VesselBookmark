@@ -2,7 +2,7 @@ using UnityEngine;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui;
-using com.github.lhervier.ksp.shared.ugui.internalpopup;
+using com.github.lhervier.ksp.shared.ugui.popin;
 using com.github.lhervier.ksp.shared.ugui.styles;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
@@ -37,14 +37,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
 
         public EditCommentOverlayController Build()
         {
-            var popupBuilder = new InternalPopupBuilder<EditCommentContentController, EditCommentFooterController>()
+            var popupBuilder = new PopinBuilder<EditCommentContentController, EditCommentFooterController>()
                 .WithParent(_parent)
                 .WithTitle(ModLocalization.GetString("editWindowTitle"))
                 .WithTitleColor(DefaultPalette.AccentColor)
                 .WithContentBuilder(new EditCommentContentBuilder())
                 .WithFooterBuilder(new EditCommentFooterBuilder());
 
-            InternalPopupController popup = popupBuilder.Build();
+            PopinController popup = popupBuilder.Build();
             EditCommentContentController content = popupBuilder.ContentController;
             EditCommentFooterController footer = popupBuilder.FooterController;
 
