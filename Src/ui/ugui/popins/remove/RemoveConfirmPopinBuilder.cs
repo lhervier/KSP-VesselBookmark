@@ -34,7 +34,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.popins.remove
                 .WithParent(_parent)
                 .WithTitle(ModLocalization.GetString("dialogRemoveTitle"))
                 .WithTitleColor(DefaultPalette.DangerColor)
-                .WithCancelLabel(ModLocalization.GetString("dialogButtonCancel"))
+                // Cancel label left unset on purpose: inherits the shared "commonCancel" default.
                 .WithOkLabel(ModLocalization.GetString("dialogButtonRemove"))
                 .WithOkStyle(PopinButtonStyle.Alert)
                 .Build();
