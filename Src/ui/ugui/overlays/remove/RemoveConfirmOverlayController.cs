@@ -2,15 +2,15 @@ using UnityEngine;
 using TMPro;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.shared;
-using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.shared.ugui.popin;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
 {
     /// <summary>
-    /// Orchestrates the remove-confirmation internal popup: shows/closes it on ViewModel.PendingRemoval,
-    /// fills the message with the pending bookmark's name, and wires the footer buttons (Remove / Cancel).
-    /// Lives on the popup's always-active root so its lifecycle runs even while the popup is closed.
+    /// Orchestrates the remove-confirmation internal popup: shows/closes it on ViewModel.PendingRemoval and
+    /// fills the message with the pending bookmark's name. The footer buttons are wired to the ViewModel by
+    /// the shared button bar. Lives on the popup's always-active root so its lifecycle runs even while the
+    /// popup is closed.
     /// </summary>
     public class RemoveConfirmOverlayController : MonoBehaviour
     {
@@ -35,46 +35,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
             return this;
         }
 
-        private ButtonController _cancelButtonController;
-        public RemoveConfirmOverlayController WithCancelButtonController(ButtonController cancelButtonController)
-        {
-            _cancelButtonController = cancelButtonController;
-            return this;
-        }
-
-        private ButtonController _removeButtonController;
-        public RemoveConfirmOverlayController WithRemoveButtonController(ButtonController removeButtonController)
-        {
-            _removeButtonController = removeButtonController;
-            return this;
-        }
-
         public void Start()
         {
             _viewModel.OnPendingRemovalChanged.Add(OnPendingRemovalChanged);
             OnPendingRemovalChanged();
-
-            if( _cancelButtonController != null )
-            {
-                _cancelButtonController.OnClick.Add(_viewModel.CancelPendingRemoval);
-            }
-            if( _removeButtonController != null )
-            {
-                _removeButtonController.OnClick.Add(_viewModel.ConfirmPendingRemoval);
-            }
         }
 
         public void OnDestroy()
         {
-            if( _removeButtonController != null )
-            {
-                _removeButtonController.OnClick.Remove(_viewModel.ConfirmPendingRemoval);
-            }
-            if( _cancelButtonController != null )
-            {
-                _cancelButtonController.OnClick.Remove(_viewModel.CancelPendingRemoval);
-            }
-
             _viewModel?.OnPendingRemovalChanged.Remove(OnPendingRemovalChanged);
         }
 

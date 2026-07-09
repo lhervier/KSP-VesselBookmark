@@ -29,25 +29,25 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
 
         public RemoveConfirmOverlayController Build()
         {
-            var popupBuilder = new PopinBuilder<RemoveConfirmContentController, RemoveConfirmFooterController>()
+            // The footer is a declared button bar; its clicks are wired to the ViewModel by the shared
+            // PopinButtonBarController, so the orchestrator only drives show/close and the message.
+            var popupBuilder = new ButtonBarPopinBuilder<RemoveConfirmContentController>()
                 .WithParent(_parent)
                 .WithTitle(ModLocalization.GetString("dialogRemoveTitle"))
                 .WithTitleColor(DefaultPalette.DangerColor)
                 .WithContentBuilder(new RemoveConfirmContentBuilder())
-                .WithFooterBuilder(new RemoveConfirmFooterBuilder());
+                .WithButton(ModLocalization.GetString("dialogButtonCancel"), _viewModel.CancelPendingRemoval)
+                .WithButton(ModLocalization.GetString("dialogButtonRemove"), _viewModel.ConfirmPendingRemoval, PopinButtonStyle.Alert);
 
             PopinController popup = popupBuilder.Build();
             RemoveConfirmContentController content = popupBuilder.ContentController;
-            RemoveConfirmFooterController footer = popupBuilder.FooterController;
 
             // The orchestrator lives on the popup's always-active root.
             return popup.gameObject
                 .AddComponent<RemoveConfirmOverlayController>()
                 .WithViewModel(_viewModel)
                 .WithPopupController(popup)
-                .WithMessageComponent(content.GetMessage())
-                .WithCancelButtonController(footer.GetCancelButtonController())
-                .WithRemoveButtonController(footer.GetRemoveButtonController());
+                .WithMessageComponent(content.GetMessage());
         }
     }
 }

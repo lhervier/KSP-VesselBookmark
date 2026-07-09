@@ -37,16 +37,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
 
         public EditCommentOverlayController Build()
         {
-            var popupBuilder = new PopinBuilder<EditCommentContentController, EditCommentFooterController>()
+            // The footer is a declared button bar; its clicks are wired to the ViewModel by the shared
+            // PopinButtonBarController, so the orchestrator only drives show/close and the content binding.
+            var popupBuilder = new ButtonBarPopinBuilder<EditCommentContentController>()
                 .WithParent(_parent)
                 .WithTitle(ModLocalization.GetString("editWindowTitle"))
                 .WithTitleColor(DefaultPalette.AccentColor)
                 .WithContentBuilder(new EditCommentContentBuilder())
-                .WithFooterBuilder(new EditCommentFooterBuilder());
+                .WithButton(ModLocalization.GetString("buttonCancel"), _viewModel.CancelBookmarkCommentEdition)
+                .WithButton(ModLocalization.GetString("buttonSave"), _viewModel.SaveBookmarkComment, PopinButtonStyle.Confirm);
 
             PopinController popup = popupBuilder.Build();
             EditCommentContentController content = popupBuilder.ContentController;
-            EditCommentFooterController footer = popupBuilder.FooterController;
 
             // The orchestrator lives on the popup's always-active root.
             return popup.gameObject
@@ -54,9 +56,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
                 .WithViewModel(_viewModel)
                 .WithPopupController(popup)
                 .WithSubComponent(content.GetSub())
-                .WithTextFieldController(content.GetTextFieldController())
-                .WithCancelButtonController(footer.GetCancelButtonController())
-                .WithOkButtonController(footer.GetOkButtonController());
+                .WithTextFieldController(content.GetTextFieldController());
         }
     }
 }

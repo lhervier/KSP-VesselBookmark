@@ -1,16 +1,16 @@
 using UnityEngine;
 using TMPro;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
-using com.github.lhervier.ksp.shared.ugui.button;
 using com.github.lhervier.ksp.shared.ugui.popin;
 using com.github.lhervier.ksp.shared.ugui.textfield;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
 {
     /// <summary>
-    /// Orchestrates the edit-comment internal popup: shows/closes it on ViewModel.EditingComment, binds
-    /// the text area to ViewModel.Comment, and wires the footer buttons (Save / Cancel). Lives on the
-    /// popup's always-active root so its lifecycle runs even while the popup is closed.
+    /// Orchestrates the edit-comment internal popup: shows/closes it on ViewModel.EditingComment and binds
+    /// the text area to ViewModel.Comment. The footer buttons (Save / Cancel) are wired to the ViewModel by
+    /// the shared button bar. Lives on the popup's always-active root so its lifecycle runs even while the
+    /// popup is closed.
     /// </summary>
     public class EditCommentOverlayController : MonoBehaviour
     {
@@ -42,20 +42,6 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             return this;
         }
 
-        private ButtonController _cancelButtonController;
-        public EditCommentOverlayController WithCancelButtonController(ButtonController cancelButtonController)
-        {
-            this._cancelButtonController = cancelButtonController;
-            return this;
-        }
-
-        private ButtonController _okButtonController;
-        public EditCommentOverlayController WithOkButtonController(ButtonController okButtonController)
-        {
-            this._okButtonController = okButtonController;
-            return this;
-        }
-
         public void Start()
         {
             _viewModel.OnEditingCommentChanged.Add(OnEditingCommentChanged);
@@ -65,26 +51,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
             {
                 _textFieldController.OnValueChanged.Add(OnInputChanged);
             }
-            if( _cancelButtonController != null )
-            {
-                _cancelButtonController.OnClick.Add(_viewModel.CancelBookmarkCommentEdition);
-            }
-            if( _okButtonController != null )
-            {
-                _okButtonController.OnClick.Add(_viewModel.SaveBookmarkComment);
-            }
         }
 
         public void OnDestroy()
         {
-            if( _okButtonController != null )
-            {
-                _okButtonController.OnClick.Remove(_viewModel.SaveBookmarkComment);
-            }
-            if( _cancelButtonController != null )
-            {
-                _cancelButtonController.OnClick.Remove(_viewModel.CancelBookmarkCommentEdition);
-            }
             if( _textFieldController != null )
             {
                 _textFieldController.OnValueChanged.Remove(OnInputChanged);
