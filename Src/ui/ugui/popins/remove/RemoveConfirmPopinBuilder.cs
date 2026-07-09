@@ -8,8 +8,8 @@ using com.github.lhervier.ksp.shared.ugui.styles;
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.popins.remove
 {
     /// <summary>
-    /// Assembles the remove-confirmation internal popup: title + message content + Cancel/Remove footer,
-    /// driven by an orchestrator bound to ViewModel.PendingRemoval.
+    /// Assembles the remove-confirmation internal popup: a shared <see cref="ConfirmPopinBuilder"/> (danger
+    /// title + Cancel/Remove footer), driven by an orchestrator bound to ViewModel.OnRemovalRequested.
     /// </summary>
     public class RemoveConfirmPopinBuilder : IUGUIBuilder<RemoveConfirmPopinController>
     {
@@ -29,25 +29,21 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.popins.remove
 
         public RemoveConfirmPopinController Build()
         {
-            // The footer is a declared button bar; its clicks are wired to the ViewModel by the shared
-            // PopinButtonBarController, so the orchestrator only drives show/close and the message.
-            var popupBuilder = new ButtonBarPopinBuilder<RemoveConfirmContentController>()
+            // The confirm popin owns its message and OK action; the orchestrator (re)fills them per request.
+            ConfirmPopinController confirm = new ConfirmPopinBuilder()
                 .WithParent(_parent)
                 .WithTitle(ModLocalization.GetString("dialogRemoveTitle"))
                 .WithTitleColor(DefaultPalette.DangerColor)
-                .WithContentBuilder(new RemoveConfirmContentBuilder())
-                .WithButton(ModLocalization.GetString("dialogButtonCancel"), _viewModel.CancelPendingRemoval)
-                .WithButton(ModLocalization.GetString("dialogButtonRemove"), _viewModel.ConfirmPendingRemoval, PopinButtonStyle.Alert);
-
-            PopinController popup = popupBuilder.Build();
-            RemoveConfirmContentController content = popupBuilder.ContentController;
+                .WithCancelLabel(ModLocalization.GetString("dialogButtonCancel"))
+                .WithOkLabel(ModLocalization.GetString("dialogButtonRemove"))
+                .WithOkStyle(PopinButtonStyle.Alert)
+                .Build();
 
             // The orchestrator lives on the popup's always-active root.
-            return popup.gameObject
+            return confirm.gameObject
                 .AddComponent<RemoveConfirmPopinController>()
                 .WithViewModel(_viewModel)
-                .WithPopupController(popup)
-                .WithMessageComponent(content.GetMessage());
+                .WithConfirmPopin(confirm);
         }
     }
 }

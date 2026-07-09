@@ -1,5 +1,4 @@
 using UnityEngine;
-using TMPro;
 using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui.popin;
@@ -7,10 +6,9 @@ using com.github.lhervier.ksp.shared.ugui.popin;
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.popins.remove
 {
     /// <summary>
-    /// Orchestrates the remove-confirmation internal popup: shows/closes it on ViewModel.PendingRemoval and
-    /// fills the message with the pending bookmark's name. The footer buttons are wired to the ViewModel by
-    /// the shared button bar. Lives on the popup's always-active root so its lifecycle runs even while the
-    /// popup is closed.
+    /// Orchestrates the remove-confirmation internal popup: on ViewModel.OnRemovalRequested, fills the
+    /// shared confirm popin with the bookmark's name, wires its OK action to remove that bookmark, and shows
+    /// it. Lives on the popup's always-active root so its lifecycle runs even while the popup is closed.
     /// </summary>
     public class RemoveConfirmPopinController : MonoBehaviour
     {
@@ -21,46 +19,28 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.popins.remove
             return this;
         }
 
-        private PopinController _popup;
-        public RemoveConfirmPopinController WithPopupController(PopinController popup)
+        private ConfirmPopinController _confirm;
+        public RemoveConfirmPopinController WithConfirmPopin(ConfirmPopinController confirm)
         {
-            this._popup = popup;
-            return this;
-        }
-
-        private TextMeshProUGUI _message;
-        public RemoveConfirmPopinController WithMessageComponent(TextMeshProUGUI message)
-        {
-            this._message = message;
+            this._confirm = confirm;
             return this;
         }
 
         public void Start()
         {
-            _viewModel.OnPendingRemovalChanged.Add(OnPendingRemovalChanged);
-            OnPendingRemovalChanged();
+            _viewModel.OnRemovalRequested.Add(OnRemovalRequested);
         }
 
         public void OnDestroy()
         {
-            _viewModel?.OnPendingRemovalChanged.Remove(OnPendingRemovalChanged);
+            _viewModel?.OnRemovalRequested.Remove(OnRemovalRequested);
         }
 
-        private void OnPendingRemovalChanged()
+        private void OnRemovalRequested(Bookmark bookmark)
         {
-            Bookmark pending = _viewModel.PendingRemoval;
-            if (pending != null)
-            {
-                if (_message != null)
-                {
-                    _message.text = ModLocalization.GetString("dialogRemoveMessageWithName", pending.BookmarkTitle);
-                }
-                _popup?.Show();
-            }
-            else
-            {
-                _popup?.Close();
-            }
+            _confirm.SetMessage(ModLocalization.GetString("dialogRemoveMessageWithName", bookmark.BookmarkTitle));
+            _confirm.SetOkAction(() => _viewModel.Remove(bookmark));
+            _confirm.Show();
         }
     }
 }

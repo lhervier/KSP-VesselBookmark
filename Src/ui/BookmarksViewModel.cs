@@ -299,19 +299,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public readonly EventVoid OnEditingCommentChanged = new EventVoid("BookmarksViewModel.OnEditingCommentChanged");
 
         /// <summary>
-        /// The bookmark whose removal is awaiting confirmation (drives the removal popin). Null if none.
+        /// Raised when the user asks to remove a bookmark. Carries that bookmark. The removal-confirmation
+        /// popin listens to it; the ViewModel only relays the request and never tracks its outcome.
         /// </summary>
-        public Bookmark PendingRemoval
-        {
-            get => _pendingRemoval;
-            set {
-                if( _pendingRemoval == value ) return;
-                _pendingRemoval = value;
-                OnPendingRemovalChanged.Fire();
-            }
-        }
-        private Bookmark _pendingRemoval = null;
-        public readonly EventVoid OnPendingRemovalChanged = new EventVoid("BookmarksViewModel.OnPendingRemovalChanged");
+        public readonly EventData<Bookmark> OnRemovalRequested = new EventData<Bookmark>("BookmarksViewModel.OnRemovalRequested");
 
         // =============================================================
         // Live game state (active vessel / target highlighting)
@@ -952,28 +943,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         // ======================================================================
 
         /// <summary>
-        /// Ask to remove the given bookmark: opens the confirmation popin.
+        /// Ask to remove the given bookmark. Relays the request to the confirmation popin; the actual
+        /// removal happens later through <see cref="Remove"/> if the user confirms.
         /// </summary>
-        /// <param name="bookmark">The bookmark to remove</param>
+        /// <param name="bookmark">The bookmark the user wants to remove</param>
         public void RequestRemoval(Bookmark bookmark) {
-            PendingRemoval = bookmark;
-        }
-
-        /// <summary>
-        /// Confirm the pending removal: actually removes the bookmark and closes the popin.
-        /// </summary>
-        public void ConfirmPendingRemoval() {
-            Bookmark bookmark = PendingRemoval;
-            PendingRemoval = null;
-            if( bookmark == null ) return;
-            Remove(bookmark);
-        }
-
-        /// <summary>
-        /// Cancel the pending removal: closes the popin without removing anything.
-        /// </summary>
-        public void CancelPendingRemoval() {
-            PendingRemoval = null;
+            OnRemovalRequested.Fire(bookmark);
         }
     }
 }

@@ -8,8 +8,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.popins
 {
     /// <summary>
     /// Builds the bookmarks window popins (filter menu + edit-comment and remove-confirm internal popups)
-    /// as siblings of the content and title bar. Each self-manages its visibility through the ViewModel
-    /// (FilterMenuOpen / EditingComment / PendingRemoval), so nothing needs wiring after Build.
+    /// as siblings of the content and title bar. The filter menu and edit-comment popins self-manage their
+    /// visibility through the ViewModel (FilterMenuOpen / EditingComment); the remove-confirm popin opens on
+    /// the ViewModel.OnRemovalRequested event. Nothing needs wiring after Build.
     /// </summary>
     public sealed class BookmarksPopinsBuilder : IUGUIBuilder<BookmarksPopinsController>
     {
