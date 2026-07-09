@@ -2,6 +2,5 @@
 # Thin wrapper: delegates to the shared generic build in KSP-Shared/tools.
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
-export MOD_NAME="VesselBookmarkMod"
-export MOD_SLN="VesselBookmark.sln"
+export MOD_CSPROJ="VesselBookmarkMod.csproj"
 exec bash KSP-Shared/tools/build.sh

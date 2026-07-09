@@ -1,6 +1,5 @@
 using System.Reflection;
 
-[assembly: AssemblyTitle("VesselBookmarkMod")]
 [assembly: AssemblyDescription("Mod for KSP to add bookmarks to vessels")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
