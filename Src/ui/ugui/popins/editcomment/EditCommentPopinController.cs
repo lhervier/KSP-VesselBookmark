@@ -4,7 +4,7 @@ using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.shared.ugui.popin;
 using com.github.lhervier.ksp.shared.ugui.textfield;
 
-namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
+namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.popins.editcomment
 {
     /// <summary>
     /// Orchestrates the edit-comment internal popup: shows/closes it on ViewModel.EditingComment and binds
@@ -12,31 +12,31 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
     /// the shared button bar. Lives on the popup's always-active root so its lifecycle runs even while the
     /// popup is closed.
     /// </summary>
-    public class EditCommentOverlayController : MonoBehaviour
+    public class EditCommentPopinController : MonoBehaviour
     {
         private BookmarksViewModel _viewModel;
-        public EditCommentOverlayController WithViewModel(BookmarksViewModel viewModel)
+        public EditCommentPopinController WithViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
             return this;
         }
 
         private PopinController _popup;
-        public EditCommentOverlayController WithPopupController(PopinController popup)
+        public EditCommentPopinController WithPopupController(PopinController popup)
         {
             this._popup = popup;
             return this;
         }
 
         private TextMeshProUGUI _sub;
-        public EditCommentOverlayController WithSubComponent(TextMeshProUGUI sub)
+        public EditCommentPopinController WithSubComponent(TextMeshProUGUI sub)
         {
             this._sub = sub;
             return this;
         }
 
         private TextFieldController _textFieldController;
-        public EditCommentOverlayController WithTextFieldController(TextFieldController textFieldController)
+        public EditCommentPopinController WithTextFieldController(TextFieldController textFieldController)
         {
             this._textFieldController = textFieldController;
             return this;

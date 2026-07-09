@@ -4,7 +4,7 @@ using com.github.lhervier.ksp.bookmarksmod.bookmarks;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui.popin;
 
-namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
+namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.popins.remove
 {
     /// <summary>
     /// Orchestrates the remove-confirmation internal popup: shows/closes it on ViewModel.PendingRemoval and
@@ -12,24 +12,24 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
     /// the shared button bar. Lives on the popup's always-active root so its lifecycle runs even while the
     /// popup is closed.
     /// </summary>
-    public class RemoveConfirmOverlayController : MonoBehaviour
+    public class RemoveConfirmPopinController : MonoBehaviour
     {
         private BookmarksViewModel _viewModel;
-        public RemoveConfirmOverlayController WithViewModel(BookmarksViewModel viewModel)
+        public RemoveConfirmPopinController WithViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
             return this;
         }
 
         private PopinController _popup;
-        public RemoveConfirmOverlayController WithPopupController(PopinController popup)
+        public RemoveConfirmPopinController WithPopupController(PopinController popup)
         {
             this._popup = popup;
             return this;
         }
 
         private TextMeshProUGUI _message;
-        public RemoveConfirmOverlayController WithMessageComponent(TextMeshProUGUI message)
+        public RemoveConfirmPopinController WithMessageComponent(TextMeshProUGUI message)
         {
             this._message = message;
             return this;

@@ -5,7 +5,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.shared.ugui;
 using com.github.lhervier.ksp.shared.ugui.textfield;
 
-namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
+namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.popins.editcomment
 {
     /// <summary>
     /// Builds the content of the edit-comment internal popup: a subtitle (the bookmark title) above a

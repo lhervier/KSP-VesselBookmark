@@ -284,7 +284,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public readonly EventVoid OnFilterMenuOpenChanged = new EventVoid("BookmarksViewModel.OnFilterMenuOpenChanged");
 
         /// <summary>
-        /// Whether the comment edition overlay is open.
+        /// Whether the comment edition popin is open.
         /// </summary>
         public bool EditingComment
         {
@@ -299,7 +299,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public readonly EventVoid OnEditingCommentChanged = new EventVoid("BookmarksViewModel.OnEditingCommentChanged");
 
         /// <summary>
-        /// The bookmark whose removal is awaiting confirmation (drives the removal overlay). Null if none.
+        /// The bookmark whose removal is awaiting confirmation (drives the removal popin). Null if none.
         /// </summary>
         public Bookmark PendingRemoval
         {
@@ -871,7 +871,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         /// <summary>
-        /// Begin editing the selected bookmark's comment (opens the edition overlay).
+        /// Begin editing the selected bookmark's comment (opens the edition popin).
         /// The Comment buffer is already kept in sync with the selection (see _onSelectedBookmarkChanged).
         /// </summary>
         public void BeginCommentEdition()
@@ -881,7 +881,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         /// <summary>
-        /// Update the comment of the current bookmark, then close the edition overlay.
+        /// Update the comment of the current bookmark, then close the edition popin.
         /// </summary>
         public void SaveBookmarkComment()
         {
@@ -892,7 +892,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         /// <summary>
-        /// Discard comment edits (restore the buffer from the bookmark), then close the edition overlay.
+        /// Discard comment edits (restore the buffer from the bookmark), then close the edition popin.
         /// </summary>
         public void CancelBookmarkCommentEdition()
         {
@@ -948,11 +948,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         // ======================================================================
-        //  Removal confirmation flow (drives the removal overlay)
+        //  Removal confirmation flow (drives the removal popin)
         // ======================================================================
 
         /// <summary>
-        /// Ask to remove the given bookmark: opens the confirmation overlay.
+        /// Ask to remove the given bookmark: opens the confirmation popin.
         /// </summary>
         /// <param name="bookmark">The bookmark to remove</param>
         public void RequestRemoval(Bookmark bookmark) {
@@ -960,7 +960,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         /// <summary>
-        /// Confirm the pending removal: actually removes the bookmark and closes the overlay.
+        /// Confirm the pending removal: actually removes the bookmark and closes the popin.
         /// </summary>
         public void ConfirmPendingRemoval() {
             Bookmark bookmark = PendingRemoval;
@@ -970,7 +970,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         /// <summary>
-        /// Cancel the pending removal: closes the overlay without removing anything.
+        /// Cancel the pending removal: closes the popin without removing anything.
         /// </summary>
         public void CancelPendingRemoval() {
             PendingRemoval = null;

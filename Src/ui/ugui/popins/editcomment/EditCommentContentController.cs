@@ -2,11 +2,11 @@ using UnityEngine;
 using TMPro;
 using com.github.lhervier.ksp.shared.ugui.textfield;
 
-namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
+namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.popins.editcomment
 {
     /// <summary>
     /// Holds the edit-comment popup content widgets (the bookmark subtitle and the comment text area)
-    /// so the overlay orchestrator can bind them to the ViewModel.
+    /// so the popin orchestrator can bind them to the ViewModel.
     /// </summary>
     public class EditCommentContentController : MonoBehaviour
     {

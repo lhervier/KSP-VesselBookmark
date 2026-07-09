@@ -170,7 +170,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         public static readonly Color FooterSelColor = Rgb(119, 119, 119);      // #777
         
         // ==============================================================
-        // Overlays internes (édition commentaire + confirmation suppression)
+        // Internal popins (comment edition + removal confirmation)
         // ==============================================================
         
         public const int CardSubFontSize = 11;

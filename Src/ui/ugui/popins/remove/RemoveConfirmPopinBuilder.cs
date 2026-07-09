@@ -5,29 +5,29 @@ using com.github.lhervier.ksp.shared.ugui;
 using com.github.lhervier.ksp.shared.ugui.popin;
 using com.github.lhervier.ksp.shared.ugui.styles;
 
-namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
+namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.popins.remove
 {
     /// <summary>
     /// Assembles the remove-confirmation internal popup: title + message content + Cancel/Remove footer,
     /// driven by an orchestrator bound to ViewModel.PendingRemoval.
     /// </summary>
-    public class RemoveConfirmOverlayBuilder : IUGUIBuilder<RemoveConfirmOverlayController>
+    public class RemoveConfirmPopinBuilder : IUGUIBuilder<RemoveConfirmPopinController>
     {
         private BookmarksViewModel _viewModel;
-        public RemoveConfirmOverlayBuilder WithViewModel(BookmarksViewModel viewModel)
+        public RemoveConfirmPopinBuilder WithViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
             return this;
         }
 
         private Transform _parent;
-        public RemoveConfirmOverlayBuilder WithParent(Transform parent)
+        public RemoveConfirmPopinBuilder WithParent(Transform parent)
         {
             this._parent = parent;
             return this;
         }
 
-        public RemoveConfirmOverlayController Build()
+        public RemoveConfirmPopinController Build()
         {
             // The footer is a declared button bar; its clicks are wired to the ViewModel by the shared
             // PopinButtonBarController, so the orchestrator only drives show/close and the message.
@@ -44,7 +44,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
 
             // The orchestrator lives on the popup's always-active root.
             return popup.gameObject
-                .AddComponent<RemoveConfirmOverlayController>()
+                .AddComponent<RemoveConfirmPopinController>()
                 .WithViewModel(_viewModel)
                 .WithPopupController(popup)
                 .WithMessageComponent(content.GetMessage());

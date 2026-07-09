@@ -1,10 +1,10 @@
 using UnityEngine;
 using TMPro;
 
-namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
+namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.popins.remove
 {
     /// <summary>
-    /// Holds the remove-confirmation popup message label so the overlay orchestrator can fill it with
+    /// Holds the remove-confirmation popup message label so the popin orchestrator can fill it with
     /// the pending bookmark's name.
     /// </summary>
     public class RemoveConfirmContentController : MonoBehaviour

@@ -4,7 +4,7 @@ using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui.popup;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar;
-using com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays;
+using com.github.lhervier.ksp.bookmarksmod.ui.ugui.popins;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui {
@@ -53,13 +53,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             // The popup controller is a component on THIS GameObject: it survives KSP destroying the
             // window (Escape) and persists its own open state, so we no longer track visibility ourselves.
-            _popupController = new PopupBuilder<TitleBarController, ContentController, BookmarksOverlaysController>()
+            _popupController = new PopupBuilder<TitleBarController, ContentController, BookmarksPopinsController>()
                 .WithHost(this.gameObject)
                 .WithPopupID(DIALOG_ID)
                 .WithTitle(ModLocalization.GetString("windowTitle"))
                 .WithTitleBarBuilder(new TitleBarBuilder().WithViewModel(_viewModel))
                 .WithContentBuilder(new ContentBuilder().WithViewModel(_viewModel))
-                .WithOverlayBuilder(new BookmarksOverlaysBuilder().WithViewModel(_viewModel))
+                .WithOverlayBuilder(new BookmarksPopinsBuilder().WithViewModel(_viewModel))
                 .WithSize(new Vector2(VesselBookmarkPalette.WindowWidth, VesselBookmarkPalette.WindowHeight))
                 .Build();
             // The controller restores its own open state (in its Start, after this method returns), so we

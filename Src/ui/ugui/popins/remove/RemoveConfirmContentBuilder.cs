@@ -3,7 +3,7 @@ using TMPro;
 using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.shared.ugui;
 
-namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.remove
+namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.popins.remove
 {
     /// <summary>
     /// Builds the content of the remove-confirmation internal popup: the confirmation message (filled

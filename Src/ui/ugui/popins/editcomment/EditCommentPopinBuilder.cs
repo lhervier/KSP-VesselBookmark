@@ -5,27 +5,27 @@ using com.github.lhervier.ksp.shared.ugui;
 using com.github.lhervier.ksp.shared.ugui.popin;
 using com.github.lhervier.ksp.shared.ugui.styles;
 
-namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
+namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.popins.editcomment
 {
     /// <summary>
     /// Assembles the edit-comment internal popup: title + comment content + Cancel/Save footer, driven
     /// by an orchestrator bound to ViewModel.EditingComment / ViewModel.Comment.
     /// </summary>
-    public class EditCommentOverlayBuilder : IUGUIBuilder<EditCommentOverlayController>
+    public class EditCommentPopinBuilder : IUGUIBuilder<EditCommentPopinController>
     {
         // ==========================================
         // Builder parameters
         // ==========================================
 
         private BookmarksViewModel _viewModel;
-        public EditCommentOverlayBuilder WithViewModel(BookmarksViewModel viewModel)
+        public EditCommentPopinBuilder WithViewModel(BookmarksViewModel viewModel)
         {
             this._viewModel = viewModel;
             return this;
         }
 
         private Transform _parent;
-        public EditCommentOverlayBuilder WithParent(Transform parent)
+        public EditCommentPopinBuilder WithParent(Transform parent)
         {
             this._parent = parent;
             return this;
@@ -35,7 +35,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
         // Build
         // ==========================================
 
-        public EditCommentOverlayController Build()
+        public EditCommentPopinController Build()
         {
             // The footer is a declared button bar; its clicks are wired to the ViewModel by the shared
             // PopinButtonBarController, so the orchestrator only drives show/close and the content binding.
@@ -52,7 +52,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.overlays.editcomment
 
             // The orchestrator lives on the popup's always-active root.
             return popup.gameObject
-                .AddComponent<EditCommentOverlayController>()
+                .AddComponent<EditCommentPopinController>()
                 .WithViewModel(_viewModel)
                 .WithPopupController(popup)
                 .WithSubComponent(content.GetSub())
