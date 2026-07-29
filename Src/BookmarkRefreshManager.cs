@@ -83,13 +83,14 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         }
 
         /// <summary>
-        /// Check if a vessel has an alarm.
+        /// Find the alarm set on a vessel, or null if it has none.
         /// </summary>
-        private bool CheckHasAlarm(Vessel vessel) {
+        private AlarmTypeBase FindAlarm(Vessel vessel) {
             if (vessel == null) {
-                return false;
+                return null;
             }
-            return _vesselsManager.VesselsWithAlarm.Contains(vessel.persistentId);
+            _vesselsManager.AlarmsByVesselId.TryGetValue(vessel.persistentId, out AlarmTypeBase alarm);
+            return alarm;
         }
 
         /// <summary>
@@ -238,7 +239,9 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     string bodyDisplayName = vessel.mainBody != null ? vessel.mainBody.displayName.LocalizeRemoveGender() : "";
                     bookmark.VesselSituationLabel = GetSituationLabel(bodyDisplayName, vessel.situation);
 
-                    bookmark.HasAlarm = CheckHasAlarm(vessel);
+                    AlarmTypeBase alarm = FindAlarm(vessel);
+                    bookmark.HasAlarm = alarm != null;
+                    bookmark.AlarmTitle = alarm != null ? alarm.title : "";
 
                     if( bookmark is CommandModuleBookmark ) {
                         // Nothing more

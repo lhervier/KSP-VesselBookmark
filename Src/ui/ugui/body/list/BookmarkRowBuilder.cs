@@ -118,7 +118,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             BuildTypeIcon(line1.transform, _bookmark.BookmarkVesselType);
             if (_bookmark.HasAlarm)
             {
-                BuildAlarmIcon(line1.transform);
+                BuildAlarmIcon(line1.transform, _bookmark.AlarmTitle);
             }
 
             // Titre
@@ -257,7 +257,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             }
         }
 
-        private void BuildAlarmIcon(Transform parent)
+        private void BuildAlarmIcon(Transform parent, string alarmTitle)
         {
             var go = new GameObject("Alarm", typeof(RectTransform));
             go.transform.SetParent(parent, false);
@@ -279,7 +279,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             }
             img.type = Image.Type.Simple;
             img.raycastTarget = true;   // pour recevoir le survol du tooltip
-            Tooltips.Attach(go, ModLocalization.GetString("tooltipAlarm"));
+
+            // Tooltip = libellé de l'alarme (générique si l'alarme n'en a pas)
+            Tooltips.Attach(go, !string.IsNullOrEmpty(alarmTitle) ? alarmTitle : ModLocalization.GetString("tooltipAlarm"));
         }
 
         // Status chip, hidden by default. Refresh() shows it and sets its state

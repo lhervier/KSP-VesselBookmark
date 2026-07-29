@@ -24,8 +24,8 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         /// <summary>vessel persistentId → Vessel (loaded vessels take precedence over unloaded ones)</summary>
         public Dictionary<uint, Vessel> VesselsByPersistentId = new Dictionary<uint, Vessel>();
 
-        /// <summary>persistentId of every vessel that currently has an alarm</summary>
-        public HashSet<uint> VesselsWithAlarm = new HashSet<uint>();
+        /// <summary>vessel persistentId → the alarm set on it (the one that will fire first)</summary>
+        public Dictionary<uint, AlarmTypeBase> AlarmsByVesselId = new Dictionary<uint, AlarmTypeBase>();
 
         public EventVoid OnVesselsChanged = new EventVoid("VesselsManager.OnVesselsChanged");
         private bool _refreshRequested = false;
@@ -88,7 +88,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             this.PartsByFlightId.Clear();
             this.ProtoPartsByFlightId.Clear();
             this.VesselsByPersistentId.Clear();
-            this.VesselsWithAlarm.Clear();
+            this.AlarmsByVesselId.Clear();
 
             this.IndexLoadedVessels();
             this.IndexUnloadedVessels();
@@ -194,7 +194,11 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 if (AlarmClockScenario.Instance == null) return;
                 foreach (AlarmTypeBase alarm in AlarmClockScenario.Instance.alarms.Values) {
                     if (alarm == null || alarm.Vessel == null) continue;
-                    VesselsWithAlarm.Add(alarm.Vessel.persistentId);
+                    uint vesselId = alarm.Vessel.persistentId;
+                    // A vessel may carry several alarms : keep the next one to fire, as it is the one
+                    // the player is waiting for.
+                    if (AlarmsByVesselId.TryGetValue(vesselId, out AlarmTypeBase knownAlarm) && knownAlarm.ut <= alarm.ut) continue;
+                    AlarmsByVesselId[vesselId] = alarm;
                 }
             } catch (Exception e) {
                 LOGGER.LogError($"Error indexing alarms: {e.Message}");

@@ -109,6 +109,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.bookmarks {
         public bool HasAlarm { get; set; } = false;
 
         /// <summary>
+        /// Title of the alarm associated to the bookmark (empty if it has no alarm)
+        /// </summary>
+        public string AlarmTitle { get; set; } = "";
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="bookmarkType">The type of the bookmark</param>

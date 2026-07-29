@@ -59,6 +59,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 bookmark.VesselSituation = node.GetStringValue("vesselSituation");
                 bookmark.VesselSituationLabel = node.GetStringValue("vesselSituationLabel");
                 bookmark.HasAlarm = node.GetBoolValue("hasAlarm");
+                bookmark.AlarmTitle = node.GetStringValue("alarmTitle");
 
                 if( bookmarkType == BookmarkType.CommandModule ) {
                     CommandModuleBookmark commandModuleBookmark = (CommandModuleBookmark) bookmark;
@@ -134,6 +135,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
             node.AddStringValue("vesselSituation", bookmark.VesselSituation);
             node.AddStringValue("vesselSituationLabel", bookmark.VesselSituationLabel);
             node.AddBoolValue("hasAlarm", bookmark.HasAlarm);
+            node.AddStringValue("alarmTitle", bookmark.AlarmTitle);
 
             if( bookmark is CommandModuleBookmark commandModuleBookmark ) {
                 node.AddUintValue("commandModuleFlightID", commandModuleBookmark.CommandModuleFlightID);
