@@ -8,6 +8,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui;
 using com.github.lhervier.ksp.shared.ugui.badge;
+using com.github.lhervier.ksp.shared.ugui.selectionring;
 using com.github.lhervier.ksp.shared.ugui.sprites;
 using com.github.lhervier.ksp.shared.ugui.styles;
 
@@ -15,9 +16,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 {
     /// <summary>
     /// One bookmark row: line 1 (type icon + alarm + title + status chip + the ⚙▲▼✕ buttons), line 2
-    /// (situation + vessel name), line 3 (comment). The background, the left accent bar, the title
-    /// color, the chip and the button visibility depend on the state (selection, hover, active
-    /// vessel, target) and are re-evaluated by Refresh().
+    /// (situation + vessel name), line 3 (comment). The background, the left accent bar, the
+    /// selection ring, the title color, the chip and the button visibility depend on the state
+    /// (selection, hover, active vessel, target) and are re-evaluated by Refresh().
     /// </summary>
     public class BookmarkRowBuilder : IUGUIBuilder<BookmarkRowController>
     {
@@ -181,6 +182,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 BuildComment(rowGo.transform, _bookmark.Comment);
             }
 
+            // Anneau de sélection. Construit APRÈS les lignes : uGUI dessine dans l'ordre des enfants,
+            // le dernier frère passe donc au-dessus du contenu de la ligne.
+            SelectionRingController selectionRing = new SelectionRingBuilder()
+                .WithParent(rowGo.transform)
+                .Build();
+
             // Survol + clic sur la ligne (les boutons enfants consomment leurs propres clics).
             // PointerHandler plutôt qu'EventTrigger pour ne pas bloquer la molette (cf. PointerHandler).
             var pointer = rowGo.AddComponent<PointerHandler>();
@@ -190,6 +197,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 .WithBookmark(_bookmark)
                 .WithBackground(bg)
                 .WithAccentBar(accentBar)
+                .WithSelectionRing(selectionRing)
                 .WithNameComponent(name)
                 .WithChip(chip)
                 .WithRowButtons(rowButtonsGroup)

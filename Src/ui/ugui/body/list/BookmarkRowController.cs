@@ -8,6 +8,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui;
+using com.github.lhervier.ksp.shared.ugui.selectionring;
 using com.github.lhervier.ksp.shared.ugui.sprites;
 using System;
 using System.CodeDom;
@@ -46,6 +47,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
         public BookmarkRowController WithAccentBar(Image accentBar)
         {
             this._accentBar = accentBar;
+            return this;
+        }
+
+        private SelectionRingController _selectionRing;
+        public BookmarkRowController WithSelectionRing(SelectionRingController selectionRing)
+        {
+            this._selectionRing = selectionRing;
             return this;
         }
 
@@ -237,6 +245,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             // Liseré gauche
             _accentBar.enabled = active || selected;
             _accentBar.color = active ? DefaultPalette.AccentColor : DefaultPalette.AccentBorderColor;
+
+            // Anneau de sélection : canal visuel réservé à la sélection, qui se superpose à l'état au
+            // lieu de le remplacer. Sans lui, sélectionner la ligne du vaisseau actif ne change rien à
+            // l'écran — fond et liseré sont déjà à leurs valeurs « actif », qui priment ci-dessus.
+            _selectionRing.SetVisible(selected);
 
             // Couleur du titre
             if (!_vesselExists) _name.color = VesselBookmarkPalette.NameMissingColor;

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vessel Bookmarks — Rappel des critères de filtrage</title>
+<title>Vessel Bookmarks — Sélection visible + rappel des critères</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Titillium+Web:wght@400;600&display=swap" rel="stylesheet">
 <style>
 /* ===========================================================================
@@ -109,6 +109,35 @@ body{background:#0a0a0a;display:flex;justify-content:center;align-items:flex-sta
 .vb-bm:hover{background:rgba(255,255,255,.03)}
 .vb-bm.sel{background:rgba(141,190,69,.06);border-left-color:#4a6e20}
 .vb-bm.active{background:rgba(141,190,69,.09);border-left-color:#8dbe45}
+
+/* ===========================================================================
+   *** PROPOSITION 2 *** : rendre la SÉLECTION visible sur la ligne du vaisseau
+   actif. Ci-dessus, .sel et .active peignent les mêmes pixels (fond vert +
+   liseré vert) et .active, déclaré en dernier, gagne : sélectionner la ligne
+   active ne change rien à l'écran. Cause : l'ÉTAT (actif / cible / disparu) et
+   la SÉLECTION se disputent un seul canal visuel.
+   Remède commun aux trois variantes : donner à la sélection un canal PROPRE,
+   qui se superpose à l'état au lieu de le remplacer. La classe de variante est
+   posée sur la fenêtre (.v-ring / .v-caret / .v-bars), .v-current = l'existant.
+   =========================================================================== */
+
+/* -- A. ANNEAU : la sélection est un contour, l'état reste le fond + le liseré -- */
+.v-ring .vb-bm.sel{background:rgba(141,190,69,.06);border-left-color:#4a6e20;box-shadow:inset 0 0 0 1px rgba(232,232,232,.5)}
+.v-ring .vb-bm.active{background:rgba(141,190,69,.09);border-left-color:#8dbe45;box-shadow:none}
+.v-ring .vb-bm.active.sel{background:rgba(141,190,69,.09);border-left-color:#8dbe45;box-shadow:inset 0 0 0 1px rgba(232,232,232,.5)}
+
+/* -- B. CURSEUR : gouttière réservée sur toutes les lignes (aucun décalage au clic) -- */
+.v-caret .vb-bm{padding-left:19px}
+.v-caret .vb-bm::before{content:'▶';position:absolute;left:5px;top:9px;font-size:8px;line-height:1;color:transparent;font-family:'Share Tech Mono',monospace}
+.v-caret .vb-bm.sel::before{color:#e8e8e8}
+.v-caret .vb-bm.sel{background:rgba(255,255,255,.05);border-left-color:#4a6e20}
+.v-caret .vb-bm.active{background:rgba(141,190,69,.09);border-left-color:#8dbe45}
+.v-caret .vb-bm.active.sel{background:rgba(141,190,69,.15)}
+
+/* -- C. DOUBLE LISERÉ : le liseré extérieur porte l'état, un liseré clair intérieur la sélection -- */
+.v-bars .vb-bm.sel{background:rgba(255,255,255,.05);border-left-color:#e8e8e8}
+.v-bars .vb-bm.active{background:rgba(141,190,69,.09);border-left-color:#8dbe45;box-shadow:none}
+.v-bars .vb-bm.active.sel{background:rgba(141,190,69,.16);border-left-color:#8dbe45;box-shadow:inset 3px 0 0 #e8e8e8}
 .vb-bm-l1{display:flex;align-items:center;gap:7px}
 .vb-type{width:20px;height:20px;border:1px solid #444;border-radius:2px;background:#1f1f1f;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;filter:grayscale(.3)}
 .vb-alarm{font-size:12px;color:#a98a4a;flex-shrink:0}
@@ -162,12 +191,20 @@ body{background:#0a0a0a;display:flex;justify-content:center;align-items:flex-sta
 .vb-legend b{color:#aaa;font-weight:600}
 .vb-legend kbd{font-family:'Share Tech Mono',monospace;font-size:11px;color:#8dbe45}
 .vb-legend .alt{color:#555;font-style:italic;border:none}
+
+/* sélecteur de variante (hors maquette : outil de comparaison) */
+.vb-vsw{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0 4px}
+.vb-vopt{background:#1e1e1e;border:1px solid #444;color:#999;font-family:'Titillium Web',sans-serif;font-size:11px;padding:4px 9px;border-radius:2px;cursor:pointer}
+.vb-vopt:hover{background:#2a2a2a;color:#ddd}
+.vb-vopt.on{background:rgba(141,190,69,.12);border-color:#4a6e20;color:#8dbe45;font-weight:600}
+.vb-vdesc{color:#777;font-size:11px;line-height:1.6;border-left:2px solid #2a2a2a;padding:2px 0 2px 8px;margin-bottom:6px;min-height:34px}
+.vb-vdesc b{color:#aaa}
 </style>
 </head>
 <body>
 
 <!-- ======================= FENÊTRE PRINCIPALE ======================= -->
-<div class="vb-w">
+<div class="vb-w v-ring" id="vb-win">
 
   <!-- Title bar -->
   <div class="vb-tb">
@@ -243,7 +280,33 @@ body{background:#0a0a0a;display:flex;justify-content:center;align-items:flex-sta
 
 <!-- ======================= LÉGENDE ======================= -->
 <div class="vb-legend">
-  <h2>Rappel des critères en cours</h2>
+  <h2>Sélection vs vaisseau actif</h2>
+  <p style="margin-bottom:8px">La ligne <b>Station Ke</b> est celle du vaisseau piloté (pastille <kbd>Actif</kbd>) <i>et</i> la ligne sélectionnée. Aujourd'hui les deux états peignent les mêmes pixels — fond vert + liseré vert — et « actif » gagne : <b>la sélection est invisible</b>. Compare les variantes, puis clique d'autres lignes pour vérifier que la sélection reste lisible partout (y compris sur une ligne <kbd>Disparu</kbd> ou <kbd>Cible</kbd>).</p>
+
+  <div class="vb-vsw" id="vb-vsw">
+    <button class="vb-vopt" data-v="v-current" onclick="setVariant(this)">0 · Actuel</button>
+    <button class="vb-vopt on" data-v="v-ring" onclick="setVariant(this)">A · Anneau ★</button>
+    <button class="vb-vopt" data-v="v-caret" onclick="setVariant(this)">B · Curseur</button>
+    <button class="vb-vopt" data-v="v-bars" onclick="setVariant(this)">C · Double liseré</button>
+  </div>
+  <div class="vb-vdesc" id="vb-vdesc"></div>
+
+  <p style="margin-bottom:6px">Le principe commun : <b>l'état</b> (actif / cible / disparu) garde le fond et le liseré ; <b>la sélection</b> reçoit un canal à elle, qui se <i>superpose</i> au lieu de remplacer. Les trois variantes ne diffèrent que par le canal choisi.</p>
+  <ul>
+    <li><b>A · Anneau</b> <i>(recommandé)</i> — contour clair de 1 px autour de la ligne. Canal totalement disjoint du fond : lisible sur ligne normale, active, cible ou disparue, sans toucher au code couleur vert = « lié au vaisseau courant ». Coût : un <kbd>Image</kbd> en overlay avec <kbd>SpritesGlobal.Border</kbd> (déjà utilisé pour la case d'icône de type).</li>
+    <li><b>B · Curseur</b> — un <kbd>▶</kbd> dans une gouttière réservée sur <i>toutes</i> les lignes (donc aucun décalage au clic). Repère non colorimétrique, donc robuste au daltonisme et aux fonds saturés ; coûte ~11 px de largeur en permanence.</li>
+    <li><b>C · Double liseré</b> — le liseré gauche porte l'état (vert si actif), doublé d'un liseré clair intérieur pour la sélection. Très économique (un 2<sup>e</sup> <kbd>Image</kbd> à côté de l'AccentBar existant), mais le repère est concentré sur 3 px au bord gauche : peu visible sur une fenêtre large.</li>
+  </ul>
+  <p class="alt" style="padding-top:6px">À noter : les boutons de ligne (<kbd>⚙▲▼✕</kbd>) sont déjà révélés sur la ligne active (<kbd>showButtons = hovered || selected || active</kbd>), ils ne peuvent donc pas servir de repère de sélection ici.</p>
+
+  <h3>Alternatives écartées</h3>
+  <ul>
+    <li class="alt">Renforcer seulement le fond de « actif + sélectionné » (vert plus soutenu) : il faut mémoriser la nuance pour la lire — pas de repère absolu, et la marge est mince entre .09 et .16 d'opacité.</li>
+    <li class="alt">S'en remettre à la barre du bas (« Sélection : <i>nom</i> ») : correct comme confirmation, mais l'œil est dans la liste, pas dans le pied de fenêtre.</li>
+    <li class="alt">Retirer le fond vert de la ligne active quand elle est sélectionnée : on perdrait l'information « c'est le vaisseau piloté » au moment précis où on agit dessus.</li>
+  </ul>
+
+  <h2 style="margin-top:22px">Rappel des critères en cours</h2>
   <p style="margin-bottom:10px">Aujourd'hui, une fois la popin de filtres refermée, il ne reste qu'un point vert sur <kbd>⋯</kbd> : on sait qu'on filtre, pas <i>sur quoi</i>. Proposition, sur 4 niveaux de lecture :</p>
   <ul>
     <li><b>1. Barre de pastilles</b> — une pastille par critère actif, juste sous le title bar. Clic sur le libellé → rouvre la popin sur ce critère (la ligne clignote) ; clic sur <kbd>✕</kbd> → retire ce seul critère. La barre <b>disparaît</b> quand plus rien n'est filtré : aucun encombrement pour qui ne filtre pas.</li>
@@ -547,14 +610,30 @@ function pickCombo(e,which,val){ e.stopPropagation();
 
 function flash(el){ el.style.background='#4a6e20'; setTimeout(()=>el.style.background='',150); }
 
+/* Sélecteur de variante de rendu de la sélection (outil de comparaison, hors maquette) */
+const VARIANT_DESC = {
+  'v-current':'<b>Actuel</b> — la ligne active et la ligne sélectionnée sont rendues identiquement : cliquer sur « Station Ke » ne produit aucun changement visible.',
+  'v-ring'   :'<b>A · Anneau</b> — contour clair autour de la ligne sélectionnée. Le fond et le liseré restent libres de dire l\'état (actif / cible / disparu).',
+  'v-caret'  :'<b>B · Curseur</b> — un ▶ dans une gouttière réservée sur toutes les lignes. Repère de forme, pas de couleur.',
+  'v-bars'   :'<b>C · Double liseré</b> — liseré extérieur = état, liseré clair intérieur = sélection.',
+};
+function setVariant(btn){
+  const v = btn.dataset.v;
+  document.getElementById('vb-win').className = 'vb-w ' + v;
+  document.querySelectorAll('.vb-vopt').forEach(b=>b.classList.toggle('on', b===btn));
+  document.getElementById('vb-vdesc').innerHTML = VARIANT_DESC[v];
+}
+
 document.addEventListener('click',e=>{
   if(!e.target.closest('.vb-menu-wrap')) document.getElementById('vb-menu').classList.remove('open');
   if(!e.target.closest('.vb-combo')) document.querySelectorAll('.vb-combo-list').forEach(l=>l.classList.remove('open'));
 });
 
-/* Init : quelques critères posés d'entrée pour montrer la barre. */
-F.body='Eve'; F.type='Ship'; F.search='truck'; F.alarm='WITH';
-document.getElementById('vb-search-input').value = F.search;
+/* Init : pas de filtre, et la ligne du vaisseau actif sélectionnée — c'est le cas
+   litigieux (sélection + actif sur la même ligne), visible sans manipulation.
+   Poser un critère via le menu ⋯ fait réapparaître la barre de pastilles. */
+selectedId = bookmarks.find(b=>b.active).id;
+document.getElementById('vb-vdesc').innerHTML = VARIANT_DESC['v-ring'];
 refresh();
 </script>
 </body>

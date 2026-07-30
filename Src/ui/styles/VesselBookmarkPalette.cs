@@ -147,6 +147,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         public static readonly Color RowHoverColor = Rgba(255, 255, 255, 0.03f);
         public static readonly Color RowSelectedBgColor = Rgba(141, 190, 69, 0.06f);
         public static readonly Color RowActiveBgColor = Rgba(141, 190, 69, 0.09f);
+        // (anneau de sélection : SelectionRingColor / SelectionRingThickness, dans DefaultPalette)
 
         // Icône type de vaisseau
         public const float TypeIconSize = 20f;
