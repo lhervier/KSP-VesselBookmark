@@ -133,6 +133,26 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private List<string> _availableSituations = new List<string>();
         public readonly EventVoid OnAvailableSituationsChanged = new EventVoid("BookmarksViewModel.OnAvailableSituationsChanged");
 
+        /// <summary>
+        /// Alarm-filter value standing for "with or without an alarm". Kept as an opaque token : the
+        /// combo turns it into the localized "Tous" label via its LabelFor.
+        /// </summary>
+        public const string ALL_ALARMS = "All";
+
+        /// <summary>Alarm-filter value keeping only the bookmarks whose vessel carries an alarm.</summary>
+        public const string WITH_ALARM = "With";
+
+        /// <summary>Alarm-filter value keeping only the bookmarks whose vessel carries no alarm.</summary>
+        public const string WITHOUT_ALARM = "Without";
+
+        /// <summary>
+        /// The three values of the alarm filter (ALL_ALARMS, WITH_ALARM, WITHOUT_ALARM). The list is
+        /// fixed, but it is exposed like the other ones so the combo is fed the same way.
+        /// </summary>
+        public IReadOnlyList<string> AvailableAlarms => _availableAlarms;
+        private readonly List<string> _availableAlarms = new List<string> { ALL_ALARMS, WITH_ALARM, WITHOUT_ALARM };
+        public readonly EventVoid OnAvailableAlarmsChanged = new EventVoid("BookmarksViewModel.OnAvailableAlarmsChanged");
+
         // ===============================================================
         // "Populated" values : the subset of the exhaustive lists that is actually carried by at least
         // one bookmark. The combos list every possible value but grey out the ones absent from these
@@ -142,6 +162,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private readonly HashSet<string> _populatedBodies = new HashSet<string>();
         private readonly HashSet<string> _populatedVesselTypes = new HashSet<string>();
         private readonly HashSet<string> _populatedSituations = new HashSet<string>();
+        private readonly HashSet<string> _populatedAlarms = new HashSet<string>();
 
         /// <summary>
         /// Whether the given body filter value matches at least one bookmark (the "all"/"current"
@@ -168,6 +189,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         public bool IsSituationPopulated(string situation) {
             if( situation == ALL_SITUATIONS ) return true;
             return _populatedSituations.Contains(situation);
+        }
+
+        /// <summary>
+        /// Whether the given alarm filter value matches at least one bookmark (the "all" token always
+        /// does). Drives the greying of the alarm combo.
+        /// </summary>
+        public bool IsAlarmPopulated(string alarm) {
+            if( alarm == ALL_ALARMS ) return true;
+            return _populatedAlarms.Contains(alarm);
         }
 
         // ===============================================================
@@ -215,6 +245,20 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
         private string _selectedSituation = ALL_SITUATIONS;
         public readonly EventVoid OnSelectedSituationChanged = new EventVoid("BookmarksViewModel.OnSelectedSituationChanged");
+
+        /// <summary>
+        /// The selected alarm criterion (ALL_ALARMS, WITH_ALARM or WITHOUT_ALARM)
+        /// </summary>
+        public string SelectedAlarm {
+            get => _selectedAlarm;
+            set {
+                if( value == _selectedAlarm ) return;
+                _selectedAlarm = value;
+                OnSelectedAlarmChanged.Fire();
+            }
+        }
+        private string _selectedAlarm = ALL_ALARMS;
+        public readonly EventVoid OnSelectedAlarmChanged = new EventVoid("BookmarksViewModel.OnSelectedAlarmChanged");
 
         /// <summary>
         /// Filtre : n'afficher que les bookmarks qui ont un commentaire (pour usage futur).
@@ -369,6 +413,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             this.OnSelectedVesselTypeChanged.Add(UpdateBookmarksSelection);
             this.OnSelectedSituationChanged.Add(UpdateBookmarksSelection);
             this.OnSelectedBodyChanged.Add(UpdateBookmarksSelection);
+            this.OnSelectedAlarmChanged.Add(UpdateBookmarksSelection);
             this.OnSearchTextChanged.Add(UpdateBookmarksSelection);
             this.OnFilterHasCommentChanged.Add(UpdateBookmarksSelection);
 
@@ -377,6 +422,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             this.OnSelectedVesselTypeChanged.Add(_fireFiltersChanged);
             this.OnSelectedSituationChanged.Add(_fireFiltersChanged);
             this.OnSelectedBodyChanged.Add(_fireFiltersChanged);
+            this.OnSelectedAlarmChanged.Add(_fireFiltersChanged);
             this.OnSearchTextChanged.Add(_fireFiltersChanged);
             this.OnFilterHasCommentChanged.Add(_fireFiltersChanged);
 
@@ -420,12 +466,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
 
             this.OnFilterHasCommentChanged.Remove(UpdateBookmarksSelection);
             this.OnSearchTextChanged.Remove(UpdateBookmarksSelection);
+            this.OnSelectedAlarmChanged.Remove(UpdateBookmarksSelection);
             this.OnSelectedBodyChanged.Remove(UpdateBookmarksSelection);
             this.OnSelectedSituationChanged.Remove(UpdateBookmarksSelection);
             this.OnSelectedVesselTypeChanged.Remove(UpdateBookmarksSelection);
 
             this.OnFilterHasCommentChanged.Remove(_fireFiltersChanged);
             this.OnSearchTextChanged.Remove(_fireFiltersChanged);
+            this.OnSelectedAlarmChanged.Remove(_fireFiltersChanged);
             this.OnSelectedBodyChanged.Remove(_fireFiltersChanged);
             this.OnSelectedSituationChanged.Remove(_fireFiltersChanged);
             this.OnSelectedVesselTypeChanged.Remove(_fireFiltersChanged);
@@ -487,6 +535,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 this.UpdateAvailableBodies();
                 this.UpdateAvailableVesselTypes();
                 this.UpdateAvailableSituations();
+                this.UpdateAvailableAlarms();
                 this.UpdateAvailableBookmarks();
             } catch (Exception e) {
                 LOGGER.LogError($"Error updating bookmarks: {e.Message}");
@@ -596,6 +645,24 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             }
         }
 
+        private void UpdateAvailableAlarms() {
+            try {
+                LOGGER.LogDebug($"Updating available alarms");
+
+                // "Populated" set : the two answers actually given by at least one bookmark. Drives the
+                // greying — with no alarm anywhere, "With an alarm" is greyed out. The list itself is
+                // fixed, so only this set is recomputed.
+                _populatedAlarms.Clear();
+                foreach (Bookmark bookmark in _bookmarkManager.GetAllBookmarks()) {
+                    _populatedAlarms.Add(bookmark.HasAlarm ? WITH_ALARM : WITHOUT_ALARM);
+                }
+
+                this.OnAvailableAlarmsChanged.Fire();
+            } catch (Exception e) {
+                LOGGER.LogError($"Error updating available alarms: {e.Message}");
+            }
+        }
+
         /// <summary>
         /// Update the available bookmarks
         /// </summary>
@@ -617,6 +684,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                     if( !MatchesBody(bookmark, filterBody) ) continue;
                     if( !MatchesVesselType(bookmark) ) continue;
                     if( !MatchesSituation(bookmark) ) continue;
+                    if( !MatchesAlarm(bookmark) ) continue;
                     if( !MatchesSearchText(bookmark) ) continue;
                     if( !MatchesHasComment(bookmark) ) continue;
 
@@ -683,6 +751,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private bool MatchesSituation(Bookmark bookmark) {
             if( string.Equals(SelectedSituation, ALL_SITUATIONS) ) return true;
             return string.Equals(bookmark.VesselSituation, SelectedSituation);
+        }
+
+        /// <summary>
+        /// Whether the bookmark passes the alarm filter.
+        /// </summary>
+        /// <param name="bookmark">The bookmark to test</param>
+        private bool MatchesAlarm(Bookmark bookmark) {
+            if( string.Equals(SelectedAlarm, ALL_ALARMS) ) return true;
+            return bookmark.HasAlarm == string.Equals(SelectedAlarm, WITH_ALARM);
         }
 
         /// <summary>
@@ -769,6 +846,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             FilterCriterionId.Body,
             FilterCriterionId.VesselType,
             FilterCriterionId.Situation,
+            FilterCriterionId.Alarm,
             FilterCriterionId.HasComment,
         };
 
@@ -815,6 +893,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 case FilterCriterionId.Body: return SelectedBody != ALL_BODIES;
                 case FilterCriterionId.VesselType: return SelectedVesselType != ALL_VESSEL_TYPES;
                 case FilterCriterionId.Situation: return SelectedSituation != ALL_SITUATIONS;
+                case FilterCriterionId.Alarm: return SelectedAlarm != ALL_ALARMS;
                 case FilterCriterionId.HasComment: return FilterHasComment;
                 default: return false;
             }
@@ -830,6 +909,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 case FilterCriterionId.Body: return ModLocalization.GetString("filterKeyBody");
                 case FilterCriterionId.VesselType: return ModLocalization.GetString("filterKeyType");
                 case FilterCriterionId.Situation: return ModLocalization.GetString("filterKeySituation");
+                case FilterCriterionId.Alarm: return ModLocalization.GetString("filterKeyAlarm");
                 case FilterCriterionId.HasComment: return ModLocalization.GetString("filterKeyOption");
                 default: return string.Empty;
             }
@@ -845,6 +925,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 case FilterCriterionId.Body: return LabelForBody(SelectedBody);
                 case FilterCriterionId.VesselType: return LabelForVesselType(SelectedVesselType);
                 case FilterCriterionId.Situation: return LabelForSituation(SelectedSituation);
+                case FilterCriterionId.Alarm: return LabelForAlarm(SelectedAlarm);
                 case FilterCriterionId.HasComment: return ModLocalization.GetString("filterValueWithComment");
                 default: return string.Empty;
             }
@@ -860,6 +941,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 case FilterCriterionId.Body: SelectedBody = ALL_BODIES; break;
                 case FilterCriterionId.VesselType: SelectedVesselType = ALL_VESSEL_TYPES; break;
                 case FilterCriterionId.Situation: SelectedSituation = ALL_SITUATIONS; break;
+                case FilterCriterionId.Alarm: SelectedAlarm = ALL_ALARMS; break;
                 case FilterCriterionId.HasComment: FilterHasComment = false; break;
             }
         }
@@ -872,6 +954,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             SelectedBody = ALL_BODIES;
             SelectedVesselType = ALL_VESSEL_TYPES;
             SelectedSituation = ALL_SITUATIONS;
+            SelectedAlarm = ALL_ALARMS;
             SetSearchTextNow(string.Empty);
             FilterHasComment = false;
             this._preventBookmarksUpdates = false;
@@ -925,6 +1008,21 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 return Vessel.GetSituationString(situation);
             }
             return value;
+        }
+
+        /// <summary>
+        /// Displayed label of an alarm filter value. The ALL_ALARMS token becomes "Tous"; the two
+        /// others become "Avec alarme" / "Sans alarme".
+        /// </summary>
+        /// <param name="value">The raw alarm filter value</param>
+        public string LabelForAlarm(string value) {
+            if( value == WITH_ALARM ) {
+                return ModLocalization.GetString("alarmWith");
+            }
+            if( value == WITHOUT_ALARM ) {
+                return ModLocalization.GetString("alarmWithout");
+            }
+            return ModLocalization.GetString("labelAll");
         }
 
         // ======================================================================

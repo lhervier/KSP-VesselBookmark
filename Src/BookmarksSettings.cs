@@ -27,13 +27,15 @@ namespace com.github.lhervier.ksp.bookmarksmod {
         public string SelectedBody { get; private set; }
         public string SelectedVesselType { get; private set; }
         public string SelectedSituation { get; private set; }
+        public string SelectedAlarm { get; private set; }
         public string SearchText { get; private set; }
         public bool FilterHasComment { get; private set; }
 
-        public void SetCriteria(string selectedBody, string selectedVesselType, string selectedSituation, string searchText, bool filterHasComment) {
+        public void SetCriteria(string selectedBody, string selectedVesselType, string selectedSituation, string selectedAlarm, string searchText, bool filterHasComment) {
             SelectedBody = selectedBody;
             SelectedVesselType = selectedVesselType;
             SelectedSituation = selectedSituation;
+            SelectedAlarm = selectedAlarm;
             SearchText = searchText;
             FilterHasComment = filterHasComment;
             HasCriteria = true;
@@ -59,12 +61,15 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                 if (node == null) {
                     return;
                 }
-                // "selectedBody" acts as the presence marker for the whole criteria group : the five
-                // values are always written together, so its presence means the group was saved.
+                // "selectedBody" acts as the presence marker for the whole criteria group : the values
+                // are always written together, so its presence means the group was saved. A criterion
+                // added later is absent from an older file : it reads back empty, and the caller is the
+                // one that knows the default to fall back on.
                 if (node.HasValue("selectedBody")) {
                     SelectedBody = node.GetValue("selectedBody") ?? string.Empty;
                     SelectedVesselType = node.GetValue("selectedVesselType") ?? string.Empty;
                     SelectedSituation = node.GetValue("selectedSituation") ?? string.Empty;
+                    SelectedAlarm = node.GetValue("selectedAlarm") ?? string.Empty;
                     SearchText = node.GetValue("searchText") ?? string.Empty;
                     bool.TryParse(node.GetValue("filterHasComment"), out bool filterHasComment);
                     FilterHasComment = filterHasComment;
@@ -83,6 +88,7 @@ namespace com.github.lhervier.ksp.bookmarksmod {
                     node.AddValue("selectedBody", SelectedBody ?? string.Empty);
                     node.AddValue("selectedVesselType", SelectedVesselType ?? string.Empty);
                     node.AddValue("selectedSituation", SelectedSituation ?? string.Empty);
+                    node.AddValue("selectedAlarm", SelectedAlarm ?? string.Empty);
                     node.AddValue("searchText", SearchText ?? string.Empty);
                     node.AddValue("filterHasComment", FilterHasComment.ToString());
                 }

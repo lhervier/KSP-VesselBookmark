@@ -47,11 +47,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         private ComboController _bodyCombo;
         private ComboController _typeCombo;
         private ComboController _situationCombo;
-        public FilterMenuController WithComboControllers(ComboController body, ComboController type, ComboController situation)
+        private ComboController _alarmCombo;
+        public FilterMenuController WithComboControllers(ComboController body, ComboController type, ComboController situation, ComboController alarm)
         {
             _bodyCombo = body;
             _typeCombo = type;
             _situationCombo = situation;
+            _alarmCombo = alarm;
             return this;
         }
 
@@ -66,12 +68,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 _viewModel.OnSelectedVesselTypeChanged.Add(RefreshTypeCombo);
                 _viewModel.OnAvailableSituationsChanged.Add(RefreshSituationCombo);
                 _viewModel.OnSelectedSituationChanged.Add(RefreshSituationCombo);
+                _viewModel.OnAvailableAlarmsChanged.Add(RefreshAlarmCombo);
+                _viewModel.OnSelectedAlarmChanged.Add(RefreshAlarmCombo);
                 _viewModel.OnFilterHasCommentChanged.Add(RefreshCheckbox);
                 _viewModel.OnFilterEditionRequested.Add(OnFilterEditionRequested);
 
                 RefreshBodyCombo();
                 RefreshTypeCombo();
                 RefreshSituationCombo();
+                RefreshAlarmCombo();
                 RefreshCheckbox();
                 OnFilterMenuOpenChanged();
             }
@@ -87,6 +92,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             if( _situationCombo != null )
             {
                 _situationCombo.OnSelect.Add(OnSituationSelected);
+            }
+            if( _alarmCombo != null )
+            {
+                _alarmCombo.OnSelect.Add(OnAlarmSelected);
             }
         }
 
@@ -104,6 +113,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             {
                 _situationCombo.OnSelect.Remove(OnSituationSelected);
             }
+            if( _alarmCombo != null )
+            {
+                _alarmCombo.OnSelect.Remove(OnAlarmSelected);
+            }
 
             if( _viewModel != null )
             {
@@ -114,6 +127,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 _viewModel.OnSelectedVesselTypeChanged.Remove(RefreshTypeCombo);
                 _viewModel.OnAvailableSituationsChanged.Remove(RefreshSituationCombo);
                 _viewModel.OnSelectedSituationChanged.Remove(RefreshSituationCombo);
+                _viewModel.OnAvailableAlarmsChanged.Remove(RefreshAlarmCombo);
+                _viewModel.OnSelectedAlarmChanged.Remove(RefreshAlarmCombo);
                 _viewModel.OnFilterHasCommentChanged.Remove(RefreshCheckbox);
                 _viewModel.OnFilterEditionRequested.Remove(OnFilterEditionRequested);
             }
@@ -133,6 +148,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 case FilterCriterionId.Body: _bodyCombo?.Open(); break;
                 case FilterCriterionId.VesselType: _typeCombo?.Open(); break;
                 case FilterCriterionId.Situation: _situationCombo?.Open(); break;
+                case FilterCriterionId.Alarm: _alarmCombo?.Open(); break;
             }
         }
 
@@ -151,6 +167,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             _viewModel.SelectedSituation = situation;
         }
 
+        private void OnAlarmSelected(string alarm)
+        {
+            _viewModel.SelectedAlarm = alarm;
+        }
+
         private void OnFilterMenuOpenChanged()
         {
             bool open = _viewModel.FilterMenuOpen;
@@ -164,6 +185,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 RefreshBodyCombo();
                 RefreshTypeCombo();
                 RefreshSituationCombo();
+                RefreshAlarmCombo();
                 RefreshCheckbox();
             }
             else
@@ -171,6 +193,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 _bodyCombo?.Collapse();
                 _typeCombo?.Collapse();
                 _situationCombo?.Collapse();
+                _alarmCombo?.Collapse();
             }
         }
 
@@ -187,6 +210,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
         private void RefreshSituationCombo()
         {
             _situationCombo?.SetOptions(_viewModel.AvailableSituations, _viewModel.SelectedSituation);
+        }
+
+        private void RefreshAlarmCombo()
+        {
+            _alarmCombo?.SetOptions(_viewModel.AvailableAlarms, _viewModel.SelectedAlarm);
         }
 
         private void RefreshCheckbox()

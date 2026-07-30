@@ -14,9 +14,9 @@ using com.github.lhervier.ksp.shared.ugui.textfield;
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
 {
     /// <summary>
-    /// Menu déroulant des filtres (déclenché par le bouton « ⋯ » du title bar). Un piège à clic
-    /// plein écran (ferme au clic dehors) + un panneau ancré en haut à droite contenant : recherche,
-    /// combos Corps/Type, case « commentaire seulement » et réinitialisation. Piloté par FilterMenuOpen.
+    /// Drop-down filter menu (opened by the title bar's "⋯" button). A full-window click trap (closes
+    /// on a click outside) plus a panel anchored top-right holding: search field, Body/Type/Situation/
+    /// Alarm combos, "with a comment only" checkbox and reset action. Driven by FilterMenuOpen.
     /// </summary>
     public class FilterMenuBuilder : IUGUIBuilder<FilterMenuController>
     {
@@ -147,7 +147,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                     .WithEnabledFor(_viewModel.IsSituationPopulated))
                 .WithPreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
                 .Build();
-            
+            // Alarme : critère à trois états (les deux / avec / sans), d'où un combo et non une case
+            // à cocher, qui ne saurait exprimer le « sans ».
+            ComboController alarmCombo = new ComboBuilder()
+                .WithParent(panelGo.transform)
+                .WithLabel(ModLocalization.GetString("labelAlarm"))
+                .WithLabelFor(_viewModel.LabelForAlarm)
+                .WithItemContentBuilder(new FilterComboItemContentBuilder()
+                    .WithLabelFor(_viewModel.LabelForAlarm)
+                    .WithEnabledFor(_viewModel.IsAlarmPopulated))
+                .WithPreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
+                .Build();
+
             // Case « commentaire seulement »
             CheckboxController checkBox = BuildCheckbox(panelGo.transform);
             
@@ -159,7 +170,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 .AddComponent<FilterMenuController>()
                 .WithViewModel(_viewModel)
                 .WithSearchFieldController(search)
-                .WithComboControllers(bodyCombo, typeCombo, situationCombo)
+                .WithComboControllers(bodyCombo, typeCombo, situationCombo, alarmCombo)
                 .WithCheckboxController(checkBox)
                 .WithPanelAndTrap(panelGo, trapGo);
         }

@@ -42,12 +42,19 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 _viewModel.SelectedBody = _settings.SelectedBody;
                 _viewModel.SelectedVesselType = _settings.SelectedVesselType;
                 _viewModel.SelectedSituation = _settings.SelectedSituation;
+                // The alarm criterion was added after the settings format: a file written before it
+                // carries no value for it, and the view model must keep its "any alarm" default rather
+                // than take an empty one (which would read as an active, unmatchable criterion).
+                if (!string.IsNullOrEmpty(_settings.SelectedAlarm)) {
+                    _viewModel.SelectedAlarm = _settings.SelectedAlarm;
+                }
                 _viewModel.SearchText = _settings.SearchText;
                 _viewModel.FilterHasComment = _settings.FilterHasComment;
             }
             _viewModel.OnSelectedBodyChanged.Add(OnCriteriaChanged);
             _viewModel.OnSelectedVesselTypeChanged.Add(OnCriteriaChanged);
             _viewModel.OnSelectedSituationChanged.Add(OnCriteriaChanged);
+            _viewModel.OnSelectedAlarmChanged.Add(OnCriteriaChanged);
             _viewModel.OnSearchTextChanged.Add(OnCriteriaChanged);
             _viewModel.OnFilterHasCommentChanged.Add(OnCriteriaChanged);
 
@@ -77,6 +84,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 _viewModel.OnSelectedBodyChanged.Remove(OnCriteriaChanged);
                 _viewModel.OnSelectedVesselTypeChanged.Remove(OnCriteriaChanged);
                 _viewModel.OnSelectedSituationChanged.Remove(OnCriteriaChanged);
+                _viewModel.OnSelectedAlarmChanged.Remove(OnCriteriaChanged);
                 _viewModel.OnSearchTextChanged.Remove(OnCriteriaChanged);
                 _viewModel.OnFilterHasCommentChanged.Remove(OnCriteriaChanged);
             }
@@ -123,6 +131,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
                 _viewModel.SelectedBody,
                 _viewModel.SelectedVesselType,
                 _viewModel.SelectedSituation,
+                _viewModel.SelectedAlarm,
                 _viewModel.SearchText,
                 _viewModel.FilterHasComment);
             _settings.Save();

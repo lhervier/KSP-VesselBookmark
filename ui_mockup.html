@@ -9,9 +9,10 @@
 /* ===========================================================================
    Variante de ui_mockup.html : proposition d'ergonomie pour RAPPELER les
    critères de recherche en cours (aujourd'hui seulement signalés par un point
-   vert sur le bouton "⋯").
-   Nouveauté = la barre de pastilles (.vb-fbar) sous le title bar + l'état vide
-   enrichi. Les filtres sont ici réellement fonctionnels pour pouvoir juger.
+   vert sur le bouton "⋯"), et proposition d'un critère "alarme" à trois états.
+   Nouveautés = la barre de pastilles (.vb-fbar) sous le title bar, l'état vide
+   enrichi, et le combo "Alarme" (toutes / avec / sans) dans la popin de
+   filtres. Les filtres sont ici réellement fonctionnels pour pouvoir juger.
    =========================================================================== */
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#0a0a0a;display:flex;justify-content:center;align-items:flex-start;gap:40px;flex-wrap:wrap;padding:40px 20px;min-height:100vh;font-family:'Titillium Web',sans-serif}
@@ -206,6 +207,15 @@ body{background:#0a0a0a;display:flex;justify-content:center;align-items:flex-sta
               <div class="vb-combo-list" id="vb-sit-list"></div>
             </div>
           </div>
+          <!-- *** NOUVEAU *** : critère à trois états (les deux / avec / sans), donc un combo
+               et non une case à cocher, qui ne saurait en exprimer que deux. -->
+          <div class="vb-menu-row" id="vb-row-alarm">
+            <span class="vb-menu-lbl">Alarme</span>
+            <div class="vb-combo">
+              <button class="vb-combo-btn" onclick="toggleCombo(event,'alarm')"><span class="vb-combo-label" id="vb-alarm-label">Toutes</span><span class="vb-combo-caret">▾</span></button>
+              <div class="vb-combo-list" id="vb-alarm-list"></div>
+            </div>
+          </div>
           <label class="vb-check" id="vb-row-comment"><input type="checkbox" id="vb-comment-input" onchange="setFilter('comment',this.checked)"><label>Avec un commentaire seulement</label></label>
           <div class="vb-menu-sep"></div>
           <div class="vb-menu-action" onclick="clearFilters()"><span class="vb-ma-ico">✕</span><span>Réinitialiser les filtres</span></div>
@@ -242,6 +252,16 @@ body{background:#0a0a0a;display:flex;justify-content:center;align-items:flex-sta
     <li><b>4. État vide explicite</b> — « aucun signet ne correspond » rappelle les critères en clair et offre le bouton de réinitialisation, au lieu d'une liste vide muette.</li>
   </ul>
 
+  <h2 style="margin-top:22px">Nouveau critère : alarme</h2>
+  <p style="margin-bottom:10px">Sélectionner les signets dont le vaisseau a une alarme, n'en a pas, ou les deux. Rendu ici par un <b>combo « Alarme »</b> sous « Situation » :</p>
+  <ul>
+    <li><b>Toutes</b> (défaut, critère inactif) · <b>Avec alarme</b> · <b>Sans alarme</b>.</li>
+    <li>Trois états ⇒ combo, pas case à cocher : la case « avec un commentaire seulement » n'en exprime que deux et ne saurait dire « sans ».</li>
+    <li>Même traitement que les autres combos : la valeur qui ne correspond à aucun signet est grisée (aucune alarme posée ⇒ « Avec alarme » en gris).</li>
+    <li>Pastille de rappel <kbd>ALARME · Avec alarme</kbd>, retirable au <kbd>✕</kbd> comme les autres ; clic sur le libellé → rouvre la popin et déroule le combo.</li>
+  </ul>
+  <p class="alt" style="padding-top:6px">Le même schéma resservira si un critère « avec commentaire / sans commentaire » est un jour souhaité : la case à cocher actuelle deviendrait un combo à trois valeurs.</p>
+
   <h3>Détails d'ergonomie</h3>
   <ul>
     <li>Pastille = <b>clé</b> (CORPS, TYPE…) en petit + <b>valeur</b> en vert : lisible en diagonale sans relire l'intitulé.</li>
@@ -265,6 +285,8 @@ body{background:#0a0a0a;display:flex;justify-content:center;align-items:flex-sta
 const TYPE_ICON = {Station:'🛰',Probe:'📡',Rover:'🚙',Ship:'🚀',Lander:'🛬',Plane:'✈',Base:'🏠',Relay:'📶',Debris:'🗑'};
 const TYPE_LABEL = {Station:'Station',Probe:'Sonde',Rover:'Rover',Ship:'Vaisseau',Lander:'Atterrisseur',Plane:'Avion',Base:'Base',Relay:'Relais',Debris:'Débris'};
 const SIT_LABEL  = {LANDED:'Posé',ORBITING:'En orbite'};
+/* Valeurs du critère "alarme". 'All' = les deux (critère inactif). */
+const ALARM_LABEL = {WITH:'Avec alarme',WITHOUT:'Sans alarme'};
 
 let bookmarks = [
   {id:154872978,  sec:'cmd', type:'Base',    name:'Base Mu',                     situation:'Posé sur Mun',                 vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
@@ -324,10 +346,11 @@ bookmarks.forEach(b=>{
 const ALL_BODIES = ['Kerbin','Mun','Minmus','Eve','Gilly'];
 const ALL_TYPES  = ['Base','Debris','Lander','Plane','Probe','Relay','Rover','Ship','Station'];
 const ALL_SITS   = ['LANDED','ORBITING'];
+const ALL_ALARMS = ['WITH','WITHOUT'];
 
 /* État des filtres -------------------------------------------------------- */
 const ALL = 'All';
-let F = {search:'', body:ALL, type:ALL, sit:ALL, comment:false};
+let F = {search:'', body:ALL, type:ALL, sit:ALL, alarm:ALL, comment:false};
 let selectedId = null;
 
 /* Métadonnées des critères : un seul endroit décrit clé, libellé et remise à zéro. */
@@ -336,6 +359,7 @@ const CRITERIA = [
   {id:'body',    key:'Corps',     row:'vb-row-body',    isSet:()=>F.body!==ALL,          label:()=>F.body,                        clear:()=>{F.body=ALL;}},
   {id:'type',    key:'Type',      row:'vb-row-type',    isSet:()=>F.type!==ALL,          label:()=>TYPE_LABEL[F.type]||F.type,    clear:()=>{F.type=ALL;}},
   {id:'sit',     key:'Situation', row:'vb-row-sit',     isSet:()=>F.sit!==ALL,           label:()=>SIT_LABEL[F.sit]||F.sit,       clear:()=>{F.sit=ALL;}},
+  {id:'alarm',   key:'Alarme',    row:'vb-row-alarm',   isSet:()=>F.alarm!==ALL,         label:()=>ALARM_LABEL[F.alarm]||F.alarm, clear:()=>{F.alarm=ALL;}},
   {id:'comment', key:'Filtre',    row:'vb-row-comment', isSet:()=>F.comment,             label:()=>'Avec commentaire',            clear:()=>{F.comment=false;document.getElementById('vb-comment-input').checked=false;}},
 ];
 
@@ -346,6 +370,7 @@ function matches(b){
   if(F.body!==ALL && b.body!==F.body) return false;
   if(F.type!==ALL && b.type!==F.type) return false;
   if(F.sit !==ALL && b.sit !==F.sit ) return false;
+  if(F.alarm!==ALL && b.alarm !== (F.alarm==='WITH')) return false;
   if(F.comment && !b.comment) return false;
   if(F.search.trim()){
     const hay = [b.name,b.situation,b.vname||'',TYPE_LABEL[b.type]||'',b.comment].join(' ').toLowerCase();
@@ -503,6 +528,7 @@ const COMBOS = {
   body:{all:ALL_BODIES, allLabel:'Tous',   label:v=>v,                   populated:()=>new Set(bookmarks.map(b=>b.body))},
   type:{all:ALL_TYPES,  allLabel:'Tous',   label:v=>TYPE_LABEL[v]||v,    populated:()=>new Set(bookmarks.map(b=>b.type))},
   sit: {all:ALL_SITS,   allLabel:'Toutes', label:v=>SIT_LABEL[v]||v,     populated:()=>new Set(bookmarks.map(b=>b.sit))},
+  alarm:{all:ALL_ALARMS,allLabel:'Toutes', label:v=>ALARM_LABEL[v]||v,   populated:()=>new Set(bookmarks.map(b=>b.alarm?'WITH':'WITHOUT'))},
 };
 function buildCombos(){
   Object.keys(COMBOS).forEach(which=>{
@@ -527,7 +553,7 @@ document.addEventListener('click',e=>{
 });
 
 /* Init : quelques critères posés d'entrée pour montrer la barre. */
-F.body='Eve'; F.type='Ship'; F.search='truck';
+F.body='Eve'; F.type='Ship'; F.search='truck'; F.alarm='WITH';
 document.getElementById('vb-search-input').value = F.search;
 refresh();
 </script>

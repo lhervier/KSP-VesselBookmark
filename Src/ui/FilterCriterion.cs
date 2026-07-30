@@ -10,6 +10,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui
         Body,
         VesselType,
         Situation,
+        Alarm,
         HasComment,
     }
 
