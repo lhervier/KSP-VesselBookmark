@@ -21,16 +21,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer
         // Action icons. The game SDF font does not render these glyphs reliably, so each prefers a
         // dedicated sprite (registered at startup), falling back to a text glyph when the texture is
         // missing.
-        private static string EditLabel => SpriteOrGlyph("edit", "✎", "✏", "E");
-        private static string GoToLabel => SpriteOrGlyph("goto", "➤", "►", "▶", "→", ">");
-        private static string TargetLabel => SpriteOrGlyph("target", "◎", "◉", "⊙", "○", "o");
-
-        private static string SpriteOrGlyph(string spriteName, params string[] glyphs)
-        {
-            return SpritesIcons.HasSprite(spriteName)
-                ? "<sprite name=\"" + spriteName + "\" tint=1>"
-                : DefaultPalette.PickGlyph(glyphs);
-        }
+        private static string EditLabel => SpritesIcons.SpriteOrGlyph("edit", "✎", "✏", "E");
+        private static string GoToLabel => SpritesIcons.SpriteOrGlyph("goto", "➤", "►", "▶", "→", ">");
+        private static string TargetLabel => SpritesIcons.SpriteOrGlyph("target", "◎", "◉", "⊙", "○", "o");
 
         // ================================================
         // Builder parameters

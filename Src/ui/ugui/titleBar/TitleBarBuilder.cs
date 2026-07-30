@@ -61,9 +61,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
 
             // "Refresh" button. No circular-arrow glyph in the game SDF font: use the shared "refresh"
             // sprite, falling back to a text glyph if the texture is missing.
-            string refreshLabel = SpritesIcons.HasSprite("refresh")
-                ? "<sprite name=\"refresh\" tint=1>"
-                : DefaultPalette.PickGlyph("↻", "⟳", "↺", "R");
+            string refreshLabel = SpritesIcons.SpriteOrGlyph("refresh", "↻", "⟳", "↺", "R");
             ButtonController refresh = NewButton("Refresh", refreshLabel, true);
             refresh.OnClick.Add(() => _viewModel.ForceReload());
             refresh.transform.SetParent(right, false);

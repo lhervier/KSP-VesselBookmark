@@ -822,6 +822,46 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             return SelectedBookmark.VesselPersistentID != FlightGlobals.ActiveVessel.persistentId;
         }
         
+        /// <summary>
+        /// Whether the part action window can be opened for the given bookmark: it must be a command
+        /// module bookmark whose part is one of the vessel currently being flown.
+        /// </summary>
+        /// <param name="bookmark">The bookmark to check</param>
+        /// <returns>Whether the PAW of the bookmark's command module can be opened</returns>
+        public bool CanShowPaw(Bookmark bookmark) {
+            return GetPawPart(bookmark) != null && UIPartActionController.Instance != null;
+        }
+
+        /// <summary>
+        /// The loaded part of the given bookmark's command module when its PAW is reachable, null
+        /// otherwise (not a command module bookmark, not in flight, or another vessel).
+        /// </summary>
+        /// <param name="bookmark">The bookmark to get the command module part of</param>
+        /// <returns>The command module part, or null</returns>
+        private Part GetPawPart(Bookmark bookmark) {
+            // A PAW only exists in the flight scene, and only for a loaded part. Restricting to the
+            // active vessel gives both: it is always loaded, so its parts carry the stored flightID.
+            if( !HighLogic.LoadedSceneIsFlight ) {
+                return null;
+            }
+            if( !(bookmark is CommandModuleBookmark commandModuleBookmark) ) {
+                return null;
+            }
+            Vessel activeVessel = FlightGlobals.ActiveVessel;
+            if( activeVessel == null || activeVessel.parts == null ) {
+                return null;
+            }
+            if( activeVessel.persistentId != commandModuleBookmark.VesselPersistentID ) {
+                return null;
+            }
+            foreach( Part part in activeVessel.parts ) {
+                if( part.flightID == commandModuleBookmark.CommandModuleFlightID ) {
+                    return part;
+                }
+            }
+            return null;
+        }
+
         // ======================================================================
         //  Current selected bookmark actions
         // ======================================================================
@@ -939,6 +979,24 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             while( bookmark.Order < nextBookmark.Order ) {
                 _bookmarkManager.MoveBookmarkDown(bookmark);
             }
+        }
+
+        /// <summary>
+        /// Open the part action window of the given bookmark's command module.
+        /// No-op when <see cref="CanShowPaw"/> is false for that bookmark.
+        /// </summary>
+        /// <param name="bookmark">The bookmark whose command module PAW must be opened</param>
+        public void ShowPaw(Bookmark bookmark) {
+            Part part = GetPawPart(bookmark);
+            if( part == null ) {
+                LOGGER.LogWarning($"Bookmark {bookmark}: Command module part not found. Cannot show its PAW.");
+                return;
+            }
+            if( UIPartActionController.Instance == null ) {
+                LOGGER.LogWarning($"Bookmark {bookmark}: UIPartActionController not found. Cannot show the PAW.");
+                return;
+            }
+            UIPartActionController.Instance.SpawnPartActionWindow(part);
         }
 
         /// <summary>

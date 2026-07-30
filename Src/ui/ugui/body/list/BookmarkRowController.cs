@@ -84,6 +84,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             return this;
         }
 
+        // Null on a row that can never show a PAW (i.e. a vessel bookmark).
+        private ButtonController _pawButtonController;
+        public BookmarkRowController WithPawButtonController(ButtonController pawButtonController)
+        {
+            _pawButtonController = pawButtonController;
+            return this;
+        }
+
         private ButtonController _upButtonController;
         public BookmarkRowController WithUpButtonController(ButtonController upButtonController)
         {
@@ -116,6 +124,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 _pointerHandler.OnClick = RowClicked;
             }
 
+            if( _pawButtonController != null )
+            {
+                _pawButtonController.OnClick.Add(OnPawButton);
+            }
             if( _upButtonController != null )
             {
                 _upButtonController.OnClick.Add(OnUpButton);
@@ -132,6 +144,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 
         public void OnDestroy()
         {
+            if( _pawButtonController != null )
+            {
+                _pawButtonController.OnClick.Remove(OnPawButton);
+            }
             if( _upButtonController != null )
             {
                 _upButtonController.OnClick.Remove(OnUpButton);
@@ -173,6 +189,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
         private void RowClicked()
         {
             _viewModel.SelectedBookmark = _bookmark;
+        }
+
+        private void OnPawButton()
+        {
+            _viewModel.ShowPaw(_bookmark);
         }
 
         private void OnUpButton()
@@ -231,6 +252,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             else if (target) SetChip(true, "chipTarget",
                 DefaultPalette.AccentColor, DefaultPalette.AccentBgColor, DefaultPalette.AccentBorderColor);
             else _chip.SetVisible(false);
+
+            // PAW button: hidden — not greyed out — whenever it is not usable, like the accent bar or
+            // the chip. The group is driven by a CanvasGroup (global alpha), so hiding a single button
+            // means deactivating its GameObject; the horizontal layout then compacts on its own.
+            if (_pawButtonController != null)
+            {
+                _pawButtonController.gameObject.SetActive(_viewModel.CanShowPaw(_bookmark));
+            }
 
             // Boutons d'ordre/suppression
             bool showButtons = hovered || selected || active;

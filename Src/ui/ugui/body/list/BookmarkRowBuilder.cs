@@ -14,10 +14,10 @@ using com.github.lhervier.ksp.shared.ugui.styles;
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
 {
     /// <summary>
-    /// Une ligne de bookmark : ligne 1 (icône type + alarme + titre + pastille d'état + boutons ▲▼✕),
-    /// ligne 2 (situation + nom de vaisseau), ligne 3 (commentaire). Le fond, le liseré gauche, la
-    /// couleur du titre, la pastille et la visibilité des boutons dépendent de l'état (sélection,
-    /// survol, vaisseau actif, cible) et sont réévalués par Refresh().
+    /// One bookmark row: line 1 (type icon + alarm + title + status chip + the ⚙▲▼✕ buttons), line 2
+    /// (situation + vessel name), line 3 (comment). The background, the left accent bar, the title
+    /// color, the chip and the button visibility depend on the state (selection, hover, active
+    /// vessel, target) and are re-evaluated by Refresh().
     /// </summary>
     public class BookmarkRowBuilder : IUGUIBuilder<BookmarkRowController>
     {
@@ -25,6 +25,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
         private static string MoveUpLabel => DefaultPalette.PickGlyph("▲", "↑");
         private static string MoveDownLabel => DefaultPalette.PickGlyph("▼", "↓");
         private static string RemoveLabel => DefaultPalette.PickGlyph("✕", "✗", "×", "x");
+
+        // The gear is not in the game SDF font: prefer the shared sprite, fall back to a text glyph.
+        private static string PawLabel => SpritesIcons.SpriteOrGlyph("paw", "⚙", "☰", "≡", "P");
 
         // ===========================================
         // Builder parameters
@@ -137,12 +140,13 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             // Pastille d'état (Actif / Cible / Disparu) — créée, affichée selon l'état dans Refresh()
             BadgeController chip = BuildChip(line1.transform);
 
-            // Boutons ▲ ▼ ✕ (révélés au survol / sélection)
+            // ⚙ ▲ ▼ ✕ buttons (revealed on hover / selection)
             CanvasGroup rowButtonsGroup = BuildRowButtons(
-                line1.transform, 
-                _bookmark, 
-                _first, 
+                line1.transform,
+                _bookmark,
+                _first,
                 _last,
+                out ButtonController pawButton,
                 out ButtonController upButton,
                 out ButtonController downButton,
                 out ButtonController removeButton
@@ -191,6 +195,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 .WithRowButtons(rowButtonsGroup)
                 .WithVesselExists(vesselExists)
                 .WithPointerHandler(pointer)
+                .WithPawButtonController(pawButton)
                 .WithUpButtonController(upButton)
                 .WithDownButtonController(downButton)
                 .WithRemoveButtonController(removeButton);
@@ -299,10 +304,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
         }
 
         private CanvasGroup BuildRowButtons(
-            Transform parent, 
-            Bookmark bookmark, 
-            bool isFirst, 
+            Transform parent,
+            Bookmark bookmark,
+            bool isFirst,
             bool isLast,
+            out ButtonController pawButton,
             out ButtonController upButton,
             out ButtonController downButton,
             out ButtonController removeButton
@@ -323,6 +329,25 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             group.alpha = 0f;
             group.blocksRaycasts = false;
             group.interactable = false;
+
+            // "Show PAW" button, only on a command module row: a bookmarked vessel has no part of its
+            // own to open a PAW for. The row controller then shows it only while that command module
+            // belongs to the vessel being flown, the sole case where the PAW is reachable.
+            pawButton = null;
+            if (bookmark is CommandModuleBookmark)
+            {
+                pawButton = new VBMButtonBuilder()
+                    .WithObjectName("ShowPaw")
+                    .WithLabel(PawLabel)
+                    .WithSize(VesselBookmarkPalette.RowButtonSize)
+                    .WithFontSize(VesselBookmarkPalette.RowButtonFontSize)
+                    .WithBackgroundColor(VesselBookmarkPalette.RowButtonBgColor)
+                    .WithHoverColor(VesselBookmarkPalette.RowButtonHoverColor)
+                    .Build();
+                pawButton.transform.SetParent(groupGo.transform, false);
+                Tooltips.Attach(pawButton.gameObject, ModLocalization.GetString("tooltipPaw"));
+                pawButton.gameObject.SetActive(false);   // revealed by the controller's Refresh()
+            }
 
             // Row buttons use their own (smaller) size, font and colors, overriding the VBM defaults.
             upButton = new VBMButtonBuilder()
