@@ -241,6 +241,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 .WithPlaceholder(ModLocalization.GetString("menuSearchPlaceholder"))
                 .WithHeight(VesselBookmarkPalette.ComboHeight)
                 .WithFontSize(VesselBookmarkPalette.SearchFontSize)
+                .WithClearButtonState(true)
                 .Build();
             search.OnValueChanged.Add(v => _viewModel.SearchText = v);
             return search;
