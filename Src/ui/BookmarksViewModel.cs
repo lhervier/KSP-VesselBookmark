@@ -56,7 +56,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
         private Bookmark _selectedBookmark = null;
         public readonly EventVoid OnSelectedBookmarkChanged = new EventVoid("BookmarksViewModel.OnSelectedBookmarkChanged");
-        
+
+        // Selected row of the list. Static because this view model — a component of the per-scene
+        // BookmarksUI addon — is destroyed and rebuilt on every scene change, and the list must reopen on
+        // the row it was left on, like the window's position, open state and scroll offset already do.
+        // Memorized as an identity rather than as a reference: loading a game rebuilds the bookmark
+        // objects. Deliberately lost when the game restarts: nothing is written to disk.
+        private static BookmarkType _lastSelectedBookmarkType = BookmarkType.Unknown;
+        private static uint _lastSelectedBookmarkID = 0;
+
         // ======================================================================
         // Lists of values (bookmarks, bodies, vessel types, ...)
         // ======================================================================
@@ -439,6 +447,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             // switch and on SOI crossing — neither raises a bookmark event.
             GameEvents.onVesselSOIChanged.Add(_onVesselSOIChanged);
 
+            // Restore the row selected before the scene change. Assigned through the property, after the
+            // subscriptions above, so the restored selection propagates exactly like a user click (comment
+            // buffer, list highlight, footer). Resolved by identity : nothing to restore if the bookmark is
+            // gone. UpdateBookmarksSelection below drops it again if the restored filters hide it.
+            if( _lastSelectedBookmarkType != BookmarkType.Unknown ) {
+                SelectedBookmark = _bookmarkManager.GetBookmark(_lastSelectedBookmarkType, _lastSelectedBookmarkID);
+            }
+
             UpdateBookmarksSelection();
         }
 
@@ -488,6 +504,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private void _onSelectedBookmarkChanged()
         {
             Comment = SelectedBookmark?.Comment ?? string.Empty;
+
+            // Remember which row it is, for the next time the view model is built (i.e. the next scene).
+            _lastSelectedBookmarkType = SelectedBookmark?.BookmarkType ?? BookmarkType.Unknown;
+            _lastSelectedBookmarkID = SelectedBookmark?.BookmarkID ?? 0;
         }
 
         private void _fireFiltersChanged()
