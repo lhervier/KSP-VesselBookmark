@@ -12,6 +12,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body
     /// </summary>
     public class BodyBuilder : IUGUIBuilder<ScrollableViewController>
     {
+        // Scroll offset of the list. Static because the window — hence the scrollable view, hence this
+        // builder — is destroyed and rebuilt on every scene change, and the list must reopen where it was
+        // left, like the window's position and open state already do. Deliberately lost when the game
+        // restarts: nothing is written to disk.
+        private static float _scrollOffset = 0f;
+
         // ===================================================
         // Builder parameters
         // ===================================================
@@ -29,14 +35,31 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body
 
         public ScrollableViewController Build()
         {
-            return new ScrollableViewBuilder<ListController>()
+            ScrollableViewController body = new ScrollableViewBuilder<ListController>()
                 .WithObjectName("Bookmarks.Body")
+                .WithInitialScrollOffset(_scrollOffset)
                 .WithContentBuilder(new ListBuilder().WithViewModel(_viewModel))
                 .WithScrollbarWidth(VesselBookmarkPalette.ScrollbarWidth)
                 .WithScrollbarBackgroundColor(VesselBookmarkPalette.SearchBgColor)
                 .WithHandleColor(PopupPalette.PopupBorderColor)
                 .WithHandleHoverColor(VesselBookmarkPalette.ScrollbarColor)
                 .Build();
+
+            // No unsubscription: the event belongs to the controller, which dies with the view (and takes
+            // the delegate, hence this builder, with it).
+            body.OnScrollOffsetChanged.Add(OnScrollOffsetChanged);
+            return body;
+        }
+
+        /// <summary>
+        /// The user scrolled the list : remember where, for the next time the view is built.
+        /// </summary>
+        /// <param name="scrollOffset">The new scroll offset, in pixels from the top of the list</param>
+        // Instance method although it only writes a static field: KSP's EventData.Add reads
+        // evt.Target.GetType(), which throws on the null Target of a static handler.
+        private void OnScrollOffsetChanged(float scrollOffset)
+        {
+            _scrollOffset = scrollOffset;
         }
     }
 }
