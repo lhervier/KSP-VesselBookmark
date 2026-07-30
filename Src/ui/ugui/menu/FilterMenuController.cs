@@ -67,6 +67,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 _viewModel.OnAvailableSituationsChanged.Add(RefreshSituationCombo);
                 _viewModel.OnSelectedSituationChanged.Add(RefreshSituationCombo);
                 _viewModel.OnFilterHasCommentChanged.Add(RefreshCheckbox);
+                _viewModel.OnFilterEditionRequested.Add(OnFilterEditionRequested);
 
                 RefreshBodyCombo();
                 RefreshTypeCombo();
@@ -114,6 +115,24 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 _viewModel.OnAvailableSituationsChanged.Remove(RefreshSituationCombo);
                 _viewModel.OnSelectedSituationChanged.Remove(RefreshSituationCombo);
                 _viewModel.OnFilterHasCommentChanged.Remove(RefreshCheckbox);
+                _viewModel.OnFilterEditionRequested.Remove(OnFilterEditionRequested);
+            }
+        }
+
+        /// <summary>
+        /// Brings up the control backing the requested criterion. The menu has just been opened by the
+        /// ViewModel, so the panel is already active: only the control itself is left to unfold (drop
+        /// the combo down, focus the search field). The "with a comment" checkbox has nothing to
+        /// unfold — showing the menu is enough.
+        /// </summary>
+        private void OnFilterEditionRequested(FilterCriterionId id)
+        {
+            switch( id )
+            {
+                case FilterCriterionId.Text: _search?.Activate(); break;
+                case FilterCriterionId.Body: _bodyCombo?.Open(); break;
+                case FilterCriterionId.VesselType: _typeCombo?.Open(); break;
+                case FilterCriterionId.Situation: _situationCombo?.Open(); break;
             }
         }
 

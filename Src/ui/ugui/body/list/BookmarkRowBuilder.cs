@@ -130,7 +130,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             var nameLe = nameGo.AddComponent<LayoutElement>();
             nameLe.flexibleWidth = 1f;
             var name = UGUILabels.AddLabel(nameGo);
-            name.text = BuildTitle(_bookmark, vesselExists);
+            name.text = SearchHighlight.Apply(BuildTitle(_bookmark, vesselExists), _viewModel.SearchText);
             name.fontSize = VesselBookmarkPalette.NameFontSize;
             name.fontStyle = vesselExists ? FontStyles.Normal : FontStyles.Italic;
             name.color = VesselBookmarkPalette.NameColor;
@@ -159,7 +159,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             var situationGo = new GameObject("Situation", typeof(RectTransform));
             situationGo.transform.SetParent(line2.transform, false);
             var situation = UGUILabels.AddLabel(situationGo);
-            situation.text = _bookmark.VesselSituationLabel;
+            situation.text = SearchHighlight.Apply(_bookmark.VesselSituationLabel, _viewModel.SearchText);
             situation.fontSize = VesselBookmarkPalette.SituationFontSize;
             situation.color = VesselBookmarkPalette.SituationColor;
             situation.alignment = TextAlignmentOptions.Left;
@@ -169,7 +169,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 var vnameGo = new GameObject("VesselName", typeof(RectTransform));
                 vnameGo.transform.SetParent(line2.transform, false);
                 var vname = UGUILabels.AddLabel(vnameGo);
-                vname.text = "(" + _bookmark.VesselName + ")";
+                vname.text = "(" + SearchHighlight.Apply(_bookmark.VesselName, _viewModel.SearchText) + ")";
                 vname.fontSize = VesselBookmarkPalette.SituationFontSize;
                 vname.color = VesselBookmarkPalette.VesselNameColor;
                 vname.alignment = TextAlignmentOptions.Left;
@@ -436,7 +436,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
             var textLe = textGo.AddComponent<LayoutElement>();
             textLe.flexibleWidth = 1f;
             var text = UGUILabels.AddLabel(textGo);
-            text.text = comment;
+            text.text = SearchHighlight.Apply(comment, _viewModel.SearchText);
             text.fontSize = VesselBookmarkPalette.CommentFontSize;
             text.color = VesselBookmarkPalette.CommentTextColor;
             text.alignment = TextAlignmentOptions.TopLeft;

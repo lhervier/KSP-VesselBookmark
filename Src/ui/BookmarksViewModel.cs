@@ -244,6 +244,26 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private float _searchTextChangeTime = -1f;
         private string _searchText = string.Empty;
         public readonly EventVoid OnSearchTextChanged = new EventVoid("BookmarksViewModel.OnSearchTextChanged");
+
+        /// <summary>
+        /// Sets the search text and applies it immediately, without waiting for the typing debounce.
+        /// For programmatic changes (reset, criterion removal), where there is no keystroke burst to
+        /// absorb and the UI must reflect the change at once.
+        /// </summary>
+        /// <param name="value">The new search text (null is treated as empty)</param>
+        private void SetSearchTextNow(string value) {
+            _searchText = value ?? string.Empty;
+            _searchTextChangeTime = -1f;      // cancels any debounce still pending
+            OnSearchTextChanged.Fire();
+        }
+
+        /// <summary>
+        /// Fired whenever ANY search criterion changes. Consumers that only need to know "the filtering
+        /// changed" subscribe to this single event instead of the five per-criterion ones — forgetting
+        /// one of them is otherwise silent (the situation filter used to be missing from the title bar's
+        /// "active filter" dot).
+        /// </summary>
+        public readonly EventVoid OnFiltersChanged = new EventVoid("BookmarksViewModel.OnFiltersChanged");
         
         // =============================================================
         // Comment edition
@@ -282,6 +302,23 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
         private bool _filterMenuOpen = false;
         public readonly EventVoid OnFilterMenuOpenChanged = new EventVoid("BookmarksViewModel.OnFilterMenuOpenChanged");
+
+        /// <summary>
+        /// Raised when the user asks to change a given criterion (by clicking its chip in the filter
+        /// bar). Carries that criterion; the filter menu listens to it and brings up the matching
+        /// control. The ViewModel only relays the request.
+        /// </summary>
+        public readonly EventData<FilterCriterionId> OnFilterEditionRequested = new EventData<FilterCriterionId>("BookmarksViewModel.OnFilterEditionRequested");
+
+        /// <summary>
+        /// Ask to change the given criterion: opens the filter menu and relays the request so it can
+        /// bring up the control backing that criterion.
+        /// </summary>
+        /// <param name="id">The criterion the user wants to change</param>
+        public void RequestFilterEdition(FilterCriterionId id) {
+            FilterMenuOpen = true;
+            OnFilterEditionRequested.Fire(id);
+        }
 
         /// <summary>
         /// Whether the comment edition popin is open.
@@ -335,6 +372,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             this.OnSearchTextChanged.Add(UpdateBookmarksSelection);
             this.OnFilterHasCommentChanged.Add(UpdateBookmarksSelection);
 
+            // Every per-criterion event is relayed to the aggregated one, right where it is already
+            // wired to the bookmarks refresh: a criterion cannot be added without being broadcast.
+            this.OnSelectedVesselTypeChanged.Add(_fireFiltersChanged);
+            this.OnSelectedSituationChanged.Add(_fireFiltersChanged);
+            this.OnSelectedBodyChanged.Add(_fireFiltersChanged);
+            this.OnSearchTextChanged.Add(_fireFiltersChanged);
+            this.OnFilterHasCommentChanged.Add(_fireFiltersChanged);
+
             this.OnSelectedBookmarkChanged.Add(_onSelectedBookmarkChanged);
 
             _bookmarkManager.OnBookmarksUpdated.Add(UpdateBookmarksSelection);
@@ -379,6 +424,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             this.OnSelectedSituationChanged.Remove(UpdateBookmarksSelection);
             this.OnSelectedVesselTypeChanged.Remove(UpdateBookmarksSelection);
 
+            this.OnFilterHasCommentChanged.Remove(_fireFiltersChanged);
+            this.OnSearchTextChanged.Remove(_fireFiltersChanged);
+            this.OnSelectedBodyChanged.Remove(_fireFiltersChanged);
+            this.OnSelectedSituationChanged.Remove(_fireFiltersChanged);
+            this.OnSelectedVesselTypeChanged.Remove(_fireFiltersChanged);
+
             this.OnSelectedBookmarkChanged.Remove(_onSelectedBookmarkChanged);
 
             GameEvents.onVesselChange.Remove(_onActiveVesselChanged);
@@ -389,6 +440,14 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         private void _onSelectedBookmarkChanged()
         {
             Comment = SelectedBookmark?.Comment ?? string.Empty;
+        }
+
+        private void _fireFiltersChanged()
+        {
+            // Same guard as the bookmarks refresh: a bulk change (ClearFilters) broadcasts once, at the
+            // end, instead of once per criterion it resets.
+            if( _preventBookmarksUpdates ) return;
+            this.OnFiltersChanged.Fire();
         }
 
         private void _onActiveVesselChanged(Vessel vessel)
@@ -703,15 +762,105 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         // =============================================================================
 
         /// <summary>
+        /// Every criterion, in the order they are presented to the user.
+        /// </summary>
+        private static readonly FilterCriterionId[] ALL_CRITERIA = {
+            FilterCriterionId.Text,
+            FilterCriterionId.Body,
+            FilterCriterionId.VesselType,
+            FilterCriterionId.Situation,
+            FilterCriterionId.HasComment,
+        };
+
+        /// <summary>
         /// Whether any filter is currently active (différent de l'état par défaut).
         /// </summary>
         public bool HasActiveFilters {
             get {
-                return SelectedBody != ALL_BODIES
-                    || SelectedVesselType != ALL_VESSEL_TYPES
-                    || SelectedSituation != ALL_SITUATIONS
-                    || !string.IsNullOrEmpty(SearchText)
-                    || FilterHasComment;
+                foreach( FilterCriterionId id in ALL_CRITERIA ) {
+                    if( IsCriterionActive(id) ) return true;
+                }
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Whether the filtering currently hides at least one bookmark. Distinct from
+        /// <see cref="HasActiveFilters"/>: a criterion may be set and yet exclude nothing.
+        /// </summary>
+        public bool IsFilteringOut => AvailableBookmarksCount != TotalBookmarksCount;
+
+        /// <summary>
+        /// The active criteria, in presentation order, each with its localized key/value labels.
+        /// Empty when nothing is filtered.
+        /// </summary>
+        public List<FilterCriterion> ActiveCriteria {
+            get {
+                var criteria = new List<FilterCriterion>();
+                foreach( FilterCriterionId id in ALL_CRITERIA ) {
+                    if( !IsCriterionActive(id) ) continue;
+                    criteria.Add(new FilterCriterion(id, GetCriterionKeyLabel(id), GetCriterionValueLabel(id)));
+                }
+                return criteria;
+            }
+        }
+
+        /// <summary>
+        /// Whether the given criterion is set to something else than its "all" (inactive) value.
+        /// </summary>
+        /// <param name="id">The criterion to test</param>
+        private bool IsCriterionActive(FilterCriterionId id) {
+            switch( id ) {
+                case FilterCriterionId.Text: return !string.IsNullOrEmpty(SearchText);
+                case FilterCriterionId.Body: return SelectedBody != ALL_BODIES;
+                case FilterCriterionId.VesselType: return SelectedVesselType != ALL_VESSEL_TYPES;
+                case FilterCriterionId.Situation: return SelectedSituation != ALL_SITUATIONS;
+                case FilterCriterionId.HasComment: return FilterHasComment;
+                default: return false;
+            }
+        }
+
+        /// <summary>
+        /// Localized name of the given criterion (e.g. "Corps").
+        /// </summary>
+        /// <param name="id">The criterion to name</param>
+        private string GetCriterionKeyLabel(FilterCriterionId id) {
+            switch( id ) {
+                case FilterCriterionId.Text: return ModLocalization.GetString("filterKeyText");
+                case FilterCriterionId.Body: return ModLocalization.GetString("filterKeyBody");
+                case FilterCriterionId.VesselType: return ModLocalization.GetString("filterKeyType");
+                case FilterCriterionId.Situation: return ModLocalization.GetString("filterKeySituation");
+                case FilterCriterionId.HasComment: return ModLocalization.GetString("filterKeyOption");
+                default: return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Localized value the given criterion is currently set to (e.g. "Mun").
+        /// </summary>
+        /// <param name="id">The criterion to read</param>
+        private string GetCriterionValueLabel(FilterCriterionId id) {
+            switch( id ) {
+                case FilterCriterionId.Text: return ModLocalization.GetString("filterValueText", SearchText);
+                case FilterCriterionId.Body: return LabelForBody(SelectedBody);
+                case FilterCriterionId.VesselType: return LabelForVesselType(SelectedVesselType);
+                case FilterCriterionId.Situation: return LabelForSituation(SelectedSituation);
+                case FilterCriterionId.HasComment: return ModLocalization.GetString("filterValueWithComment");
+                default: return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Reset the given criterion to its "all" value, leaving the others untouched.
+        /// </summary>
+        /// <param name="id">The criterion to reset</param>
+        public void ClearFilter(FilterCriterionId id) {
+            switch( id ) {
+                case FilterCriterionId.Text: SetSearchTextNow(string.Empty); break;
+                case FilterCriterionId.Body: SelectedBody = ALL_BODIES; break;
+                case FilterCriterionId.VesselType: SelectedVesselType = ALL_VESSEL_TYPES; break;
+                case FilterCriterionId.Situation: SelectedSituation = ALL_SITUATIONS; break;
+                case FilterCriterionId.HasComment: FilterHasComment = false; break;
             }
         }
 
@@ -723,10 +872,59 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
             SelectedBody = ALL_BODIES;
             SelectedVesselType = ALL_VESSEL_TYPES;
             SelectedSituation = ALL_SITUATIONS;
-            SearchText = string.Empty;
+            SetSearchTextNow(string.Empty);
             FilterHasComment = false;
             this._preventBookmarksUpdates = false;
             UpdateBookmarksSelection();
+            this.OnFiltersChanged.Fire();
+        }
+
+        // ----------------------------------------------------------------------
+        //  Raw filter value -> displayed label. Shared by the filter menu (combo labels) and by the
+        //  filter bar (criterion chips), so both always name a criterion the same way.
+        // ----------------------------------------------------------------------
+
+        /// <summary>
+        /// Displayed label of a body filter value. The ALL_BODIES and CURRENT_BODY tokens become
+        /// "Tous" and "Courant (&lt;body&gt;)"; any other value is a body name, translated to its
+        /// localized game name. The raw value stays the filter/identity key and is never displayed.
+        /// </summary>
+        /// <param name="value">The raw body filter value</param>
+        public string LabelForBody(string value) {
+            if( value == ALL_BODIES ) {
+                return ModLocalization.GetString("labelAll");
+            }
+            if( value == CURRENT_BODY ) {
+                return ModLocalization.GetString("labelBodyCurrent", CelestialBodyLabels.GetDisplayName(CurrentBodyName));
+            }
+            return CelestialBodyLabels.GetDisplayName(value);
+        }
+
+        /// <summary>
+        /// Displayed label of a vessel-type filter value (the "All" token uses the vesselTypeAll key).
+        /// </summary>
+        /// <param name="value">The raw vessel-type filter value</param>
+        public string LabelForVesselType(string value) {
+            if( string.IsNullOrEmpty(value) ) return value;
+            string key = value == ALL_VESSEL_TYPES ? "vesselTypeAll" : "vesselType" + value;
+            return ModLocalization.GetString(key);
+        }
+
+        /// <summary>
+        /// Displayed label of a situation filter value. The ALL_SITUATIONS token becomes "Tous"; any
+        /// other value is a Vessel.Situations name, translated by the stock game (without the body
+        /// name — the body is a separate criterion).
+        /// </summary>
+        /// <param name="value">The raw situation filter value</param>
+        public string LabelForSituation(string value) {
+            if( string.IsNullOrEmpty(value) ) return value;
+            if( value == ALL_SITUATIONS ) {
+                return ModLocalization.GetString("labelAll");
+            }
+            if( Enum.TryParse(value, out Vessel.Situations situation) ) {
+                return Vessel.GetSituationString(situation);
+            }
+            return value;
         }
 
         // ======================================================================

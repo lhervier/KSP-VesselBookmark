@@ -6,6 +6,7 @@ using com.github.lhervier.ksp.bookmarksmod.ui.styles;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.sprites;
 using com.github.lhervier.ksp.shared;
 using com.github.lhervier.ksp.shared.ugui.sprites;
+using com.github.lhervier.ksp.shared.ugui.styles;
 
 namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
 {
@@ -46,11 +47,10 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
                 this._viewModel.OnAvailableBookmarksChanged.Add(OnAvailableBookmarksChanged);
                 this._viewModel.OnActiveOrTargetChanged.Add(OnActiveOrTargetChanged);
 
-                // "Active filter" dot: refreshes whenever a filter changes
-                this._viewModel.OnSelectedBodyChanged.Add(UpdateFilterDot);
-                this._viewModel.OnSelectedVesselTypeChanged.Add(UpdateFilterDot);
-                this._viewModel.OnSearchTextChanged.Add(UpdateFilterDot);
-                this._viewModel.OnFilterHasCommentChanged.Add(UpdateFilterDot);
+                // "Active filter" dot: refreshes whenever a filter changes. The aggregated event covers
+                // every criterion at once — subscribing to them one by one had silently left the
+                // situation filter out, and the dot then ignored it.
+                this._viewModel.OnFiltersChanged.Add(UpdateFilterDot);
 
                 UpdateCount();
                 UpdateAddButton();
@@ -64,10 +64,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
             {
                 this._viewModel.OnAvailableBookmarksChanged.Remove(OnAvailableBookmarksChanged);
                 this._viewModel.OnActiveOrTargetChanged.Remove(OnActiveOrTargetChanged);
-                this._viewModel.OnSelectedBodyChanged.Remove(UpdateFilterDot);
-                this._viewModel.OnSelectedVesselTypeChanged.Remove(UpdateFilterDot);
-                this._viewModel.OnSearchTextChanged.Remove(UpdateFilterDot);
-                this._viewModel.OnFilterHasCommentChanged.Remove(UpdateFilterDot);
+                this._viewModel.OnFiltersChanged.Remove(UpdateFilterDot);
             }
         }
 
@@ -77,7 +74,22 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.titleBar
         private void UpdateCount()
         {
             if (_countBadge == null) return;
-            _countBadge.SetText($"{_viewModel.AvailableBookmarksCount} / {_viewModel.TotalBookmarksCount}");
+            // Accent only while the filtering actually hides bookmarks: the badge then reads as "some
+            // are missing from the list", and stays neutral the rest of the time.
+            if (_viewModel.IsFilteringOut)
+            {
+                _countBadge.SetState(
+                    $"{_viewModel.AvailableBookmarksCount} / {_viewModel.TotalBookmarksCount}",
+                    DefaultPalette.AccentColor, DefaultPalette.AccentBgColor, DefaultPalette.AccentBorderColor);
+            }
+            else
+            {
+                _countBadge.SetState(
+                    $"{_viewModel.AvailableBookmarksCount} / {_viewModel.TotalBookmarksCount}",
+                    VesselBookmarkPalette.CountIdleTextColor,
+                    VesselBookmarkPalette.CountIdleBgColor,
+                    VesselBookmarkPalette.CountIdleBorderColor);
+            }
         }
 
         private void UpdateAddButton()

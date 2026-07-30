@@ -24,7 +24,11 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         // Badge compteur "X / Y"
         public const int CountFontSize = 10;
         public const float CountPaddingH = 6f;
-        // (couleurs = AccentColor / AccentBorderColor / AccentBgColor)
+        // Accentué (AccentColor / AccentBgColor / AccentBorderColor) quand le filtrage masque des
+        // signets, éteint sinon : la couleur seule dit s'il manque quelque chose à l'écran.
+        public static readonly Color CountIdleTextColor = Rgb(119, 119, 119);      // #777
+        public static readonly Color CountIdleBgColor = Rgba(255, 255, 255, 0.03f);
+        public static readonly Color CountIdleBorderColor = Rgb(68, 68, 68);       // #444
 
         // Boutons du title bar (＋ ⟳ ⋯ ✕)
         public const float TitleButtonSize = 22f;
@@ -70,6 +74,37 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         public static readonly Color ComboItemDisabledColor = Rgb(102, 102, 102);  // #666 (option sans bookmark)
         
         // ==============================================================
+        // Barre de rappel des critères actifs (sous le title bar)
+        // ==============================================================
+        public const float FilterBarPaddingH = 8f;
+        public const float FilterBarPaddingV = 5f;
+        public const float FilterBarSpacingH = 4f;      // entre pastilles, sur une même ligne
+        public const float FilterBarSpacingV = 3f;      // entre deux lignes de pastilles
+        public const float FilterBarSeparatorHeight = 1f;
+        public static readonly Color FilterBarBgColor = Rgb(24, 24, 24);         // #181818
+        public static readonly Color FilterBarSeparatorColor = Rgb(42, 42, 42);  // #2a2a2a
+
+        // Pastille d'un critère : [clé valeur][✕]
+        public const float FilterChipHeight = 18f;
+        public const int FilterChipKeyFontSize = 9;
+        public const int FilterChipValueFontSize = 11;
+        public const float FilterChipPaddingH = 5f;
+        public const float FilterChipSpacing = 4f;         // entre la clé et la valeur
+        public const int FilterChipBorderThickness = 1;
+        public const float FilterChipRemoveWidth = 15f;
+        public static readonly Color FilterChipKeyColor = Rgb(109, 143, 69);     // #6d8f45
+        public static readonly Color FilterChipValueColor = Rgb(166, 214, 94);   // #a6d65e
+        public static readonly Color FilterChipHoverColor = Rgba(141, 190, 69, 0.18f);
+        public static readonly Color FilterChipRemoveHoverColor = Rgba(192, 89, 79, 0.25f);
+        // (fond/bordure de la pastille = AccentBgColor / AccentBorderColor)
+
+        // Action « tout effacer », à droite de la barre
+        public const int FilterClearFontSize = 10;
+        public const float FilterClearPaddingH = 4f;
+        public static readonly Color FilterClearColor = Rgb(119, 119, 119);      // #777
+        public static readonly Color FilterClearHoverColor = Rgba(192, 89, 79, 0.12f);
+
+        // ==============================================================
         // Corps : liste scrollable
         // ==============================================================
         public const float ScrollbarWidth = 8f;
@@ -84,6 +119,15 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         public static readonly Color SectionHeaderBorderColor = Rgb(34, 34, 34); // #222
         public static readonly Color SectionNameColor = Rgb(221, 221, 221);    // #ddd
         public static readonly Color SectionCountColor = Rgb(85, 85, 85);      // #555
+
+        // État vide « aucun signet ne correspond » (remplace les sections quand le filtrage ne laisse rien)
+        public const int EmptyTitleFontSize = 13;
+        public const int EmptyTextFontSize = 11;
+        public const float EmptyPaddingH = 20f;
+        public const float EmptyPaddingV = 30f;
+        public const float EmptySpacing = 8f;
+        public static readonly Color EmptyTitleColor = Rgb(153, 153, 153);     // #999
+        public static readonly Color EmptyTextColor = Rgb(102, 102, 102);      // #666
 
         // Texte d'aide sous l'en-tête de section
         public const int SectionHintFontSize = 11;
@@ -113,6 +157,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.styles
         // Icône alarme
         public const float AlarmIconSize = 16f;
         // (couleur = WarmColor)
+
+        // Surlignage des occurrences du texte recherché (balise TMP <mark>)
+        public static readonly Color SearchHighlightColor = Rgba(141, 190, 69, 0.28f);
 
         // Titre du bookmark
         public const int NameFontSize = 13;

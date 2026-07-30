@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.body;
+using com.github.lhervier.ksp.bookmarksmod.ui.ugui.filterbar;
 using com.github.lhervier.ksp.bookmarksmod.ui.ugui.footer;
 using com.github.lhervier.ksp.shared.ugui;
 using com.github.lhervier.ksp.shared.ugui.scrollableview;
@@ -9,8 +10,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
 {
     /// <summary>
     /// Popup content (everything below the shared title bar): a vertical layout filling the content host,
-    /// with the scrollable bookmarks body taking all the remaining height on top and the footer action bar
-    /// pinned at the bottom. Mounted by the shared PopupBuilder, which stretches it to fill the host.
+    /// with the active-filters bar on top, the scrollable bookmarks body taking all the remaining height,
+    /// and the footer action bar pinned at the bottom. Mounted by the shared PopupBuilder, which
+    /// stretches it to fill the host.
     /// </summary>
     public class ContentBuilder : IUGUIBuilder<ContentController>
     {
@@ -42,6 +44,12 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui
             layout.childControlHeight = true;
             layout.childForceExpandWidth = true;
             layout.childForceExpandHeight = false;
+
+            // Rappel des critères de recherche actifs — hauteur nulle tant qu'aucun filtre n'est posé.
+            FilterBarController filterBar = new FilterBarBuilder()
+                .WithViewModel(_viewModel)
+                .Build();
+            filterBar.transform.SetParent(go.transform, false);
 
             // Scrollable body — greedy on height so it fills the host minus the footer.
             ScrollableViewController body = new BodyBuilder()

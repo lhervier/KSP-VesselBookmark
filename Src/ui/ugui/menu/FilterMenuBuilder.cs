@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -123,9 +122,9 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             ComboController bodyCombo = new ComboBuilder()
                 .WithParent(panelGo.transform)
                 .WithLabel(ModLocalization.GetString("labelBody"))
-                .WithLabelFor(TranslateBody)
+                .WithLabelFor(_viewModel.LabelForBody)
                 .WithItemContentBuilder(new FilterComboItemContentBuilder()
-                    .WithLabelFor(TranslateBody)
+                    .WithLabelFor(_viewModel.LabelForBody)
                     .WithEnabledFor(_viewModel.IsBodyPopulated)
                     .WithIndentFor(CelestialBodySorter.GetIndentLevel, VesselBookmarkPalette.ComboItemIndentStep))
                 .WithPreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
@@ -133,18 +132,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
             ComboController typeCombo = new ComboBuilder()
                 .WithParent(panelGo.transform)
                 .WithLabel(ModLocalization.GetString("labelType"))
-                .WithLabelFor(TranslateVesselType)
+                .WithLabelFor(_viewModel.LabelForVesselType)
                 .WithItemContentBuilder(new FilterComboItemContentBuilder()
-                    .WithLabelFor(TranslateVesselType)
+                    .WithLabelFor(_viewModel.LabelForVesselType)
                     .WithEnabledFor(_viewModel.IsVesselTypePopulated))
                 .WithPreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
                 .Build();
             ComboController situationCombo = new ComboBuilder()
                 .WithParent(panelGo.transform)
                 .WithLabel(ModLocalization.GetString("labelSituation"))
-                .WithLabelFor(TranslateSituation)
+                .WithLabelFor(_viewModel.LabelForSituation)
                 .WithItemContentBuilder(new FilterComboItemContentBuilder()
-                    .WithLabelFor(TranslateSituation)
+                    .WithLabelFor(_viewModel.LabelForSituation)
                     .WithEnabledFor(_viewModel.IsSituationPopulated))
                 .WithPreferredWidth(VesselBookmarkPalette.MenuComboLableWidth)
                 .Build();
@@ -165,46 +164,8 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.menu
                 .WithPanelAndTrap(panelGo, trapGo);
         }
 
-        // Valeur brute du corps → libellé affiché. Les jetons ALL_BODIES et CURRENT_BODY deviennent
-        // « Tous » et « Courant (<corps>) » ; tout autre valeur (nom de corps interne) est traduite
-        // vers le nom localisé du jeu. La valeur brute reste la clé d'identité/filtre, jamais affichée.
-        private string TranslateBody(string value)
-        {
-            if( value == BookmarksViewModel.ALL_BODIES )
-            {
-                return ModLocalization.GetString("labelAll");
-            }
-            if( value == BookmarksViewModel.CURRENT_BODY )
-            {
-                return ModLocalization.GetString("labelBodyCurrent", CelestialBodyLabels.GetDisplayName(_viewModel.CurrentBodyName));
-            }
-            return CelestialBodyLabels.GetDisplayName(value);
-        }
-
-        // Valeur brute du type de vaisseau → libellé traduit (la valeur « All » utilise vesselTypeAll).
-        private static string TranslateVesselType(string value)
-        {
-            if (string.IsNullOrEmpty(value)) return value;
-            string key = value == "All" ? "vesselTypeAll" : "vesselType" + value;
-            return ModLocalization.GetString(key);
-        }
-
-        // Valeur brute de la situation → libellé affiché. Le jeton ALL_SITUATIONS devient « Tous » ;
-        // toute autre valeur est un nom d'enum Vessel.Situations traduit par le natif KSP
-        // (Vessel.GetSituationString, sans nom de corps — le corps est un filtre à part).
-        private static string TranslateSituation(string value)
-        {
-            if (string.IsNullOrEmpty(value)) return value;
-            if (value == BookmarksViewModel.ALL_SITUATIONS)
-            {
-                return ModLocalization.GetString("labelAll");
-            }
-            if (Enum.TryParse(value, out Vessel.Situations situation))
-            {
-                return Vessel.GetSituationString(situation);
-            }
-            return value;
-        }
+        // (Raw filter value -> displayed label: see BookmarksViewModel.LabelForXxx. Shared with the
+        // filter bar so a criterion is named identically wherever it shows up.)
 
         // ---- Sous-éléments ----------------------------------------------------------------
 

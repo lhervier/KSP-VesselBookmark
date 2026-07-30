@@ -93,6 +93,18 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.body.list
                 Destroy(transform.GetChild(i).gameObject);
             }
 
+            // Filtrage sans aucune correspondance : on remplace les sections (qui n'auraient plus qu'un
+            // compteur à 0 et une aide hors sujet) par un panneau qui rappelle les critères en cause.
+            // Une liste réellement vide, elle, garde ses sections : leur aide dit comment la remplir.
+            if (_viewModel.AvailableBookmarksCount == 0 && _viewModel.HasActiveFilters)
+            {
+                new NoMatchBuilder()
+                    .WithViewModel(_viewModel)
+                    .WithParent(transform)
+                    .Build();
+                return;
+            }
+
             var available = _viewModel.AvailableBookmarks;
             foreach (var section in SECTIONS)
             {
