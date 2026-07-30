@@ -1,17 +1,17 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vessel Bookmarks — Maquette UI (uGUI)</title>
+<title>Vessel Bookmarks — Rappel des critères de filtrage</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Titillium+Web:wght@400;600&display=swap" rel="stylesheet">
 <style>
 /* ===========================================================================
-   Maquette de refonte graphique du mod VesselBookmarks.
-   Style calqué sur ksp_cheatsheet_ps4.html (mod KSP-SteamInputPlugin) :
-   thème sombre, accent vert #8dbe45, polices Titillium Web + Share Tech Mono.
-   Les couleurs reprennent SteamInputPalette.cs (mapping 1:1 HTML <-> uGUI).
-   Toutes les classes sont préfixées .vb-  (vessel bookmark).
+   Variante de ui_mockup.html : proposition d'ergonomie pour RAPPELER les
+   critères de recherche en cours (aujourd'hui seulement signalés par un point
+   vert sur le bouton "⋯").
+   Nouveauté = la barre de pastilles (.vb-fbar) sous le title bar + l'état vide
+   enrichi. Les filtres sont ici réellement fonctionnels pour pouvoir juger.
    =========================================================================== */
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#0a0a0a;display:flex;justify-content:center;align-items:flex-start;gap:40px;flex-wrap:wrap;padding:40px 20px;min-height:100vh;font-family:'Titillium Web',sans-serif}
@@ -22,7 +22,9 @@ body{background:#0a0a0a;display:flex;justify-content:center;align-items:flex-sta
 /* ---- Title bar ---- */
 .vb-tb{background:#2e2e2e;border-bottom:1px solid #444;padding:5px 8px;display:flex;align-items:center;gap:6px}
 .vb-title{font-weight:600;font-size:12px;color:#e8e8e8;letter-spacing:.04em;text-transform:uppercase;flex:1}
-.vb-count{font-size:10px;color:#8dbe45;font-weight:600;letter-spacing:.05em;border:1px solid #4a6e20;padding:1px 6px;border-radius:2px;background:rgba(141,190,69,.1)}
+.vb-count{font-size:10px;color:#777;font-weight:600;letter-spacing:.05em;border:1px solid #444;padding:1px 6px;border-radius:2px;background:rgba(255,255,255,.03)}
+/* le compteur passe en accent dès qu'un filtre masque des signets */
+.vb-count.filtered{color:#8dbe45;border-color:#4a6e20;background:rgba(141,190,69,.1)}
 .vb-tbtns{display:flex;align-items:center;gap:4px}
 .vb-btn{background:#383838;border:1px solid #555;border-bottom:2px solid #333;color:#bbb;font-size:13px;min-width:22px;height:22px;padding:0 4px;border-radius:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Share Tech Mono',monospace}
 .vb-btn:hover{background:#484848;color:#fff}
@@ -37,15 +39,17 @@ body{background:#0a0a0a;display:flex;justify-content:center;align-items:flex-sta
 .vb-menu.open{display:block}
 .vb-menu-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#555;padding:2px 10px 5px}
 .vb-menu-sep{border-top:1px solid #2a2a2a;margin:5px 0}
-.vb-menu-row{display:flex;align-items:center;gap:8px;padding:4px 10px}
-.vb-menu-lbl{font-size:11px;color:#999;min-width:46px;flex-shrink:0;text-transform:uppercase;letter-spacing:.04em}
+.vb-menu-row{display:flex;align-items:center;gap:8px;padding:4px 10px;border-left:2px solid transparent}
+/* surlignage temporaire de la ligne quand on arrive depuis une pastille */
+.vb-menu-row.flash{border-left-color:#8dbe45;background:rgba(141,190,69,.06)}
+.vb-menu-lbl{font-size:11px;color:#999;min-width:56px;flex-shrink:0;text-transform:uppercase;letter-spacing:.04em}
 .vb-search{flex:1;display:flex;align-items:center;gap:6px;background:#0d0d0d;border:1px solid #2a2a2a;border-radius:2px;padding:3px 7px}
 .vb-search span{color:#555;font-size:11px}
-.vb-search input{flex:1;background:transparent;border:none;outline:none;color:#e8e8e8;font-family:'Titillium Web',sans-serif;font-size:12px}
+.vb-search input{flex:1;background:transparent;border:none;outline:none;color:#e8e8e8;font-family:'Titillium Web',sans-serif;font-size:12px;min-width:0}
 .vb-search input::placeholder{color:#555}
 
-/* combo (réutilisé du cheatsheet) */
-.vb-combo{position:relative;flex:1}
+/* combo */
+.vb-combo{position:relative;flex:1;min-width:0}
 .vb-combo-btn{width:100%;display:flex;align-items:center;gap:6px;background:#2a2a2a;border:1px solid #555;border-radius:2px;color:#e8e8e8;font-family:'Titillium Web',sans-serif;font-size:12px;padding:3px 8px;cursor:pointer;text-align:left}
 .vb-combo-btn:hover{background:#333}
 .vb-combo-btn .vb-combo-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -55,8 +59,9 @@ body{background:#0a0a0a;display:flex;justify-content:center;align-items:flex-sta
 .vb-combo-item{display:flex;align-items:center;gap:7px;padding:4px 9px;cursor:pointer;font-size:12px;color:#ddd}
 .vb-combo-item:hover{background:#2a2a2a}
 .vb-combo-item.sel{background:rgba(141,190,69,.08);color:#8dbe45}
+.vb-combo-item.empty{color:#4a4a4a}
 
-/* checkbox (réutilisé du cheatsheet) */
+/* checkbox */
 .vb-check{display:flex;align-items:center;gap:7px;padding:4px 10px;cursor:pointer;user-select:none}
 .vb-check input[type=checkbox]{accent-color:#8dbe45;width:13px;height:13px;flex-shrink:0}
 .vb-check label{font-size:12px;color:#bbb;cursor:pointer}
@@ -65,20 +70,41 @@ body{background:#0a0a0a;display:flex;justify-content:center;align-items:flex-sta
 .vb-menu-action .vb-ma-ico{font-size:12px;width:13px;text-align:center;color:#888}
 .vb-menu-action:hover .vb-ma-ico{color:#8dbe45}
 
+/* ===========================================================================
+   *** LA PROPOSITION *** : barre de rappel des critères actifs.
+   Insérée entre le title bar et le corps. Masquée (display:none) tant qu'aucun
+   critère n'est posé -> zéro encombrement pour qui ne filtre pas.
+   =========================================================================== */
+.vb-fbar{display:none;align-items:center;flex-wrap:wrap;gap:4px;padding:5px 8px;background:#181818;border-bottom:1px solid #2a2a2a}
+.vb-fbar.on{display:flex}
+.vb-fbar-ico{font-size:11px;color:#4a6e20;flex-shrink:0;margin-right:1px;font-family:'Share Tech Mono',monospace}
+
+/* une pastille = un critère actif */
+.vb-fchip{display:flex;align-items:center;gap:0;background:rgba(141,190,69,.1);border:1px solid #4a6e20;border-radius:2px;max-width:100%;overflow:hidden}
+.vb-fchip-lbl{display:flex;align-items:baseline;gap:4px;padding:1px 5px;cursor:pointer;min-width:0}
+.vb-fchip-lbl:hover{background:rgba(141,190,69,.18)}
+.vb-fchip-k{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#6d8f45;flex-shrink:0}
+.vb-fchip-v{font-size:11px;color:#a6d65e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vb-fchip-x{font-family:'Share Tech Mono',monospace;font-size:10px;color:#6d8f45;padding:1px 5px 1px 4px;cursor:pointer;border-left:1px solid rgba(74,110,32,.7);flex-shrink:0}
+.vb-fchip-x:hover{background:rgba(192,89,79,.25);color:#e0a49c}
+
+/* "tout effacer", poussé à droite */
+.vb-fclear{margin-left:auto;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#777;cursor:pointer;padding:1px 4px;border-radius:2px;flex-shrink:0}
+.vb-fclear:hover{color:#c0594f;background:rgba(192,89,79,.12)}
+
 /* ---- Corps : liste ---- */
 .vb-body{max-height:430px;overflow-y:auto}
 .vb-body::-webkit-scrollbar{width:8px}
 .vb-body::-webkit-scrollbar-thumb{background:#888;border-radius:4px}
 .vb-body::-webkit-scrollbar-track{background:#141414}
 
-/* en-tête de section (= zone header du cheatsheet) */
 .vb-sec-h{display:flex;align-items:center;padding:4px 8px;background:#1a1a1a;border-bottom:1px solid #222;border-top:1px solid #222}
 .vb-sec-name{font-weight:600;font-size:11px;color:#ddd;text-transform:uppercase;letter-spacing:.05em;flex:1}
 .vb-sec-cnt{font-size:10px;color:#555;font-family:'Share Tech Mono',monospace}
 .vb-sec-hint{padding:5px 10px;color:#555;font-size:11px;font-style:italic;background:#121212;border-bottom:1px solid #1c1c1c}
 
 /* ligne de bookmark */
-.vb-bm{padding:6px 8px 6px 8px;border-bottom:1px solid #1c1c1c;cursor:pointer;position:relative;border-left:2px solid transparent}
+.vb-bm{padding:6px 8px;border-bottom:1px solid #1c1c1c;cursor:pointer;position:relative;border-left:2px solid transparent}
 .vb-bm:hover{background:rgba(255,255,255,.03)}
 .vb-bm.sel{background:rgba(141,190,69,.06);border-left-color:#4a6e20}
 .vb-bm.active{background:rgba(141,190,69,.09);border-left-color:#8dbe45}
@@ -89,12 +115,12 @@ body{background:#0a0a0a;display:flex;justify-content:center;align-items:flex-sta
 .vb-bm.active .vb-name{color:#fff;font-weight:600}
 .vb-name.target{color:#8dbe45}
 .vb-name.missing{color:#666;font-style:italic}
+/* surlignage des occurrences du texte recherché */
+.vb-hl{background:rgba(141,190,69,.28);color:#cdea9a;border-radius:1px}
 .vb-chip{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:1px 5px;border-radius:2px;flex-shrink:0}
-.vb-chip.target{color:#8dbe45;border:1px solid #4a6e20;background:rgba(141,190,69,.1)}
-.vb-chip.active{color:#8dbe45;border:1px solid #4a6e20;background:rgba(141,190,69,.1)}
+.vb-chip.target,.vb-chip.active{color:#8dbe45;border:1px solid #4a6e20;background:rgba(141,190,69,.1)}
 .vb-chip.missing{color:#c0594f;border:1px solid #6e2a20;background:rgba(192,89,79,.1)}
 
-/* boutons d'ordre/suppression révélés au survol ou sélection */
 .vb-rowbtns{display:flex;align-items:center;gap:3px;flex-shrink:0;opacity:0;transition:opacity .08s}
 .vb-bm:hover .vb-rowbtns,.vb-bm.sel .vb-rowbtns,.vb-bm.active .vb-rowbtns{opacity:1}
 .vb-rb{background:#2a2a2a;border:1px solid #444;color:#999;font-size:11px;width:18px;height:18px;border-radius:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace}
@@ -108,44 +134,33 @@ body{background:#0a0a0a;display:flex;justify-content:center;align-items:flex-sta
 .vb-bm-l3{padding-left:27px;margin-top:4px}
 .vb-comment{font-size:11px;line-height:1.45;color:#a98a4a;background:rgba(176,115,24,.06);border-left:2px solid #4a3a18;border-radius:2px;padding:4px 8px}
 
-/* état vide */
-.vb-empty{padding:24px 16px;text-align:center;color:#666;font-size:12px;line-height:1.6}
+/* état vide — enrichi : dit POURQUOI c'est vide et propose la sortie */
+.vb-empty{padding:22px 16px;text-align:center;color:#666;font-size:12px;line-height:1.6}
+.vb-empty-big{padding:34px 20px;text-align:center}
+.vb-empty-big .vb-eb-t{color:#999;font-size:13px;margin-bottom:6px}
+.vb-empty-big .vb-eb-s{color:#666;font-size:11px;line-height:1.7;margin-bottom:14px}
+.vb-empty-big .vb-eb-s b{color:#8dbe45;font-weight:600}
+.vb-eb-btn{display:inline-flex;align-items:center;gap:6px;background:#2a2a2a;border:1px solid #555;border-bottom:2px solid #444;color:#bbb;font-family:'Titillium Web',sans-serif;font-size:12px;height:26px;padding:0 12px;border-radius:2px;cursor:pointer}
+.vb-eb-btn:hover{background:#383838;color:#fff;border-color:#8dbe45}
 
-/* ---- Barre d'actions du bas (agit sur la sélection) ---- */
+/* ---- Barre d'actions du bas ---- */
 .vb-foot{display:flex;align-items:center;gap:8px;padding:7px 9px;background:#181818;border-top:1px solid #2a2a2a}
-.vb-foot-sel{flex:1;font-size:11px;color:#777;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic}
+.vb-foot-sel{flex:1;font-size:11px;color:#777;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic;min-width:0}
 .vb-foot-sel b{color:#bbb;font-style:normal;font-weight:600}
 .vb-act{background:#2a2a2a;border:1px solid #555;border-bottom:2px solid #444;color:#bbb;font-size:13px;height:26px;padding:0 10px;border-radius:2px;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'Titillium Web',sans-serif}
 .vb-act .vb-act-ico{font-family:'Share Tech Mono',monospace;font-size:13px}
 .vb-act:hover:not(:disabled){background:#383838;color:#fff;border-color:#8dbe45}
 .vb-act:disabled{opacity:.25;cursor:default}
 
-/* ---- Overlay d'édition de commentaire (calque interne, PAS une PopupDialog) ---- */
-.vb-overlay{position:absolute;inset:0;background:rgba(8,8,8,.78);display:none;align-items:center;justify-content:center;z-index:200;border-radius:3px}
-.vb-overlay.open{display:flex}
-.vb-card{width:84%;background:#1a1a1a;border:1px solid #555;border-radius:3px;padding:14px;box-shadow:0 6px 24px rgba(0,0,0,.6)}
-.vb-card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#8dbe45;margin-bottom:9px}
-.vb-card-sub{font-size:11px;color:#777;margin-bottom:9px}
-.vb-card-sub b{color:#bbb}
-.vb-textarea{width:100%;height:90px;resize:none;background:#0d0d0d;border:1px solid #2a2a2a;border-radius:2px;color:#e8e8e8;font-family:'Titillium Web',sans-serif;font-size:13px;line-height:1.5;padding:8px;outline:none}
-.vb-textarea:focus{border-color:#4a6e20}
-.vb-card-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
-.vb-card-btn{font-family:'Titillium Web',sans-serif;font-size:12px;height:28px;padding:0 14px;border-radius:2px;cursor:pointer;border:1px solid #555;border-bottom:2px solid #333;background:#383838;color:#bbb}
-.vb-card-btn:hover{background:#484848;color:#fff}
-.vb-card-btn.ok{background:rgba(141,190,69,.12);border-color:#4a6e20;color:#8dbe45}
-.vb-card-btn.ok:hover{background:rgba(141,190,69,.22);color:#a6d65e}
-.vb-card.confirm .vb-card-title{color:#c0594f}
-.vb-card-msg{font-size:13px;color:#ccc;line-height:1.5;margin-bottom:6px}
-.vb-card-btn.danger{background:rgba(192,89,79,.12);border-color:#6e2a20;color:#c0594f}
-.vb-card-btn.danger:hover{background:rgba(192,89,79,.22);color:#d97b70}
-
-/* ---- légende sous la maquette ---- */
-.vb-legend{width:420px;color:#666;font-size:12px;line-height:1.6}
+/* ---- légende ---- */
+.vb-legend{width:430px;color:#666;font-size:12px;line-height:1.6}
 .vb-legend h2{color:#8dbe45;font-size:13px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;font-weight:600}
+.vb-legend h3{color:#999;font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin:16px 0 6px;font-weight:600}
 .vb-legend ul{list-style:none}
 .vb-legend li{padding:3px 0;border-bottom:1px solid #1a1a1a}
 .vb-legend b{color:#aaa;font-weight:600}
 .vb-legend kbd{font-family:'Share Tech Mono',monospace;font-size:11px;color:#8dbe45}
+.vb-legend .alt{color:#555;font-style:italic;border:none}
 </style>
 </head>
 <body>
@@ -156,35 +171,42 @@ body{background:#0a0a0a;display:flex;justify-content:center;align-items:flex-sta
   <!-- Title bar -->
   <div class="vb-tb">
     <span class="vb-title">🔖 Signets</span>
-    <span class="vb-count" id="vb-count">4 / 6</span>
+    <span class="vb-count" id="vb-count">0 / 0</span>
     <div class="vb-tbtns">
       <button class="vb-btn" title="Ajouter le vaisseau actif" onclick="flash(this)">＋</button>
       <button class="vb-btn" title="Rafraîchir" onclick="flash(this)">⟳</button>
       <div class="vb-menu-wrap">
-        <button class="vb-btn has-filters" id="vb-filter-btn" title="Filtres" onclick="toggleMenu(event)">⋯<span class="vb-dot"></span></button>
+        <button class="vb-btn" id="vb-filter-btn" title="Filtres" onclick="toggleMenu(event)">⋯<span class="vb-dot"></span></button>
         <div class="vb-menu" id="vb-menu">
           <div class="vb-menu-title">Filtres &amp; recherche</div>
-          <div class="vb-menu-row">
+          <div class="vb-menu-row" id="vb-row-search">
             <div class="vb-search">
               <span>🔍</span>
-              <input type="text" placeholder="Rechercher…" value="" oninput="onSearch(this.value)">
+              <input type="text" id="vb-search-input" placeholder="Rechercher…" oninput="setFilter('search',this.value)">
             </div>
           </div>
-          <div class="vb-menu-row">
+          <div class="vb-menu-row" id="vb-row-body">
             <span class="vb-menu-lbl">Corps</span>
             <div class="vb-combo">
               <button class="vb-combo-btn" onclick="toggleCombo(event,'body')"><span class="vb-combo-label" id="vb-body-label">Tous</span><span class="vb-combo-caret">▾</span></button>
               <div class="vb-combo-list" id="vb-body-list"></div>
             </div>
           </div>
-          <div class="vb-menu-row">
+          <div class="vb-menu-row" id="vb-row-type">
             <span class="vb-menu-lbl">Type</span>
             <div class="vb-combo">
               <button class="vb-combo-btn" onclick="toggleCombo(event,'type')"><span class="vb-combo-label" id="vb-type-label">Tous</span><span class="vb-combo-caret">▾</span></button>
               <div class="vb-combo-list" id="vb-type-list"></div>
             </div>
           </div>
-          <label class="vb-check"><input type="checkbox" onchange="onCommentFilter(this.checked)"><label>Avec un commentaire seulement</label></label>
+          <div class="vb-menu-row" id="vb-row-sit">
+            <span class="vb-menu-lbl">Situation</span>
+            <div class="vb-combo">
+              <button class="vb-combo-btn" onclick="toggleCombo(event,'sit')"><span class="vb-combo-label" id="vb-sit-label">Toutes</span><span class="vb-combo-caret">▾</span></button>
+              <div class="vb-combo-list" id="vb-sit-list"></div>
+            </div>
+          </div>
+          <label class="vb-check" id="vb-row-comment"><input type="checkbox" id="vb-comment-input" onchange="setFilter('comment',this.checked)"><label>Avec un commentaire seulement</label></label>
           <div class="vb-menu-sep"></div>
           <div class="vb-menu-action" onclick="clearFilters()"><span class="vb-ma-ico">✕</span><span>Réinitialiser les filtres</span></div>
         </div>
@@ -193,74 +215,63 @@ body{background:#0a0a0a;display:flex;justify-content:center;align-items:flex-sta
     </div>
   </div>
 
+  <!-- *** PROPOSITION *** : rappel des critères actifs (masqué si aucun filtre) -->
+  <div class="vb-fbar" id="vb-fbar"></div>
+
   <!-- Corps : liste des bookmarks -->
   <div class="vb-body" id="vb-body"></div>
 
   <!-- Barre d'actions (sur la sélection) -->
   <div class="vb-foot">
     <span class="vb-foot-sel" id="vb-foot-sel">Aucune sélection</span>
-    <button class="vb-act" id="vb-act-edit" disabled onclick="openEdit()" title="Éditer le commentaire"><span class="vb-act-ico">✎</span></button>
-    <button class="vb-act" id="vb-act-goto" disabled onclick="flash(this)" title="Aller au vaisseau"><span class="vb-act-ico">➤</span></button>
-    <button class="vb-act" id="vb-act-target" disabled onclick="flash(this)" title="Définir comme cible"><span class="vb-act-ico">◎</span></button>
-  </div>
-
-  <!-- Overlay : édition du commentaire (calque interne) -->
-  <div class="vb-overlay" id="vb-edit-overlay">
-    <div class="vb-card">
-      <div class="vb-card-title">Commentaire</div>
-      <div class="vb-card-sub" id="vb-edit-sub"></div>
-      <textarea class="vb-textarea" id="vb-edit-text" placeholder="Votre note personnelle…"></textarea>
-      <div class="vb-card-foot">
-        <button class="vb-card-btn" onclick="closeEdit()">Annuler</button>
-        <button class="vb-card-btn ok" onclick="saveEdit()">OK</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Overlay : confirmation de suppression (calque interne) -->
-  <div class="vb-overlay" id="vb-del-overlay">
-    <div class="vb-card confirm">
-      <div class="vb-card-title">Supprimer le signet</div>
-      <div class="vb-card-msg" id="vb-del-msg"></div>
-      <div class="vb-card-foot">
-        <button class="vb-card-btn" onclick="closeDel()">Annuler</button>
-        <button class="vb-card-btn danger" onclick="confirmDel()">Supprimer</button>
-      </div>
-    </div>
+    <button class="vb-act" id="vb-act-edit" disabled title="Éditer le commentaire"><span class="vb-act-ico">✎</span></button>
+    <button class="vb-act" id="vb-act-goto" disabled title="Aller au vaisseau"><span class="vb-act-ico">➤</span></button>
+    <button class="vb-act" id="vb-act-target" disabled title="Définir comme cible"><span class="vb-act-ico">◎</span></button>
   </div>
 
 </div>
 
 <!-- ======================= LÉGENDE ======================= -->
 <div class="vb-legend">
-  <h2>Proposition de refonte — Vessel Bookmarks</h2>
+  <h2>Rappel des critères en cours</h2>
+  <p style="margin-bottom:10px">Aujourd'hui, une fois la popin de filtres refermée, il ne reste qu'un point vert sur <kbd>⋯</kbd> : on sait qu'on filtre, pas <i>sur quoi</i>. Proposition, sur 4 niveaux de lecture :</p>
   <ul>
-    <li><b>Style</b> : repris du cheatsheet PS4 (uGUI / PopupDialog), accent vert <kbd>#8dbe45</kbd>.</li>
-    <li><b>Filtres dans « ⋯ »</b> : recherche, corps, type et case « commentaire » regroupés dans le menu du title bar. Le point vert sur « ⋯ » signale un filtre actif.</li>
-    <li><b>Deux sections</b> : signets par module de commande / par vaisseau, avec une aide grisée sous chaque titre.</li>
-    <li><b>Actions hybrides</b> : ▲ ▼ ✕ au survol/sélection de la ligne ; <b>Éditer / Aller / Cibler</b> dans la barre du bas, actives sur la sélection.</li>
-    <li><b>Vaisseau actif</b> : liseré + fond vert. <b>Cible</b> : titre vert + pastille. <b>Vaisseau disparu</b> : gris italique + pastille rouge.</li>
-    <li><b>Édition / suppression</b> : calque interne par-dessus le corps (pas de nouvelle fenêtre).</li>
-    <li style="color:#555;font-style:italic;border:none;padding-top:8px">Clique une ligne pour la sélectionner, survole-la pour révéler ▲▼✕, ouvre « ⋯ » et « ✎ ».</li>
+    <li><b>1. Barre de pastilles</b> — une pastille par critère actif, juste sous le title bar. Clic sur le libellé → rouvre la popin sur ce critère (la ligne clignote) ; clic sur <kbd>✕</kbd> → retire ce seul critère. La barre <b>disparaît</b> quand plus rien n'est filtré : aucun encombrement pour qui ne filtre pas.</li>
+    <li><b>2. Compteur</b> <kbd>n / total</kbd> — passe en vert dès que le filtrage masque quelque chose, reste gris sinon.</li>
+    <li><b>3. Surlignage</b> — les occurrences du texte recherché sont surlignées dans les lignes (titre, situation, commentaire).</li>
+    <li><b>4. État vide explicite</b> — « aucun signet ne correspond » rappelle les critères en clair et offre le bouton de réinitialisation, au lieu d'une liste vide muette.</li>
   </ul>
+
+  <h3>Détails d'ergonomie</h3>
+  <ul>
+    <li>Pastille = <b>clé</b> (CORPS, TYPE…) en petit + <b>valeur</b> en vert : lisible en diagonale sans relire l'intitulé.</li>
+    <li>La recherche texte s'affiche entre guillemets, tronquée par ellipse si longue.</li>
+    <li>Au-delà de 2 lignes de pastilles, la barre reste bornée (elle passe à la ligne, la fenêtre grandit peu : 5 critères max).</li>
+    <li><b>« Tout effacer »</b> à droite de la barre = raccourci vers <i>Réinitialiser les filtres</i>, sans rouvrir la popin.</li>
+    <li>Les valeurs de combo sans aucun signet sont grisées (déjà implémenté côté C# : <kbd>IsBodyPopulated</kbd> &amp; co.).</li>
+  </ul>
+
+  <h3>Alternatives écartées</h3>
+  <ul>
+    <li class="alt">Ligne de résumé texte unique (« Filtré : Mun · Station · "taxi" ») : moins chère, mais pas de retrait critère par critère.</li>
+    <li class="alt">Résumé uniquement en tooltip du point vert : invisible tant qu'on ne survole pas — ne règle pas le problème.</li>
+    <li class="alt">Filtres toujours dépliés dans la fenêtre : coûte ~4 lignes en permanence, alors qu'on filtre par intermittence.</li>
+  </ul>
+  <p class="alt" style="padding-top:10px">Joue avec le menu <kbd>⋯</kbd> pour voir la barre apparaître, puis retire les critères un à un.</p>
 </div>
 
 <script>
-/* Données d'exemple ------------------------------------------------------- */
+/* Données d'exemple (reprises de ui_mockup.html) --------------------------- */
 const TYPE_ICON = {Station:'🛰',Probe:'📡',Rover:'🚙',Ship:'🚀',Lander:'🛬',Plane:'✈',Base:'🏠',Relay:'📶',Debris:'🗑'};
-const BODIES = ['Tous','Kerbin','Mun','Minmus','Eve','Gilly'];
-const TYPES  = ['Tous','Base','Débris','Atterrisseur','Avion','Sonde','Relais','Rover','Vaisseau','Station'];
+const TYPE_LABEL = {Station:'Station',Probe:'Sonde',Rover:'Rover',Ship:'Vaisseau',Lander:'Atterrisseur',Plane:'Avion',Base:'Base',Relay:'Relais',Debris:'Débris'};
+const SIT_LABEL  = {LANDED:'Posé',ORBITING:'En orbite'};
 
-/* Bookmarks réels importés depuis la sauvegarde (nœud VESSEL_BOOKMARKS).
-   - vname = nom du vaisseau, affiché entre () uniquement s'il diffère du titre (cas module de commande docké).
-   - %NEWLINE% des commentaires converti en \n. */
 let bookmarks = [
-  // --- Signets par module de commande ---
   {id:154872978,  sec:'cmd', type:'Base',    name:'Base Mu',                     situation:'Posé sur Mun',                 vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
   {id:3222643961, sec:'cmd', type:'Base',    name:'Base Mi',                     situation:'Posé sur Minmus',              vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
   {id:974353361,  sec:'cmd', type:'Base',    name:'Base Eve',                    situation:'Posé sur Eve',                 vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
   {id:1116289897, sec:'cmd', type:'Base',    name:'Base Gi',                     situation:'Posé sur Gilly',               vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Ajouter Foreuse\nAjouter Batteries'},
-  {id:2706995273, sec:'cmd', type:'Station', name:'Station Ke',                  situation:'En orbite autour de Kerbin',   vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
+  {id:2706995273, sec:'cmd', type:'Station', name:'Station Ke',                  situation:'En orbite autour de Kerbin',   vname:null,          alarm:false, active:true,  target:false, missing:false, comment:''},
   {id:801646316,  sec:'cmd', type:'Station', name:'Station Mu',                  situation:'En orbite autour de Mun',      vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
   {id:2703066388, sec:'cmd', type:'Station', name:'Station Mi',                  situation:'En orbite autour de Minmus',   vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
   {id:3130931997, sec:'cmd', type:'Station', name:'Station Eve',                 situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Valentina a bord'},
@@ -268,7 +279,7 @@ let bookmarks = [
   {id:907817627,  sec:'cmd', type:'Lander',  name:'Mu Att. X2',                  situation:'En orbite autour de Mun',      vname:'Station Mu',  alarm:false, active:false, target:false, missing:false, comment:''},
   {id:1829643223, sec:'cmd', type:'Lander',  name:'Mi Att. X2',                  situation:'En orbite autour de Minmus',   vname:'Station Mi',  alarm:false, active:false, target:false, missing:false, comment:''},
   {id:3107656054, sec:'cmd', type:'Lander',  name:'Station Gi Att. X2',          situation:'En orbite autour de Gilly',    vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
-  {id:321153399,  sec:'cmd', type:'Ship',    name:'Taxi Mu Ke X5',               situation:'En orbite autour de Kerbin',   vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Anyl et Maxcente à bord'},
+  {id:321153399,  sec:'cmd', type:'Ship',    name:'Taxi Mu Ke X5',               situation:'En orbite autour de Kerbin',   vname:null,          alarm:false, active:false, target:true,  missing:false, comment:'Anyl et Maxcente à bord'},
   {id:3688059901, sec:'cmd', type:'Ship',    name:'Taxi Mi Ke X2',               situation:'En orbite autour de Kerbin',   vname:null,          alarm:false, active:false, target:false, missing:false, comment:''},
   {id:383088338,  sec:'cmd', type:'Ship',    name:'Taxi Mi Mu X8',               situation:'En orbite autour de Minmus',   vname:'Station Mi',  alarm:false, active:false, target:false, missing:false, comment:''},
   {id:2404109512, sec:'cmd', type:'Ship',    name:'Taxi Eve Ke X9',              situation:'En orbite autour de Kerbin',   vname:null,          alarm:true,  active:false, target:false, missing:false, comment:'Jeb a bord'},
@@ -288,7 +299,7 @@ let bookmarks = [
   {id:1825741530, sec:'cmd', type:'Ship',    name:'Eve NTruck 05 54T Quenbéron', situation:'En orbite autour de Minmus',   vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Ravitailler'},
   {id:4127605033, sec:'cmd', type:'Ship',    name:'Eve Truck 01 24T Lazbeau',    situation:'En orbite autour de Gilly',    vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Ravitailler\nA vide'},
   {id:885268935,  sec:'cmd', type:'Ship',    name:'Eve Truck 02 24T Néhédouarde',situation:'En orbite autour de Gilly',    vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Ravitailler\nA vide'},
-  {id:1182498243, sec:'cmd', type:'Ship',    name:'Eve Truck 03 24T Stécente',   situation:'En orbite autour de Gilly',    vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Ravitailler\nA Vide'},
+  {id:1182498243, sec:'cmd', type:'Ship',    name:'Eve Truck 03 24T Stécente',   situation:'En orbite autour de Gilly',    vname:null,          alarm:false, active:false, target:false, missing:true,  comment:'Ravitailler\nA Vide'},
   {id:2569677126, sec:'cmd', type:'Ship',    name:'Eve Truck 04 24T Delemy',     situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Attraper des atterrisseurs'},
   {id:3985073403, sec:'cmd', type:'Ship',    name:'Eve Truck 05 24T Moïcaste',   situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Attraper des atterrisseurs'},
   {id:3749422718, sec:'cmd', type:'Plane',   name:'Base Eve - Avion',            situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Bill et Bob à bord\nFaire atterrir sur Eve'},
@@ -298,31 +309,127 @@ let bookmarks = [
   {id:2297787915, sec:'cmd', type:'Lander',  name:'Eve Atterrisseur',            situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Jumellé'},
   {id:430471660,  sec:'cmd', type:'Lander',  name:'Eve Atterrisseur',            situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Jumellé'},
   {id:4288136601, sec:'cmd', type:'Lander',  name:'Eve Atterrisseur',            situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Jumellé'},
-  // --- Signets par vaisseau ---
   {id:1585884509, sec:'vessel', type:'Ship', name:'Eve Truck 04 24T Delemy',     situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Base Eve 4/5: Panneaux X3 + Escape'},
   {id:4031407199, sec:'vessel', type:'Ship', name:'Eve Truck 05 24T Moïcaste',   situation:'En orbite autour d’Eve',       vname:null,          alarm:false, active:false, target:false, missing:false, comment:'Eve Base 5/5: Labo + Habitat X2 + Bureaux + Sciences'},
 ];
 
-let selectedId = 154872978;
-let editId = null, delId = null;
+/* Dérive corps + situation depuis le libellé (le C# les a en propre). */
+bookmarks.forEach(b=>{
+  const m = b.situation.match(/^Posé sur (.+)$/);
+  if(m){ b.sit='LANDED'; b.body=m[1]; }
+  else { b.sit='ORBITING'; b.body=b.situation.replace(/^En orbite autour d[e’]\s?/,''); }
+});
+
+/* Listes de valeurs, dans l'ordre "Kerbol vers l'extérieur" comme CelestialBodySorter. */
+const ALL_BODIES = ['Kerbin','Mun','Minmus','Eve','Gilly'];
+const ALL_TYPES  = ['Base','Debris','Lander','Plane','Probe','Relay','Rover','Ship','Station'];
+const ALL_SITS   = ['LANDED','ORBITING'];
+
+/* État des filtres -------------------------------------------------------- */
+const ALL = 'All';
+let F = {search:'', body:ALL, type:ALL, sit:ALL, comment:false};
+let selectedId = null;
+
+/* Métadonnées des critères : un seul endroit décrit clé, libellé et remise à zéro. */
+const CRITERIA = [
+  {id:'search',  key:'Texte',     row:'vb-row-search',  isSet:()=>F.search.trim()!=='',  label:()=>`« ${F.search.trim()} »`,      clear:()=>{F.search='';document.getElementById('vb-search-input').value='';}},
+  {id:'body',    key:'Corps',     row:'vb-row-body',    isSet:()=>F.body!==ALL,          label:()=>F.body,                        clear:()=>{F.body=ALL;}},
+  {id:'type',    key:'Type',      row:'vb-row-type',    isSet:()=>F.type!==ALL,          label:()=>TYPE_LABEL[F.type]||F.type,    clear:()=>{F.type=ALL;}},
+  {id:'sit',     key:'Situation', row:'vb-row-sit',     isSet:()=>F.sit!==ALL,           label:()=>SIT_LABEL[F.sit]||F.sit,       clear:()=>{F.sit=ALL;}},
+  {id:'comment', key:'Filtre',    row:'vb-row-comment', isSet:()=>F.comment,             label:()=>'Avec commentaire',            clear:()=>{F.comment=false;document.getElementById('vb-comment-input').checked=false;}},
+];
+
+function activeCriteria(){ return CRITERIA.filter(c=>c.isSet()); }
+
+/* Filtrage ---------------------------------------------------------------- */
+function matches(b){
+  if(F.body!==ALL && b.body!==F.body) return false;
+  if(F.type!==ALL && b.type!==F.type) return false;
+  if(F.sit !==ALL && b.sit !==F.sit ) return false;
+  if(F.comment && !b.comment) return false;
+  if(F.search.trim()){
+    const hay = [b.name,b.situation,b.vname||'',TYPE_LABEL[b.type]||'',b.comment].join(' ').toLowerCase();
+    if(!hay.includes(F.search.trim().toLowerCase())) return false;
+  }
+  return true;
+}
+
+/* Barre de rappel des critères -------------------------------------------- */
+function renderFilterBar(){
+  const bar = document.getElementById('vb-fbar');
+  const act = activeCriteria();
+  bar.classList.toggle('on', act.length>0);
+  if(!act.length){ bar.innerHTML=''; return; }
+  let h = `<span class="vb-fbar-ico">▼</span>`;
+  act.forEach(c=>{
+    h += `<span class="vb-fchip">
+            <span class="vb-fchip-lbl" title="Modifier ce critère" onclick="editCriterion('${c.id}')">
+              <span class="vb-fchip-k">${c.key}</span><span class="vb-fchip-v">${esc(c.label())}</span>
+            </span>
+            <span class="vb-fchip-x" title="Retirer ce critère" onclick="clearCriterion('${c.id}')">✕</span>
+          </span>`;
+  });
+  h += `<span class="vb-fclear" title="Réinitialiser les filtres" onclick="clearFilters()">✕ Tout effacer</span>`;
+  bar.innerHTML = h;
+}
+
+function clearCriterion(id){
+  CRITERIA.find(c=>c.id===id).clear();
+  refresh();
+}
+
+/* Ouvre la popin et pointe la ligne du critère (le clic sur la pastille = "je veux le changer"). */
+function editCriterion(id){
+  const c = CRITERIA.find(x=>x.id===id);
+  document.getElementById('vb-menu').classList.add('open');
+  const row = document.getElementById(c.row);
+  row.classList.add('flash');
+  setTimeout(()=>row.classList.remove('flash'), 1200);
+  if(id==='search') document.getElementById('vb-search-input').focus();
+}
 
 /* Rendu de la liste ------------------------------------------------------- */
 function render(){
-  const cmd    = bookmarks.filter(b=>b.sec==='cmd');
-  const vessel = bookmarks.filter(b=>b.sec==='vessel');
-  let html = '';
-  html += section('Signets par module de commande', 'Clic droit sur un module de commande pour ajouter / retirer un signet', cmd);
-  html += section('Signets par vaisseau', 'Bouton ＋ du title bar pour le vaisseau actif', vessel);
-  document.getElementById('vb-body').innerHTML = html;
-  renderFoot();
+  const kept = bookmarks.filter(matches);
+  const cmd    = kept.filter(b=>b.sec==='cmd');
+  const vessel = kept.filter(b=>b.sec==='vessel');
+
+  const body = document.getElementById('vb-body');
+  if(!kept.length){ body.innerHTML = emptyState(); }
+  else {
+    let html = '';
+    html += section('Signets par module de commande', 'Clic droit sur un module de commande pour ajouter / retirer un signet', cmd);
+    html += section('Signets par vaisseau', 'Bouton ＋ du title bar pour le vaisseau actif', vessel);
+    body.innerHTML = html;
+  }
+
+  const count = document.getElementById('vb-count');
+  count.textContent = `${kept.length} / ${bookmarks.length}`;
+  count.classList.toggle('filtered', kept.length !== bookmarks.length);
+  document.getElementById('vb-filter-btn').classList.toggle('has-filters', activeCriteria().length>0);
+  renderFoot(kept);
 }
+
+/* État vide : rappelle les critères en clair plutôt qu'une liste muette. */
+function emptyState(){
+  const act = activeCriteria();
+  if(!act.length) return `<div class="vb-empty">Aucun signet enregistré</div>`;
+  const list = act.map(c=>`<b>${esc(c.label())}</b>`).join(' · ');
+  return `<div class="vb-empty-big">
+            <div class="vb-eb-t">Aucun signet ne correspond</div>
+            <div class="vb-eb-s">Critères en cours :<br>${list}</div>
+            <button class="vb-eb-btn" onclick="clearFilters()"><span style="font-family:'Share Tech Mono',monospace">✕</span> Réinitialiser les filtres</button>
+          </div>`;
+}
+
 function section(title, hint, list){
   let h = `<div class="vb-sec-h"><span class="vb-sec-name">${title}</span><span class="vb-sec-cnt">${list.length}</span></div>`;
   h += `<div class="vb-sec-hint">${hint}</div>`;
-  if(!list.length){ h += `<div class="vb-empty">Aucun signet</div>`; return h; }
+  if(!list.length){ h += `<div class="vb-empty">Aucun signet ne correspond</div>`; return h; }
   list.forEach((b,i)=>{ h += row(b, i===0, i===list.length-1); });
   return h;
 }
+
 function row(b, isFirst, isLast){
   const cls = ['vb-bm']; if(b.id===selectedId) cls.push('sel'); if(b.active) cls.push('active');
   const nameCls = ['vb-name']; if(b.target) nameCls.push('target'); if(b.missing) nameCls.push('missing');
@@ -331,110 +438,87 @@ function row(b, isFirst, isLast){
   else if(b.target)  chip = `<span class="vb-chip target">Cible</span>`;
   if(b.missing)      chip = `<span class="vb-chip missing">Disparu</span>`;
   const alarm = b.alarm ? `<span class="vb-alarm" title="Alarme associée">⏰</span>` : '';
-  const vname = b.vname ? `<span class="vb-vname">(${b.vname})</span>` : '';
-  const comment = b.comment ? `<div class="vb-bm-l3"><div class="vb-comment">${b.comment.replace(/\n/g,'<br>')}</div></div>` : '';
+  const vname = b.vname ? `<span class="vb-vname">(${hl(b.vname)})</span>` : '';
+  const comment = b.comment ? `<div class="vb-bm-l3"><div class="vb-comment">${hl(b.comment).replace(/\n/g,'<br>')}</div></div>` : '';
   return `
   <div class="${cls.join(' ')}" onclick="select(${b.id})">
     <div class="vb-bm-l1">
       <span class="vb-type">${TYPE_ICON[b.type]||'❔'}</span>
       ${alarm}
-      <span class="${nameCls.join(' ')}">${b.name}</span>
+      <span class="${nameCls.join(' ')}">${hl(b.name)}</span>
       ${chip}
       <span class="vb-rowbtns">
-        <button class="vb-rb" ${isFirst?'disabled':''} title="Monter"   onclick="moveUp(event,${b.id})">▲</button>
-        <button class="vb-rb" ${isLast?'disabled':''}  title="Descendre" onclick="moveDown(event,${b.id})">▼</button>
-        <button class="vb-rb danger" title="Supprimer" onclick="askDel(event,${b.id})">✕</button>
+        <button class="vb-rb" ${isFirst?'disabled':''} title="Monter">▲</button>
+        <button class="vb-rb" ${isLast?'disabled':''}  title="Descendre">▼</button>
+        <button class="vb-rb danger" title="Supprimer">✕</button>
       </span>
     </div>
-    <div class="vb-bm-l2"><span class="vb-situation">${b.situation}</span>${vname}</div>
+    <div class="vb-bm-l2"><span class="vb-situation">${hl(b.situation)}</span>${vname}</div>
     ${comment}
   </div>`;
 }
 
+/* Surligne les occurrences du texte recherché (niveau 3 de la proposition). */
+function hl(text){
+  const t = esc(text);
+  const q = F.search.trim();
+  if(!q) return t;
+  const re = new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+  return t.replace(re, '<span class="vb-hl">$1</span>');
+}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
 /* Barre du bas ------------------------------------------------------------ */
-function renderFoot(){
-  const b = bookmarks.find(x=>x.id===selectedId);
+function renderFoot(kept){
+  const b = kept.find(x=>x.id===selectedId);
   const sel = document.getElementById('vb-foot-sel');
   const edit=document.getElementById('vb-act-edit'), goto=document.getElementById('vb-act-goto'), target=document.getElementById('vb-act-target');
   if(!b){ sel.textContent='Aucune sélection'; edit.disabled=goto.disabled=target.disabled=true; return; }
-  sel.innerHTML = `Sélection : <b>${b.name}</b>`;
-  edit.disabled   = false;           // toujours possible d'annoter
-  goto.disabled   = b.missing;       // impossible si le vaisseau n'existe plus
-  target.disabled = b.missing || b.active; // pas de cible sur soi-même
+  sel.innerHTML = `Sélection : <b>${esc(b.name)}</b>`;
+  edit.disabled   = false;
+  goto.disabled   = b.missing;
+  target.disabled = b.missing || b.active;
 }
 
 /* Interactions ------------------------------------------------------------ */
-function select(id){ selectedId=id; render(); }
-function moveUp(e,id){ e.stopPropagation(); reorder(id,-1); }
-function moveDown(e,id){ e.stopPropagation(); reorder(id,1); }
-function reorder(id,dir){
-  const b=bookmarks.find(x=>x.id===id);
-  const grp=bookmarks.filter(x=>x.sec===b.sec);
-  const gi=grp.indexOf(b), gj=gi+dir;
-  if(gj<0||gj>=grp.length) return;
-  const ai=bookmarks.indexOf(grp[gi]), aj=bookmarks.indexOf(grp[gj]);
-  [bookmarks[ai],bookmarks[aj]]=[bookmarks[aj],bookmarks[ai]];
-  render();
+function select(id){ selectedId=id; refresh(); }
+function setFilter(which,val){ F[which]=val; refresh(); }
+
+function refresh(){ renderFilterBar(); buildCombos(); render(); }
+
+function clearFilters(){
+  CRITERIA.forEach(c=>c.clear());
+  refresh();
 }
 
-/* Édition commentaire (overlay) */
-function openEdit(){
-  const b=bookmarks.find(x=>x.id===selectedId); if(!b) return;
-  editId=b.id;
-  document.getElementById('vb-edit-sub').innerHTML=`Signet : <b>${b.name}</b>`;
-  document.getElementById('vb-edit-text').value=b.comment||'';
-  document.getElementById('vb-edit-overlay').classList.add('open');
-  document.getElementById('vb-edit-text').focus();
-}
-function closeEdit(){ document.getElementById('vb-edit-overlay').classList.remove('open'); editId=null; }
-function saveEdit(){
-  const b=bookmarks.find(x=>x.id===editId); if(b){ b.comment=document.getElementById('vb-edit-text').value.trim(); }
-  closeEdit(); render();
-}
-
-/* Suppression (overlay de confirmation) */
-function askDel(e,id){ e.stopPropagation(); const b=bookmarks.find(x=>x.id===id); delId=id;
-  document.getElementById('vb-del-msg').innerHTML=`Voulez-vous supprimer le signet «&nbsp;${b.name}&nbsp;» ?`;
-  document.getElementById('vb-del-overlay').classList.add('open');
-}
-function closeDel(){ document.getElementById('vb-del-overlay').classList.remove('open'); delId=null; }
-function confirmDel(){ bookmarks=bookmarks.filter(x=>x.id!==delId); if(selectedId===delId) selectedId=null; closeDel(); updateCount(); render(); }
-
-/* Menu filtres + combos */
+/* Menu + combos ----------------------------------------------------------- */
 function toggleMenu(e){ e.stopPropagation(); document.getElementById('vb-menu').classList.toggle('open'); }
 function toggleCombo(e,which){ e.stopPropagation();
   document.querySelectorAll('.vb-combo-list').forEach(l=>{ if(l.id!==`vb-${which}-list`) l.classList.remove('open'); });
   document.getElementById(`vb-${which}-list`).classList.toggle('open');
 }
-function buildCombo(which, items, current){
-  const list=document.getElementById(`vb-${which}-list`);
-  list.innerHTML=items.map(it=>`<div class="vb-combo-item ${it===current?'sel':''}" onclick="pickCombo(event,'${which}','${it}')">${it}</div>`).join('');
+
+/* Options des combos : liste exhaustive, valeurs sans signet grisées (cf. IsBodyPopulated côté C#). */
+const COMBOS = {
+  body:{all:ALL_BODIES, allLabel:'Tous',   label:v=>v,                   populated:()=>new Set(bookmarks.map(b=>b.body))},
+  type:{all:ALL_TYPES,  allLabel:'Tous',   label:v=>TYPE_LABEL[v]||v,    populated:()=>new Set(bookmarks.map(b=>b.type))},
+  sit: {all:ALL_SITS,   allLabel:'Toutes', label:v=>SIT_LABEL[v]||v,     populated:()=>new Set(bookmarks.map(b=>b.sit))},
+};
+function buildCombos(){
+  Object.keys(COMBOS).forEach(which=>{
+    const cfg = COMBOS[which], cur = F[which], pop = cfg.populated();
+    document.getElementById(`vb-${which}-label`).textContent = cur===ALL ? cfg.allLabel : cfg.label(cur);
+    const items = [{v:ALL, t:cfg.allLabel, on:true}].concat(cfg.all.map(v=>({v, t:cfg.label(v), on:pop.has(v)})));
+    document.getElementById(`vb-${which}-list`).innerHTML = items.map(it=>
+      `<div class="vb-combo-item ${it.v===cur?'sel':''} ${it.on?'':'empty'}" onclick="pickCombo(event,'${which}','${it.v}')">${it.t}</div>`
+    ).join('');
+  });
 }
 function pickCombo(e,which,val){ e.stopPropagation();
-  document.getElementById(`vb-${which}-label`).textContent=val;
   document.getElementById(`vb-${which}-list`).classList.remove('open');
-  buildCombo(which, which==='body'?BODIES:TYPES, val);
-  refreshFilterDot();
-}
-function onSearch(v){ refreshFilterDot(); }
-function onCommentFilter(v){ refreshFilterDot(); }
-function clearFilters(){
-  document.getElementById('vb-body-label').textContent='Tous';
-  document.getElementById('vb-type-label').textContent='Tous';
-  document.querySelectorAll('.vb-search input').forEach(i=>i.value='');
-  document.querySelectorAll('.vb-check input').forEach(c=>c.checked=false);
-  buildCombo('body',BODIES,'Tous'); buildCombo('type',TYPES,'Tous');
-  refreshFilterDot();
-}
-function refreshFilterDot(){
-  const active = document.getElementById('vb-body-label').textContent!=='Tous'
-    || document.getElementById('vb-type-label').textContent!=='Tous'
-    || [...document.querySelectorAll('.vb-search input')].some(i=>i.value.trim())
-    || [...document.querySelectorAll('.vb-check input')].some(c=>c.checked);
-  document.getElementById('vb-filter-btn').classList.toggle('has-filters', active);
+  setFilter(which,val);
 }
 
-function updateCount(){ document.getElementById('vb-count').textContent = `${bookmarks.length} / ${bookmarks.length}`; }
 function flash(el){ el.style.background='#4a6e20'; setTimeout(()=>el.style.background='',150); }
 
 document.addEventListener('click',e=>{
@@ -442,11 +526,10 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('.vb-combo')) document.querySelectorAll('.vb-combo-list').forEach(l=>l.classList.remove('open'));
 });
 
-/* Init */
-buildCombo('body',BODIES,'Tous');
-buildCombo('type',TYPES,'Tous');
-updateCount();
-render();
+/* Init : quelques critères posés d'entrée pour montrer la barre. */
+F.body='Eve'; F.type='Ship'; F.search='truck';
+document.getElementById('vb-search-input').value = F.search;
+refresh();
 </script>
 </body>
 </html>
