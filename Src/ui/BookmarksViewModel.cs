@@ -883,6 +883,20 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui {
         }
 
         /// <summary>
+        /// Remove the comment of the current bookmark, then close the edition popin.
+        /// </summary>
+        public void DeleteBookmarkComment()
+        {
+            EditingComment = false;
+            if( SelectedBookmark == null ) return;
+            // The buffer is only resynchronized when the selection changes, so it must be cleared too:
+            // otherwise reopening the popin on the same bookmark would show the removed text again.
+            Comment = string.Empty;
+            SelectedBookmark.Comment = string.Empty;
+            _bookmarkManager.OnBookmarksUpdated.Fire();
+        }
+
+        /// <summary>
         /// Discard comment edits (restore the buffer from the bookmark), then close the edition popin.
         /// </summary>
         public void CancelBookmarkCommentEdition()

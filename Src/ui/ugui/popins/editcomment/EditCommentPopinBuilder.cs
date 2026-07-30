@@ -44,6 +44,7 @@ namespace com.github.lhervier.ksp.bookmarksmod.ui.ugui.popins.editcomment
                 .WithTitle(ModLocalization.GetString("editWindowTitle"))
                 .WithTitleColor(DefaultPalette.AccentColor)
                 .WithContentBuilder(new EditCommentContentBuilder())
+                .WithButton(ModLocalization.GetString("buttonDelete"), _viewModel.DeleteBookmarkComment, PopinButtonStyle.Alert)
                 .WithButton(ModLocalization.GetString("buttonCancel"), _viewModel.CancelBookmarkCommentEdition)
                 .WithButton(ModLocalization.GetString("buttonSave"), _viewModel.SaveBookmarkComment, PopinButtonStyle.Confirm);
 
